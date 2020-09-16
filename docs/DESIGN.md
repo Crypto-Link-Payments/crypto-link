@@ -17,7 +17,7 @@ rain tx, etc.), off-chain wallet system has been created. Once user deposits XLM
 database till user decides to withdraw from Discord.
 
 ## ***Merchant System***
-Merchant system allows Discord community owners to monetize Discord roles time oriented. Owner sets the role, 
+Merchant system allows Discord community owners to monetize Discord roles timely oriented. Owner sets the role, 
 provide role time length, value of the role in $ (converted to XLM based on market price). Once done, role becomes
- monetized and available for discord users to be purchased. Once user purchases it, system will automatically monitor 
+ monetized and available for Discord users to be purchased. Once user purchases it, system will automatically monitor 
  for role expiration, and handle everything on behalf of the owner. 

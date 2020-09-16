@@ -4,7 +4,12 @@ which has integrated Crypto Link in their daily operations.
 
 Additional information on how Crypto Link is designed can be obtained [here](DESIGN.md)
 
+## Available Currencies
+### Stellar Lumen (XLM)
+
+
 ## Quick Start
+
 ### As Discord User
 
 Head to one of the Communities where Crypto-Link is present and execute 
