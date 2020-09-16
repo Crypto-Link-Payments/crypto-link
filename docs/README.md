@@ -1,10 +1,10 @@
-## About
 Crypto Link, Discord bot which allows for instant peer to peer (P2P) transactions, payments and Discord community 
 monetization with the help of integrated Merchant System. Discord users can access their wallet through any community 
 which has integrated Crypto Link in their daily operations.
- 
-## Quick Start
 
+Additional information on how Crypto Link is designed can be obtained [here](DESIGN.md)
+
+## Quick Start
 ### As Discord User
 
 Head to one of the Communities where Crypto-Link is present and execute 
