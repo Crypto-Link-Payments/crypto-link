@@ -1,14 +1,9 @@
 # Crypto Link 
 
 ## About
-
-Crypto Link, Discord bot which allows for P2P transactions, payments and Community Monetization with the help of 
-merchant system. 
-
-Crypto Link operates on currency:
- - Stellar Lumen
- 
-One wallet for Discord User which can be accessed from any community where Crypto Link is present!
+Crypto Link, Discord bot which allows for instant peer to peer (P2P) transactions, payments and Discord community 
+monetization with the help of integrated Merchant System. Discord users can access their wallet through any community 
+which has integrated Crypto Link in their daily operations.
  
 ## Quick Start
 
