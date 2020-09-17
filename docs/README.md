@@ -103,7 +103,7 @@ example for Stellar Lumen:
 
 ### :crown: As Discord Guild Owner :crown:
 
-#### Merchant system and corporate wallet
+#### :currency_exchange: Merchant system and corporate wallet :currency_exchange:
 Merchant system allows Guild Owners to monetize and create time oriented roles (Time-Bombed).
 Crypto Link, automatically scans for purchases, appends required role to user which made a purchase,
 transfers money to Guild's account, as well as monitor for expiration. Ones Expired time checkpoint
