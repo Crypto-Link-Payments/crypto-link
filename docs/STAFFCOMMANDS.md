@@ -62,3 +62,5 @@ requests on chain withdrawal from Discord wallet to any monero address
 
 ## Get Monero hot wallet balance and details 
 ```hot_wallet monero_balance```
+
+[Back to main page](README.md)

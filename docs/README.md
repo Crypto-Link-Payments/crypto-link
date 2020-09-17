@@ -160,7 +160,7 @@ Instructions to operate with corporate account can be found [here](CORPORATEACCO
 
 ## Additional and Specific Material
 - [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
-- [Bot Set up functions Only LPI Staff](STAFFCOMMANDS.md)
+- [Bot Set up functions only Crypto Link Staff](STAFFCOMMANDS.md)
 - [Help Commands](HELPCMDS.md)
 - [Dealing with user accounts and making P2P payments](COMMANDS.md)
 - [Merchant System Only for Community owners](MERCHANTCOMMANDS.md)
