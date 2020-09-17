@@ -12,7 +12,7 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 helpers = Helpers()
-secret_details = helpers.read_json_file(file_name="walletSecerets.json")
+secret_details = helpers.read_json_file(file_name="walletSecrets.json")
 public_details = helpers.read_json_file(file_name="hotWallets.json")
 
 

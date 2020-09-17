@@ -139,7 +139,6 @@ walletSecerets.json
 __pycache__
 .__pycache__
 .idea
-CLEnvironment/
-
+walletSecrets.json
 
 /CLEnvironment/
