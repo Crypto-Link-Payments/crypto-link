@@ -22,16 +22,22 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 [Stellar Foundation](https://www.stellar.org/foundation) <br />
 [Stellar Lumnes](https://www.stellar.org/lumens) <br />
 
-## :construction: Constructs of Crypto Link :construction:
+## :construction: Crypto Link Use case:construction:
 Crypto Link user experience is designed with peer-to-peer and merchant-consumer perspective in mind
 
 ### Peer to Peer perspective
 Crypto Link allows users to execute instant peer to peer transactions with the help of XLM. Once transaction is
-successfully processed, user experience is further expanded, with transactions reports
+successfully processed, user experience is further expanded, with transactions reports and conversion rates provided
+by [CoinGecko](https://www.coingecko.com/en). 
 
-
-
-
+### Merchant-Consumer perspective
+With integration of the Merchant System, guild owners can now monetize their Discord Communities and their roles.
+There has been significant rise in communities which offer their members Payed services for limited amount of time. 
+To Our knowledge none of the payment solutions on Discord currently provides this opportunity. With Crytpo Link Merchant
+system owner can deploy timed monetized roles and offer them to their community members. User than uses XLM and personal
+wallet to purchase the role, and obtain access to special areas. Merchant System than automatically monitors for role
+expiration. With integration guild owners can save a lot of time and resources devoted to purchase handling and monitoring
+for expirations. Crypto Link will take care on its own. 
 
 Additional basic information on how Crypto Link is designed can be obtained [here](DESIGN.md).
 
@@ -40,7 +46,7 @@ Monetizing guild community is instant and straight-forward. No programming skill
 Discord operate from user and owner perspective. If you are familiar with Discord than simply click [here](https://discord.com/oauth2/authorize?client_id=706806251321032726&scope=bot&permissions=1342700624&response_type=code)
 to get invitation. Once Crypto Link joins community required role with permissions will be automatically created. 
 
-### Required permissions for Crypto Link to operate optimally
+### :warning: Required permissions for Crypto Link to operate optimally :warning:
 
 * ***Manage Roles*** --> Required for Merchant System to operate optimally
 * ***Manage Emojis*** --> Eventually custom emojis will be integrated
@@ -54,7 +60,7 @@ to get invitation. Once Crypto Link joins community required role with permissio
 
 ### After Crypto Link Joins 
 Assign newly created role Crypto Link to the channels of your community where you would like that it operates and 
-listens for commands. 
+listens for commands, and everything will be set and ready to go.
 
 
 ## :joystick: Commands to operate with Crypto Link :joystick:
