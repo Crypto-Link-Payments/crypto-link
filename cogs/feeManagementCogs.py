@@ -26,6 +26,21 @@ class FeeManagementAndControl(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command()
+    async def fees(self, ctx):
+        fees = bot_manager.get_fees_by_category(all=1)
+        fee_info = discord.Embed(title='Applied fees for system',
+                                 description='State of fees for each segment of the bot',
+                                 colour=discord.Colour.blue())
+
+        for data in fees:
+            fee_info.add_field(name=data['type'],
+                               value=f"{data['fee']}$",
+                               inline=False)
+
+        fee_info.set_thumbnail(url=self.bot.user.avatar_url)
+        await ctx.channel.send(embed=fee_info)
+
     @commands.group()
     @commands.check(is_one_of_gods)
     async def fee(self, ctx):

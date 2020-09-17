@@ -17,6 +17,7 @@ Entry command to access help menu and all availabale sub-commands is:
 
 ### For All Discord Users
 #### General about crypto link
+General information on Crypto Link, ownership, license, etc
 ```text
 !help about
 ```

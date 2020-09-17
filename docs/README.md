@@ -64,7 +64,6 @@ listens for commands, and everything will be set and ready to go.
 
 
 ## :joystick: Commands to operate with Crypto Link :joystick:
-Command to which Crypto Link listens to can be broken down into multiple areas. 
 
 Crypto link listens to following prefixes:
 ```text
@@ -72,7 +71,7 @@ Crypto link listens to following prefixes:
 or
 @CryptoLink <command> <subcommands>
 ```
-### :sos: Helper menu :sos:
+### :sos: Access Help menu :sos:
 In order to ease access to Discord users we have provided general command where all functions are explained.
 By executing command bellow either on the public channel of the community or direct messaging the bot system
 will guide you through all available areas
@@ -157,6 +156,26 @@ More on merchant system, its use cases, and set up procedure can be found [here]
 
 Instructions to operate with corporate account can be found [here](CORPORATEACCOUNTMANAGEMENT.md)
 
+## Fees for using the crypto link system
+We have integrated as well operational fees to gather funding for further development. Fees are currently applied
+ for following crypto link activiteis:
+
+- [X] Merchant license fee 
+- [X] Merchant wallet withdrawal
+- [X] XLM withdrawal fee
+
+Additional limits:
+- [X] Minimum merchant transfer amount
+- [ ] Minimum stellar withdrawal amount 
+
+For explanation on all the fees and limits read [here](FEESANDLIMITS.md) 
+ 
+ To check current fees use 
+command:
+
+```text
+!fees
+```
 
 ## Additional and Specific Material
 - [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
