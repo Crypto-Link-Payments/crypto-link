@@ -1,4 +1,4 @@
-# Help Commands Showcase
+# :sos: Help Commands Showcase :sos:
 
 ## Prefix
 ```text

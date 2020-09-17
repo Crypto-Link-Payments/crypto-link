@@ -49,7 +49,7 @@ Crypto link listens to following prefixes:
 or
 @CryptoLink <command> <subcommands>
 ```
-### Helper menu
+### :sos: Helper menu :sos:
 In order to ease access to Discord users we have provided general command where all functions are explained.
 By executing command bellow either on the public channel of the community or direct messaging the bot system
 will guide you through all available areas
