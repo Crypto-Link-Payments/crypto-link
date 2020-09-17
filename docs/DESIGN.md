@@ -21,3 +21,5 @@ Merchant system allows Discord community owners to monetize Discord roles timely
 provide role time length, value of the role in $ (converted to XLM based on market price). Once done, role becomes
  monetized and available for Discord users to be purchased. Once user purchases it, system will automatically monitor 
  for role expiration, and handle everything on behalf of the owner. 
+ 
+[Back to main page](README.md)
