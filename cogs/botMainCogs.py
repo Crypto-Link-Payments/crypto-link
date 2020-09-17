@@ -1,18 +1,19 @@
 """SCRIPT: Dealing with the corporate balance """
 
 import time
+from datetime import datetime
 
 import discord
 from colorama import Fore
 from discord.ext import commands
-from datetime import datetime
 
+from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
 from backOffice.corpHistory import CorporateHistoryManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.stellarActivityManager import StellarManager
+from cogs.utils.customCogChecks import is_one_of_gods
 from cogs.utils.monetaryConversions import get_decimal_point, get_normal
-from backOffice.botStatistics import BotStatsManager
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
@@ -27,11 +28,6 @@ d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
-
-
-def is_one_of_gods(ctx):
-    list_of_gods = [d['ownerId'], d['creator']]
-    return [god for god in list_of_gods if god == ctx.message.author.id]
 
 
 class BotWalletCommands(commands.Cog):
@@ -175,7 +171,6 @@ class BotWalletCommands(commands.Cog):
                               value=f"P2P Tx Count:{data['xlm']['ofChain']['transactionCount']}\n"
                                     f"Total P2P Transfered: {int(data['xlm']['ofChain']['offChainMoved']) / 10000000} <:stelaremoji:684676687425961994>",
                               inline=False)
-
 
         await ctx.author.send(embed=stats_embed)
         guilds = await self.bot.fetch_guilds(limit=150).flatten()
