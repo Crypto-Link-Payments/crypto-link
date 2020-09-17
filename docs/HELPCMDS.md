@@ -1,21 +1,53 @@
 # Help Commands Showcase
 
-Bot Prefix : ! or Bot tag
+## Prefix
+```text
+!<command> <subcommands>
+or
+@CryptoLink <command> <subcommands>
+```
 
-## About the system
-``` about```
+Entry command to access help menu and all availabale sub-commands is:
 
-## Help Entry Point and sub-categories
-``` help```
+```text
+!help
+```
 
-### How to get started
-``` help get_started```
+## Sub-Categories of help
 
-### All availabale currencies on the system
-``` help currencies```
+### For All Discord Users
+#### General about crypto link
+```text
+!help about
+```
 
-### How to make P2P Transaction over Discord 
-``` help transactions```
+#### How to get started as Discord User
+```text
+!help get_started
+```
 
-### Details to operate with personal account
-``` help account```
+#### Check all available cryptocurrencies
+```text
+!help currencies
+```
+
+#### How to make P2P Transaction over Discord 
+```text
+!help transactions
+```
+
+#### Commands available to operate with personal Discord wallet
+```text
+!help account
+```
+
+## For Guild Owners
+Entry command to access community owner sub menu is:
+```text
+!help owner
+```
+
+### Information about the Crypto Link merchant system
+```text
+!help owner merchant
+```

@@ -18,9 +18,6 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 [Stellar Foundation](https://www.stellar.org/foundation) <br />
 [Stellar Lumnes](https://www.stellar.org/lumens) <br />
 
-
-
-
 ## :hammer: Integration of Crypto Link to Discord :hammer: 
 Monetizing guild community is instant and straight-forward. No programming skills required, just basic knowledge on how
 Discord operate from user and owner perspective. If you are familiar with Discord than simply click [here](https://discord.com/oauth2/authorize?client_id=706806251321032726&scope=bot&permissions=1342700624&response_type=code)
@@ -41,6 +38,30 @@ to get invitation. Once Crypto Link joins community required role with permissio
 ### After Crypto Link Joins 
 Assign newly created role Crypto Link to the channels of your community where you would like that it operates and 
 listens for commands. 
+
+
+## :joystick: Commands to operate with Crypto Link :joystick:
+Command to which Crypto Link listens to can be broken down into multiple areas. 
+
+Crypto link listens to following prefixes:
+```text
+!<command> <subcommands>
+or
+@CryptoLink <command> <subcommands>
+```
+### Helper menu
+In order to ease access to Discord users we have provided general command where all functions are explained.
+By executing command bellow either on the public channel of the community or direct messaging the bot system
+will guide you through all available areas
+
+```text
+!help
+```
+
+All available commands for ***help*** category are available [here](HELPCMDS.md)
+
+
+## Quick start guide
 
 ### As Discord User
 
