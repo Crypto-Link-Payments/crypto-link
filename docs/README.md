@@ -89,14 +89,14 @@ example for Stellar Lumen:
 !send xlm <amount> <@discord.User>  # Sends N amount of XLM to targeted user
 ```
 
-#### Making Discord Withdrawals and Deposits
+#### :moneybag: Making Discord Withdrawals and Deposits :moneybag:
 
-##### Deposits
+##### incoming_envelope: Deposits
 ```text
 !wallet deposit  # Returns instructions on how to deposit currency to Discord
 ```
 
-##### Withdrawals
+##### :outbox_tray: Withdrawals
 ```text
 !withdraw  # Returns Instructions on how to withdraw from Discord to your personal wallet
 ```
