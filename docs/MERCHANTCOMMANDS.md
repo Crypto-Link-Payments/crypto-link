@@ -8,53 +8,77 @@ duration, users will be able to purchase role with XLM after conversion from USD
 ```text
 !merchant_initiate
 ```
+## How to create and activate monetized role 
+Once you successfully register into the merchant system you can start to monetize your community.
 
-## 
-## How to create monetized role
+### Step 1 -> Create role and assign parameters
 
+When creating monetized role following details are required to be provided to the system 
 
+- Role Name -> No longer than 10 Characters in length and no special characters allowed
+- Dollar value -> Dollar value of the role which will be used for conversion to XLM when purchase is initiated
+- Duration parameters required to be set in order like shown in command bellow and only integer allowed. Infinite role 
+is at this point not allowed. At least one of the chronological parameters needs to be greater than 1. 
 
+    - ***Weeks*** - Integer number 
+    - ***Days*** - Integer number
+    - ***Hours*** - Integer number
+    - ***Minutes*** - Integer number
+    
 ```text
-!merchant initiate
+!merchant create_role <role name> <value in $> <weeks> <days> <hours> <minutes>
+```
+Examples:
+```text
+!merchant create_role Weekly 100 1 0 0 0  # monetized role with name Weekly in value 100$ for 1 week.
+```
+If everything goes well you should receive notification from the system on successfull creation. 
+
+### Step 2 Activate role for purchase
+```text
+!merchant start_role <@discord.Role>
 ```
 
-3. Create Monetized Role
-
+Referencing to step 1 example would be:
 ```text
-!merchant monetize create_role <role name> <dolar_value> <weeks count> <days count> <hours count> <minute count>
+!merchant start_role @weekly
 ```
 
-### How to delete monetized role 
+***__Congratulations you have just monetized your community. Now inform your members and earn some XLM.__***
+
+## Other available commands 
+
+### Merchant manual
+```text
+!merchant manual
+```
+
+### Role management
+
+#### Removing role from the system
 ```text
 !merchant monetize delete_role <@discord.Role>
 ```
-
-### How to obtain all available monetized roles from community?
+#### Deactivate merchant role from available to purchase:
 ```text
-!merchant monetize community_role
+!merchant stop_role <@discord.Role>
+```
+### Activate/reactivate merchant role 
+```text
+!merchant start_role <@discord.Role>
 ```
 
-### Deactivating and reactivating already created role 
+### Community Wallet Commands
+#### Checking details of merchant wallet
 ```text
-!merchant monetize stop_role <discord.Role>
+!merchant balance
 ```
 
-```text
-!merchant monetize start_role <discord.Role>
-```
 
-## Accessing Merchant Wallet of the community
-- get the details on all available commands for the wallet 
-```text
-!merchant wallet
-```
-### Wallet balances
+### Withdraw XLM from wallet to personal wallet
 
 ```text
-!merchant wallet balance
+!merchant transfer_xlm
 ```
 
-### Transfer from Merchant wallet to owner account
-```text
-!merchant wallet transfer <currency = xlm or xmr>
-```
+[Back to main page](README.md)

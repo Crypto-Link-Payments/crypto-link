@@ -366,7 +366,7 @@ class MerchantCommunityOwner(commands.Cog):
     @commands.check(is_owner)
     async def balance(self, ctx):
         """
-        Returns the current value of the community wallet in monero and stellar
+        Returns the current value of the community wallet iin stellar
         :param ctx:
         :return:
         """
