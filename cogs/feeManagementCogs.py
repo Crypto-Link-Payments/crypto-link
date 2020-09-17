@@ -10,6 +10,7 @@ from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
+from cogs.utils.customCogChecks import is_animus, is_one_of_gods
 
 bot_manager = BotManager()
 custom_messages = CustomMessages()
@@ -19,16 +20,6 @@ helper = Helpers()
 
 d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-
-def is_animus(ctx):
-    return ctx.message.author.id == d['creator']
-
-
-def is_one_of_gods(ctx):
-    list_of_gods = [d['ownerId'], d['creator']]
-    return [god for god in list_of_gods if god == ctx.message.author.id]
-
 
 class FeeManagementAndControl(commands.Cog):
 
