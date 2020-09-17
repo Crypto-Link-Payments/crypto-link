@@ -1,5 +1,5 @@
 ![banner](../img/image0.png)
-![stellar](https://img.shields.io/badge/Powered%20by-Stellar%20Lumen-brightgreen)
+![stellar](https://img.shields.io/badge/Powered%20by-Stellar%20Lumen-brightgreen) ![discord](https://img.shields.io/badge/Platform-Discord-blue)
 
 Crypto Link, Discord bot which allows for instant peer to peer (P2P) transactions, payments and Discord community 
 monetization with the help of integrated Merchant System built on top of Stellar Lumen cryptocurrency.
