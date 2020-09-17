@@ -141,8 +141,11 @@ In order to register corporate wallet and merchant system for community execute 
 ```
 once successfully registered you can check all available commands under:
 
+#### :page_with_curl: Access merchant manual :page_with_curl:
+
+Merchant manual can be access through
 ```text
-!merchant
+!merchant manual
 ```
 
 #### :moneybag: Check community balance :moneybag:
