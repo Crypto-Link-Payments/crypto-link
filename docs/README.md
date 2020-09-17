@@ -145,6 +145,11 @@ once successfully registered you can check all available commands under:
 !merchant
 ```
 
+#### :moneybag: Check community balance :moneybag:
+```text
+!merchant balance
+```
+
 More on merchant system, its use cases, and set up procedure can be found [here](MERCHANTCOMMANDS.md).
 
 Instructions to operate with corporate account can be found [here](CORPORATEACCOUNTMANAGEMENT.md)
