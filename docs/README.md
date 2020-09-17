@@ -61,9 +61,9 @@ will guide you through all available areas
 All available commands for ***help*** category are available [here](HELPCMDS.md)
 
 
-## Quick start guide
+## :runner: Quick start guide :runner:
 
-### As Discord User
+### :boy: As Discord User :boy:
 
 Head to one of the Communities where Crypto-Link is present and execute 
 ```text
@@ -74,7 +74,7 @@ Once you receive successful report to DM on registration you can proceed with:
 !wallet      --> Instructions on all available commands to operate with your personal wallet
 ```
 
-#### Making P2P (Peer To Peer) transaction
+#### :dollar: Making P2P (Peer To Peer) transaction :dollar:
 
 Function Structure
 
@@ -101,7 +101,7 @@ example for Stellar Lumen:
 !withdraw  # Returns Instructions on how to withdraw from Discord to your personal wallet
 ```
 
-### As Discord Guild Owner 
+### :crown: As Discord Guild Owner :crown:
 
 #### Invite the bot
 Bot requires following Discord Permissions to operate optimally
