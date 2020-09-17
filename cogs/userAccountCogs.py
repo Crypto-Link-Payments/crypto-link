@@ -64,7 +64,7 @@ class UserAccountCommands(commands.Cog):
                       f'web: https://www.stellar.org/\n'
                       f'cmc: https://coinmarketcap.com/currencies/stellar/',
                 inline=False)
-
+            balance_embed.set_footer(text='Conversion rates provided by CoinGecko')
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
 
             await ctx.author.send(embed=balance_embed)
