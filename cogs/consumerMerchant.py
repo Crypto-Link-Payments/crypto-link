@@ -176,12 +176,13 @@ class ConsumerCommands(commands.Cog):
 
     @membership.command()
     @commands.bot_has_permissions(manage_roles=True)
-    async def subscribe(self, ctx, role: discord.Role, ticker: str):
+    async def subscribe(self, ctx, role: discord.Role):
         """
         Obtain a role available from community
         :param role:
         :return:
         """
+        ticker='xlm'
         tickers = ['xlm']
         if not re.search("[~!#$%^&*()_+{}:;\']", ticker):
             if merchant_manager.check_if_community_exist(community_id=ctx.message.guild.id):

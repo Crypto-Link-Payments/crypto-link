@@ -124,13 +124,26 @@ example for Stellar Lumen:
 !withdraw  # Returns Instructions on how to withdraw from Discord to your personal wallet
 ```
 
+#### :credit_card: Purchasing membership  :credit_card:
+
+If user wants to purchase available monetized role on community, he/she can do so with command:
+```text
+!membership subscirbe <@discord.Role>
+```
+
 ### :crown: As Discord Guild Owner :crown:
 
-#### :currency_exchange: Merchant system and corporate wallet :currency_exchange:
-Merchant system allows Guild Owners to monetize and create time oriented roles (Time-Bombed).
-Crypto Link, automatically scans for purchases, appends required role to user which made a purchase,
-transfers money to Guild's account, as well as monitor for expiration. Ones Expired time checkpoint
-is met, it will automatically remove the role from the user. 
+#### :currency_exchange: Merchant System registration :currency_exchange:
+
+In order to register corporate wallet and merchant system for community execute command:
+```text
+!merchant_initiate
+```
+once successfully registered you can check all available commands under:
+
+```text
+!merchant
+```
 
 More on merchant system, its use cases, and set up procedure can be found [here](MERCHANTCOMMANDS.md).
 
