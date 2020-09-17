@@ -1,6 +1,6 @@
 # Available CryptoCurrencies on Crypto Link system
 
-## ### ![banner](../img/emojiLumen.png) Stellar Lumen (XLM) ![banner](../img/emojiLumen.png)
+## ![banner](../img/emojiLumen.png) Stellar Lumen (XLM) ![banner](../img/emojiLumen.png)
 https://www.stellar.org/lumens 
 
 ```
