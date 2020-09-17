@@ -53,19 +53,18 @@ class UserAccountCommands(commands.Cog):
             stellar_balance = get_normal(value=str(values['stellar']['balance']),
                                          decimal_point=get_decimal_point('xlm'))
             stellar_to_usd = convert_to_usd(amount=float(stellar_balance), coin_name='stellar')
-
-            monero_balance = get_normal(value=str(values['monero']['balance']), decimal_point=get_decimal_point('xmr'))
-            monero_to_usd = convert_to_usd(amount=float(monero_balance), coin_name='monero')
-            balance_embed = discord.Embed(title=f"Balance status for {ctx.message.author}",
+            balance_embed = discord.Embed(title=f"Account details for  {ctx.message.author}",
+                                          description='Bellow is the latest data on your Discord Wallet balance',
                                           colour=discord.Colour.green())
 
             balance_embed.add_field(
                 name=f"{CONST_STELLAR_EMOJI} Stellar Balance {CONST_STELLAR_EMOJI}",
                 value=f'__Crypto__ {stellar_balance} {CONST_STELLAR_EMOJI}\n'
-                      f'__Fiat__: ${stellar_to_usd["total"]} ({stellar_to_usd["usd"]})\n'
+                      f'__Fiat__: ${round(stellar_to_usd["total"],4)} ({round(stellar_to_usd["usd"],4)}$/XLM)\n'
                       f'web: https://www.stellar.org/\n'
                       f'cmc: https://coinmarketcap.com/currencies/stellar/',
                 inline=False)
+
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
 
             await ctx.author.send(embed=balance_embed)

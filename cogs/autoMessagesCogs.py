@@ -40,6 +40,9 @@ class AutoFunctions(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
+        else:
+            print(error)
+
     @commands.Cog.listener()
     async def on_member_join(self, member):
         """
