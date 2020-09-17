@@ -93,19 +93,18 @@ class UserAccountCommands(commands.Cog):
                 title = '__Account registration status__'
                 message = f'Account has been successfully registered into the system and wallets created.' \
                           f' Please use {d["command"]}balance or {d["command"]}wallet.'
-                await customMessages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
+                await customMessages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
                                                     sys_msg_title=title)
             else:
                 title = '__Account registration status__'
                 message = f'Account could not be registered at this moment please try again later.'
-                await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                     sys_msg_title=title)
-
         else:
             title = '__Account registration status__'
             message = f'You have already registered account into the system. Please use ***{d["command"]}balance*** or ' \
                       f'***{d["command"]}wallet*** to obtain details on balances and your profile'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
 
     @commands.group()
