@@ -51,3 +51,4 @@ Entry command to access community owner sub menu is:
 ```text
 !help owner merchant
 ```
+[Back to main page](README.md)
