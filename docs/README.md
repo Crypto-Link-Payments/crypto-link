@@ -91,41 +91,17 @@ example for Stellar Lumen:
 
 #### :moneybag: Making Discord Withdrawals and Deposits :moneybag:
 
-##### incoming_envelope: Deposits
+##### :incoming_envelope: Deposits :incoming_envelope:
 ```text
 !wallet deposit  # Returns instructions on how to deposit currency to Discord
 ```
 
-##### :outbox_tray: Withdrawals
+##### :outbox_tray: Withdrawals:outbox_tray:
 ```text
 !withdraw  # Returns Instructions on how to withdraw from Discord to your personal wallet
 ```
 
 ### :crown: As Discord Guild Owner :crown:
-
-#### Invite the bot
-Bot requires following Discord Permissions to operate optimally
-```text
-# Read Message
-# Send Message
-# Send TTS Message
-# Manage Message  --> Bot deletes transaction reports after a while so channels are not spammed
-# Embed Links
-# Attach Files
-# Read Message History
-# Use External Emojis 
-# Add Reactions
-```
-
-:arrow_down: Invitation Link :arrow_down: 
-
-[Bot Invite Link](https://discord.com/oauth2/authorize?client_id=706806251321032726&scope=bot&permissions=392256)
-
-```text
-Note:  All required permission are already calculated in invite link so Crypto Link
-role will be automatically created. In order to get started on a channel just
-assign role to specific channel where you want Crypto Link to be present.
-```
 
 #### Merchant system and corporate wallet
 Merchant system allows Guild Owners to monetize and create time oriented roles (Time-Bombed).
