@@ -20,12 +20,27 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 
 
 
-## Onboard Crypto Link to Discord 
-If you are Discord community owner or you have administrator rights, you can import Crypto Link simply by clicking bellow 
-to invite link. Once bot will join your community, Crypto Link role will be automatically created with all required
-permissions for Crypto Link to operate. 
 
-### Required permissions for bot to integrate
+## :hammer: Integration of Crypto Link to Discord :hammer: 
+Monetizing guild community is instant and straight-forward. No programming skills required, just basic knowledge on how
+Discord operate from user and owner perspective. If you are familiar with Discord than simply click [here](https://discord.com/oauth2/authorize?client_id=706806251321032726&scope=bot&permissions=1342700624&response_type=code)
+to get invitation. Once Crypto Link joins community required role with permissions will be automatically created. 
+
+### Required permissions for Crypto Link to operate optimally
+
+* ***Manage Roles*** --> Required for Merchant System to operate optimally
+* ***Manage Emojis*** --> Eventually custom emojis will be integrated
+* ***Read, Send Messages*** --> Informing users on transactions and activities (not marketing!)
+* ***Manage Messages*** --> Tx public reports are deleted after a while to keep channels clean
+* ***Attach Files*** --> PDF reports on account statement and other infographics to be integrated
+* ***Read Message History*** --> Required to read own  messages from the past for deletion 
+* ***Add Reaction*** --> For use with special transactions 
+* ***Mentions*** --> Transactions done by the role 
+* ***Use of external emojis*** --> Custom emojis wil be integrated and cross community emojis
+
+### After Crypto Link Joins 
+Assign newly created role Crypto Link to the channels of your community where you would like that it operates and 
+listens for commands. 
 
 ### As Discord User
 
