@@ -38,6 +38,8 @@ class WithdrawalCommands(commands.Cog):
     @commands.group()
     @commands.check(user_has_wallet)
     async def withdraw(self, ctx):
+        print(f'WITHDRAW: {ctx.author} -> {ctx.message.content}')
+
         try:
             await ctx.message.delete()
         except Exception:
@@ -72,7 +74,7 @@ class WithdrawalCommands(commands.Cog):
         except Exception:
             pass
 
-        # Get fee and convert to stroops
+        print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
 
         #TODO check fees and so on
         stellar_fee = bot_manager.get_fees_by_category(key='xlm')['fee']
@@ -205,6 +207,8 @@ class WithdrawalCommands(commands.Cog):
         :param error:
         :return:
         """
+        print(f'ERR WITHDRAW XLM TRIGGERED  : {error}')
+
         if isinstance(error, commands.CheckFailure):
             message = f'**You are either not registered in the system or you have tried to use command over DM with the ' \
                       f'system itself. Head to one of the channels on community where system is accessible.'
