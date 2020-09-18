@@ -6,8 +6,8 @@
 ![Stars](https://img.shields.io/github/stars/launch-pad-investments/crypto-link?style=plastic)
 ![Language](https://img.shields.io/badge/Python-v3.8-yellowgreen?style=plastic)
 ![Discord](https://img.shields.io/discord/756132394289070102?label=Discord&logo=discord&style=plastic)
-![Twitter](https://img.shields.io/twitter/url?style=social&url=CryptoLink8&style=plastic)
-![TwitterFollow](https://img.shields.io/twitter/follow/CryptoLink8?style=social&style=plastic)
+![Twitter](https://img.shields.io/twitter/url?logo=twitter&style=social&url=https%3A%2F%2Ftwitter.com%2FCryptoLink8&style=plastic)
+![TwitterFollow](https://img.shields.io/twitter/follow/CryptoLink8?logo=Twitter&style=social&style=plastic)
 
 Crypto Link, Discord bot which allows for instant peer to peer (P2P) transactions, payments and Discord community 
 monetization with the help of integrated Merchant System built on top of Stellar Lumen cryptocurrency.
