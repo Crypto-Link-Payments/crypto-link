@@ -41,7 +41,11 @@ class AutoFunctions(commands.Cog):
                                                  sys_msg_title=title)
 
         else:
+            print(f'=============BUG===========')
+            print(ctx.message.author)
             print(error)
+            print(ctx.message.content)
+            print(f'=============BUG===========')
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
