@@ -1,4 +1,5 @@
 ![banner](../img/image0.png)
+
 ![stellar](https://img.shields.io/badge/Powered%20by-Stellar&%20Lumen-brightgreen?style=plastic) 
 ![discord](https://img.shields.io/badge/Platform-Discord-blue?style=plastic&?style=plastic)
 ![Issues](https://img.shields.io/github/issues/launch-pad-investments/crypto-link?style=plastic)
@@ -8,7 +9,11 @@
 ![Discord](https://img.shields.io/discord/756132394289070102?label=Discord&logo=discord&style=plastic)
 ![Twitter](https://img.shields.io/twitter/url?logo=twitter&style=social&url=https%3A%2F%2Ftwitter.com%2FCryptoLink8&style=plastic)
 ![TwitterFollow](https://img.shields.io/twitter/follow/CryptoLink8?logo=Twitter&style=social&style=plastic)
-
+![Last Commit](https://img.shields.io/github/last-commit/launch-pad-investments/crypto-link?logo=github&style=plastic)
+![Last Commit](https://img.shields.io/github/contributors/launch-pad-investments/crypto-link?logo=Github&style=plastic)
+![Commit activity](https://img.shields.io/github/commit-activity/m/launch-pad-investments/crypto-link?logo=github&style=plastic)
+![Code Size](https://img.shields.io/github/languages/code-size/launch-pad-investments/crypto-link?logo=github&style=plastic)
+![Repo Size](https://img.shields.io/github/repo-size/launch-pad-investments/crypto-link?logo=github&style=plastic)
 
 Crypto Link, Discord bot which allows for instant peer to peer (P2P) transactions, payments and Discord community 
 monetization with the help of integrated Merchant System built on top of Stellar Lumen cryptocurrency.
@@ -205,7 +210,7 @@ More on commands and their showcase can be viewed [here](CRYPTOLINKSTAFF.md)
 - [Dealing with user accounts and making P2P payments](USERCOMMANDS.md)
 - [Merchant System Only for Community owners](MERCHANTCOMMANDS.md)
 - [Command map and help categories](COMMANDMAP.md)]
-- 
+
 ## Contributing 
 Coming soon...
 
@@ -221,4 +226,4 @@ XLM: GD6SRXH4BXMW7ANSW3PKXZNORKHRXQIGV7TYNK6DHSDB5ISC3M7FOQUU
 NEO: AbXWN3yD7JpajRiPmXdaTF4KRCHjkVjUSV
 ONT: AKSDsUfbyJcQgpycwi73MCvapseLwt2P1c
 ```
-[github-last-commit]: https://github.com/launch-pad-investments/crypto-link/commit/HEAD
+
