@@ -7,9 +7,9 @@ import sys
 from discord.ext import commands
 
 from backOffice.stellarOnChainHandler import StellarWallet
+from cogs.utils.customCogChecks import is_one_of_gods
 from cogs.utils.monetaryConversions import convert_to_usd
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.customCogChecks import is_one_of_gods
 from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,6 +22,7 @@ d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+
 
 class HotWalletCommands(commands.Cog):
     def __init__(self, bot):
@@ -70,6 +71,19 @@ class HotWalletCommands(commands.Cog):
             message = 'Status of the wallet could not be obtained at this moment'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=sys_msg_title)
+
+    @hot.group()
+    @commands.check(is_one_of_gods)
+    async def scan(self):
+        pass
+
+    @scan.command()
+    async def memo(self):
+        pass
+
+    @scan.command()
+    async def tx_id(self):
+        pass
 
 
 def setup(bot):
