@@ -109,7 +109,7 @@ Note: if transactions successful both sender and recipient will receive payment 
 
 example for Stellar Lumen:
 ```text
-!send xlm <amount> <@discord.User>  # Sends N amount of XLM to targeted user
+!}send xlm 100 @Animus#4608  # Sends N amount of XLM to targeted user
 ```
 
 #### :moneybag: Making Discord Withdrawals and Deposits :moneybag:
