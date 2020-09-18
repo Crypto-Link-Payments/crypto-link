@@ -68,6 +68,9 @@ class BotWalletCommands(commands.Cog):
         except Exception:
             pass
 
+        print(f'CL : {ctx.author} -> {ctx.message.content}')
+
+
         if ctx.invoked_subcommand is None:
             title = '__Available Commands for Corp Wallet Transfers__'
             description = "All commands to operate with Launch Pad Corporate wallet"
@@ -82,6 +85,7 @@ class BotWalletCommands(commands.Cog):
     @cl.command()
     @commands.check(is_one_of_gods)
     async def balance(self, ctx):
+        print(f'CL BALANCE : {ctx.author} -> {ctx.message.content}')
         data = bot_manager.get_bot_wallets_balance()
         values = discord.Embed(title="Balance of Launch Pad Investment Corporate Wallet",
                                description="Current state of Crypto Link Lumen wallet",
@@ -99,6 +103,12 @@ class BotWalletCommands(commands.Cog):
     @cl.command()
     @commands.check(is_one_of_gods)
     async def sweep(self, ctx):
+        try:
+            await ctx.message.delete()
+        except Exception:
+            pass
+
+        print(f'CL SWEEP  : {ctx.author} -> {ctx.message.content}')
         author = ctx.message.author.id
 
         balance = int(bot_manager.get_bot_wallet_balance_by_ticker(ticker='xlm'))
@@ -155,6 +165,7 @@ class BotWalletCommands(commands.Cog):
     @cl.command()
     @commands.check(is_one_of_gods)
     async def stats(self, ctx):
+        print(f'CL STATS  : {ctx.author} -> {ctx.message.content}')
         data = bot_stats.get_all_stats()
         stats_embed = discord.Embed(title='__Global Crypto Link Stats__',
                                     colour=discord.Color.green(),
@@ -184,6 +195,14 @@ class BotWalletCommands(commands.Cog):
                         value=f'{reach}',
                         inline=False)
         await ctx.author.send(embed=world)
+
+    @cl.error
+    async def balance_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f':warning: __Restricted area__ :warning: '
+            message = f'You do not have rights to access this are of the bot'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                sys_msg_title=title)
 
 
 def setup(bot):
