@@ -22,7 +22,6 @@ CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 class TransactionCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.symbols = ['xlm']
 
     @commands.group()
     @commands.check(is_public)
@@ -33,12 +32,16 @@ class TransactionCommands(commands.Cog):
         except Exception:
             pass
 
+        print(f'SEND: {ctx.author} -> {ctx.message.content}')
+
         if ctx.invoked_subcommand is None:
-            title = '__Available functions and  coins for P2P transactions'
-            description = "Bellow are presented all available currencies for P2P transacitons on Launch Pad Investments"
+            title = '💵 __Available p2p transaction commands__ 💵'
+            description = "Bellow are presented all available currencies for P2P transactions"
             list_of_values = [
                 {"name": f"{CONST_STELLAR_EMOJI} Stellar Lumen {CONST_STELLAR_EMOJI}",
-                 "value": f"{d['command']}send xlm <amount> <@DiscordUser>"}]
+                 "value": f"{d['command']}send xlm <amount> <@DiscordUser>\n"
+                          f"\nexample:\n"
+                          f"{d['command']}send xlm 100 @Animus#4608"}]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values)
 
@@ -52,7 +55,12 @@ class TransactionCommands(commands.Cog):
         :param recipient:
         :return:
         """
+        try:
+            await ctx.message.delete()
+        except Exception:
+            pass
 
+        print(f'SEND XLM: {ctx.author} -> {ctx.message.content}')
         stroops = (int(amount * (10 ** 7)))
         if stroops > 0:
             if not ctx.message.author == recipient and not recipient.bot:
@@ -120,8 +128,19 @@ class TransactionCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
 
+    @send.error
+    async def send_error(self, ctx, error):
+        print(f'ERR SEND TRIGGERED  : {error}')
+        if isinstance(error, commands.CheckFailure):
+            title = f':warning:  __Conditions not met __ :warning: '
+            message = f'In order to successfully execute transaction, following conditions need to be met:\n' \
+                      f'```-> You have to have registered wallet and sufficinet balance\n' \
+                      f'-> Command needs to be executed on public channel```'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                sys_msg_title=title)
     @xlm.error
     async def xlm_send_error(self, ctx, error):
+        print(f'ERR XLM SEND TRIGGERED  : {error}')
         if isinstance(error, commands.BadArgument):
             title = f'__Bad Argument Provided __'
             message = f'You have provided wrong argument either for amount or than for the recipient'
@@ -148,6 +167,12 @@ class TransactionCommands(commands.Cog):
             title = f'__System Transaction Error__'
             message = f'In order to execute P2P transaction you need to be registered into the system, and ' \
                       f'transaction request needs to be executed on one of the text channels on {ctx.message.guild}'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                sys_msg_title=title)
+
+        elif isinstance(error, commands.CommandOnCooldown):
+            title = f':timer:  __System Transaction Error__ :timer: '
+            message = f'You wanted to make another transaction too fast. Limit is set to 1 TX per 1 minute '
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
 
