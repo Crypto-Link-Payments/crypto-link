@@ -60,9 +60,28 @@ class BotWalletCommands(commands.Cog):
                                value=f'{normal_amount} {emoji}')
         await stellar_notify_channel.send(embed=corp_channel)
 
-    @commands.command()
+
+    @commands.group()
     @commands.check(is_one_of_gods)
-    async def check_corp_balance(self, ctx):
+    async def cl(self, ctx):
+        try:
+            await ctx.message.delete()
+        except Exception:
+            pass
+
+        if ctx.invoked_subcommand is None:
+            title = '__Available Commands for Corp Wallet Transfers__'
+            description = "All commands to operate with Launch Pad Corporate wallet"
+            list_of_values = [
+                {"name": "Check Corporate Balance", "value": f"{d['command']}corporate check_corp_balance"},
+                {"name": "Transfer total Stellar balance from Corp to god member",
+                 "value": f"{d['command']}transfer sweep_xlm <discord.Member>"}]
+
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values)
+
+    @cl.command()
+    @commands.check(is_one_of_gods)
+    async def balance(self, ctx):
         data = bot_manager.get_bot_wallets_balance()
         values = discord.Embed(title="Balance of Launch Pad Investment Corporate Wallet",
                                description="Current state of all bot wallets",
@@ -77,27 +96,9 @@ class BotWalletCommands(commands.Cog):
                              inline=False)
         await ctx.channel.send(embed=values, delete_after=100)
 
-    @commands.group()
+    @cl.command()
     @commands.check(is_one_of_gods)
-    async def transfer(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
-        if ctx.invoked_subcommand is None:
-            title = '__Available Commands for Corp Wallet Transfers__'
-            description = "All commands to operate with Launch Pad Corporate wallet"
-            list_of_values = [
-                {"name": "Check Corporate Balance", "value": f"{d['command']}check_corp_balance"},
-                {"name": "Transfer total Stellar balance from Corp to god member",
-                 "value": f"{d['command']}transfer sweep_xlm <discord.Member>"}]
-
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values)
-
-    @transfer.command()
-    @commands.check(is_one_of_gods)
-    async def sweep_xlm(self, ctx):
+    async def sweep(self, ctx):
         author = ctx.message.author.id
 
         balance = int(bot_manager.get_bot_wallet_balance_by_ticker(ticker='xlm'))
@@ -153,7 +154,7 @@ class BotWalletCommands(commands.Cog):
                       f"is 0 {CONST_STELLAR_EMOJI}"
             await customMessages.system_message(ctx, color_code=1, message=message, destination=0, sys_msg_title=title)
 
-    @commands.command()
+    @cl.command()
     @commands.check(is_one_of_gods)
     async def stats(self, ctx):
         data = bot_stats.get_all_stats()

@@ -36,7 +36,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or(d['command']))  # T
 bot.remove_command('help')  # removing the old help command
 
 extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
-              'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.botMainCogs', 'cogs.withdrawalCogs',
+              'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
               'cogs.feeManagementCogs']
 
