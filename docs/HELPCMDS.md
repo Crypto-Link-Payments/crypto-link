@@ -12,7 +12,7 @@ or
 @CryptoLink <command> <subcommands>
 ```
 
-Entry command to access help menu and all availabale sub-commands is:
+Entry command to access help menu and all available sub-commands is:
 
 ```text
 !help

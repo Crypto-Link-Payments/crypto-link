@@ -10,6 +10,7 @@ from discord.ext import commands
 from git import Repo, InvalidGitRepositoryError
 
 from backOffice.profileRegistrations import AccountManager
+from cogs.utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
@@ -23,22 +24,13 @@ d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 
-def is_animus(ctx):
-    return ctx.message.author.id == d['creator']
-
-
-def is_one_of_gods(ctx):
-    list_of_gods = [d['ownerId'], d['creator']]
-    return [god for god in list_of_gods if god == ctx.message.author.id]
-
-
 class BotManagementCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.group()
     @commands.check(is_one_of_gods)
-    async def god(self, ctx):
+    async def mng(self, ctx):
         """
         Category of commands under team category
         :param ctx:
@@ -65,14 +57,14 @@ class BotManagementCommands(commands.Cog):
                                                            f"***{d['command']}god*** needs to be typed in first followed by relevant sub-commands",
                                                data=value)
 
-    @god.group()
+    @mng.group()
     @commands.check(is_animus)
     async def system(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__Turning bot off__',
-                      'value': f"***{d['command']}god system off*** "},
+                      'value': f"***{d['command']}mng system off*** "},
                      {'name': '__Pulling update from Github__',
-                      'value': f"***{d['command']}god system update*** "},
+                      'value': f"***{d['command']}mng system update*** "},
                      ]
 
             await customMessages.embed_builder(ctx, title='Available sub commands for system',
@@ -85,9 +77,9 @@ class BotManagementCommands(commands.Cog):
         sys.exit(0)
 
     @system.command()
-    async def update(self, ctx):
+    async def update(self):
         extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
-                      'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.botMainCogs', 'cogs.withdrawalCogs',
+                      'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
                       'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs',
                       'cogs.merchantLicensingCogs',
                       'cogs.feeManagementCogs']
@@ -136,20 +128,35 @@ class BotManagementCommands(commands.Cog):
                               inline=False)
         await channel.send(embed=load_status)
 
-    # TODO finish COG manipulation commands
-    @system.command()
-    async def load_cog(self, ctx, cog_name: str):
+    @mng.group()
+    async def scripts(self, ctx):
+        if ctx.invoked_subcommand is None:
+            value = [{'name': '__List all cogs__',
+                      'value': f"***{d['command']}mng scripts list_cogs*** "},
+                     {'name': '__Loading specific cog__',
+                      'value': f"***{d['command']}mng scripts load <cog name>*** "},
+                     {'name': '__Unloading specific cog__',
+                      'value': f"***{d['command']}mng scripts unload <cog name>*** "},
+                     {'name': '__Reload all cogs__',
+                      'value': f"***{d['command']}mng scripts reload*** "}
+                     ]
+
+            await customMessages.embed_builder(ctx, title='Available sub commands for system',
+                                               description='Available commands under category ***system***', data=value)
+
+    @scripts.command()
+    async def load(self, ctx, cog_name: str):
         pass
 
-    @system.command()
-    async def unload_cog(self, ctx, cog_name: str):
+    @scripts.command()
+    async def unload(self, ctx, cog_name: str):
         pass
 
-    @system.command()
+    @scripts.command()
     async def list_cogs(self, ctx):
         pass
 
-    @system.command()
+    @scripts.command()
     async def reload(self, ctx):
         pass
 
