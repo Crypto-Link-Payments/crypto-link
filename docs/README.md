@@ -4,7 +4,6 @@
 ![Issues](https://img.shields.io/github/issues/launch-pad-investments/crypto-link?style=plastic)
 ![Forks](https://img.shields.io/github/forks/launch-pad-investments/crypto-link?style=plastic)
 ![Stars](https://img.shields.io/github/stars/launch-pad-investments/crypto-link?style=plastic)
-![License](https://img.shields.io/github/license/launch-pad-investments/crypto-link?style=plastic)
 ![Language](https://img.shields.io/badge/Python-v3.8-yellowgreen?style=plastic)
 ![Discord](https://img.shields.io/discord/756132394289070102?label=Discord&logo=discord&style=plastic)
 
