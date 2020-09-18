@@ -32,6 +32,7 @@ class UserAccountCommands(commands.Cog):
     @commands.command()
     @commands.check(user_has_wallet)
     async def bal(self, ctx):
+        print(f'BAL: {ctx.author}-> {ctx.message.content}')
         """
         Gets the user balances
         :param ctx:
@@ -72,6 +73,7 @@ class UserAccountCommands(commands.Cog):
     @commands.check(is_public)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def register(self, ctx):
+        print(f'REGISTER: {ctx.author} -> {ctx.message.content}')
         """
         Register user in the system
         :param ctx:
@@ -105,6 +107,7 @@ class UserAccountCommands(commands.Cog):
     @commands.check(user_has_wallet)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):
+        print(f'WALLET: {ctx.author} -> {ctx.message.content}')
         """
         Get the details
         :param ctx:
@@ -132,6 +135,7 @@ class UserAccountCommands(commands.Cog):
         :param ctx:
         :return:
         """
+        print(f'WALLET DEPOSIT: {ctx.author} -> {ctx.message.content}')
 
         try:
             await ctx.message.delete()
@@ -181,6 +185,8 @@ class UserAccountCommands(commands.Cog):
             await ctx.message.delete()
         except Exception:
             pass
+
+        print(f'WALLET BALANCE: {ctx.author} -> {ctx.message.content}')
 
         data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
         stellar_balance = get_normal(value=str(data['balance']),
