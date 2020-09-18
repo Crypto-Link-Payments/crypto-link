@@ -187,6 +187,6 @@ command:
 - [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
 - [Bot Set up functions only Crypto Link Staff](CLOFFCHAIN.md)
 - [Help Commands](HELPCMDS.md)
-- [Dealing with user accounts and making P2P payments](COMMANDS.md)
+- [Dealing with user accounts and making P2P payments](USERCOMMANDS.md)
 - [Merchant System Only for Community owners](MERCHANTCOMMANDS.md)
 - [Command map and help categories](COMMANDMAP.md)]
