@@ -14,6 +14,7 @@ from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.securityChecks import check_stellar_address
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
+from cogs.utils.customCogChecks import is_public, user_has_wallet
 
 helper = Helpers()
 account_mng = AccountManager()
@@ -29,20 +30,13 @@ hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_STELLAR_WITHDRAWAL_FEE = 0.001
 
-def is_public(ctx):
-    return ctx.message.channel.type != discord.ChannelType.private
-
-
-def is_registered_in_system(ctx):
-    return account_mng.check_user_existence(user_id=ctx.message.author.id)
-
 
 class WithdrawalCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.group()
-    @commands.check(is_registered_in_system)
+    @commands.check(user_has_wallet)
     async def withdraw(self, ctx):
         try:
             await ctx.message.delete()
@@ -54,16 +48,18 @@ class WithdrawalCommands(commands.Cog):
             description = "All commands available to withdraw funds from Discord Wallet"
             list_of_values = [
                 {
-                    "name": f"{CONST_STELLAR_EMOJI} Withdraw Stellar (XLM) from Discord wallet{CONST_STELLAR_EMOJI}",
-                    "value": f"{d['command']}withdraw stellar <amount> <destination address>"}]
+                    "name": f"{CONST_STELLAR_EMOJI} Withdraw Stellar (XLM) from Discord wallet {CONST_STELLAR_EMOJI}",
+                    "value": f"{d['command']}withdraw xlm <amount> <destination address>\n"
+                             f"\nexample:\n"
+                             f"```!withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"}]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                destination=1)
 
     @withdraw.command()
-    @commands.check(is_registered_in_system)
+    @commands.check(user_has_wallet)
     @commands.check(is_public)
-    async def stellar(self, ctx, amount: float, address: str):
+    async def xlm(self, ctx, amount: float, address: str):
         """
         Initiates withdrawal on Stellar chain
         :param ctx: Discord Context
@@ -78,6 +74,7 @@ class WithdrawalCommands(commands.Cog):
 
         # Get fee and convert to stroops
 
+        #TODO check fees and so on
         stellar_fee = bot_manager.get_fees_by_category(key='xlm')['fee']
         fee_in_xlm = convert_to_currency(amount=stellar_fee, coin_name='stellar')
         fee_in_stroops = int(fee_in_xlm['total'] * (10 ** 7))
@@ -200,7 +197,7 @@ class WithdrawalCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
 
-    @stellar.error
+    @xlm.error
     async def stellar_withdrawal_error(self, ctx, error):
         """
         Custom error handlers for stellar withdrawal command

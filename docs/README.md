@@ -119,16 +119,21 @@ example for Stellar Lumen:
 !wallet deposit  # Returns instructions on how to deposit currency to Discord
 ```
 
-##### :outbox_tray: Withdrawals:outbox_tray:
+##### :outbox_tray: Withdraw XLM from Discord:outbox_tray:
 ```text
-!withdraw  # Returns Instructions on how to withdraw from Discord to your personal wallet
+!withdraw clm <amount> <destination address>  
+```
+
+Example:
+```text
+!withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7
 ```
 
 #### :credit_card: Purchasing membership  :credit_card:
 
 If user wants to purchase available monetized role on community, he/she can do so with command:
 ```text
-!membership subscirbe <@discord.Role>
+!membership subscribe <@discord.Role>
 ```
 
 ### :crown: As Discord Guild Owner :crown:
