@@ -7,8 +7,6 @@
 ![Stars](https://img.shields.io/github/stars/launch-pad-investments/crypto-link?style=plastic)
 ![Language](https://img.shields.io/badge/Python-v3.8-yellowgreen?style=plastic)
 ![Discord](https://img.shields.io/discord/756132394289070102?label=Discord&logo=discord&style=plastic)
-![Twitter](https://img.shields.io/twitter/url?logo=twitter&style=social&url=https%3A%2F%2Ftwitter.com%2FCryptoLink8&style=plastic)
-![TwitterFollow](https://img.shields.io/twitter/follow/CryptoLink8?logo=Twitter&style=social&style=plastic)
 ![Last Commit](https://img.shields.io/github/last-commit/launch-pad-investments/crypto-link?logo=github&style=plastic)
 ![Last Commit](https://img.shields.io/github/contributors/launch-pad-investments/crypto-link?logo=Github&style=plastic)
 ![Commit activity](https://img.shields.io/github/commit-activity/m/launch-pad-investments/crypto-link?logo=github&style=plastic)
@@ -210,6 +208,15 @@ More on commands and their showcase can be viewed [here](CRYPTOLINKSTAFF.md)
 - [Dealing with user accounts and making P2P payments](USERCOMMANDS.md)
 - [Merchant System Only for Community owners](MERCHANTCOMMANDS.md)
 - [Command map and help categories](COMMANDMAP.md)]
+
+
+## Get in touch
+
+### Join us on Discord
+[Discord Invite Link](https://discord.gg/ddvGTsb)
+
+### Send us email
+cryptolinkpayments@gmail.com
 
 ## Contributing 
 Coming soon...

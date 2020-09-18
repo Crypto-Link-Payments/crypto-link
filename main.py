@@ -35,12 +35,15 @@ channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(d['command']))  # Test commands
 bot.remove_command('help')  # removing the old help command
 
-extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
+# extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
+#               'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
+#               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
+#               'cogs.feeManagementCogs']
+
+extensions = ['cogs.generalCogs','cogs.userAccountCogs',
               'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
               'cogs.feeManagementCogs']
-
-
 def get_time():
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
@@ -320,7 +323,7 @@ async def check_merchant_licences():
 def start_scheduler():
     print(Fore.LIGHTBLUE_EX + 'Started Chroned Monitors')
     scheduler.add_job(check_stellar_hot_wallet,
-                      CronTrigger(minute="10,20,30,40,50,00", second=0))
+                      CronTrigger(minute="00,01,03,05,07,09,11,13,15,17,19,21,23,25,34,38,40,43,45,47,51,53", second=0))
     scheduler.add_job(check_expired_roles, CronTrigger(
         minute="00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,47,50,51,52,53"))
     scheduler.add_job(check_merchant_licences,
