@@ -190,6 +190,11 @@ There are as well numerous commands availabale to operate with the Crypto Link's
 designed to be accessed only for members of the Crypto Link staff.
 Commands can be viewed [here](SYSTEMMANAGEMENT.md)
 
+## Hot wallet commands for Crypto Link Staff
+in order to make quick checks of the hot wallet commands such as balance, memo queries and transaction ID queries
+have been implemented
+Command list can be access [here](HOTWALLETCOMMANDS.md)
+
 ## Additional and Specific Material
 - [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
 - [Bot Set up functions only Crypto Link Staff](CLOFFCHAIN.md)
