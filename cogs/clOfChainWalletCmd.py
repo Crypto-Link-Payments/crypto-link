@@ -60,7 +60,6 @@ class BotWalletCommands(commands.Cog):
                                value=f'{normal_amount} {emoji}')
         await stellar_notify_channel.send(embed=corp_channel)
 
-
     @commands.group()
     @commands.check(is_one_of_gods)
     async def cl(self, ctx):
@@ -73,18 +72,19 @@ class BotWalletCommands(commands.Cog):
             title = '__Available Commands for Corp Wallet Transfers__'
             description = "All commands to operate with Launch Pad Corporate wallet"
             list_of_values = [
-                {"name": "Check Corporate Balance", "value": f"{d['command']}corporate check_corp_balance"},
-                {"name": "Transfer total Stellar balance from Corp to god member",
-                 "value": f"{d['command']}transfer sweep_xlm <discord.Member>"}]
+                {"name": "Check Corporate Balance", "value": f"{d['command']}cl balance"},
+                {"name": "Withdrawing XLM from Corp to personal",
+                 "value": f"{d['command']}cl sweep"}]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values)
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                               destination=ctx.message.author)
 
     @cl.command()
     @commands.check(is_one_of_gods)
     async def balance(self, ctx):
         data = bot_manager.get_bot_wallets_balance()
         values = discord.Embed(title="Balance of Launch Pad Investment Corporate Wallet",
-                               description="Current state of all bot wallets",
+                               description="Current state of Crypto Link Lumen wallet",
                                color=discord.Colour.blurple())
         for bal in data:
             ticker = bal['ticker']
@@ -149,9 +149,7 @@ class BotWalletCommands(commands.Cog):
                                                     sys_msg_title=title)
         else:
             title = '__Corporate Transfer Error__'
-            message = f"You can not transfer XLM from corporate account to {ctx.message.author} " \
-                      f"because the corporate wallet balance" \
-                      f"is 0 {CONST_STELLAR_EMOJI}"
+            message = f"You can not sweep the account as its balance is 0.0000000 {CONST_STELLAR_EMOJI}"
             await customMessages.system_message(ctx, color_code=1, message=message, destination=0, sys_msg_title=title)
 
     @cl.command()
