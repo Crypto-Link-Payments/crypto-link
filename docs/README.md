@@ -186,6 +186,10 @@ command:
 ```text
 !fees
 ```
+## Crypto Link commands for staff
+There are as well numerous commands availabale to operate with the Crypto Link's backend system and were
+designed to be accessed only for members of the Crypto Link staff.
+Commands can be viewed [here](SYSTEMMANAGEMENT.md)
 
 ## Additional and Specific Material
 - [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
