@@ -8,9 +8,10 @@ from discord.ext import commands
 from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
+from cogs.utils.customCogChecks import is_one_of_gods
+from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
-from cogs.utils.customCogChecks import is_animus, is_one_of_gods
 
 bot_manager = BotManager()
 custom_messages = CustomMessages()
@@ -20,11 +21,26 @@ helper = Helpers()
 
 d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
+CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+
 
 class FeeManagementAndControl(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+    def filter_db_keys(self, type:str):
+
+        if type == 'with_xlm':
+            type = "XLM Withdrawal fee"
+        elif type =='merch_transfer_cost':
+            type = "Merchant wallet withdrawal fee"
+        elif type == 'merch_license':
+            type = "Merchant Monthly License cost"
+        elif type == 'merch_transfer_min':
+            type = 'Merchant mnimum transfer'
+
+        return type
 
     @commands.command()
     async def fees(self, ctx):
@@ -34,11 +50,18 @@ class FeeManagementAndControl(commands.Cog):
                                  colour=discord.Colour.blue())
 
         for data in fees:
-            fee_info.add_field(name=data['type'],
-                               value=f"{data['fee']}$",
+            conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
+            type = self.filter_db_keys(type=data['type'])
+
+            fee_info.add_field(name=type,
+                               value=f"XLM = {conversion['total']} {CONST_STELLAR_EMOJI}\n"
+                                     f"Dollar = {data['fee']}$\n"
+                                     f"Rate = {conversion['usd']}/ XLM",
                                inline=False)
 
         fee_info.set_thumbnail(url=self.bot.user.avatar_url)
+        fee_info.set_footer(text='Conversion rates provided by CoinGecko',
+                            icon_url='https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
         await ctx.channel.send(embed=fee_info)
 
     @commands.group()
@@ -64,7 +87,8 @@ class FeeManagementAndControl(commands.Cog):
                  "value": f"Information on current state of the fees"},
             ]
 
-            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values)
+            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                                thumbnail=self.bot.user.avatar_url, destination=ctx.message.author)
 
     @fee.group()
     async def change(self, ctx):
@@ -88,7 +112,8 @@ class FeeManagementAndControl(commands.Cog):
 
             ]
 
-            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values)
+            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                                thumbnail=self.bot.user.avatar_url, destination=ctx.message.author)
 
     @change.command()
     async def minimum_merchant_transfer_value(self, ctx, value: float):
@@ -179,13 +204,19 @@ class FeeManagementAndControl(commands.Cog):
         fee_info = discord.Embed(title='Applied fees for system',
                                  description='State of fees for each segment of the bot',
                                  colour=discord.Colour.blue())
-
         for data in fees:
-            fee_info.add_field(name=data['type'],
-                               value=f"{data['fee']}$",
+            type = self.filter_db_keys(type=data['type'])
+
+            conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
+            fee_info.add_field(name=type,
+                               value=f"XLM = {conversion['total']} {CONST_STELLAR_EMOJI}\n"
+                                     f"Dollar = {data['fee']}$\n"
+                                     f"Rate = {conversion['usd']}/ XLM",
                                inline=False)
 
         fee_info.set_thumbnail(url=self.bot.user.avatar_url)
+        fee_info.set_footer(text='Conversion rates provided by CoinGecko',
+                            icon_url='https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
         await ctx.channel.send(embed=fee_info)
 
 
