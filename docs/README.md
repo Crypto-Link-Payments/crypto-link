@@ -14,7 +14,7 @@ Crypto Link, Discord bot which allows for instant peer to peer (P2P) transaction
 monetization with the help of integrated Merchant System built on top of Stellar Lumen cryptocurrency.
 Discord users can access their wallet through any community which has integrated Crypto Link in their daily operations.
 
-### ![banner](../img/emojiLumen.png) What is Stellar and Lumen (XLM) ![banner](../img/emojiLumen.png)
+## ![banner](../img/emojiLumen.png) What is Stellar and Lumen (XLM) ![banner](../img/emojiLumen.png)
 
 Stellar is an open source, decentralized protocol for digital currency to fiat money transfers which allows 
 cross-border transactions between any pair of currencies. The Stellar protocol is supported by a 501(c)3 nonprofit, 
@@ -169,7 +169,7 @@ Instructions to operate with corporate account can be found [here](CORPORATEACCO
 
 ## :money_with_wings: Fees for using the crypto link system :money_with_wings:
 We have integrated as well operational fees to gather funding for further development. Fees are currently applied
- for following crypto link activiteis:
+ for following crypto link activities:
 
 - [X] Merchant license fee 
 - [X] Merchant wallet withdrawal
@@ -187,15 +187,16 @@ For explanation on all the fees and limits read [here](FEESANDLIMITS.md)
 !fees
 ```
 
-## Crypto Link commands for staff
-There are as well numerous commands availabale to operate with the Crypto Link's backend system and were
-designed to be accessed only for members of the Crypto Link staff.
-Commands can be viewed [here](SYSTEMMANAGEMENT.md)
 
-## Hot wallet commands for Crypto Link Staff
-in order to make quick checks of the hot wallet commands such as balance, memo queries and transaction ID queries
-have been implemented
-Command list can be access [here](HOTWALLETCOMMANDS.md)
+## Bot management commands
+Crypto Link has as well integrated command for management which are locked for Crypto Link Staff.
+Commands are broken down into three specific areas:
+
+- Bot basic administration commands
+- Hot wallet queries
+- Management of fees and limits for Crypto Link
+
+More on commands and their showcase can be viewed [here](CRYPTOLINKSTAFF.md)
 
 ## Additional and Specific Material
 - [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
@@ -212,7 +213,6 @@ Coming soon...
 Coming soon...
 
 ## :pig2:  Support jar :pig2: 
-
 ### Cryptocurrencies
 ```text
 BTC: 36vWbdegL57pHK3sVghrpwfp3V1tMqvHfc
