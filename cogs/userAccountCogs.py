@@ -5,6 +5,7 @@ from backOffice.botWallet import BotManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
+from cogs.utils.customCogChecks import is_public, user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd
 from cogs.utils.monetaryConversions import get_normal, get_decimal_point
 from cogs.utils.systemMessaages import CustomMessages
@@ -23,21 +24,14 @@ hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
-def is_public(ctx):
-    return ctx.message.channel.type != discord.ChannelType.private
-
-
-def is_registered_in_system(ctx):
-    return account_mng.check_user_existence(user_id=ctx.message.author.id)
-
 
 class UserAccountCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    @commands.check(is_registered_in_system)
-    async def balance(self, ctx):
+    @commands.check(user_has_wallet)
+    async def bal(self, ctx):
         """
         Gets the user balances
         :param ctx:
@@ -60,7 +54,7 @@ class UserAccountCommands(commands.Cog):
             balance_embed.add_field(
                 name=f"{CONST_STELLAR_EMOJI} Stellar Balance {CONST_STELLAR_EMOJI}",
                 value=f'__Crypto__ {stellar_balance} {CONST_STELLAR_EMOJI}\n'
-                      f'__Fiat__: ${round(stellar_to_usd["total"],4)} ({round(stellar_to_usd["usd"],4)}$/XLM)\n'
+                      f'__Fiat__: ${round(stellar_to_usd["total"], 4)} ({round(stellar_to_usd["usd"], 4)}$/XLM)\n'
                       f'web: https://www.stellar.org/\n'
                       f'cmc: https://coinmarketcap.com/currencies/stellar/',
                 inline=False)
@@ -108,7 +102,7 @@ class UserAccountCommands(commands.Cog):
                                                 sys_msg_title=title)
 
     @commands.group()
-    @commands.check(is_registered_in_system)
+    @commands.check(user_has_wallet)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):
         """
@@ -124,15 +118,14 @@ class UserAccountCommands(commands.Cog):
         if ctx.invoked_subcommand is None:
             title = '__Available Wallets__'
             description = "All commands to check wallet details for each available cryptocurrency"
-            list_of_values = [
+            list_of_values = [{"name": "Quick balance check", "value": f"{d['command']}bal"},
                 {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet deposit"},
-                {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet xlm"}]
+                {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet balance"}]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                destination=1)
 
     @wallet.command()
-    @commands.check(is_registered_in_system)
     async def deposit(self, ctx):
         """
         Returns instructions on how to deposit to the Discord Wallet
@@ -178,8 +171,7 @@ class UserAccountCommands(commands.Cog):
                                                 sys_msg_title=title)
 
     @wallet.command()
-    @commands.check(is_registered_in_system)
-    async def xlm(self, ctx):
+    async def balance(self, ctx):
         """
         Querying account details for the Stellar Lumen Wallet
         :param ctx:
@@ -225,7 +217,16 @@ class UserAccountCommands(commands.Cog):
             title = f'__Balance check error__'
             message = f'You have not registered yourself into the system yet. Please head to one of the public ' \
                       f'channels, where Virtual Interactive Pilot is Accessible and  execute {d["command"]}register'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                sys_msg_title=title)
+
+    @bal.error
+    async def balance_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'__Balance check error__'
+            message = f'You have not registered yourself into the system yet. Please head to one of the public ' \
+                      f'channels, where Virtual Interactive Pilot is Accessible and  execute {d["command"]}register'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
 
     @register.error

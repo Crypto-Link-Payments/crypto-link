@@ -32,6 +32,7 @@ class HelpCommands(commands.Cog):
             list_of_values = [
                 {"name": "How to get started", "value": f"{d['command']}help get_started"},
                 {"name": "About the payment solution", "value": f"{d['command']} about"},
+                {"name": "Account commands", "value": f"{d['command']}help account"},
                 {"name": "How to make peer to peer transactions", "value": f"{d['command']}help transactions"},
                 {"name": "List of available currencies", "value": f"{d['command']}help currencies"},
                 {"name": "List of commands if you are community owner", "value": f"{d['command']}help owner"},
@@ -117,22 +118,21 @@ class HelpCommands(commands.Cog):
 
         await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                            destination=1)
-
     @help.command()
     async def account(self, ctx):
         title = '__Obtain information on personal account__'
         description = "Bellow are presented all currencies available for P2P transactions"
         list_of_values = [
             {"name": "Get balance information",
-             "value": f"{d['command']} balance"},
+             "value": f"{d['command']}bal"},
             {"name": "Access wallet",
-             "value": f"{d['command']} wallet"},
+             "value": f"{d['command']}wallet"},
             {"name": "Get instructions on how to deposit",
-             "value": f"{d['command']} wallet deposit"},
-            {"name": "Get wallet details for Stellar Lumen Network",
-             "value": f"{d['command']} wallet xlm"},
+             "value": f"{d['command']}wallet deposit"},
+            {"name": "Get full account report",
+             "value": f"{d['command']}wallet balance"},
             {"name": "Get details on how to withdraw from Discord Wallet",
-             "value": f"{d['command']} withdraw"}]
+             "value": f"{d['command']}withdraw"}]
 
         await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                            destination=1)
