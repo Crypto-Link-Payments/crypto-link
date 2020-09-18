@@ -1,6 +1,4 @@
-import datetime
 import time
-from re import match
 
 import discord
 from discord.ext import commands
@@ -10,11 +8,11 @@ from backOffice.botWallet import BotManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
+from cogs.utils.customCogChecks import is_public, user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.securityChecks import check_stellar_address
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
-from cogs.utils.customCogChecks import is_public, user_has_wallet
 
 helper = Helpers()
 account_mng = AccountManager()
@@ -76,7 +74,7 @@ class WithdrawalCommands(commands.Cog):
 
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
 
-        #TODO check fees and so on
+        # TODO check fees and so on
         stellar_fee = bot_manager.get_fees_by_category(key='xlm')['fee']
         fee_in_xlm = convert_to_currency(amount=stellar_fee, coin_name='stellar')
         fee_in_stroops = int(fee_in_xlm['total'] * (10 ** 7))
@@ -101,6 +99,8 @@ class WithdrawalCommands(commands.Cog):
                         # Initiate on chain withdrawal
                         data = stellar_wallet.withdraw(address=address,
                                                        xlm_amount=str(xlm_with_amount))
+                        # data = await stellar_wallet.as_withdraw(address=address,
+                        #                                         xlm_amount=str(xlm_with_amount))
 
                         if data:
                             data_new = {
@@ -164,7 +164,7 @@ class WithdrawalCommands(commands.Cog):
                                                                    'has initiated on-chainw withdrawal',
                                                        color=discord.Colour.blurple())
                                 notify.add_field(name='Value',
-                                                 value=f'{fee_in_stroops}{CONST_STELLAR_EMOJI}')
+                                                 value=f'{fee_in_stroops / 10000000}{CONST_STELLAR_EMOJI}')
                                 await channel.send(embed=notify)
 
                         else:
@@ -194,8 +194,8 @@ class WithdrawalCommands(commands.Cog):
                                                     sys_msg_title=title)
         else:
             title = 'Withdrawal address error'
-            message = f'{address} is not valis for Stellar. Please reached the address and try again. If issue persists\n' \
-                      f'please contact dev team.'
+            message = f'{address} is not valis for Stellar. Please reached the address and try again. ' \
+                      f'If issue persists\n please contact dev team.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
 
@@ -228,6 +228,7 @@ class WithdrawalCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
         return
+
 
 def setup(bot):
     bot.add_cog(WithdrawalCommands(bot))

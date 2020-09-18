@@ -6,7 +6,7 @@ import os
 import sys
 
 from utils.tools import Helpers
-from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder
+from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, AiohttpClient
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
@@ -151,7 +151,8 @@ class StellarWallet():
         source_account = self.server.load_account(self.public_key)
         tx = TransactionBuilder(
             source_account=source_account,
-            network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE, base_fee=self.__base_fee()).append_payment_op(
+            network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+            base_fee=self.__base_fee()).append_payment_op(
             destination=address, asset_code="XLM", amount=xlm_amount).set_timeout(30).build()
         tx.sign(self.root_keypair)
         response = self.server.submit_transaction(tx)
@@ -169,3 +170,37 @@ class StellarWallet():
 
         else:
             return {}
+
+    async def as_withdraw(self, address, xlm_amount):
+        """
+        Asynchronous support for withdrawals
+        """
+        async with Server(
+                horizon_url="https://horizon-testnet.stellar.org", client=AiohttpClient()):
+            source_account = self.server.load_account(self.public_key)
+            base_fee = await self.server.fetch_base_fee()
+            tx = (TransactionBuilder(
+                source_account=source_account,
+                network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+                base_fee=base_fee).add_text_memo('Discord withdrawal').append_payment_op(
+                destination=address, asset_code="XLM",
+                amount=xlm_amount).set_timeout(30).build()
+            )
+            tx.sign(self.root_keypair)
+            response = await self.server.submit_transaction(tx)
+            if "status" not in response:
+                details = self.__decode_processed_withdrawal_envelope(envelope_xdr=response['envelope_xdr'])
+                end_details = {
+                    "explorer": response['_links']['transaction']['href'],
+                    "hash": response['hash'],
+                    "ledger": response['ledger'],
+                    "destination": details['destination'],
+                    "amount": details['amount'],
+                    "stroops": details['stroops']
+                }
+                return end_details
+
+            else:
+                return {}
+
+
