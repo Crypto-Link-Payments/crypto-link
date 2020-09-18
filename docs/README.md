@@ -63,7 +63,6 @@ to get invitation. Once Crypto Link joins community required role with permissio
 Assign newly created role Crypto Link to the channels of your community where you would like that it operates and 
 listens for commands, and everything will be set and ready to go.
 
-
 ## :joystick: Commands to operate with Crypto Link :joystick:
 
 Crypto link listens to following prefixes:
@@ -198,13 +197,16 @@ Commands can be viewed [here](SYSTEMMANAGEMENT.md)
 - [Dealing with user accounts and making P2P payments](USERCOMMANDS.md)
 - [Merchant System Only for Community owners](MERCHANTCOMMANDS.md)
 - [Command map and help categories](COMMANDMAP.md)]
-
+- 
 ## Contributing 
 Coming soon...
 
-## Support jar
+## License
+Coming soon...
 
-### Crypto
+## :pig2:  Support jar :pig2: 
+
+### Cryptocurrencies
 ```text
 BTC: 36vWbdegL57pHK3sVghrpwfp3V1tMqvHfc
 ETH: 0x03AE3AD4b8d19091363Beb6f97AA10f8ae9c3284
