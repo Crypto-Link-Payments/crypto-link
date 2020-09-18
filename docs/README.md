@@ -9,6 +9,7 @@
 ![Twitter](https://img.shields.io/twitter/url?logo=twitter&style=social&url=https%3A%2F%2Ftwitter.com%2FCryptoLink8&style=plastic)
 ![TwitterFollow](https://img.shields.io/twitter/follow/CryptoLink8?logo=Twitter&style=social&style=plastic)
 
+
 Crypto Link, Discord bot which allows for instant peer to peer (P2P) transactions, payments and Discord community 
 monetization with the help of integrated Merchant System built on top of Stellar Lumen cryptocurrency.
 Discord users can access their wallet through any community which has integrated Crypto Link in their daily operations.
@@ -176,16 +177,16 @@ We have integrated as well operational fees to gather funding for further develo
 
 Additional limits:
 - [X] Minimum merchant transfer amount
-- [ ] Minimum stellar withdrawal amount 
+- [X] Minimum stellar withdrawal amount 
 
 For explanation on all the fees and limits read [here](FEESANDLIMITS.md) 
  
- To check current fees use 
-command:
+ To check current fees and their conversion please use command:
 
 ```text
 !fees
 ```
+
 ## Crypto Link commands for staff
 There are as well numerous commands availabale to operate with the Crypto Link's backend system and were
 designed to be accessed only for members of the Crypto Link staff.
@@ -220,3 +221,4 @@ XLM: GD6SRXH4BXMW7ANSW3PKXZNORKHRXQIGV7TYNK6DHSDB5ISC3M7FOQUU
 NEO: AbXWN3yD7JpajRiPmXdaTF4KRCHjkVjUSV
 ONT: AKSDsUfbyJcQgpycwi73MCvapseLwt2P1c
 ```
+[github-last-commit]: https://github.com/launch-pad-investments/crypto-link/commit/HEAD
