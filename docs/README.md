@@ -136,6 +136,10 @@ If user wants to purchase available monetized role on community, he/she can do s
 !membership subscribe <@discord.Role>
 ```
 
+#### :page_with_curl: All available commands for user :page_with_curl:
+
+Complete command list can be access [here](USERCOMMANDS.md)
+
 ### :crown: As Discord Guild Owner :crown:
 
 #### :currency_exchange: Merchant System registration :currency_exchange:
