@@ -2,6 +2,11 @@
 
 Bot Prefix : ! or Bot tag
 
+## :key: Access list :key:
+- [X] Crypto Link Staff 
+- [X] Guild owners
+- [X] Discord Members
+
 ## USER WALLET COMMANDS
 ```In order use the commands user needs to be registered in the system```
 - How to register wallets into the system (Required)

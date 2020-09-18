@@ -1,5 +1,10 @@
 # Merchant system 
 
+## :key: Access list :key:
+- [ ] Crypto Link Staff 
+- [X] Guild owners
+- [ ] Discord Members
+
 ## About
 Merchant system allows Discord Guild Owners to monetize their Discord Roles. By providing USD value of the role and its
 duration, users will be able to purchase role with XLM after conversion from USD to XLM based on CoinGecko deta

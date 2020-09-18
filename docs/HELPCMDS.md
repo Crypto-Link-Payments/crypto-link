@@ -1,5 +1,10 @@
 # :sos: Help Commands Showcase :sos:
 
+## :key: Access list :key:
+- [X] Crypto Link Staff 
+- [X] Guild owners
+- [X] Discord Members
+
 ## Prefix
 ```text
 !<command> <subcommands>
