@@ -167,7 +167,7 @@ More on merchant system, its use cases, and set up procedure can be found [here]
 
 Instructions to operate with corporate account can be found [here](CORPORATEACCOUNTMANAGEMENT.md)
 
-## Fees for using the crypto link system
+## :money_with_wings: Fees for using the crypto link system :money_with_wings:
 We have integrated as well operational fees to gather funding for further development. Fees are currently applied
  for following crypto link activiteis:
 

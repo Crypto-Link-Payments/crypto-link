@@ -1,4 +1,9 @@
 # Fees and limits on Crypto Link system
+Fees and limits are subjected to change, therefore for up-to date fees please use command
+
+```text
+!fees
+```
 
 ## Integrated Fees
 - [X] Merchant license fee 
@@ -11,7 +16,7 @@ Additional limits:
 - [X] Minimum stellar withdrawal amount 
 
 ## Fee values
-Conversion rates to XLM are obtaine from CoinGecko
+Conversion rates to XLM are obtained from CoinGecko
 
 ### Discord Personal Account withdrawal fee
 ```text
@@ -38,11 +43,6 @@ $1.0000
 ### Minimum merchant wallet transfer
 ```text
 $100.00000
-```
-
-NOTE: For latest fees and conversion rates please use command on Discord
-```text
-!fees
 ```
 
 [Back to main page](README.md)
