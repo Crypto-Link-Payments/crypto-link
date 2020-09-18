@@ -198,3 +198,17 @@ Commands can be viewed [here](SYSTEMMANAGEMENT.md)
 - [Dealing with user accounts and making P2P payments](USERCOMMANDS.md)
 - [Merchant System Only for Community owners](MERCHANTCOMMANDS.md)
 - [Command map and help categories](COMMANDMAP.md)]
+
+## Contributing 
+Coming soon...
+
+## Support jar
+
+### Crypto
+```text
+BTC: 36vWbdegL57pHK3sVghrpwfp3V1tMqvHfc
+ETH: 0x03AE3AD4b8d19091363Beb6f97AA10f8ae9c3284
+XLM: GD6SRXH4BXMW7ANSW3PKXZNORKHRXQIGV7TYNK6DHSDB5ISC3M7FOQUU
+NEO: AbXWN3yD7JpajRiPmXdaTF4KRCHjkVjUSV
+ONT: AKSDsUfbyJcQgpycwi73MCvapseLwt2P1c
+```
