@@ -74,6 +74,7 @@ class CustomMessages:
             title = 'Outgoing transaction'
             col = discord.Colour.red()
             destination_txt = 'Recipient'
+
         elif direction == 1:
             title = 'Incoming transaction'
             col = discord.Colour.green()
