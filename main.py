@@ -4,19 +4,20 @@ Main bot file to bring it online... Run it
 
 import time
 from datetime import datetime
+
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init
 from discord.ext import commands
 
+from backOffice.backendCheck import BotStrucutreCheck
 from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
-from backOffice.backendCheck import BotStrucutreCheck
 from utils.tools import Helpers
 
 init(autoreset=True)
@@ -35,15 +36,12 @@ channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(d['command']))  # Test commands
 bot.remove_command('help')  # removing the old help command
 
-# extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
-#               'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
-#               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
-#               'cogs.feeManagementCogs']
-
-extensions = ['cogs.generalCogs','cogs.userAccountCogs',
+extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
               'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
               'cogs.feeManagementCogs']
+
+
 def get_time():
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)

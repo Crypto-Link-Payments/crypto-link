@@ -49,4 +49,22 @@ or
 ```
 ***Note***: Transaction can be executed 1x/1min/user
 
+### Merchant Related commands (consumer perspective)
+```text
+!merchant
+```
+#### Check available roles on community for purchase
+```text
+!membership roles
+```
+
+#### Check currently obtained roles and their expiration time
+```text
+!membership current
+```
+#### Purchase role/membership 
+```text
+!membership subscribe <@discord.Role>
+```
+
 [Back to main page](README.md)
