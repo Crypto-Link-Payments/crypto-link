@@ -1,5 +1,6 @@
 ![banner](../img/image0.png)
 
+![License](https://img.shields.io/github/license/launch-pad-investments/crypto-link?style=plastic)
 ![stellar](https://img.shields.io/badge/Powered%20by-Stellar&%20Lumen-brightgreen?style=plastic) 
 ![discord](https://img.shields.io/badge/Platform-Discord-blue?style=plastic&?style=plastic)
 ![Issues](https://img.shields.io/github/issues/launch-pad-investments/crypto-link?style=plastic)
