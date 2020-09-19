@@ -219,7 +219,7 @@ More on commands and their showcase can be viewed [here](CRYPTOLINKSTAFF.md)
 cryptolinkpayments@gmail.com
 
 ## Contributing 
-Coming soon...
+If you would like to contribute to the project we have prepared certain guidliness which can be accessed [here](CONTRIBUTINGGUIDLINES.md)
 
 ## License
 Crypto Link is an open-source project managed by Launch Pad Investments.
