@@ -86,9 +86,9 @@ class CustomMessages:
                             value=f'{user}',
                             inline=False)
         tx_report.add_field(name=f'Transaction value',
-                            value=f'{amount_str} {CONST_STELLAR_EMOJI}')
+                            value=f'{amount_str}')
         tx_report.add_field(name=f'Conversion Rate',
-                            value=f'{in_dollar["usd"]}$/XLM)')
+                            value=f'{in_dollar["usd"]}$/XLM')
         tx_report.add_field(name=':currency_exchange: Fiat Value :currency_exchange: ',
                             value=f"{in_dollar['total']}$ ({in_dollar['usd']}$/XLM)",
                             inline=False)

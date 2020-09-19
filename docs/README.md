@@ -126,7 +126,7 @@ example for Stellar Lumen:
 
 ##### :outbox_tray: Withdraw XLM from Discord:outbox_tray:
 ```text
-!withdraw clm <amount> <destination address>  
+!withdraw xlm <amount> <destination address>  
 ```
 
 Example:
