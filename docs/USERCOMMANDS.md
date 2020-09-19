@@ -1,0 +1,52 @@
+# Command access for users
+
+## :key: Access list :key:
+- [ ] Crypto Link Staff 
+- [ ] Guild owners
+- [X] Discord Members
+
+
+## Prefix
+```text
+!<command> <subcommands>
+or
+@CryptoLink <command> <subcommands>
+```
+
+## Available commands for Discord members
+
+### Account related commands
+#### Register yourself to Crypto Link System
+```text
+!register
+```
+
+#### Quick balance check 
+```text
+!bal
+```
+
+#### Check balance of wallet (detailed)
+```text
+!wallet balance
+```
+
+#### Withdraw funds
+```text
+!withdraw xlm <amount> <destination address>
+```
+
+#### Deposit details for your account
+```text
+!wallet deposit
+```
+***Note***: Be sure to provide exact Stellar Deposit address and your unique MEMO otherwise funds might get lost
+
+### Transaction related commands
+#### Normal Peer to Peer transaction
+```text
+!send xlm <amount> <@discor.User>
+```
+***Note***: Transaction can be executed 1x/1min/user
+
+[Back to main page](README.md)
