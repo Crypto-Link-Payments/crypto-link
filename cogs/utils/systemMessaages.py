@@ -2,6 +2,7 @@ from datetime import datetime
 import discord
 from cogs.utils.monetaryConversions import convert_to_usd
 
+CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 class CustomMessages:
     def __init__(self):
@@ -65,7 +66,6 @@ class CustomMessages:
         :return:
         """
         title = ''
-        print('to user')
         if symbol == 'xlm':
             amount_str = f"{amount:9.7f} <:stelaremoji:684676687425961994>"
             in_dollar = convert_to_usd(amount=amount, coin_name='stellar')
@@ -84,9 +84,12 @@ class CustomMessages:
         tx_report.add_field(name=destination_txt,
                             value=f'{user}',
                             inline=False)
-        tx_report.add_field(name='Transaction Value:',
-                            value=f"{amount_str}\n"
-                                  f"{in_dollar['total']}$ ({in_dollar['usd']}$/XLM)",
+        tx_report.add_field(name=f'Transaction value',
+                            value=f'{amount_str} {CONST_STELLAR_EMOJI}')
+        tx_report.add_field(name=f'Conversion Rate',
+                            value=f'{in_dollar["usd"]}$/XLM)')
+        tx_report.add_field(name=':currency_exchange: Fiat Value :currency_exchange: ',
+                            value=f"{in_dollar['total']}$ ({in_dollar['usd']}$/XLM)",
                             inline=False)
         tx_report.set_footer(text='Conversion rates provided by CoinGecko',
                              icon_url='https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
