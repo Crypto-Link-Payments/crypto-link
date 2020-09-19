@@ -222,7 +222,8 @@ cryptolinkpayments@gmail.com
 Coming soon...
 
 ## License
-Coming soon...
+Crypto Link is an open-source project managed by Launch Pad Investments.
+We are operating under the [GNU GENERAL PUBLIC LICENSE](https://github.com/launch-pad-investments/crypto-link/blob/master/LICENSE).
 
 ## :pig2:  Support jar :pig2: 
 ### Cryptocurrencies
