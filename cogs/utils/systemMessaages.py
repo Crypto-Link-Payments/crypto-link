@@ -33,15 +33,17 @@ class CustomMessages:
     async def system_message(self, ctx, color_code: int, message: str, destination: int, sys_msg_title: str = None):
         if color_code == 0:
             signal = 0x319f6b
+            emoji = ":robot: "
         else:
             signal = discord.Colour.red()
+            emoji = ":warning:"
 
         if sys_msg_title is None:
             sys_msg_title = 'System Message'
         else:
             pass
 
-        sys_embed = discord.Embed(title="System Message",
+        sys_embed = discord.Embed(title=f"{emoji} System Message {emoji}",
                                   description=sys_msg_title,
                                   colour=signal)
         sys_embed.add_field(name='Message',
