@@ -388,7 +388,7 @@ class ConsumerCommands(commands.Cog):
                                                 destination=1)
 
     @subscribe.error
-    async def get_role_error(self, ctx, error):
+    async def subscribe_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
             title = 'Role error'
             message = 'role can not be given'
@@ -399,6 +399,12 @@ class ConsumerCommands(commands.Cog):
             message = 'role can not be given as bot does not have sufficient rights'
             await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
                                                 destination=1)
+        elif isinstance(error,commands.BadArgument):
+            title = '__System Error__'
+            message = f'Either you have provided bad argument or role does not exist int he merchant system'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+                                                destination=0)
+
         else:
             print(error)
 

@@ -47,20 +47,20 @@ class MerchantCommunityOwner(commands.Cog):
 
         if not merchant_manager.check_if_community_exist(community_id=ctx.message.guild.id):
             if merchant_manager.register_community_wallet(community_id=ctx.message.guild.id,
-                                                          community_owner_id=ctx.message.author.id):
-                msg_title = '__Community Wallet Registration Status___'
-                message = f'You have successfully created community wallet. You can proceed with {d["command"]}merchant in order ' \
-                          f' to familiarize yourself with all available commands. '
+                                                          community_owner_id=ctx.message.author.id, community_name=f'{ctx.message.guild}'):
+                msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
+                message = f'You have successfully created community wallet. You can proceed with {d["command"]}merchant' \
+                          f' in order to familiarize yourself with all available commands. '
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                     destination=1)
             else:
-                msg_title = '__Community Wallet Registration Status___'
+                msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
                 message = f'There has been an issue while registering wallet into the system. Please try again later.' \
                           f' or contact one of the support staff. '
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
                                                     destination=1)
         else:
-            msg_title = '__Community Wallet Registration Status___'
+            msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
             message = f'You have already registered {ctx.guild} for Merchant system on {self.bot.user}. Proceed' \
                       f' with command ***{d["command"]} merchant***'
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
@@ -79,8 +79,8 @@ class MerchantCommunityOwner(commands.Cog):
             pass
 
         if ctx.invoked_subcommand is None:
-            title = "__Merchant System Message Setup__"
-            description = 'Representation of all available commands under ***merchant*** category.'
+            title = "💱 __Merchant System Message Setup__💱 "
+            description = 'All available commands under ***merchant*** category.'
             list_of_commands = [
                 {"name": f'!merchant manual',
                  "value": 'Step by step guide how to set-up and monetize community'},
@@ -106,13 +106,17 @@ class MerchantCommunityOwner(commands.Cog):
     async def manual(self, ctx):
         manual = Embed(title='__Merchant system manual__',
                        colour=Color.green())
-        manual.add_field(name='Create monetized roles',
+        manual.add_field(name=':one: Create monetized roles',
                          value=f'{d["command"]}monetize create_role <role name> <Dollar value of role> '
-                               f'<duration weeks> <days> <hours> <minutes>',
-                         inline=False)
-        manual.add_field(name='Note',
-                         value='--> At least one of the time parameters needs to be greater than 0\n'
+                               f'<duration weeks> <days> <hours> <minutes>\n'
+                               f':warning: Required parameters :warning: \n'
+                               f'--> No spaces in role name and max length 20 characters'
+                               f'--> At least one of the time parameters needs to be greater than 0\n'
                                '--> Dollar value of the role is not allowed to be 0.00 $',
+                         inline=False)
+        manual.add_field(name=':two: Inform members',
+                         value=f'Once role successfully create, it can be purchased by your members with command\n'
+                               f'{d["command"]}membership subscribe @discord.Role',
                          inline=False)
         await ctx.channel.send(embed=manual, delete_after=600)
 
@@ -140,7 +144,7 @@ class MerchantCommunityOwner(commands.Cog):
                 total > 0):
 
             if not re.search("[~!#$%^&*()_+{}:;\']", role_name):  # Check for special characters
-                if len(role_name) <= 10:  # Check for role length
+                if len(role_name) <= 20:  # Check for role length
                     role = utils.get(ctx.guild.roles, name=role_name)  # Check if role present already
                     if not role:
                         if in_penny > 0:  # Checks if it is greater than 0 for xcash
@@ -171,8 +175,8 @@ class MerchantCommunityOwner(commands.Cog):
 
                                 msg_title = '__Time to Inform Members___'
                                 message = f'Users can now apply for the role by executing the' \
-                                          f' command bellow: \n ***{d["command"]}membership subscribe <@Discord Role> ' \
-                                          f'<ticker>***\n. ' \
+                                          f' command bellow: \n ***{d["command"]}membership subscribe ' \
+                                          f'<@Discord Role>***\n. ' \
                                           f'Thank You for using Merchant Service'
                                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
                                                                     color_code=0,
@@ -610,7 +614,7 @@ class MerchantCommunityOwner(commands.Cog):
         :return:
         """
         if isinstance(error, commands.CheckFailure):
-            message = f'Something fot wrong while trying to register for merchant service:\n' \
+            message = f'Something went wrong while trying to register for merchant service:\n' \
                       f'All checks need to be met in order to be successful:\n' \
                       f'--> You need to be the owner :white_check_mark: \n' \
                       f'--> You need to have personal discord wallet :white_check_mark: \n' \

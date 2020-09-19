@@ -26,26 +26,26 @@ class AutoFunctions(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
-        if isinstance(error, commands.CommandNotFound):
-            title = 'System Command Error'
-            message = f':no_entry: Sorry, this command does not exist! Please' \
-                      f'type `{d["command"]}help` to check available commands.'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=title)
-
-        else:
-            print(f'=============BUG===========')
-            print(ctx.message.author)
-            print(error)
-            print(ctx.message.content)
-            print(f'=============BUG===========')
+    # @commands.Cog.listener()
+    # async def on_command_error(self, ctx, error):
+    #     try:
+    #         await ctx.message.delete()
+    #     except Exception:
+    #         pass
+    #
+    #     if isinstance(error, commands.CommandNotFound):
+    #         title = 'System Command Error'
+    #         message = f':no_entry: Sorry, this command does not exist! Please' \
+    #                   f'type `{d["command"]}help` to check available commands.'
+    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+    #                                              sys_msg_title=title)
+    #
+    #     else:
+    #         print(f'=============BUG===========')
+    #         print(ctx.message.author)
+    #         print(error)
+    #         print(ctx.message.content)
+    #         print(f'=============BUG===========')
 
     @commands.Cog.listener()
     async def on_member_join(self, member):

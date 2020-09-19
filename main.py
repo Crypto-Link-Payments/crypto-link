@@ -323,7 +323,7 @@ def start_scheduler():
     scheduler.add_job(check_stellar_hot_wallet,
                       CronTrigger(minute="00,01,03,05,07,09,11,13,15,17,19,21,23,25,34,38,40,43,45,47,51,53", second=0))
     scheduler.add_job(check_expired_roles, CronTrigger(
-        minute="00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,47,50,51,52,53"))
+        second='00'))
     scheduler.add_job(check_merchant_licences,
                       CronTrigger(minute='00', second='10'))
     scheduler.start()
