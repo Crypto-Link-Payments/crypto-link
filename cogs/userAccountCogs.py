@@ -98,7 +98,7 @@ class UserAccountCommands(commands.Cog):
                                                     sys_msg_title=title)
         else:
             title = '__Account registration status__'
-            message = f'You have already registered account into the system. Please use ***{d["command"]}balance*** or ' \
+            message = f'You have already registered account into the system. Please use ***{d["command"]}bal*** or ' \
                       f'***{d["command"]}wallet*** to obtain details on balances and your profile'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
