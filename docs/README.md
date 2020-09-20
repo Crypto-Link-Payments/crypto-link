@@ -211,6 +211,9 @@ More on commands and their showcase can be viewed [here](CRYPTOLINKSTAFF.md)
 - [Command map and help categories](COMMANDMAP.md)]
 
 
+##Roadmap
+Coming soon
+
 ## Get in touch
 
 ### Join us on Discord
