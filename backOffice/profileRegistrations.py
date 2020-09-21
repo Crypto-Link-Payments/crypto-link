@@ -56,7 +56,6 @@ class AccountManager(object):
             return False
 
     def update_user_wallet_balance(self, discord_id: int, ticker: str, direction: int, amount: int):
-        # TODO check if it can be merged with other use cases
         """
         Updating the user wallet balance used with merchant system
         """
@@ -94,16 +93,19 @@ class AccountManager(object):
             "stellarDepositId": stellar_deposit_id,
             "depositsCount": int(0),
             "withdrawalsCount": int(0),
+            'privateXlmTxCount': int(0),
+            'publicXlmTxCount': int(0),
+            'privateClTxCount': int(0),
+            'publicClTxCount': int(0),
+            'clMined': float(0.0),
             "xlmReceived": float(0.0),
             "xlmSent": float(0.0),
-            "clRecieved": float(0.0),
+            "clReceived": float(0.0),
             "clSent": float(0.0),
-            "clMoved": float(0.0),
-            'privateTxCount': int(0),
-            'publicTxCount': int(0),
             "rolePurchased": int(0),
             'spentOnRolesUsd': float(0.0),
             'spentOnRolesXlm': float(0.0),
+            'specialTransaction': int(0)
         }
 
         try:
