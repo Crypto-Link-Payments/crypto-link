@@ -1,10 +1,8 @@
 import discord
 from discord.ext import commands
 
-from backOffice.botWallet import BotManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.stellarActivityManager import StellarManager
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.customCogChecks import is_public, user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd
 from cogs.utils.monetaryConversions import get_normal, get_decimal_point
@@ -13,13 +11,10 @@ from utils.tools import Helpers
 
 helper = Helpers()
 account_mng = AccountManager()
-stellar_wallet = StellarWallet()
 customMessages = CustomMessages()
-bot_manager = BotManager()
 stellar = StellarManager()
 
 d = helper.read_json_file(file_name='botSetup.json')
-notf_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -38,10 +33,6 @@ class UserAccountCommands(commands.Cog):
         :param ctx:
         :return:
         """
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
 
         values = account_mng.get_wallet_balances_based_on_discord_id(discord_id=ctx.message.author.id)
         if values:
@@ -79,10 +70,6 @@ class UserAccountCommands(commands.Cog):
         :param ctx:
         :return:
         """
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
 
         if not account_mng.check_user_existence(user_id=ctx.message.author.id):
             if account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
@@ -113,17 +100,13 @@ class UserAccountCommands(commands.Cog):
         :param ctx:
         :return:
         """
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
 
         if ctx.invoked_subcommand is None:
             title = '__Available Wallets__'
             description = "All commands to check wallet details for each available cryptocurrency"
             list_of_values = [{"name": "Quick balance check", "value": f"{d['command']}bal"},
-                {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet deposit"},
-                {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet balance"}]
+                              {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet deposit"},
+                              {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet balance"}]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                destination=1)
@@ -137,10 +120,6 @@ class UserAccountCommands(commands.Cog):
         """
         print(f'WALLET DEPOSIT: {ctx.author} -> {ctx.message.content}')
 
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
 
         user_profile = account_mng.get_user_profile(user_id=ctx.message.author.id)
         if user_profile:
