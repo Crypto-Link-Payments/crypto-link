@@ -15,23 +15,30 @@ def convert_to_currency(amount, coin_name):
     :return:
     """
 
-    data = gecko.get_price(ids=coin_name, vs_currencies='usd')
+    data = gecko.get_price(ids=coin_name, vs_currencies='usd,eur')
     details = dict()
     if coin_name == 'stellar':
         usd_stellar = data['stellar']['usd']
+        eur_stellar = data['stellar']['eur']
         details = {
             "usd": usd_stellar,
-            "total": round(float(amount / usd_stellar), 3)
+            "total": round(float(amount / usd_stellar), 3),
+            'eur':eur_stellar,
+            'total_eur':round(float(amount/eur_stellar),3)
         }
     return details
+
+def get_rates(coin_name):
+    """
+    Getting rates for Stellar 
+    """
+    data = gecko.get_price(ids=coin_name, vs_currencies='usd,eur')
+    return data
 
 
 def convert_to_usd(amount, coin_name):
     """
     Function converts crypto value to $ and returns the per unit and total amount
-    :param amount: amount needed to be converted
-    :param ticker: ticker for classification
-    :return:
     """
 
     data = gecko.get_price(ids=coin_name, vs_currencies='usd')
@@ -47,17 +54,16 @@ def convert_to_usd(amount, coin_name):
 
 
 def get_decimal_point(symbol):
+    """
+    Get decimal points based on symbol
+    """
     if symbol == 'xlm':
-        # return profile for normal crypto currency
         return 7
 
 
 def get_normal(value, decimal_point: int):
     """
     Converts from minor to major
-    :param value:
-    :param symbol:
-    :return:
     """
     s = str(value)
     if len(s) < decimal_point + 1:
@@ -72,10 +78,7 @@ def get_normal(value, decimal_point: int):
 
 def get_in_micro(size, decimal_point: int):
     """
-    Convers from major to minor
-    :param size:
-    :param symbol:
-    :return:
+    Converts from major units to minor
     """
     str_amount = str(size)
     fraction_size = 0
@@ -102,3 +105,7 @@ def get_in_micro(size, decimal_point: int):
         str_amount = str_amount + '0' * (decimal_point - fraction_size)
 
     return str_amount
+
+
+conversion = convert_to_currency(amount=1, coin_name='stellar')
+print(conversion)

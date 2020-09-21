@@ -9,7 +9,7 @@ from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
 from cogs.utils.customCogChecks import is_one_of_gods
-from cogs.utils.monetaryConversions import convert_to_currency
+from cogs.utils.monetaryConversions import convert_to_currency, get_rates
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
@@ -49,15 +49,20 @@ class FeeManagementAndControl(commands.Cog):
                                  description='State of fees for each segment of the bot',
                                  colour=discord.Colour.blue())
 
+        rates = get_rates(coin_name='stellar')
+        print(rates)
         for data in fees:
             conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
             type = self.filter_db_keys(type=data['type'])
 
             fee_info.add_field(name=type,
                                value=f"XLM = {conversion['total']} {CONST_STELLAR_EMOJI}\n"
-                                     f"Dollar = {data['fee']}$\n"
-                                     f"Rate = {conversion['usd']}/ XLM",
+                                     f"Dollar = {data['fee']}$",
                                inline=False)
+
+        fee_info.add_field(name='Conversion rates',
+                           value=f'{rates["stellar"]["usd"]} :dollar: / {CONST_STELLAR_EMOJI}\n'
+                                 f'{rates["stellar"]["eur"]} :euro: / {CONST_STELLAR_EMOJI}')
 
         fee_info.set_thumbnail(url=self.bot.user.avatar_url)
         fee_info.set_footer(text='Conversion rates provided by CoinGecko',
