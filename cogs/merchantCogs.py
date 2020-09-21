@@ -7,7 +7,6 @@ from discord.ext import commands
 from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
-from backOffice.stellarActivityManager import StellarManager
 from cogs.utils.customCogChecks import is_owner, has_wallet, is_public, community_registration_status
 from cogs.utils.monetaryConversions import convert_to_currency, get_decimal_point
 from cogs.utils.monetaryConversions import get_normal
@@ -17,12 +16,10 @@ from utils.tools import Helpers
 helper = Helpers()
 lpi_wallet = BotManager()
 merchant_manager = MerchantManager()
-stellar_manager = StellarManager()
 customMessages = CustomMessages()
 account_mng = AccountManager()
 d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-CONST_FEE = 4.00  # In Dollar
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 
@@ -47,7 +44,8 @@ class MerchantCommunityOwner(commands.Cog):
 
         if not merchant_manager.check_if_community_exist(community_id=ctx.message.guild.id):
             if merchant_manager.register_community_wallet(community_id=ctx.message.guild.id,
-                                                          community_owner_id=ctx.message.author.id, community_name=f'{ctx.message.guild}'):
+                                                          community_owner_id=ctx.message.author.id,
+                                                          community_name=f'{ctx.message.guild}'):
                 msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
                 message = f'You have successfully created community wallet. You can proceed with {d["command"]}merchant' \
                           f' in order to familiarize yourself with all available commands. '
@@ -439,7 +437,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                                               wallet_tick='xlm',
                                                                               amount=balance):
                     for_owner = balance - fee_in_stroops
-                    #TODO fix bug where it could happen that fee in stroops us greater than the available balance
+                    # TODO fix bug where it could happen that fee in stroops us greater than the available balance
 
                     # credit fee to launch pad investment wallet
                     if lpi_wallet.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm', direction=1):
