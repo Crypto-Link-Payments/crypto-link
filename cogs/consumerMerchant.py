@@ -12,11 +12,8 @@ import discord
 from discord.ext import commands
 from pycoingecko import CoinGeckoAPI
 
-from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
-from backOffice.stellarActivityManager import StellarManager
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 from utils import numbers
@@ -24,17 +21,14 @@ from utils.tools import Helpers
 
 helper = Helpers()
 account_mng = AccountManager()
-stellar_wallet = StellarWallet()
 customMessages = CustomMessages()
 gecko = CoinGeckoAPI()
-bot_manager = BotManager()
 merchant_manager = MerchantManager()
-stellar = StellarManager()
 d = helper.read_json_file(file_name='botSetup.json')
 notf_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+
 
 class ConsumerCommands(commands.Cog):
     def __init__(self, bot):
@@ -72,16 +66,15 @@ class ConsumerCommands(commands.Cog):
         if coin_name == 'xlm':
             return numbers.scientific_conversion(value=amount, decimals=7)
 
-
     @commands.group()
     @commands.check(guild_has_merchant)
     @commands.check(user_has_wallet)
     @commands.check(is_public)
     async def membership(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
+        """
+        Entry point for membership connected with merchant system
+        """
+
         title = '__Membership available commands__'
         description = 'Representation of all available commands under ***membership*** category.'
         list_of_commands = [
@@ -110,13 +103,13 @@ class ConsumerCommands(commands.Cog):
         roles = merchant_manager.check_user_roles(user_id=author, discord_id=community)
         if roles:
             for data in roles:
-                # TODO check why variables not used
-                currency = data['currency']  # Currency user payed in
-                atomic_value = int(data['atomicValue'])
+                value_in_stellar = round(int(data['atomicValue']) / 10000000, 7)
+
                 starting_time = datetime.fromtimestamp(int(data['start']))
                 ending_time = datetime.fromtimestamp(int(data['end']))
                 count_left = ending_time - datetime.utcnow()
-                penny_worth = int(data['pennies'])
+                dollar_worth = round(int(data['pennies']) / 100, 4)
+
                 role_name = data['roleName']
                 role_id = int(data['roleId'])
 
@@ -128,6 +121,12 @@ class ConsumerCommands(commands.Cog):
                 role_embed.add_field(name="Role Obtained:",
                                      value=f"{starting_time} UTC",
                                      inline=False)
+                role_embed.add_field(name="Payed for Role ",
+                                     value=f"{value_in_stellar} {CONST_STELLAR_EMOJI}",
+                                     inline=False)
+                role_embed.add_field(name="Role value in $",
+                                     value=f"${dollar_worth}",
+                                     inline=True)
                 role_embed.add_field(name="Role expires",
                                      value=f'{ending_time} UTC',
                                      inline=False)
@@ -146,19 +145,17 @@ class ConsumerCommands(commands.Cog):
     @commands.check(is_public)
     async def roles(self, ctx):
         """
-        Gets all availabale monetized roles on the community
+        Gets all available monetized roles on the community
         :return:
         """
         roles = merchant_manager.get_all_roles_community(community_id=ctx.message.guild.id)
         title = f'__Available Roles on Community {ctx.message.guild}__'
         dollar_xlm = gecko.get_price(ids='stellar', vs_currencies='usd')
-        dollar_xmr = gecko.get_price(ids='monero', vs_currencies='usd')
 
         if roles:
             for role in roles:
                 value = float(role["pennyValues"] / 100)
                 value_in_stellar = value / dollar_xlm['stellar']['usd']
-                value_in_monero = value / dollar_xmr['monero']['usd']
                 values = [{"name": 'Role', "value": f'{role["roleName"]} ID({role["roleId"]})'},
                           {"name": 'Status', "value": role["status"]},
                           {"name": 'Fiat value', "value": f"{value} $"},
@@ -182,7 +179,7 @@ class ConsumerCommands(commands.Cog):
         :param role:
         :return:
         """
-        ticker='xlm'
+        ticker = 'xlm'
         tickers = ['xlm']
         if not re.search("[~!#$%^&*()_+{}:;\']", ticker):
             if merchant_manager.check_if_community_exist(community_id=ctx.message.guild.id):
@@ -203,7 +200,7 @@ class ConsumerCommands(commands.Cog):
                                 balance = account_mng.get_balance_based_on_ticker(user_id=int(ctx.message.author.id),
                                                                                   ticker=ticker)
                                 # Check if user has sufficient balance
-                                if balance >= (crypto_price_atomic):
+                                if balance >= crypto_price_atomic:
                                     # Update the community wallet
                                     if merchant_manager.modify_funds_in_community_merchant_wallet(
                                             community_id=int(ctx.message.guild.id),
@@ -344,7 +341,8 @@ class ConsumerCommands(commands.Cog):
                                                                             sys_msg_title=title,
                                                                             color_code=1, destination=1)
                                 else:
-                                    message = f'You have insufficient balance in your wallet to purchase this role. Please' \
+                                    message = f'You have insufficient balance in your wallet to purchase this ' \
+                                              f'role. Please' \
                                               f'top-up your account with desired currency.'
                                     title = '__Insufficient balance __'
                                     await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title,
@@ -357,15 +355,20 @@ class ConsumerCommands(commands.Cog):
                                 await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title,
                                                                     color_code=1, destination=0)
                         else:
-                            message = f'Role {role} is deactivated at this moment on  {ctx.message.guild} and can not be obtained.' \
-                                      f' Please contact the owner of the community or use ***{d["command"]}membership roles*** to ' \
+                            message = f'Role {role} is deactivated at this moment on  {ctx.message.guild} and can ' \
+                                      f'' \
+                                      f'not ' \
+                                      f'be obtained.' \
+                                      f' Please contact the owner of the community or use ***{d["command"]}membership' \
+                                      f' roles*** to ' \
                                       f'familiarize yourself with all available roles and their status'
                             title = '__Merchant System Role Error__'
                             await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title,
                                                                 color_code=1,
                                                                 destination=1)
                     else:
-                        message = f'Role {role} is not monetized on {ctx.message.guild}. Please use ***{d["command"]}membership roles*** ' \
+                        message = f'Role {role} is not monetized on {ctx.message.guild}. Please use ***{d["command"]}' \
+                                  f'membership roles*** ' \
                                   f' to find all available monetized roles on the community.'
                         title = '__Merchant System Role Error__'
                         await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title, color_code=1,
@@ -399,7 +402,7 @@ class ConsumerCommands(commands.Cog):
             message = 'role can not be given as bot does not have sufficient rights'
             await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
                                                 destination=1)
-        elif isinstance(error,commands.BadArgument):
+        elif isinstance(error, commands.BadArgument):
             title = '__System Error__'
             message = f'Either you have provided bad argument or role does not exist int he merchant system'
             await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
