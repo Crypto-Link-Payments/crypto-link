@@ -48,13 +48,10 @@ class BotManagementCommands(commands.Cog):
             pass
 
         if ctx.invoked_subcommand is None:
-            value = [{'name': 'Change properties of bot setup file',
-                      'value': f"High level backend administration commands which can be accessed through\n"
-                               f" ***{d['command']}god change*** "},
-                     {'name': 'Role Management ',
-                      'value': f"Commands dedicated to management of the roles. all available sub-commands "
-                               f"are described through\n"
-                               f" ***{d['command']}god role*** "}
+            value = [{'name': 'Entry for commands to manage whole system',
+                      'value': f"{d['command']}mng system*** "},
+                     {'name': 'Entry for commands to manage COGS',
+                      'value': f"{d['command']}god scripts*** "}
                      ]
             await customMessages.embed_builder(ctx, title='Welcome to the GOD mode',
                                                description=f"Showcase of all commands and sub-commands available "
