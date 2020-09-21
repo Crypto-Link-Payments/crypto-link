@@ -23,14 +23,15 @@ def convert_to_currency(amount, coin_name):
         details = {
             "usd": usd_stellar,
             "total": round(float(amount / usd_stellar), 3),
-            'eur':eur_stellar,
-            'total_eur':round(float(amount/eur_stellar),3)
+            'eur': eur_stellar,
+            'total_eur': round(float(amount / eur_stellar), 3)
         }
     return details
 
+
 def get_rates(coin_name):
     """
-    Getting rates for Stellar 
+    Getting rates for Stellar
     """
     data = gecko.get_price(ids=coin_name, vs_currencies='usd,eur')
     return data
@@ -105,7 +106,3 @@ def get_in_micro(size, decimal_point: int):
         str_amount = str_amount + '0' * (decimal_point - fraction_size)
 
     return str_amount
-
-
-conversion = convert_to_currency(amount=1, coin_name='stellar')
-print(conversion)
