@@ -1,3 +1,7 @@
+"""
+Scipt handling withdrawal commands
+"""
+
 import time
 
 import discord
@@ -5,7 +9,6 @@ from discord.ext import commands
 
 from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
-from backOffice.profileRegistrations import AccountManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.customCogChecks import user_has_wallet, is_public
@@ -15,16 +18,14 @@ from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
 helper = Helpers()
-account_mng = AccountManager()
 stellar_wallet = StellarWallet()
 customMessages = CustomMessages()
 bot_manager = BotManager()
 bot_stats = BotStatsManager()
 stellar = StellarManager()
 d = helper.read_json_file(file_name='botSetup.json')
-notf_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
-
+notify_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 
@@ -89,7 +90,7 @@ class WithdrawalCommands(commands.Cog):
         stellar_fee = bot_manager.get_fees_by_category(key='xlm')['fee']
         fee_in_xlm = convert_to_currency(amount=stellar_fee, coin_name='stellar')
         fee_in_stroops = int(fee_in_xlm['total'] * (10 ** 7))
-        channel_id = notf_channels["stellar"]
+        channel_id = notify_channel["stellar"]
         channel = self.bot.get_channel(
             id=int(channel_id))  # Get the channel wer notification onw ithdrawal will be sent
 
