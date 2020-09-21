@@ -50,8 +50,7 @@ Additional basic information on how Crypto Link is designed can be obtained [her
 
 ## :hammer: Integration of Crypto Link to Discord :hammer: 
 Monetizing guild community is instant and straight-forward. No programming skills required, just basic knowledge on how
-Discord operate from user and owner perspective. If you are familiar with Discord than simply click [here](https://discord.com/oauth2/authorize?client_id=706806251321032726&scope=bot&permissions=1342700624&response_type=code)
-to get invitation. Once Crypto Link joins community required role with permissions will be automatically created. 
+Discord operate from user and owner perspective. 
 
 ### :warning: Required permissions for Crypto Link to operate optimally :warning:
 
@@ -212,9 +211,13 @@ More on commands and their showcase can be viewed [here](CRYPTOLINKSTAFF.md)
 
 
 ##Roadmap
-Coming soon
+
+[Development road-map](ROADMAP.md)
 
 ## Get in touch
+
+### Crypto Link invite 
+Coming soon (when its officially release)...
 
 ### Join us on Discord
 [Discord Invite Link](https://discord.gg/ddvGTsb)
