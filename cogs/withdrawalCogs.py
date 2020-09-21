@@ -26,11 +26,13 @@ notf_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
-CONST_STELLAR_WITHDRAWAL_FEE = 0.001
 
 
 def check(author):
     def inner_check(message):
+        """
+        Check for answering the verification message on withdrawal. Author origin
+        """
         if message.author.id == author.id:
             return True
         else:
@@ -84,7 +86,6 @@ class WithdrawalCommands(commands.Cog):
 
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
 
-        # TODO check fees and so on
         stellar_fee = bot_manager.get_fees_by_category(key='xlm')['fee']
         fee_in_xlm = convert_to_currency(amount=stellar_fee, coin_name='stellar')
         fee_in_stroops = int(fee_in_xlm['total'] * (10 ** 7))
@@ -112,10 +113,7 @@ class WithdrawalCommands(commands.Cog):
                     verification = await ctx.channel.send(content=message_content)
                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
 
-                    if isinstance(ctx.message.channel, discord.TextChannel):
-                        await ctx.channel.delete_messages([verification, msg_usr])
-                    else:
-                        pass
+                    await ctx.channel.delete_messages([verification, msg_usr])
 
                     if str(msg_usr.content.lower()) == 'yes':
                         processing_msg = f'Processing withdrawal request, please wait few moments....'
@@ -175,8 +173,7 @@ class WithdrawalCommands(commands.Cog):
                                         await channel.send(embed=notify)
 
                                     except Exception as e:
-                                        print('sending to channel error')
-                                        print(e)
+                                        # TODO tag user on the channel for notifcation as it could not be relayed
                                         return
 
                                     if bot_stats.update_chain_activity_stats(type_of='withdrawal', ticker='stellar',
@@ -194,7 +191,7 @@ class WithdrawalCommands(commands.Cog):
                                                                          direction=1):
                                     notify = discord.Embed(title='Bot Stellar Wallet Activity',
                                                            description='Bot Wallet has been credited because user '
-                                                                       'has initiated on-chainw withdrawal',
+                                                                       'has initiated on-chain withdrawal',
                                                            color=discord.Colour.blurple())
                                     notify.add_field(name='Value',
                                                      value=f'{fee_in_stroops / 10000000}{CONST_STELLAR_EMOJI}')
