@@ -4,13 +4,15 @@ COGS: Help commands for the payment services
 import discord
 from discord.ext import commands
 
+from cogs.utils.customCogChecks import is_owner
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
-from cogs.utils.customCogChecks import is_owner
 
 helper = Helpers()
 customMessages = CustomMessages()
 d = helper.read_json_file(file_name='botSetup.json')
+
+CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 
 class HelpCommands(commands.Cog):
@@ -19,11 +21,6 @@ class HelpCommands(commands.Cog):
 
     @commands.group()
     async def help(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if ctx.invoked_subcommand is None:
             title = '__Available help categories__'
             description = "All available help sub-categories for you to familiarize yourself with payment " \
@@ -101,7 +98,7 @@ class HelpCommands(commands.Cog):
                                   description='Bellow is a list of all available currencies for making peer 2 peer'
                                               ' transactions or to be used with merchant system')
         available.add_field(
-            name="<:stelaremoji:684676687425961994> Stellar Lumen <:stelaremoji:684676687425961994>",
+            name=f"{CONST_STELLAR_EMOJI} Stellar Lumen {CONST_STELLAR_EMOJI}",
             value=f'tx symbol: xlm\n'
                   f'web: https://www.stellar.org/\n'
                   f'cmc: https://coinmarketcap.com/currencies/stellar/',
@@ -113,11 +110,12 @@ class HelpCommands(commands.Cog):
         title = '__How to make peer to peer transaction__'
         description = "Bellow are presented all currencies available for P2P transactions"
         list_of_values = [
-            {"name": "<:stelaremoji:684676687425961994> Transacting Stellar Lumen <:stelaremoji:684676687425961994> ",
+            {"name": f"{CONST_STELLAR_EMOJI} Transacting Stellar Lumen {CONST_STELLAR_EMOJI} ",
              "value": f"{d['command']}send xlm <amount> <Discord User>"}]
 
         await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                            destination=1)
+
     @help.command()
     async def account(self, ctx):
         title = '__Obtain information on personal account__'
@@ -187,7 +185,7 @@ class HelpCommands(commands.Cog):
                                      f"command ***{d['command']}register*** \n"
                                      f":white_check_mark: Community registered into the system and merchant "
                                      f"initiated ***{d['command']}merchant_initiate***\n"
-                                     f":white_check_mark: familliarize yourself with ***{d['command']}merchant***",
+                                     f":white_check_mark: familiarize yourself with ***{d['command']}merchant***",
                                inline=False)
         merchant_nfo.set_thumbnail(url=self.bot.user.avatar_url)
         await ctx.channel.send(embed=merchant_nfo, delete_after=500)
