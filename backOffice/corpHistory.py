@@ -19,7 +19,7 @@ sys.path.append(project_path)
 
 class CorporateHistoryManager:
     def __init__(self):
-        self.connection = MongoClient(d['database']['connection'],maxPoolSize=20)
+        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
         self.corporateActivity = self.connection['CryptoLink']
         self.fromCorpTransfers = self.corporateActivity.CORPFromTransactions
 
