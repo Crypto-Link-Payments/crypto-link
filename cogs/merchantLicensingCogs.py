@@ -44,11 +44,6 @@ class MerchantLicensingCommands(commands.Cog):
         :param ctx:
         :return:
         """
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if ctx.invoked_subcommand is None:
             title = "__System Message__"
             description = 'Representation of all available commands under ***merchant*** category.'
@@ -143,12 +138,6 @@ class MerchantLicensingCommands(commands.Cog):
         :param ctx:
         :return:
         """
-
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if ctx.invoked_subcommand is None:
             title = "__Available options to purchase license__"
             description = 'Representation of all available currencies and options to purchase license.'
