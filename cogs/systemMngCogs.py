@@ -21,6 +21,13 @@ customMessages = CustomMessages()
 d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
+# Extensions integrated into Crypto Link
+extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
+              'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
+              'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs',
+              'cogs.merchantLicensingCogs',
+              'cogs.feeManagementCogs']
+
 
 class BotManagementCommands(commands.Cog):
     def __init__(self, bot):
@@ -78,11 +85,6 @@ class BotManagementCommands(commands.Cog):
 
     @system.command()
     async def update(self):
-        extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
-                      'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
-                      'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs',
-                      'cogs.merchantLicensingCogs',
-                      'cogs.feeManagementCogs']
         notification_str = ''
         channel_id = auto_channels['sys']
         channel = self.bot.get_channel(id=int(channel_id))
@@ -145,20 +147,79 @@ class BotManagementCommands(commands.Cog):
                                                description='Available commands under category ***system***', data=value)
 
     @scripts.command()
-    async def load(self, ctx, cog_name: str):
-        pass
+    async def load(self, ctx, extension: str):
+        """
+        Load specific COG == Turn ON
+        :param ctx: Context
+        :param extension: Extension Name as str
+        :return:
+        """
+        try:
+            self.bot.load_extension(f'cogs.{extension}')
+            embed_unload = Embed(name='Boom',
+                                 title='Cogs management',
+                                 colour=Colour.green())
+            embed_unload.add_field(name='Extension',
+                                   value=f'You have loaded ***{extension}*** COGS')
+
+            await ctx.channel.send(embed=embed_unload)
+        except Exception as error:
+            await ctx.channel.send(content=error)
 
     @scripts.command()
-    async def unload(self, ctx, cog_name: str):
-        pass
+    async def unload(self, ctx, extension: str):
+        """
+        Unloads COG == Turns OFF commands under certain COG
+        :param ctx: Context
+        :param extension: COG Name
+        :return:
+        """
+        try:
+            self.bot.unload_extension(f'cogs.{extension}')
+            embed_unload = Embed(name='Boom',
+                                 title='Cogs management',
+                                 colour=Colour.red())
+            embed_unload.add_field(name='Extension',
+                                   value=f'You have unloaded ***{extension}*** COGS')
+
+            await ctx.channel.send(embed=embed_unload)
+        except Exception as error:
+            await ctx.channel.send(content=error)
 
     @scripts.command()
     async def list_cogs(self, ctx):
-        pass
+        """
+        List all cogs implemented in the system
+        """
+        cog_list_embed = Embed(title='All available COGS',
+                               description='All available cogs and their description',
+                               colour=Colour.green())
+        for cg in extensions:
+            cog_list_embed.add_field(name=cg,
+                                     value='==============',
+                                     inline=False)
+        await ctx.channel.send(embed=cog_list_embed)
 
     @scripts.command()
     async def reload(self, ctx):
-        pass
+        """
+         Reload all cogs
+        """
+        notification_str = ''
+        ext_load_embed = Embed(title='System message',
+                               description='Status of the cogs after reload',
+                               colour=Colour.blue())
+        for extension in extensions:
+            try:
+                self.bot.unload_extension(f'{extension}')
+                self.bot.load_extension(f'{extension}')
+                notification_str += f'{extension} :smile: \n'
+            except Exception as e:
+                notification_str += f'{extension} :angry: {e}\n'
+
+        ext_load_embed.add_field(name='Status',
+                                 value=notification_str)
+        await ctx.channel.send(embed=ext_load_embed)
 
 
 def setup(bot):
