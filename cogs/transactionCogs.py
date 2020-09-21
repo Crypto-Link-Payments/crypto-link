@@ -15,7 +15,6 @@ stellar = StellarManager()
 bot_stats = BotStatsManager()
 customMessages = CustomMessages()
 d = helper.read_json_file(file_name='botSetup.json')
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 
@@ -27,10 +26,9 @@ class TransactionCommands(commands.Cog):
     @commands.check(is_public)
     @commands.check(has_wallet)
     async def send(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
+        """
+        Command entry point for making peer to peer transactions
+        """
 
         print(f'SEND: {ctx.author} -> {ctx.message.content}')
 
@@ -55,10 +53,6 @@ class TransactionCommands(commands.Cog):
         :param recipient:
         :return:
         """
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
 
         print(f'SEND XLM: {ctx.author} -> {ctx.message.content}')
         stroops = (int(amount * (10 ** 7)))
