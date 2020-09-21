@@ -150,7 +150,7 @@ class CustomMessages:
         await recipient.send(embed=sys_embed)
 
     @staticmethod
-    async def coin_withdrawal_notification(coin, recipient: discord.User, thumbnail,hash, destination, link, ledger: int):
+    async def coin_withdrawal_notification(coin, recipient: discord.User, amount, fee, thumbnail,hash, destination, link, ledger: int):
         notify = discord.Embed(title="Withdrawal Notification",
                                description=f' {coin} withdrawal Successfully processed',
                                colour=discord.Colour.green())
@@ -163,6 +163,12 @@ class CustomMessages:
                          inline=False)
         notify.add_field(name='Transaction hash',
                          value=hash,
+                         inline=False)
+        notify.add_field(name='Withdrawed amount',
+                         value=f'{amount} {CONST_STELLAR_EMOJI}',
+                         inline=False)
+        notify.add_field(name='Crypto Link Fee',
+                         value=fee,
                          inline=False)
         notify.add_field(name='Ledger',
                          value=str(ledger),

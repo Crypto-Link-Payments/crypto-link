@@ -1,7 +1,6 @@
 import time
 
 import discord
-from discord import Embed, Colour
 from discord.ext import commands
 
 from backOffice.botStatistics import BotStatsManager
@@ -9,7 +8,7 @@ from backOffice.botWallet import BotManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
-from cogs.utils.customCogChecks import user_has_wallet
+from cogs.utils.customCogChecks import user_has_wallet, is_public
 from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.securityChecks import check_stellar_address
 from cogs.utils.systemMessaages import CustomMessages
@@ -68,6 +67,7 @@ class WithdrawalCommands(commands.Cog):
                                                destination=1)
 
     @withdraw.command()
+    @commands.check(is_public)
     @commands.check(user_has_wallet)
     async def xlm(self, ctx, amount: float, address: str):
         """
@@ -112,7 +112,10 @@ class WithdrawalCommands(commands.Cog):
                     verification = await ctx.channel.send(content=message_content)
                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
 
-                    await ctx.channel.delete_messages([verification, msg_usr])
+                    if isinstance(ctx.message.channel, discord.TextChannel):
+                        await ctx.channel.delete_messages([verification, msg_usr])
+                    else:
+                        pass
 
                     if str(msg_usr.content.lower()) == 'yes':
                         processing_msg = f'Processing withdrawal request, please wait few moments....'
@@ -147,6 +150,8 @@ class WithdrawalCommands(commands.Cog):
                                     await customMessages.coin_withdrawal_notification(coin='XLM',
                                                                                       recipient=ctx.message.author,
                                                                                       hash=data['hash'],
+                                                                                      amount=data_new["amount"],
+                                                                                      fee=f"${stellar_fee}, Rate:{round(fee_in_xlm['usd'], 4)}",
                                                                                       destination=data['destination'],
                                                                                       ledger=data['ledger'],
                                                                                       link=data['explorer'],
@@ -246,7 +251,7 @@ class WithdrawalCommands(commands.Cog):
         print(f'ERR WITHDRAW XLM TRIGGERED  : {error}')
 
         if isinstance(error, commands.CheckFailure):
-            message = f'**You are either not registered in the system or you have tried to use command over DM with the ' \
+            message = f'You are either not registered in the system or you have tried to use command over DM with the ' \
                       f'system itself. Head to one of the channels on community where system is accessible.'
             title = f'**__Not registered__** :clipboard:'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
