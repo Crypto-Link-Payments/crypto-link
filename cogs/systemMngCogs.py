@@ -50,9 +50,11 @@ class BotManagementCommands(commands.Cog):
                                f" ***{d['command']}god role*** "}
                      ]
             await customMessages.embed_builder(ctx, title='Welcome to the GOD mode',
-                                               description=f"Showcase of all commands and sub-commands available for server owner, "
+                                               description=f"Showcase of all commands and sub-commands available "
+                                                           f"for server owner, "
                                                            f" and bot creator. In order to get access to the categories "
-                                                           f"***{d['command']}god*** needs to be typed in first followed by relevant sub-commands",
+                                                           f"***{d['command']}god*** needs to be typed in first "
+                                                           f"followed by relevant sub-commands",
                                                data=value)
 
     @mng.group()
