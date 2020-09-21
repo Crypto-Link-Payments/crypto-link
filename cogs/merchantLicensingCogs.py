@@ -13,7 +13,6 @@ from discord.ext import commands
 
 from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
-from backOffice.profileRegistrations import AccountManager
 from backOffice.stellarActivityManager import StellarManager
 from cogs.utils.customCogChecks import is_owner, has_wallet, community_registration_status, is_public
 from cogs.utils.monetaryConversions import convert_to_currency
@@ -23,7 +22,6 @@ from utils.tools import Helpers
 bot_manager = BotManager()
 stellar = StellarManager()
 custom_messages = CustomMessages()
-account_mng = AccountManager()
 merchant_manager = MerchantManager()
 helper = Helpers()
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
