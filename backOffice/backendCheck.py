@@ -5,8 +5,8 @@ Script initiated at start to check if all collections in mongodb exist
 import os
 import sys
 
-from pymongo import MongoClient
 from colorama import Fore, init
+from pymongo import MongoClient
 
 from utils.tools import Helpers
 
@@ -18,7 +18,7 @@ helper = Helpers()
 d = helper.read_json_file(file_name='botSetup.json')
 
 
-class BotStrucutreCheck(object):
+class BotStructureCheck(object):
     def __init__(self):
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
         self.cryptoLink = self.connection["CryptoLink"]  #
@@ -61,11 +61,11 @@ class BotStrucutreCheck(object):
         Checking document for statistical entry
         """
         # Connection to collections
-        self.on_chain = self.cryptoLink.CLOnChainStats
-        self.off_chain = self.cryptoLink.CLOffChainStats
+        on_chain = self.cryptoLink.CLOnChainStats
+        off_chain = self.cryptoLink.CLOffChainStats
 
-        stats_on_chain = len(list(self.on_chain.find()))
-        stats_off_chain = len(list(self.on_chain.find()))
+        stats_on_chain = len(list(on_chain.find()))
+        stats_off_chain = len(list(off_chain.find()))
         print(Fore.LIGHTBLUE_EX + "=====Checking STATS backend===")
         if stats_on_chain == 0:
             print(Fore.YELLOW + "MAKING ON CHAIN DOCUMENT ENTRY")
@@ -77,7 +77,7 @@ class BotStrucutreCheck(object):
                 "withdrawalAmount": int(0)
             }
 
-            self.on_chain.insert_one(stellarChain)
+            on_chain.insert_one(stellarChain)
             print(Fore.GREEN + "DONE")
         else:
             print(Fore.LIGHTGREEN_EX + "XLM ON CHAIN OK")
@@ -89,7 +89,7 @@ class BotStrucutreCheck(object):
                 "transactionCount": int(0),
                 "offChainMoved": int(0)
             }
-            self.off_chain.insert_one(stellarOfChain)
+            off_chain.insert_one(stellarOfChain)
             print(Fore.GREEN + "DONE")
         else:
             print(Fore.LIGHTGREEN_EX + "XLM OFF CHAIN OK")
@@ -98,24 +98,24 @@ class BotStrucutreCheck(object):
         """
         Check if bot wallets exists and if not than create them
         """
-        self.BotWallets = self.cryptoLink.CLWallets
-        self.BotFees = self.cryptoLink.CLFees
+        BotWallets = self.cryptoLink.CLWallets
+        BotFees = self.cryptoLink.CLFees
 
-        botWallets = len(list((self.BotWallets.find({}))))
-        botFees = len(list(self.BotFees.find()))
+        count_bot_wallets = len(list((BotWallets.find({}))))
+        count_bot_fees = len(list(BotFees.find()))
         print(Fore.LIGHTBLUE_EX + "=====Checking BOT OFF CHAIN WALLET AND BOT FEES DOCUMENT======")
 
-        if botWallets == 0:
+        if count_bot_wallets == 0:
             print(Fore.YELLOW + "MAKING BOT OFF CHAIN WALLET")
             mylist = [
                 {"ticker": "xlm", "balance": 0}
             ]
-            self.BotWallets.insert_many(mylist)
+            BotWallets.insert_many(mylist)
             print(Fore.GREEN + "DONE")
         else:
             print(Fore.LIGHTGREEN_EX + "BOT OFF CHAIN XLM WALLET OK ")
 
-        if botFees == 0:
+        if count_bot_fees == 0:
             print(Fore.YELLOW + "MAKING FEE STRUCTURE DOCS")
             mylist = [
                 {"type": "with_xlm", "key": 'xlm', 'fee': float(1.0)},
@@ -123,7 +123,7 @@ class BotStrucutreCheck(object):
                 {"type": "merch_license", "key": 'license', 'fee': float(1.0)},
                 {"type": "merch_transfer_min", "key": 'merchant_min', 'fee': float(1.0)}]
 
-            self.BotFees.insert_many(mylist)
+            BotFees.insert_many(mylist)
             print(Fore.GREEN + "DONE")
         else:
             print(Fore.LIGHTGREEN_EX + "BOT FEE SETTINGS EXIST ALREADY ")

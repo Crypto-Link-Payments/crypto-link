@@ -11,7 +11,7 @@ from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init
 from discord.ext import commands
 
-from backOffice.backendCheck import BotStrucutreCheck
+from backOffice.backendCheck import BotStructureCheck
 from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
@@ -345,7 +345,7 @@ async def on_ready():
 
 
 if __name__ == '__main__':
-    backend_check = BotStrucutreCheck()
+    backend_check = BotStructureCheck()
     backend_check.check_collections()
     backend_check.checking_stats_documents()
     backend_check.checking_bot_wallets()
