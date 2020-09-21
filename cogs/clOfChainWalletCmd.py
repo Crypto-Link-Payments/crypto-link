@@ -63,21 +63,20 @@ class BotWalletCommands(commands.Cog):
     @commands.group()
     @commands.check(is_one_of_gods)
     async def cl(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
+        """
+        Entry point for cl sub commands
+        """
         print(f'CL : {ctx.author} -> {ctx.message.content}')
-
-
         if ctx.invoked_subcommand is None:
             title = '__Available Commands for Corp Wallet Transfers__'
-            description = "All commands to operate with Launch Pad Corporate wallet"
+            description = "All commands to operate with Crypto Link Corporate Wallet"
             list_of_values = [
                 {"name": "Check Corporate Balance", "value": f"{d['command']}cl balance"},
                 {"name": "Withdrawing XLM from Corp to personal",
-                 "value": f"{d['command']}cl sweep"}]
+                 "value": f"{d['command']}cl sweep"},
+                {"name": "Statistics of crypto link system",
+                 "value": f"{d['command']}cl stats"}
+            ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                destination=ctx.message.author)
@@ -85,9 +84,12 @@ class BotWalletCommands(commands.Cog):
     @cl.command()
     @commands.check(is_one_of_gods)
     async def balance(self, ctx):
+        """
+        Check the off-chain balance status of Crypto Link system
+        """
         print(f'CL BALANCE : {ctx.author} -> {ctx.message.content}')
         data = bot_manager.get_bot_wallets_balance()
-        values = discord.Embed(title="Balance of Launch Pad Investment Corporate Wallet",
+        values = discord.Embed(title="Balance of Crypto-Link Off chain balance",
                                description="Current state of Crypto Link Lumen wallet",
                                color=discord.Colour.blurple())
         for bal in data:
@@ -103,11 +105,9 @@ class BotWalletCommands(commands.Cog):
     @cl.command()
     @commands.check(is_one_of_gods)
     async def sweep(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
+        """
+        Transfer funds from Crypto Link to develop wallet
+        """
         print(f'CL SWEEP  : {ctx.author} -> {ctx.message.content}')
         author = ctx.message.author.id
 
@@ -165,6 +165,9 @@ class BotWalletCommands(commands.Cog):
     @cl.command()
     @commands.check(is_one_of_gods)
     async def stats(self, ctx):
+        """
+        Statistical information on Crypto Link system
+        """
         print(f'CL STATS  : {ctx.author} -> {ctx.message.content}')
         data = bot_stats.get_all_stats()
         stats_embed = discord.Embed(title='__Global Crypto Link Stats__',
@@ -172,14 +175,17 @@ class BotWalletCommands(commands.Cog):
                                     timestamp=datetime.utcnow())
         stats_embed.add_field(name='On-Chain Stellar Stats',
                               value=f"Deposits:{data['xlm']['onChain']['depositCount']}\n"
-                                    f"Total dep. amount: {int(data['xlm']['onChain']['depositAmount']) / 10000000} <:stelaremoji:684676687425961994>\n"
+                                    f"Total dep. amount: {int(data['xlm']['onChain']['depositAmount']) / 10000000} "
+                                    f"<:stelaremoji:684676687425961994>\n"
                                     f"=========================\n"
                                     f"Withdrawals: {data['xlm']['onChain']['withdrawalCount']}\n"
-                                    f"Total with. amount: {int(data['xlm']['onChain']['withdrawalAmount']) / 10000000} <:stelaremoji:684676687425961994>",
+                                    f"Total with. amount: {int(data['xlm']['onChain']['withdrawalAmount']) / 10000000} "
+                                    f"<:stelaremoji:684676687425961994>",
                               inline=False)
         stats_embed.add_field(name='Off-Chain Stellar Stats',
                               value=f"P2P Tx Count:{data['xlm']['ofChain']['transactionCount']}\n"
-                                    f"Total P2P Transfered: {int(data['xlm']['ofChain']['offChainMoved']) / 10000000} <:stelaremoji:684676687425961994>",
+                                    f"Total P2P Transfered: {int(data['xlm']['ofChain']['offChainMoved']) / 10000000}"
+                                    f" <:stelaremoji:684676687425961994>",
                               inline=False)
 
         await ctx.author.send(embed=stats_embed)
