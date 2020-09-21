@@ -173,7 +173,19 @@ class WithdrawalCommands(commands.Cog):
                                         await channel.send(embed=notify)
 
                                     except Exception as e:
-                                        # TODO tag user on the channel for notifcation as it could not be relayed
+                                        error_msg = discord.Embed(title=f'Withdrawal Notification',
+                                                                  description=f'You have recieved this message because'
+                                                                              f' withdrawal notification could not be'
+                                                                              f' send to DM. Please allow bot to send'
+                                                                              f' you messages',
+                                                                  colour=discord.Colour.green())
+                                        error_msg.add_field(name='Explorer Link',
+                                                            value=data['explorer'])
+                                        error_msg.set_thumbnail(url=self.bot.user.avatar_url)
+                                        error_msg.set_footer(text='This message will selfdestruct in 360 seconds')
+                                        await ctx.channel.send(embed=error_msg, content=f'{ctx.message.author.mention}',
+                                                               delete_after=360)
+
                                         return
 
                                     if bot_stats.update_chain_activity_stats(type_of='withdrawal', ticker='stellar',
