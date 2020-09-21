@@ -44,7 +44,8 @@ class AccountManager(object):
             "userId": discord_id,
             "userName": discord_username,
             "depositId": deposit_id,
-            "balance": int(0)
+            "balance": int(0),
+            'ClTokenBalance': int(0)
         }
 
         result = self.stellarWallets.insert_one(stellar_wallet)
@@ -90,7 +91,19 @@ class AccountManager(object):
         new_user = {
             "userId": discord_id,
             "userName": discord_username,
-            "stellarDepositId": stellar_deposit_id
+            "stellarDepositId": stellar_deposit_id,
+            "depositsCount": int(0),
+            "withdrawalsCount": int(0),
+            "xlmReceived": float(0.0),
+            "xlmSent": float(0.0),
+            "clRecieved": float(0.0),
+            "clSent": float(0.0),
+            "clMoved": float(0.0),
+            'privateTxCount': int(0),
+            'publicTxCount': int(0),
+            "rolePurchased": int(0),
+            'spentOnRolesUsd': float(0.0),
+            'spentOnRolesXlm': float(0.0),
         }
 
         try:
