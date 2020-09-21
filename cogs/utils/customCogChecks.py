@@ -1,3 +1,7 @@
+"""
+File includes custom security checks for the Discord GUI part
+"""
+
 from discord import ChannelType
 
 from backOffice.merchatManager import MerchantManager
@@ -11,6 +15,9 @@ account_mng = AccountManager()
 
 
 def is_animus(ctx):
+    """
+    Check if creator
+    """
     return ctx.message.author.id == d['creator']
 
 
@@ -40,14 +47,14 @@ def has_wallet(ctx):
 def is_owner(ctx):
     """
     Function checks if the user is owner of the community or not
-    :param ctx:
-    :return:
     """
     return int(ctx.message.author.id) == int(ctx.message.guild.owner.id)
 
 
 def community_registration_status(ctx):
-    """Checks if community is registered in the merchant system"""
+    """
+    Checks if community is registered in the merchant system
+    """
     try:
         return merchant_manager.check_if_community_exist(community_id=int(ctx.message.guild.id))
     except AttributeError:
@@ -55,13 +62,21 @@ def community_registration_status(ctx):
 
 
 def community_missing(ctx):
-    """Check if community not registered in the system"""
+    """
+    Check if community not registered in the system
+    """
     return merchant_manager.check_if_community_does_not_exist(community_id=ctx.message.guild.id)
 
 
 def user_has_wallet(ctx):
+    """
+    Check if user has wallet registered in the system
+    """
     return account_mng.check_user_existence(user_id=ctx.message.author.id)
 
 
 def guild_has_merchant(ctx):
+    """
+    Check if community has activate merchant system
+    """
     return merchant_manager.check_if_community_exist(int(ctx.message.guild.id))
