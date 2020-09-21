@@ -25,7 +25,9 @@ custom_messages = CustomMessages()
 merchant_manager = MerchantManager()
 helper = Helpers()
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
+d = helper.read_json_file(file_name='botSetup.json')
 
+CONST_STELAR_EMOJI = "<:stelaremoji:684676687425961994>"
 
 class MerchantLicensingCommands(commands.Cog):
     def __init__(self, bot):
@@ -51,16 +53,16 @@ class MerchantLicensingCommands(commands.Cog):
             title = "__System Message__"
             description = 'Representation of all available commands under ***merchant*** category.'
             list_of_commands = [
-                {"name": f'!license about',
+                {"name": f'{d["command"]}license about',
                  "value": 'Returns detailed information on Licensing'},
-                {"name": f'!license price',
+                {"name": f'{d["command"]}license price',
                  "value": 'Returns information on current monthly license fee calculated '
                           'into XLM and XMR.'},
-                {"name": f'!license status',
+                {"name": f'{d["command"]}license status',
                  "value": 'Returns details if license has been activated for the community.'},
-                {"name": f'!license buy',
+                {"name": f'{d["command"]}license buy',
                  "value": 'Returns detailed information on ways how to purchase license'},
-                {"name": f'!license buy with_xlm',
+                {"name": f'{d["command"]}license buy with_xlm',
                  "value": 'Use Stellar Lumen (XLM) to buy monthly license '}
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands)
@@ -100,7 +102,7 @@ class MerchantLicensingCommands(commands.Cog):
         fee_info.add_field(name='License information',
                            value=f'Duration: 1 moth from the day of purchase\n'
                                  f'Fiat value: {fee_value}$\n'
-                                 f'Stellar Lumen: {in_lumen["total"]} <:stelaremoji:684676687425961994>\n')
+                                 f'Stellar Lumen: {in_lumen["total"]} {CONST_STELAR_EMOJI}\n')
         fee_info.set_footer(text="Conversion rates provided by CoinGecko",
                             icon_url='https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
         await ctx.message.channel.send(embed=fee_info)
@@ -149,7 +151,7 @@ class MerchantLicensingCommands(commands.Cog):
 
         if ctx.invoked_subcommand is None:
             title = "__Available options to purchase license__"
-            description = 'Representation of all availabale currencies and options to purchase license.'
+            description = 'Representation of all available currencies and options to purchase license.'
             list_of_commands = [
                 {"name": f'!license buy with_xlm',
                  "value": 'Use Stellar Lumen to purchase license'}
@@ -210,8 +212,8 @@ class MerchantLicensingCommands(commands.Cog):
                                                 value=f'{fee_value}$',
                                                 inline=False)
                             user_info.add_field(name='Value Payed',
-                                                value=f'XLM: {total}<:stelaremoji:684676687425961994>\n'
-                                                      f'Rate: {rate}$ per <:stelaremoji:684676687425961994>',
+                                                value=f'XLM: {total}{CONST_STELAR_EMOJI}\n'
+                                                      f'Rate: {rate}$ / {CONST_STELAR_EMOJI}',
                                                 inline=False)
                             try:
                                 await ctx.author.send(embed=user_info)
@@ -236,8 +238,8 @@ class MerchantLicensingCommands(commands.Cog):
                                                    value=f'{license_end}',
                                                    inline=False)
                             license_slip.add_field(name='Value Payed',
-                                                   value=f'XLM: {total}<:stelaremoji:684676687425961994>\n'
-                                                         f'Rate: {rate}$ per <:stelaremoji:684676687425961994>',
+                                                   value=f'XLM: {total}{CONST_STELAR_EMOJI}\n'
+                                                         f'Rate: {rate}$ / {CONST_STELAR_EMOJI}',
                                                    inline=False)
 
                             notf_channel = self.bot.get_channel(id=int(channel_id))
@@ -274,7 +276,7 @@ class MerchantLicensingCommands(commands.Cog):
                 title = "__Merchant License Purchase error__"
                 message = f"You can not purchase license due to insufficient funds:\n"
                 f"License price: {total} <:stelaremoji:684676687425961994>\n"
-                f"Wallet balance: {wallet_value / 10000000}<:stelaremoji:684676687425961994>. "
+                f"Wallet balance: {wallet_value / 10000000}{CONST_STELAR_EMOJI}. "
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                      sys_msg_title=title)
         else:
