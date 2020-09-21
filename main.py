@@ -235,7 +235,6 @@ async def check_expired_roles():
 
 async def check_merchant_licences():
     """
-    Monero deposit monitor script
     :return:
     """
     print(Fore.GREEN + f"{get_time()} --> CHECKING FOR COMMUNITIES WITH EXPIRED MERCHANT LICENSE")
