@@ -80,20 +80,10 @@ class StellarManager:
         else:
             return False
 
-    def check_if_stellar_discord_id_exist(self, discord_id: int):
-        """
-        Checks if wallet exist based on discord Id
-        :param discord_id:
-        :return: boolean
-        """
-        result = self.stellarWallets.find_one({"userId": discord_id})
-
-        if result:
-            return True
-        else:
-            return False
-
     def check_if_deposit_hash_processed_succ_deposits(self, hash):
+        """
+        Function which checks if HASH has been already processed
+        """
         result = self.stellarDeposits.find_one({"hash": hash})
 
         if result:
@@ -102,6 +92,9 @@ class StellarManager:
             return False
 
     def check_if_deposit_hash_processed_unprocessed_deposits(self, hash):
+        """
+        Check if hash is stored in unprocessed deposits
+        """
         result = self.stellarUnprocessedDep.find_one({"hash": hash})
 
         if result:
@@ -109,15 +102,10 @@ class StellarManager:
         else:
             return False
 
-    def get_stellar_wallet_data_by_memo(self, memo):
-        result = self.stellarWallets.find_one({"depositId": memo})
-
-        if result:
-            return result
-        else:
-            return {}
-
     def get_stellar_wallet_data_by_discord_id(self, discord_id):
+        """
+        Get users wallet details by unique Discord id.
+        """
         result = self.stellarWallets.find_one({"userId": discord_id})
 
         if result:
@@ -144,7 +132,6 @@ class StellarManager:
 
             return result.matched_count > 0
         except errors.PyMongoError as e:
-            print(e)
             return False
 
     def update_stellar_balance_by_discord_id(self, discord_id: int, stroops: int, direction: int):
@@ -170,5 +157,8 @@ class StellarManager:
             return False
 
     def get_discord_id_from_deposit_id(self, deposit_id):
+        """
+        Query unique users discord if based on deposit_id / memo
+        """
         result = self.stellarWallets.find_one({"depositId": deposit_id})
         return result
