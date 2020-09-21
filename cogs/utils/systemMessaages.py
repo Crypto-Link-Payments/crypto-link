@@ -1,20 +1,26 @@
 from datetime import datetime
+
 import discord
+
 from cogs.utils.monetaryConversions import convert_to_usd
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+
 
 class CustomMessages:
     def __init__(self):
         pass
 
-    async def embed_builder(self, ctx, title, description, data: list, destination=None, thumbnail=None):
+    @staticmethod
+    async def embed_builder(ctx, title, description, data: list, destination=None, thumbnail=None):
         """
         Build embed from data provided
         :param ctx: Discord Context
         :param title: Title for embed
         :param description: Description of embed
         :param data: data as list of dict
+        :param destination: where embed is sent
+        :param thumbnail: where embed is sent
         :return:
         """
         embed = discord.Embed(title=title,
@@ -31,7 +37,11 @@ class CustomMessages:
         else:
             await ctx.channel.send(embed=embed, delete_after=40)
 
-    async def system_message(self, ctx, color_code: int, message: str, destination: int, sys_msg_title: str = None):
+    @staticmethod
+    async def system_message(ctx, color_code: int, message: str, destination: int, sys_msg_title: str = None):
+        """
+        Custom System Messages
+        """
         if color_code == 0:
             signal = 0x319f6b
             emoji = ":robot: "
@@ -55,9 +65,10 @@ class CustomMessages:
         else:
             await ctx.channel.send(embed=sys_embed, delete_after=100)
 
-    async def transaction_report_to_user(self, user, destination, amount, symbol, direction: int):
+    @staticmethod
+    async def transaction_report_to_user(user, destination, amount, symbol, direction: int):
         """
-        To user
+        Transaction report to user
         :param user:
         :param destination:
         :param amount:
@@ -99,7 +110,8 @@ class CustomMessages:
         except Exception:
             pass
 
-    async def transaction_report_to_channel(self, ctx, recipient: discord.User, amount, currency):
+    @staticmethod
+    async def transaction_report_to_channel(ctx, recipient: discord.User, amount, currency):
         """
         Discord Transaction report to the channel
         :param ctx: discord Context
@@ -115,7 +127,8 @@ class CustomMessages:
         message = f'{recipient.mention} user {ctx.message.author} just sent you {amount_str} ({in_dollar["total"]}$)'
         await ctx.channel.send(content=message, delete_after=360)
 
-    async def coin_activity_notification_message(self, coin, recipient: discord.User, memo, hash, source_acc, amount,
+    @staticmethod
+    async def coin_activity_notification_message(coin, recipient: discord.User, memo, hash, source_acc, amount,
                                                  color_code: int):
         if color_code == 0:
             signal = 0x319f6b
@@ -136,7 +149,8 @@ class CustomMessages:
 
         await recipient.send(embed=sys_embed)
 
-    async def coin_withdrawal_notification(self, coin, recipient: discord.User, hash, destination, link, ledger: int):
+    @staticmethod
+    async def coin_withdrawal_notification(coin, recipient: discord.User, thumbnail,hash, destination, link, ledger: int):
         notify = discord.Embed(title="Withdrawal Notification",
                                description=f' {coin} withdrawal Successfully processed',
                                colour=discord.Colour.green())
@@ -156,4 +170,5 @@ class CustomMessages:
         notify.add_field(name='Explorer Link',
                          value=link,
                          inline=False)
+        notify.set_thumbnail(url=thumbnail)
         await recipient.send(embed=notify)

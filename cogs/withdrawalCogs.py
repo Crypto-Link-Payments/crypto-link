@@ -149,7 +149,8 @@ class WithdrawalCommands(commands.Cog):
                                                                                       hash=data['hash'],
                                                                                       destination=data['destination'],
                                                                                       ledger=data['ledger'],
-                                                                                      link=data['explorer'])
+                                                                                      link=data['explorer'],
+                                                                                      thumbnail=self.bot.user.avatar_url)
                                     try:
                                         # create withdrawal notifcaiton for channel
                                         notify = discord.Embed(title='Stellar Withdrawal Notification',
