@@ -16,7 +16,7 @@ To check all available sub-commands use command:
 ```
 #### Check current fee and limit values
 ```text
-!fee current
+!fees
 ```
 
 #### Change minimum merchant transfer value
