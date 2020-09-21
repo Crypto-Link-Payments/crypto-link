@@ -19,8 +19,6 @@ stellar = StellarWallet()
 
 customMessages = CustomMessages()
 d = helper.read_json_file(file_name='botSetup.json')
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 
@@ -31,11 +29,9 @@ class HotWalletCommands(commands.Cog):
     @commands.group()
     @commands.check(is_one_of_gods)
     async def hot(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
+        """
+        Command entry point for hot wallet functions
+        """
         if ctx.invoked_subcommand is None:
             value = [{'name': f'***{d["command"]}hot stellar*** ',
                       'value': f"Returns information from wallet RPC on stellar balance"}
@@ -46,6 +42,9 @@ class HotWalletCommands(commands.Cog):
 
     @hot.command()
     async def stellar(self, ctx):
+        """
+        Check Stellar hot wallet details
+        """
         data = stellar.get_stellar_hot_wallet_details()
         get_usd_value = convert_to_usd(amount=float(data['balances'][0]['balance']), coin_name='stellar')
         if data:
@@ -58,7 +57,7 @@ class HotWalletCommands(commands.Cog):
                                'value': f"{data['balances'][0]['balance']} {CONST_STELLAR_EMOJI}"},
                               {'name': f'In USD $',
                                'value': f"$ {get_usd_value['total']}\n"
-                                        f"Rate: {get_usd_value['usd']} $ 1XLM"},
+                                        f"Rate: {get_usd_value['usd']} $/ {CONST_STELLAR_EMOJI}"},
                               {'name': f'Buying liabilities',
                                'value': f"{data['balances'][0]['buying_liabilities']} {CONST_STELLAR_EMOJI}"},
                               {'name': f'Selling liabilities',
