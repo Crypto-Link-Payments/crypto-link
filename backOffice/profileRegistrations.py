@@ -55,6 +55,10 @@ class AccountManager(object):
             return False
 
     def update_user_wallet_balance(self, discord_id: int, ticker: str, direction: int, amount: int):
+        # TODO check if it can be merged with other use cases
+        """
+        Updating the user wallet balance used with merchant system
+        """
         if direction == 0:
             pass
         else:
