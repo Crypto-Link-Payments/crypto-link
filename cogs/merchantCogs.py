@@ -117,7 +117,7 @@ class MerchantCommunityOwner(commands.Cog):
         Procedure to create role in the system
         :param ctx:
         :param role_name: String representation of the role
-        :param dolar_value: Value in dollar
+        :param dollar_value: Value in dollar
         :param weeks_count: length in weeks
         :param days_count: lenght in days
         :param hours_count: length in hours
