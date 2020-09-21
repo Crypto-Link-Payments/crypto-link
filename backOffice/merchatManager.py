@@ -185,7 +185,7 @@ class MerchantManager:
         else:
             return {}
 
-    def register_community_wallet(self, community_id: int, community_owner_id: int, community_name:str):
+    def register_community_wallet(self, community_id: int, community_owner_id: int, community_name: str):
         """
         Makes community wallets once owner of the community registers details
         :param community_id:
@@ -196,7 +196,7 @@ class MerchantManager:
         community_details = {
             "communityId": int(community_id),
             "communityOwner": int(community_owner_id),
-            "communityName":community_name
+            "communityName": community_name
         }
 
         # DData for stellar community wallet
