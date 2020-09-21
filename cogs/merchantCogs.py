@@ -37,11 +37,6 @@ class MerchantCommunityOwner(commands.Cog):
         :param ctx:
         :return:
         """
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if not merchant_manager.check_if_community_exist(community_id=ctx.message.guild.id):
             if merchant_manager.register_community_wallet(community_id=ctx.message.guild.id,
                                                           community_owner_id=ctx.message.author.id,
@@ -71,11 +66,6 @@ class MerchantCommunityOwner(commands.Cog):
     @commands.check(has_wallet)  # Chekc if owner has community wallet
     @commands.bot_has_permissions(manage_roles=True)
     async def merchant(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if ctx.invoked_subcommand is None:
             title = "💱 __Merchant System Message Setup__💱 "
             description = 'All available commands under ***merchant*** category.'
