@@ -4,7 +4,9 @@ Script to handle bot off chain wallet and bot fees
 
 import os
 import sys
+
 from pymongo import MongoClient, errors
+
 from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -53,22 +55,6 @@ class BotManager(object):
                                         {"_id": 0,
                                          "balance": 1})
         return query['balance']
-
-    def create_new_fee(self, type: str, value: float):
-        """
-        Insert New fee into database. Not integrated but used when updatin project manually
-        """
-        fee_struct = {
-            "type": type,
-            "key": type,
-            "fee": value,
-
-        }
-        try:
-            self.botFees.insert_one(fee_struct)
-            return True
-        except errors.PyMongoError:
-            return False
 
     def license_fee_handling(self, fee: float, key: str):
         """
