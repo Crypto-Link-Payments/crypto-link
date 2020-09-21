@@ -5,9 +5,9 @@ from backOffice.botStatistics import BotStatsManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.stellarActivityManager import StellarManager
 from cogs.utils import monetaryConversions
+from cogs.utils.customCogChecks import is_public, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
-from cogs.utils.customCogChecks import is_public, has_wallet
 
 helper = Helpers()
 account_mng = AccountManager()
@@ -95,8 +95,6 @@ class TransactionCommands(commands.Cog):
                             await customMessages.transaction_report_to_user(direction=1, amount=amount,
                                                                             symbol='xlm', user=ctx.message.author,
                                                                             destination=recipient)
-
-
                         else:
                             stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                          stroops=int(stroops),
@@ -138,6 +136,7 @@ class TransactionCommands(commands.Cog):
                       f'-> Command needs to be executed on public channel```'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
+
     @xlm.error
     async def xlm_send_error(self, ctx, error):
         print(f'ERR XLM SEND TRIGGERED  : {error}')
