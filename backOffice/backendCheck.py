@@ -71,11 +71,15 @@ class BotStructureCheck(object):
         if stats_on_chain == 0:
             print(Fore.YELLOW + "MAKING ON CHAIN DOCUMENT ENTRY")
             stellarChain = {
-                "ticker": "xlm",
-                "depositCount": int(0),
-                "withdrawalCount": int(0),
-                "depositAmount": int(0),
-                "withdrawalAmount": int(0)
+                "depositCountXlm": int(0),
+                "withdrawalCountXlm": int(0),
+                "depositAmountXlm": float(0.0),
+                "withdrawalAmountXlm": float(0.0),
+                "depositCountClt": int(0),
+                "withdrawalCountClt": int(0),
+                "depositAmountClt": float(0.0),
+                "withdrawalAmountClt": float(0.0),
+
             }
 
             on_chain.insert_one(stellarChain)
