@@ -119,7 +119,7 @@ async def check_stellar_hot_wallet():
                                                                 key="xlmStats")
 
                         # Update Bot Global stats
-                        stats_manager.update_bot_chain_stats(type_of='deposit', ticker='stellar',
+                        stats_manager.update_bot_chain_stats(type_of='deposit', ticker='xlm',
                                                              amount=round(tx_stroop / 10000000, 7))
                     else:
                         print(Fore.RED + f'TX Processing error: \n'
