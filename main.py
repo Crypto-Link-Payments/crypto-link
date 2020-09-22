@@ -36,6 +36,7 @@ channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(d['command']))  # Test commands
 bot.remove_command('help')  # removing the old help command
 
+CONST_STELAR_EMOJI = "<:stelaremoji:684676687425961994>"
 extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
               'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
@@ -94,7 +95,7 @@ async def check_stellar_hot_wallet():
                         channel_id = notf_channels["stellar"]
                         channel = bot.get_channel(id=int(channel_id))
 
-                        # create withdrawal notifcaiton for channel
+                        # create withdrawal notification for channel
                         notify = discord.Embed(title='System Deposit Notification',
                                                description='Deposit has been processed')
                         notify.set_thumbnail(url=bot.user.avatar_url)
@@ -102,7 +103,7 @@ async def check_stellar_hot_wallet():
                                          value=f'{dest} ID; {dest.id}',
                                          inline=False)
                         notify.add_field(name='Deposit details',
-                                         value=f'Amount: {tx_stroop / 10000000:.7f} <:stelaremoji:684676687425961994>',
+                                         value=f'Amount: {tx_stroop / 10000000:.7f} {CONST_STELAR_EMOJI}',
                                          inline=False)
                         await channel.send(embed=notify)
 

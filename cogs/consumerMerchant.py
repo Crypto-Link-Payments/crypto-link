@@ -121,7 +121,7 @@ class ConsumerCommands(commands.Cog):
                 role_embed.add_field(name="Role Obtained:",
                                      value=f"{starting_time} UTC",
                                      inline=False)
-                role_embed.add_field(name="Payed for Role ",
+                role_embed.add_field(name="Paid for Role ",
                                      value=f"{value_in_stellar} {CONST_STELLAR_EMOJI}",
                                      inline=False)
                 role_embed.add_field(name="Role value in $",
