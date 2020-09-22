@@ -15,6 +15,7 @@ from backOffice.backendCheck import BotStructureCheck
 from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
+from backOffice.statsUpdater import StatsManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
@@ -27,6 +28,7 @@ stellar_manager = StellarManager()
 merchant_manager = MerchantManager()
 bot_manager = BotManager()
 bot_stats = BotStatsManager()
+stats_manager = StatsManager()
 
 custo_messages = CustomMessages()
 helper = Helpers()
@@ -85,8 +87,6 @@ async def check_stellar_hot_wallet():
 
                     # Update balance
                     if stellar_manager.update_stellar_balance_by_memo(memo=tx_memo, stroops=tx_stroop, direction=1):
-
-
                         # If balance updated successfully send the message to user of processed deposit
                         dest = await bot.fetch_user(user_id=int(user_id['userId']))
                         await custo_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
@@ -109,7 +109,8 @@ async def check_stellar_hot_wallet():
                                          inline=False)
                         await channel.send(embed=notify)
 
-                        #TODO integrate user deposit stats updates
+                        # Update user deposit stats
+                        stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000,7))
 
                         if bot_stats.update_chain_activity_stats(type_of='deposit', ticker='stellar', amount=tx_stroop):
                             pass
