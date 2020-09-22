@@ -12,7 +12,6 @@ from colorama import Fore, init
 from discord.ext import commands
 
 from backOffice.backendCheck import BotStructureCheck
-from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.statsUpdater import StatsManager
@@ -27,7 +26,6 @@ stellar_wallet = StellarWallet()
 stellar_manager = StellarManager()
 merchant_manager = MerchantManager()
 bot_manager = BotManager()
-bot_stats = BotStatsManager()
 stats_manager = StatsManager()
 
 custo_messages = CustomMessages()
@@ -112,11 +110,8 @@ async def check_stellar_hot_wallet():
                         # Update user deposit stats
                         stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000,7))
 
-                        if bot_stats.update_chain_activity_stats(type_of='deposit', ticker='stellar', amount=tx_stroop):
-                            pass
-                        else:
-                            print(Fore.RED + 'Could not update stellar chain bot stats when deposit was processed')
-
+                        # Update Bot Global stats
+                        stats_manager.update_bot_chain_stats(type_of='deposit', ticker='stellar', amount=round(tx_stroop / 10000000,7))
                     else:
                         print(Fore.RED + f'TX Processing error: \n'
                                          f'{tx}')
