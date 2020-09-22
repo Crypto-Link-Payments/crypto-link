@@ -1,5 +1,4 @@
 from datetime import datetime
-from math import fsum
 
 from discord import Embed, Colour
 from discord.ext import commands
@@ -83,7 +82,7 @@ class UserAccountCommands(commands.Cog):
         total_withdrawals_done = clCoin_stats["totalWithdrawn"] + stellar_stats["totalWithdrawn"]
         total_public_tx = clCoin_stats["publicTxCount"] + stellar_stats["publicTxCount"]
         total_private_tx = clCoin_stats["privateTxCount"] + stellar_stats["privateTxCount"]
-        total_executed_tx  = total_private_tx + total_public_tx
+        total_executed_tx = total_private_tx + total_public_tx
         total_received_tx = clCoin_stats["received"] + stellar_stats["received"]
 
         xlm_balance = round(float(stellar_wallet_data["balance"]) / 10000000, 7)
@@ -241,7 +240,6 @@ class UserAccountCommands(commands.Cog):
         merchant_info.add_field(name=f'XLM Spent',
                                 value=f'{membership_statas["spentOnRolesXlm"]} {CONST_STELLAR_EMOJI}')
         await ctx.author.send(embed=merchant_info)
-
 
     @commands.command()
     @commands.check(is_public)
