@@ -1,11 +1,15 @@
-import discord
+from datetime import datetime
+from math import fsum
+
+from discord import Embed, Colour
 from discord.ext import commands
 
+from backOffice.clTokenACtivityManager import ClTokenManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.stellarActivityManager import StellarManager
 from cogs.utils.customCogChecks import is_public, user_has_wallet
-from cogs.utils.monetaryConversions import convert_to_usd
-from cogs.utils.monetaryConversions import get_normal, get_decimal_point
+from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
+from cogs.utils.monetaryConversions import get_normal, get_decimal_point, scientific_conversion
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
@@ -13,6 +17,7 @@ helper = Helpers()
 account_mng = AccountManager()
 customMessages = CustomMessages()
 stellar = StellarManager()
+clToken = ClTokenManager()
 
 d = helper.read_json_file(file_name='botSetup.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
@@ -39,9 +44,9 @@ class UserAccountCommands(commands.Cog):
             stellar_balance = get_normal(value=str(values['stellar']['balance']),
                                          decimal_point=get_decimal_point('xlm'))
             stellar_to_usd = convert_to_usd(amount=float(stellar_balance), coin_name='stellar')
-            balance_embed = discord.Embed(title=f"Account details for  {ctx.message.author}",
-                                          description='Bellow is the latest data on your Discord Wallet balance',
-                                          colour=discord.Colour.green())
+            balance_embed = Embed(title=f"Account details for  {ctx.message.author}",
+                                  description='Bellow is the latest data on your Discord Wallet balance',
+                                  colour=Colour.green())
 
             balance_embed.add_field(
                 name=f"{CONST_STELLAR_EMOJI} Stellar Balance {CONST_STELLAR_EMOJI}",
@@ -59,6 +64,190 @@ class UserAccountCommands(commands.Cog):
             message = f'Balance could not be checked at this moment. Please try again later.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
+
+    @commands.command()
+    @commands.check(user_has_wallet)
+    async def acc(self, ctx):
+        """
+        Full account report on the wallet
+        """
+        stellar_wallet_data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
+        token_wallet_data = clToken.get_cl_token_data_by_id(discord_id=ctx.message.author.id)
+        account_details = account_mng.get_account_details(discord_id=ctx.message.author.id)
+        transaction_counter = account_details["transactionCounter"]
+
+        """
+         'transactionCounter': {'emojiTxCount': 0,
+                        'multiTxCount': 0,
+                        'receivedCount': 0,
+                        'sentTxCount': 0},
+                        """
+
+        stellar_stats = account_details["xlmStats"]
+        clCoin_stats = account_details["clCoinStats"]
+        total_deposits_done = clCoin_stats["withdrawalsCountCl"] + stellar_stats["totalDepositedXlm"]
+        total_withdrawals_done = clCoin_stats["depositsCountCl"] + stellar_stats["withdrawalsCountXlm"]
+        total_public_tx = clCoin_stats["publicClTxCount"] + stellar_stats["publicXlmTxCount"]
+        total_private_tx = clCoin_stats["privateClTxCount"] + stellar_stats["privateXlmTxCount"]
+        total_executed_tx  = total_private_tx + total_public_tx
+        total_received_tx = clCoin_stats["depositsCountCl"] + stellar_stats["totalDepositedXlm"]
+
+        xlm_balance = round(float(stellar_wallet_data["balance"]) / 10000000, 7)
+        stellar_balance = get_normal(value=str(stellar_wallet_data["balance"]),
+                                     decimal_point=get_decimal_point('xlm'))
+
+        cl_token_balance = get_normal(value=str(token_wallet_data["balance"]),
+                                      decimal_point=get_decimal_point('xlm'))
+
+        utc_now = datetime.utcnow()
+        acc_entry = Embed(title='__Account Details__',
+                          colour=Colour.dark_blue(),
+                          timestamp=utc_now)
+        acc_entry.set_thumbnail(url=ctx.author.avatar_url)
+        acc_entry.add_field(name=f'Account Owner',
+                            value=f'{ctx.message.author}',
+                            inline=True)
+        acc_entry.add_field(name=f'Account Id',
+                            value=f'{ctx.message.author.id}',
+                            inline=True)
+        acc_entry.add_field(name=f'Stellar Lumen Balance',
+                            value=f'{stellar_balance} {CONST_STELLAR_EMOJI}',
+                            inline=False)
+        acc_entry.add_field(name=f'Crypto Link Token Balance',
+                            value=f'{cl_token_balance} :sweat_drops:  ',
+                            inline=False)
+
+        acc_entry.add_field(name=f'On Chain Deposits',
+                            value=f'{total_deposits_done}',
+                            inline=False)
+        acc_entry.add_field(name=f'On Chain withdrawals',
+                            value=f'{total_withdrawals_done}',
+                            inline=False)
+        acc_entry.add_field(name=f'Total Outgoing Transactions',
+                            value=f'{total_executed_tx}',
+                            inline=False)
+        acc_entry.add_field(name=f'Total Incoming Transactions',
+                            value=f'{total_received_tx}',
+                            inline=False)
+        acc_entry.add_field(name=f'Total Public Transactions',
+                            value=f'{total_public_tx}',
+                            inline=False)
+        acc_entry.add_field(name=f'Total Private Transactions',
+                            value=f'{total_private_tx}',
+                            inline=False)
+        await ctx.author.send(embed=acc_entry)
+
+        rates = get_rates(coin_name='stellar')
+        in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
+        in_usdt = rate_converter(xlm_balance, rates["stellar"]["usd"])
+        in_btc = rate_converter(xlm_balance, rates["stellar"]["btc"])
+        in_eth = rate_converter(xlm_balance, rates["stellar"]["eth"])
+
+        xlm_wallet = Embed(title=f'{CONST_STELLAR_EMOJI} Stellar Lumen Wallet Details {CONST_STELLAR_EMOJI}',
+                           description='Bellow are latest details on your Stellar Lumen Crypto Link wallet',
+                           colour=Colour.light_grey(),
+                           timestamp=utc_now)
+        xlm_wallet.add_field(name=f'Hot Wallet Address',
+                             value=f'```{hot_wallets["xlm"]}```',
+                             inline=False)
+        xlm_wallet.add_field(name=f'Deposit Memo',
+                             value=f'{stellar_wallet_data["depositId"]}',
+                             inline=False)
+        xlm_wallet.add_field(name=f'Stellar Lumen (XLM) Balance',
+                             value=f'{stellar_balance} {CONST_STELLAR_EMOJI}',
+                             inline=False)
+        xlm_wallet.add_field(name=f'Wallet Conversions',
+                             value=f'$ {in_usdt}\n'
+                                   f'€ {in_eur}\n'
+                                   f'₿ {in_btc}\n'
+                                   f'Ξ {in_eth}',
+                             inline=True)
+        xlm_wallet.add_field(name=f'Market Rate',
+                             value=f'$ {rates["stellar"]["usd"]}\n'
+                                   f'€ {rates["stellar"]["eur"]}\n'
+                                   f'₿ {scientific_conversion(rates["stellar"]["btc"], 8)}\n'
+                                   f'Ξ {rates["stellar"]["eth"]}\n',
+                             inline=True)
+
+        xlm_wallet.add_field(name=f'Σ Deposits',
+                             value=f'{stellar_stats["depositsCountXlm"]}',
+                             inline=False)
+        xlm_wallet.add_field(name=f'Σ Total Deposited',
+                             value=f'{stellar_stats["totalDepositedXlm"]}')
+        xlm_wallet.add_field(name=f'Σ Withdrawals',
+                             value=f'{stellar_stats["withdrawalsCountXlm"]}',
+                             inline=True)
+        xlm_wallet.add_field(name=f'Σ Withdrawn',
+                             value=f'{stellar_stats["totalWithdrawnXlm"]}',
+                             inline=True)
+        xlm_wallet.add_field(name=f'Σ XLM Sent',
+                             value=f'{stellar_stats["xlmSent"]}')
+        xlm_wallet.add_field(name=f'Σ XLM Received',
+                             value=f'{stellar_stats["xlmReceived"]}')
+        xlm_wallet.add_field(name=f'Σ Public Tx',
+                             value=f'{stellar_stats["publicXlmTxCount"]}',
+                             inline=True)
+        xlm_wallet.add_field(name=f'Σ Private Tx',
+                             value=f'{stellar_stats["privateXlmTxCount"]}',
+                             inline=True)
+
+        await ctx.author.send(embed=xlm_wallet)
+
+        token_wallet = Embed(title=f':sweat_drops: Crypto Link Token Details :sweat_drops:',
+                             description='Bellow are latest details on your Crypto Link Token wallet',
+                             colour=Colour.blue(),
+                             timestamp=utc_now)
+        token_wallet.add_field(name=f'Hot Wallet Address',
+                               value=f'```{hot_wallets["xlm"]}```',
+                               inline=False)
+        token_wallet.add_field(name=f'Deposit Memo',
+                               value=f'{stellar_wallet_data["depositId"]}',
+                               inline=False)
+        token_wallet.add_field(name=f'Crypto Link Token Balance',
+                               value=f'{stellar_balance} :sweat_drops:',
+                               inline=False)
+
+        token_wallet.add_field(name=f'Σ Deposits',
+                               value=f'{clCoin_stats["depositsCountCl"]}')
+        token_wallet.add_field(name=f'Σ Total Deposited',
+                               value=f'{clCoin_stats["totalDepositedCl"]}')
+        token_wallet.add_field(name=f'Σ Withdrawals',
+                               value=f'{clCoin_stats["withdrawalsCountCl"]}',
+                               inline=True)
+        token_wallet.add_field(name=f'Σ Withdrawn',
+                               value=f'{clCoin_stats["totalWithdrawnCl"]}',
+                               inline=True)
+        token_wallet.add_field(name=f'Σ :sweat_drops: Sent',
+                               value=f'{clCoin_stats["clSent"]}')
+        token_wallet.add_field(name=f'Σ :sweat_drops: Received',
+                               value=f'{clCoin_stats["clReceived"]}')
+        token_wallet.add_field(name=f':pick: Mined',
+                               value=f'{clCoin_stats["clMined"]}')
+        token_wallet.add_field(name=f'Σ Public Tx',
+                               value=f'{clCoin_stats["publicClTxCount"]}',
+                               inline=True)
+        token_wallet.add_field(name=f'Σ Private Tx',
+                               value=f'{clCoin_stats["privateClTxCount"]}',
+                               inline=True)
+        await ctx.author.send(embed=token_wallet)
+
+        membership_statas = account_details["membershipStats"]
+
+        merchant_info = Embed(title=f':convenience_store: Membership Statistics :convenience_store: ',
+                              description='Statistics on Merchant System Usage and Role purchases',
+                              colour=Colour.orange(),
+                              timestamp=utc_now)
+        merchant_info.add_field(name=f'Roles purchased',
+                                value=f'{membership_statas["rolePurchased"]}',
+                                inline=False)
+        merchant_info.add_field(name=f'USD Spent',
+                                value=f'${membership_statas["spentOnRolesUsd"]}')
+        merchant_info.add_field(name=f'CL Token Spent',
+                                value=f'{membership_statas["spentOnRolesCl"]} :sweat_drops:')
+        merchant_info.add_field(name=f'XLM Spent',
+                                value=f'{membership_statas["spentOnRolesXlm"]} {CONST_STELLAR_EMOJI}')
+        await ctx.author.send(embed=merchant_info)
+
 
     @commands.command()
     @commands.check(is_public)
@@ -120,8 +309,7 @@ class UserAccountCommands(commands.Cog):
         """
         print(f'WALLET DEPOSIT: {ctx.author} -> {ctx.message.content}')
 
-
-        user_profile = account_mng.get_user_profile(user_id=ctx.message.author.id)
+        user_profile = account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred wallet' \
                           ' (GUI, CLI) to the address and deposit ID provided below. Have in mind that there is ' \
@@ -129,9 +317,9 @@ class UserAccountCommands(commands.Cog):
                           'of them will result in funds being lost to which staff of Launch Pad Investments is not ' \
                           'responsible for. :warning:'
 
-            deposit_embed = discord.Embed(title='How to deposit',
-                                          colour=discord.Colour.green(),
-                                          description=description)
+            deposit_embed = Embed(title='How to deposit',
+                                  colour=Colour.green(),
+                                  description=description)
 
             deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
                                     value='Be sure to include and provide appropriate  **__deposit ID__** and Wallet '
@@ -170,8 +358,8 @@ class UserAccountCommands(commands.Cog):
             stellar_balance = get_normal(value=str(data['balance']),
                                          decimal_point=get_decimal_point('xlm'))
 
-            balance_embed = discord.Embed(title=f"Stellar wallet details for {ctx.message.author}",
-                                          colour=discord.Colour.green())
+            balance_embed = Embed(title=f"Stellar wallet details for {ctx.message.author}",
+                                  colour=Colour.green())
             balance_embed.add_field(name=":map:  Wallet address :map: ",
                                     value=hot_wallets['xlm'],
                                     inline=False)
@@ -190,28 +378,6 @@ class UserAccountCommands(commands.Cog):
             message = f'Wallet could not be obtained from the system please try again later'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
-
-    @wallet.command()
-    async def stats(self,ctx):
-        """
-        Get account stats
-
-        {
-    "_id" : ObjectId("5f65d3e4d03ffdbfc0f284c3"),
-    "userId" : NumberLong(360367188432912385),
-    "userName" : "Animus#4608",
-    "depositId" : "3093853842df4383a689",
-    "balance" : NumberLong(2525809609124),
-    "ClTokenBalance" : NumberLong(0),
-    "lastModified" : ISODate("2020-09-21T10:34:20.328Z")
-}
-
-        """
-        data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
-
-        stats_info = discord.Embed(title="__Discord Account Overview__",
-                                   description='Here are all time stats data for your account',
-                                   colour=discord.Colour.gold())
 
     @balance.error
     async def balance_error(self, ctx, error):
