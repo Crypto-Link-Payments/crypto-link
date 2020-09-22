@@ -140,6 +140,7 @@ class AccountManager(object):
                             'publicTxCount': int(0),
                             "received": float(0.0),
                             "sent": float(0.0),
+                            "mined":float(0.0),
                             'spentOnRoles': float(0.0)},
             "membershipStats": {"rolePurchased": int(0),
                                 'spentOnRolesUsd': float(0.0),
