@@ -101,8 +101,7 @@ class StatsManager(object):
 
         self.userProfiles.find_one_and_update({"userId": user_id}, {"$inc": data})
 
-    def update_bot_off_chain_stats(self, ticker: str, tx_amount: int, xlm_amount: float, tx_type: str,
-                                   usd_value: float):
+    def update_bot_off_chain_stats(self, ticker: str, tx_amount: int, xlm_amount: float, tx_type: str):
         """
         update bot stats based on transaction type in the system
         """
@@ -111,7 +110,6 @@ class StatsManager(object):
                                                {"$inc": {"totalTx": int(tx_amount),
                                                          "totalMoved": xlm_amount,
                                                          "totalPublicCount": 1,
-                                                         "totalSpentUsd": usd_value,
                                                          "totalPublicMoved": xlm_amount},
                                                 "$currentDate": {"lastModified": True}})
 
@@ -120,7 +118,6 @@ class StatsManager(object):
                                                {"$inc": {"totalTx": int(tx_amount),
                                                          "totalMoved": xlm_amount,
                                                          "totalPrivateCount": 1,
-                                                         "totalSpentUsd": usd_value,
                                                          "totalPrivateMoved": xlm_amount},
                                                 "$currentDate": {"lastModified": True}})
 
@@ -128,7 +125,6 @@ class StatsManager(object):
             self.offChainActivities.update_one({"ticker": f"{ticker}"},
                                                {"$inc": {"totalTx": int(tx_amount),
                                                          "totalMoved": xlm_amount,
-                                                         "totalSpentUsd": usd_value,
                                                          "totalEmojiTx": 1,
                                                          "totalEmojiMoved": xlm_amount},
                                                 "$currentDate": {"lastModified": True}})
@@ -136,7 +132,6 @@ class StatsManager(object):
             self.offChainActivities.update_one({"ticker": f"{ticker}"},
                                                {"$inc": {"totalTx": int(tx_amount),
                                                          "totalMoved": xlm_amount,
-                                                         "totalSpentUsd": usd_value,
                                                          "multiTxCount": 1,
                                                          "multiTxMoved": xlm_amount},
                                                 "$currentDate": {"lastModified": True}})
@@ -145,7 +140,6 @@ class StatsManager(object):
             self.offChainActivities.update_one({"ticker": f"{ticker}"},
                                                {"$inc": {"totalTx": int(tx_amount),
                                                          "totalMoved": xlm_amount,
-                                                         "totalSpentUsd": usd_value,
                                                          "rolePurchaseTxCount": 1,
                                                          "roleMoved": xlm_amount},
                                                 "$currentDate": {"lastModified": True}})

@@ -3,6 +3,7 @@ from discord.ext import commands
 
 from backOffice.botStatistics import BotStatsManager
 from backOffice.profileRegistrations import AccountManager
+from backOffice.statsUpdater import StatsManager
 from backOffice.stellarActivityManager import StellarManager
 from cogs.utils import monetaryConversions
 from cogs.utils.customCogChecks import is_public, has_wallet
@@ -13,6 +14,7 @@ helper = Helpers()
 account_mng = AccountManager()
 stellar = StellarManager()
 bot_stats = BotStatsManager()
+stats_manager = StatsManager()
 customMessages = CustomMessages()
 d = helper.read_json_file(file_name='botSetup.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -72,11 +74,7 @@ class TransactionCommands(commands.Cog):
                         if stellar.update_stellar_balance_by_discord_id(discord_id=recipient.id, stroops=int(stroops),
                                                                         direction=1):
 
-                            if bot_stats.update_off_chain_activity_stats(ticker='stellar',
-                                                                         amount=stroops):  # Updating bbot stats
-                                pass
-                            else:
-                                print('Stats could not be updated')
+                            final_xlm = round(float(stroops / 10000000), 7)
 
                             await customMessages.transaction_report_to_channel(ctx=ctx, recipient=recipient,
                                                                                amount=amount, currency='xlm')
@@ -89,6 +87,20 @@ class TransactionCommands(commands.Cog):
                             await customMessages.transaction_report_to_user(direction=1, amount=amount,
                                                                             symbol='xlm', user=ctx.message.author,
                                                                             destination=recipient)
+
+                            # Updating bot stats
+                            stats_manager.update_bot_off_chain_stats(ticker='xlm', tx_amount=1,
+                                                                     xlm_amount=final_xlm,
+                                                                     tx_type='public')
+
+                            # Update discord personal wallet stats
+                            stats_manager.update_user_transaction_stats(user_id=ctx.message.author.id, key='xlmStats',
+                                                                        amount=final_xlm, direction='outgoing',
+                                                                        tx_type='public', )
+                            stats_manager.update_user_transaction_stats(user_id=recipient.id, key='xlmStats',
+                                                                        amount=final_xlm, direction='incoming',
+                                                                        tx_type='public', )
+
                         else:
                             stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                          stroops=int(stroops),
