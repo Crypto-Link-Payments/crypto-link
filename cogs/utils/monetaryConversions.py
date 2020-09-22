@@ -33,7 +33,7 @@ def get_rates(coin_name):
     """
     Getting rates for Stellar
     """
-    data = gecko.get_price(ids=coin_name, vs_currencies='usd,eur')
+    data = gecko.get_price(ids=coin_name, vs_currencies='usd,eur,btc, eth')
     return data
 
 
@@ -106,3 +106,12 @@ def get_in_micro(size, decimal_point: int):
         str_amount = str_amount + '0' * (decimal_point - fraction_size)
 
     return str_amount
+
+
+def rate_converter(amount, rate):
+    return round(float(amount * rate), 6)
+
+
+def scientific_conversion(value, decimals):
+    formatted = (f'%.{decimals}f' % value)
+    return formatted
