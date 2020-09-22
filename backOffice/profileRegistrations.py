@@ -28,7 +28,8 @@ class AccountManager(object):
 
         # Database of bot users
         self.clConnection = self.connection['CryptoLink']
-        self.userProfiles = self.clConnection.UserWallets
+        self.userProfiles = self.clConnection.userProfiles
+        self.clTokenWallets = self.clConnection.ClTokenWallets
 
         # Stellar connection
         self.stellarWallets = self.clConnection.StellarWallets  # Access to all stellar wallets
@@ -44,11 +45,25 @@ class AccountManager(object):
             "userId": discord_id,
             "userName": discord_username,
             "depositId": deposit_id,
-            "balance": int(0),
-            'ClTokenBalance': int(0)
+            "balance": int(0)
         }
 
         result = self.stellarWallets.insert_one(stellar_wallet)
+
+        if result.inserted_id:
+            return True
+        else:
+            return False
+
+    def __create_cl_token_wallet(self, discord_id: int, discord_username: str, deposit_id: str):
+        cl_token_wallet = {
+            "userId": discord_id,
+            "userName": discord_username,
+            "depositId": deposit_id,
+            'balance': int(0)
+        }
+
+        result = self.clTokenWallets.insert_one(cl_token_wallet)
 
         if result.inserted_id:
             return True
@@ -74,6 +89,16 @@ class AccountManager(object):
                 print(f' Could not update user wallet with xlm: {e}')
                 return False
 
+    def get_account_details(self, discord_id: int):
+        """Get basic account details from user"""
+        result = self.userProfiles.find_one({"userId": discord_id},
+                                            {"_id": 0})
+
+        if result:
+            return result
+        else:
+            return []
+
     def register_user(self, discord_id: int, discord_username: str):
         """
         Registers user into the system
@@ -86,6 +111,9 @@ class AccountManager(object):
 
         self.__create_stellar_wallet(discord_id=discord_id, discord_username=discord_username,
                                      deposit_id=stellar_deposit_id)
+
+        self.__create_cl_token_wallet(discord_id=discord_id, discord_username=discord_username,
+                                      deposit_id=stellar_deposit_id)
 
         new_user = {
             "userId": discord_id,
@@ -139,7 +167,8 @@ class AccountManager(object):
         else:
             return False
 
-    def get_user_profile(self, user_id: int):
+    # def get_user_wallet_details(self):
+    def get_user_memo(self, user_id: int):
         """
         Gets whole user profile data based on the ID
         :param user_id: Unique Discord ID
