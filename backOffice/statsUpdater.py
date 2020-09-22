@@ -56,11 +56,50 @@ class StatsManager(object):
                                                       "withdrawnAmount": round(float(amount), 7)},
                                              "$currentDate": {"lastModified": True}})
 
-    def update_public_tx_user_stats(self, direction, ):
-        pass
+    def update_user_transaction_stats(self, user_id: int, key, amount: float, direction: str, tx_type: str,
+                                      special: str = None, mined: float = None):
+        """Key = xlmStats or clCoinStats"""
 
-    def update_private_tx_user_stats(self):
-        pass
+        data = dict()
+        # Public or private and direction of funds
+        if tx_type == 'public':
+            data[f'{key}.publicTxCount'] = 1
+            if direction == 'outgoing':
+                data[f'{key}.publicSent'] = amount
+            elif direction == 'incoming':
+                data[f'{key}.publicReceived'] = amount
+
+        elif tx_type == 'private':
+            data[f'{key}.privateTxCount'] = 1
+            if direction == 'outgoing':
+                data[f'{key}.privateSent'] = amount
+            elif direction == 'incoming':
+                data[f'{key}.privateReceived'] = amount
+
+        # incoming or outgoing
+        if direction == 'incoming':
+            data[f"transactionCounter.receivedCount"] = 1
+            data[f"{key}.received"] = round(float(amount), 7)
+
+        elif direction == 'outgoing':
+            data[f"transactionCounter.sentTxCount"] = 1
+            data[f"{key}.sent"] = round(float(amount), 7)
+
+        # special or not
+        if special:
+            if special == 'emoji':
+                data[f"transactionCounter.emojiTxCount"] = 1
+            elif special == 'multiTx':
+                data[f"transactionCounter.multiTxCount"] = 1
+            elif special == 'rolePurchase':
+                data[f"transactionCounter.rolePurchase"] = 1
+
+        # Mined or not
+        if mined:
+            if direction == 'outgoing':
+                data[f"clCoinStats.mined"] = mined
+
+        self.userProfiles.find_one_and_update({"userId": user_id}, {"$inc": data})
 
     def update_bot_off_chain_stats(self, ticker: str, tx_amount: int, xlm_amount: float, tx_type: str,
                                    usd_value: float):
