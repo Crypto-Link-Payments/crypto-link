@@ -160,11 +160,6 @@ class UserAccountCommands(commands.Cog):
         :param ctx:
         :return:
         """
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         print(f'WALLET BALANCE: {ctx.author} -> {ctx.message.content}')
 
         data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
@@ -195,6 +190,28 @@ class UserAccountCommands(commands.Cog):
             message = f'Wallet could not be obtained from the system please try again later'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
+
+    @wallet.command()
+    async def stats(self,ctx):
+        """
+        Get account stats
+
+        {
+    "_id" : ObjectId("5f65d3e4d03ffdbfc0f284c3"),
+    "userId" : NumberLong(360367188432912385),
+    "userName" : "Animus#4608",
+    "depositId" : "3093853842df4383a689",
+    "balance" : NumberLong(2525809609124),
+    "ClTokenBalance" : NumberLong(0),
+    "lastModified" : ISODate("2020-09-21T10:34:20.328Z")
+}
+
+        """
+        data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
+
+        stats_info = discord.Embed(title="__Discord Account Overview__",
+                                   description='Here are all time stats data for your account',
+                                   colour=discord.Colour.gold())
 
     @balance.error
     async def balance_error(self, ctx, error):
