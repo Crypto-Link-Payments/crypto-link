@@ -106,8 +106,8 @@ class StellarManager:
         """
         Get users wallet details by unique Discord id.
         """
-        result = self.stellarWallets.find_one({"userId": discord_id})
-
+        result = self.stellarWallets.find_one({"userId": discord_id},
+                                              {"_id":0})
         if result:
             return result
         else:
