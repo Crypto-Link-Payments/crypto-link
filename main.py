@@ -329,12 +329,13 @@ async def check_merchant_licences():
 
 def start_scheduler():
     print(Fore.LIGHTBLUE_EX + 'Started Chroned Monitors')
+
     scheduler.add_job(check_stellar_hot_wallet,
-                      CronTrigger(second='00'))
+                      CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
     scheduler.add_job(check_expired_roles, CronTrigger(
-        second='00'))
+        second='00'), misfire_grace_time=10, max_instances=20)
     scheduler.add_job(check_merchant_licences,
-                      CronTrigger(minute='00', second='10'))
+                      CronTrigger(minute='00', second='10'), misfire_grace_time=10, max_instances=20)
     scheduler.start()
 
 
