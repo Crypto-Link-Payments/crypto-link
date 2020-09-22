@@ -208,6 +208,11 @@ class WithdrawalCommands(commands.Cog):
                                 stats_manager.update_bot_chain_stats(type_of='withdrawal', ticker='xlm',
                                                                      amount=round(stroops / 10000000, 7))
 
+                                # Update user stats
+                                stats_manager.update_user_withdrawal_stats(user_id=ctx.message.author.id,
+                                                                           amount=round(stroops / 10000000, 7),
+                                                                           key='xlmStats')
+
                             else:
                                 title = '__Withdrawal error___'
                                 message = f'Funds could not be withdrawn at this point. Please try again later.'
