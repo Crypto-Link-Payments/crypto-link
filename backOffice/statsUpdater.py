@@ -55,3 +55,58 @@ class StatsManager(object):
                                             {"$inc": {"withdrawalCount": 1,
                                                       "withdrawnAmount": round(float(amount), 7)},
                                              "$currentDate": {"lastModified": True}})
+
+    def update_public_tx_user_stats(self, direction, ):
+        pass
+
+    def update_private_tx_user_stats(self):
+        pass
+
+    def update_bot_off_chain_stats(self, ticker: str, tx_amount: int, xlm_amount: float, tx_type: str,
+                                   usd_value: float):
+        """
+        update bot stats based on transaction type in the system
+        """
+        if tx_type == 'public':
+            self.offChainActivities.update_one({"ticker": f"{ticker}"},
+                                               {"$inc": {"totalTx": int(tx_amount),
+                                                         "totalMoved": xlm_amount,
+                                                         "totalPublicCount": 1,
+                                                         "totalSpentUsd": usd_value,
+                                                         "totalPublicMoved": xlm_amount},
+                                                "$currentDate": {"lastModified": True}})
+
+        elif tx_type == 'private':
+            self.offChainActivities.update_one({"ticker": f"{ticker}"},
+                                               {"$inc": {"totalTx": int(tx_amount),
+                                                         "totalMoved": xlm_amount,
+                                                         "totalPrivateCount": 1,
+                                                         "totalSpentUsd": usd_value,
+                                                         "totalPrivateMoved": xlm_amount},
+                                                "$currentDate": {"lastModified": True}})
+
+        elif tx_type == 'emoji':
+            self.offChainActivities.update_one({"ticker": f"{ticker}"},
+                                               {"$inc": {"totalTx": int(tx_amount),
+                                                         "totalMoved": xlm_amount,
+                                                         "totalSpentUsd": usd_value,
+                                                         "totalEmojiTx": 1,
+                                                         "totalEmojiMoved": xlm_amount},
+                                                "$currentDate": {"lastModified": True}})
+        elif tx_type == 'multiTx':
+            self.offChainActivities.update_one({"ticker": f"{ticker}"},
+                                               {"$inc": {"totalTx": int(tx_amount),
+                                                         "totalMoved": xlm_amount,
+                                                         "totalSpentUsd": usd_value,
+                                                         "multiTxCount": 1,
+                                                         "multiTxMoved": xlm_amount},
+                                                "$currentDate": {"lastModified": True}})
+
+        elif tx_type == 'rolePurchase':
+            self.offChainActivities.update_one({"ticker": f"{ticker}"},
+                                               {"$inc": {"totalTx": int(tx_amount),
+                                                         "totalMoved": xlm_amount,
+                                                         "totalSpentUsd": usd_value,
+                                                         "rolePurchaseTxCount": 1,
+                                                         "roleMoved": xlm_amount},
+                                                "$currentDate": {"lastModified": True}})
