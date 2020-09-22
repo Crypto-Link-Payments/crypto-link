@@ -6,6 +6,7 @@ import os
 import sys
 
 from pymongo import MongoClient
+
 from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,32 +27,31 @@ class StatsManager(object):
         self.chainActivities = self.clConnection.CLOnChainStats
         self.offChainActivities = self.clConnection.CLOffChainStats
 
-    def update_user_deposit_stats(self, user_id:int, amount:float):
+    def update_user_deposit_stats(self, user_id: int, amount: float, key: str):
         """Updates users deposit stats"""
-        self.userProfiles.find_one_and_update({"userId": user_id},
-                                              {"$inc": {"xlmStats.depositsCountXlm": 1,
-                                                        "xlmStats.totalDepositedXlm":amount}})
 
-    def update_user_withdrawal_stats(self, user_id, amount):
+        self.userProfiles.find_one_and_update({"userId": user_id},
+                                              {"$inc": {f"{key}.depositsCount": 1,
+                                                        f"{key}.totalDeposited": amount}})
+
+    def update_user_withdrawal_stats(self, user_id, amount, key: str):
         """Updates users withdrawal stats"""
         self.userProfiles.find_one_and_update({"userId": user_id},
-                                              {"$inc": {"xlmStats.withdrawalsCountXlm": 1,
-                                                        "xlmStats.totalWithdrawnXlm": amount}})
+                                              {"$inc": {f"{key}.withdrawalsCount": 1,
+                                                        f"{key}.totalWithdrawn": amount}})
 
     def update_bot_chain_stats(self, type_of: str, ticker: str, amount: float):
         """
         Update stats when on chain activity happens
         """
 
-        if ticker == 'stellar':
-            if type_of == "deposit":
-                self.chainActivities.update_one({"ticker": "xlm"},
-                                                {"$inc": {"depositCountXlm": 1,
-                                                          "depositAmountXlm": amount},
-                                                 "$currentDate": {"lastModified": True}})
-            elif type_of == "withdrawal":
-                self.chainActivities.update_one({"ticker": "xlm"},
-                                                {"$inc": {"withdrawalCountXlm": 1,
-                                                          "withdrawalAmountXlm": amount},
-                                                 "$currentDate": {"lastModified": True}})
-
+        if type_of == "deposit":
+            self.chainActivities.update_one({"ticker": f"{ticker}"},
+                                            {"$inc": {"depositCount": 1,
+                                                      "depositAmount": round(float(amount), 7)},
+                                             "$currentDate": {"lastModified": True}})
+        elif type_of == "withdrawal":
+            self.chainActivities.update_one({"ticker": f"{ticker}"},
+                                            {"$inc": {"withdrawalCount": 1,
+                                                      "withdrawnAmount": round(float(amount), 7)},
+                                             "$currentDate": {"lastModified": True}})
