@@ -46,12 +46,12 @@ class StatsManager(object):
         if ticker == 'stellar':
             if type_of == "deposit":
                 self.chainActivities.update_one({"ticker": "xlm"},
-                                                {"$inc": {"depositCount": 1,
-                                                          "depositAmount": amount},
+                                                {"$inc": {"depositCountXlm": 1,
+                                                          "depositAmountXlm": amount},
                                                  "$currentDate": {"lastModified": True}})
             elif type_of == "withdrawal":
                 self.chainActivities.update_one({"ticker": "xlm"},
-                                                {"$inc": {"withdrawalCount": 1,
-                                                          "withdrawalAmount": amount},
+                                                {"$inc": {"withdrawalCountXlm": 1,
+                                                          "withdrawalAmountXlm": amount},
                                                  "$currentDate": {"lastModified": True}})
 
