@@ -12,7 +12,6 @@ from colorama import Fore, init
 from discord.ext import commands
 
 from backOffice.backendCheck import BotStructureCheck
-from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.statsUpdater import StatsManager
 from backOffice.stellarActivityManager import StellarManager
@@ -25,7 +24,6 @@ scheduler = AsyncIOScheduler()
 stellar_wallet = StellarWallet()
 stellar_manager = StellarManager()
 merchant_manager = MerchantManager()
-bot_manager = BotManager()
 stats_manager = StatsManager()
 
 custo_messages = CustomMessages()
@@ -47,6 +45,26 @@ def get_time():
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
     return current_time
+
+
+async def send_channel_system_message(user, stroops):
+    """
+    Sending message to user on successfull processed deposit
+    """
+    channel_id = notf_channels["stellar"]
+    channel = bot.get_channel(id=int(channel_id))
+
+    # create withdrawal notification for channel
+    notify = discord.Embed(title='System Deposit Notification',
+                           description='Deposit has been processed')
+    notify.set_thumbnail(url=bot.user.avatar_url)
+    notify.add_field(name='User details',
+                     value=f'{user} ID; {user.id}',
+                     inline=False)
+    notify.add_field(name='Deposit details',
+                     value=f'Amount: {stroops / 10000000:.7f} {CONST_STELAR_EMOJI}',
+                     inline=False)
+    await channel.send(embed=notify)
 
 
 async def check_stellar_hot_wallet():
@@ -92,26 +110,17 @@ async def check_stellar_hot_wallet():
                                                                                 hash=tx_hash, source_acc=tx_from,
                                                                                 amount=tx_stroop, color_code=0)
 
-                        channel_id = notf_channels["stellar"]
-                        channel = bot.get_channel(id=int(channel_id))
+                        # Channel system message on deposit
+                        await send_channel_system_message(user=dest, stroops=tx_stroop)
 
-                        # create withdrawal notification for channel
-                        notify = discord.Embed(title='System Deposit Notification',
-                                               description='Deposit has been processed')
-                        notify.set_thumbnail(url=bot.user.avatar_url)
-                        notify.add_field(name='User details',
-                                         value=f'{dest} ID; {dest.id}',
-                                         inline=False)
-                        notify.add_field(name='Deposit details',
-                                         value=f'Amount: {tx_stroop / 10000000:.7f} {CONST_STELAR_EMOJI}',
-                                         inline=False)
-                        await channel.send(embed=notify)
-
+                        # TODO check if it can be transfered to await async
                         # Update user deposit stats
-                        stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000,7))
+                        stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
+                                                                key="xlmStats")
 
                         # Update Bot Global stats
-                        stats_manager.update_bot_chain_stats(type_of='deposit', ticker='stellar', amount=round(tx_stroop / 10000000,7))
+                        stats_manager.update_bot_chain_stats(type_of='deposit', ticker='stellar',
+                                                             amount=round(tx_stroop / 10000000, 7))
                     else:
                         print(Fore.RED + f'TX Processing error: \n'
                                          f'{tx}')
