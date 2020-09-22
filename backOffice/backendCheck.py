@@ -30,11 +30,12 @@ class BotStructureCheck(object):
                                      "CORPFromTransactions",
                                      "MerchantCommunityProfile",
                                      "StellarCommunityWallets",
-                                     "UserWallets"
+                                     "userProfiles",
                                      "MerchantMonetizedRoles",
                                      "MerchantAppliedUsers",
                                      "MerchantPurchasedLicenses",
                                      "StellarWallets",
+                                     "ClTokenWallets",
                                      "StellarDeposits",
                                      "StellarWithdrawals",
                                      "StellarUnprocessedDeposits",
@@ -47,7 +48,7 @@ class BotStructureCheck(object):
         """
         # Check collections for bot stats
         bot_collections = self.cryptoLink.list_collection_names()
-        print(Fore.GREEN + "1. Checking collection for BOT STATS")
+        print(Fore.GREEN + "1. Checking collections")
         for collection in self.required_collections:
             if collection not in bot_collections:
                 self.cryptoLink.create_collection(name=collection)
