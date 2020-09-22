@@ -76,21 +76,15 @@ class UserAccountCommands(commands.Cog):
         account_details = account_mng.get_account_details(discord_id=ctx.message.author.id)
         transaction_counter = account_details["transactionCounter"]
 
-        """
-         'transactionCounter': {'emojiTxCount': 0,
-                        'multiTxCount': 0,
-                        'receivedCount': 0,
-                        'sentTxCount': 0},
-                        """
-
         stellar_stats = account_details["xlmStats"]
         clCoin_stats = account_details["clCoinStats"]
-        total_deposits_done = clCoin_stats["withdrawalsCountCl"] + stellar_stats["totalDepositedXlm"]
-        total_withdrawals_done = clCoin_stats["depositsCountCl"] + stellar_stats["withdrawalsCountXlm"]
-        total_public_tx = clCoin_stats["publicClTxCount"] + stellar_stats["publicXlmTxCount"]
-        total_private_tx = clCoin_stats["privateClTxCount"] + stellar_stats["privateXlmTxCount"]
+
+        total_deposits_done = clCoin_stats["totalDeposited"] + stellar_stats["totalDeposited"]
+        total_withdrawals_done = clCoin_stats["totalWithdrawn"] + stellar_stats["totalWithdrawn"]
+        total_public_tx = clCoin_stats["publicTxCount"] + stellar_stats["publicTxCount"]
+        total_private_tx = clCoin_stats["privateTxCount"] + stellar_stats["privateTxCount"]
         total_executed_tx  = total_private_tx + total_public_tx
-        total_received_tx = clCoin_stats["depositsCountCl"] + stellar_stats["totalDepositedXlm"]
+        total_received_tx = clCoin_stats["received"] + stellar_stats["received"]
 
         xlm_balance = round(float(stellar_wallet_data["balance"]) / 10000000, 7)
         stellar_balance = get_normal(value=str(stellar_wallet_data["balance"]),
@@ -170,25 +164,25 @@ class UserAccountCommands(commands.Cog):
                              inline=True)
 
         xlm_wallet.add_field(name=f'Σ Deposits',
-                             value=f'{stellar_stats["depositsCountXlm"]}',
+                             value=f'{stellar_stats["depositsCount"]}',
                              inline=False)
         xlm_wallet.add_field(name=f'Σ Total Deposited',
-                             value=f'{stellar_stats["totalDepositedXlm"]}')
+                             value=f'{stellar_stats["totalDeposited"]}')
         xlm_wallet.add_field(name=f'Σ Withdrawals',
-                             value=f'{stellar_stats["withdrawalsCountXlm"]}',
+                             value=f'{stellar_stats["withdrawalsCount"]}',
                              inline=True)
         xlm_wallet.add_field(name=f'Σ Withdrawn',
-                             value=f'{stellar_stats["totalWithdrawnXlm"]}',
+                             value=f'{stellar_stats["totalWithdrawn"]}',
                              inline=True)
         xlm_wallet.add_field(name=f'Σ XLM Sent',
-                             value=f'{stellar_stats["xlmSent"]}')
+                             value=f'{stellar_stats["sent"]}')
         xlm_wallet.add_field(name=f'Σ XLM Received',
-                             value=f'{stellar_stats["xlmReceived"]}')
+                             value=f'{stellar_stats["received"]}')
         xlm_wallet.add_field(name=f'Σ Public Tx',
-                             value=f'{stellar_stats["publicXlmTxCount"]}',
+                             value=f'{stellar_stats["publicTxCount"]}',
                              inline=True)
         xlm_wallet.add_field(name=f'Σ Private Tx',
-                             value=f'{stellar_stats["privateXlmTxCount"]}',
+                             value=f'{stellar_stats["privateTxCount"]}',
                              inline=True)
 
         await ctx.author.send(embed=xlm_wallet)
@@ -208,26 +202,26 @@ class UserAccountCommands(commands.Cog):
                                inline=False)
 
         token_wallet.add_field(name=f'Σ Deposits',
-                               value=f'{clCoin_stats["depositsCountCl"]}')
+                               value=f'{clCoin_stats["depositsCount"]}')
         token_wallet.add_field(name=f'Σ Total Deposited',
-                               value=f'{clCoin_stats["totalDepositedCl"]}')
+                               value=f'{clCoin_stats["totalDeposited"]}')
         token_wallet.add_field(name=f'Σ Withdrawals',
-                               value=f'{clCoin_stats["withdrawalsCountCl"]}',
+                               value=f'{clCoin_stats["withdrawalsCount"]}',
                                inline=True)
         token_wallet.add_field(name=f'Σ Withdrawn',
-                               value=f'{clCoin_stats["totalWithdrawnCl"]}',
+                               value=f'{clCoin_stats["totalWithdrawn"]}',
                                inline=True)
         token_wallet.add_field(name=f'Σ :sweat_drops: Sent',
-                               value=f'{clCoin_stats["clSent"]}')
+                               value=f'{clCoin_stats["sent"]}')
         token_wallet.add_field(name=f'Σ :sweat_drops: Received',
-                               value=f'{clCoin_stats["clReceived"]}')
+                               value=f'{clCoin_stats["received"]}')
         token_wallet.add_field(name=f':pick: Mined',
-                               value=f'{clCoin_stats["clMined"]}')
+                               value=f'{clCoin_stats["mined"]}')
         token_wallet.add_field(name=f'Σ Public Tx',
-                               value=f'{clCoin_stats["publicClTxCount"]}',
+                               value=f'{clCoin_stats["publicTxCount"]}',
                                inline=True)
         token_wallet.add_field(name=f'Σ Private Tx',
-                               value=f'{clCoin_stats["privateClTxCount"]}',
+                               value=f'{clCoin_stats["privateTxCount"]}',
                                inline=True)
         await ctx.author.send(embed=token_wallet)
 
