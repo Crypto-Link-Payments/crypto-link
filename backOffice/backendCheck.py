@@ -70,31 +70,60 @@ class BotStructureCheck(object):
         print(Fore.LIGHTBLUE_EX + "=====Checking STATS backend===")
         if stats_on_chain == 0:
             print(Fore.YELLOW + "MAKING ON CHAIN DOCUMENT ENTRY")
-            stellarChain = {
-                "depositCountXlm": int(0),
-                "withdrawalCountXlm": int(0),
-                "depositAmountXlm": float(0.0),
-                "withdrawalAmountXlm": float(0.0),
-                "depositCountClt": int(0),
-                "withdrawalCountClt": int(0),
-                "depositAmountClt": float(0.0),
-                "withdrawalAmountClt": float(0.0),
+            global_stats = [{
+                "ticker": "xlm",
+                "depositCount": int(0),
+                "withdrawalCount": int(0),
+                "depositAmount": float(0.0),
+                "withdrawnAmount": float(0.0)
+            }, {
+                "ticker": "clToken",
+                "depositCount": int(0),
+                "withdrawalCount": int(0),
+                "depositAmount": float(0.0),
+                "withdrawnAmount": float(0.0)
+            }]
 
-            }
-
-            on_chain.insert_one(stellarChain)
+            on_chain.insert_many(global_stats)
             print(Fore.GREEN + "DONE")
         else:
             print(Fore.LIGHTGREEN_EX + "XLM ON CHAIN OK")
         print('+++++++++++++++++++++++++++++++++++++++++++++++++')
+
         if stats_off_chain == 0:
             print(Fore.YELLOW + "MAKING OFF CHAIN DOCUMENT ENTRY")
-            stellarOfChain = {
-                "ticker": "xlm",
-                "transactionCount": int(0),
-                "offChainMoved": int(0)
-            }
-            off_chain.insert_one(stellarOfChain)
+            stats_off = [{
+                "ticker":"xlm",
+                "totalTx": int(0),
+                "totalMoved": float(0.0),
+                "totalPrivateCount": int(0),
+                "totalPublicCount": int(0),
+                "totalEmojiTx":int(0),
+                "totalEmojiMoved":float(0),
+                "rolePurchased":int(0),
+                "spentOnRoles":float(0.0),
+                "spentInUsd":float(0.0),
+                "multiTxCount":int(0),
+            }, {
+                "ticker":"clToken",
+                "totalTx": int(0),
+                "totalMoved": float(0.0),
+                "totalPrivateCount": int(0),
+                "totalPublicCount": int(0),
+                "totalEmojiTx":int(0),
+                "totalEmojiMoved":float(0),
+                "rolePurchased":int(0),
+                "spentOnRoles":float(0.0),
+                "spentInUsd":float(0.0),
+                "multiTxCount":int(0),
+            },{
+                "ticker":"merchant",
+                "totalSpentInUsd":float(0.0),
+                "totalSpentInXlm":float(0.0),
+                "totalSpentInClToken": float(0.0)
+            }]
+
+            off_chain.insert_many(stats_off)
             print(Fore.GREEN + "DONE")
         else:
             print(Fore.LIGHTGREEN_EX + "XLM OFF CHAIN OK")
