@@ -9,6 +9,7 @@ from discord.ext import commands
 
 from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
+from backOffice.statsUpdater import StatsManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.customCogChecks import user_has_wallet, is_public
@@ -22,6 +23,7 @@ stellar_wallet = StellarWallet()
 customMessages = CustomMessages()
 bot_manager = BotManager()
 bot_stats = BotStatsManager()
+stats_manager = StatsManager()
 stellar = StellarManager()
 d = helper.read_json_file(file_name='botSetup.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
@@ -156,7 +158,7 @@ class WithdrawalCommands(commands.Cog):
                                                                                       link=data['explorer'],
                                                                                       thumbnail=self.bot.user.avatar_url)
                                     try:
-                                        # create withdrawal notifcaiton for channel
+                                        # create withdrawal notification for channel
                                         notify = discord.Embed(title='Stellar Withdrawal Notification',
                                                                description='Withdrawal has been processed',
                                                                colour=discord.Colour.gold())
@@ -173,9 +175,9 @@ class WithdrawalCommands(commands.Cog):
                                                          inline=False)
                                         await channel.send(embed=notify)
 
-                                    except Exception as e:
+                                    except Exception:
                                         error_msg = discord.Embed(title=f'Withdrawal Notification',
-                                                                  description=f'You have recieved this message because'
+                                                                  description=f'You have received this message because'
                                                                               f' withdrawal notification could not be'
                                                                               f' send to DM. Please allow bot to send'
                                                                               f' you messages',
@@ -183,17 +185,9 @@ class WithdrawalCommands(commands.Cog):
                                         error_msg.add_field(name='Explorer Link',
                                                             value=data['explorer'])
                                         error_msg.set_thumbnail(url=self.bot.user.avatar_url)
-                                        error_msg.set_footer(text='This message will selfdestruct in 360 seconds')
+                                        error_msg.set_footer(text='This message will self-destruct in 360 seconds')
                                         await ctx.channel.send(embed=error_msg, content=f'{ctx.message.author.mention}',
                                                                delete_after=360)
-
-                                        return
-
-                                    if bot_stats.update_chain_activity_stats(type_of='withdrawal', ticker='stellar',
-                                                                             amount=stroops):
-                                        pass
-                                    else:
-                                        print('Could not update stellar withdrawal stats ')
 
                                 else:
                                     print('Could not store withdrawal to history')
@@ -209,6 +203,10 @@ class WithdrawalCommands(commands.Cog):
                                     notify.add_field(name='Value',
                                                      value=f'{fee_in_stroops / 10000000}{CONST_STELLAR_EMOJI}')
                                     await channel.send(embed=notify)
+
+                                # Update bot stats
+                                stats_manager.update_bot_chain_stats(type_of='withdrawal', ticker='xlm',
+                                                                     amount=round(stroops / 10000000, 7))
 
                             else:
                                 title = '__Withdrawal error___'
