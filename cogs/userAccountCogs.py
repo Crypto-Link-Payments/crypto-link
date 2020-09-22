@@ -264,7 +264,7 @@ class UserAccountCommands(commands.Cog):
             if account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
                 title = '__Account registration status__'
                 message = f'Account has been successfully registered into the system and wallets created.' \
-                          f' Please use {d["command"]}balance or {d["command"]}wallet.'
+                          f' Please use {d["command"]}bal or {d["command"]}wallet.'
                 await customMessages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
                                                     sys_msg_title=title)
             else:

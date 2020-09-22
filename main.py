@@ -80,11 +80,13 @@ async def check_stellar_hot_wallet():
                     tx_from = tx["source_account"]
                     tx_stroop = tx['stroop']
 
-                    # Send message to the user
+                    # Get user_id based on transaciton memo
                     user_id = stellar_manager.get_discord_id_from_deposit_id(deposit_id=tx_memo)
 
                     # Update balance
                     if stellar_manager.update_stellar_balance_by_memo(memo=tx_memo, stroops=tx_stroop, direction=1):
+
+
                         # If balance updated successfully send the message to user of processed deposit
                         dest = await bot.fetch_user(user_id=int(user_id['userId']))
                         await custo_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
@@ -106,6 +108,8 @@ async def check_stellar_hot_wallet():
                                          value=f'Amount: {tx_stroop / 10000000:.7f} {CONST_STELAR_EMOJI}',
                                          inline=False)
                         await channel.send(embed=notify)
+
+                        #TODO integrate user deposit stats updates
 
                         if bot_stats.update_chain_activity_stats(type_of='deposit', ticker='stellar', amount=tx_stroop):
                             pass
