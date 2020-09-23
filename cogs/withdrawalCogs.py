@@ -102,8 +102,10 @@ class WithdrawalCommands(commands.Cog):
                     xlm_with_amount = stroops / 10000000
 
                     # Confirmation message
-                    message_content = f"{ctx.message.author.mention} Current withdrawal fee which will be appended to your withdrawal amout is " \
-                                      f"{round(fee_in_xlm['total'], 7)} {CONST_STELLAR_EMOJI} (${stellar_fee}, Rate:{round(fee_in_xlm['usd'], 4)})." \
+                    message_content = f"{ctx.message.author.mention} Current withdrawal fee which will be appended " \
+                                      f"to your withdrawal amout is " \
+                                      f"{round(fee_in_xlm['total'], 7)} {CONST_STELLAR_EMOJI} (${stellar_fee}, " \
+                                      f"Rate:{round(fee_in_xlm['usd'], 4)})." \
                                       f"Are you still willing to withdraw? answer with ***yes*** or ***no***"
 
                     verification = await ctx.channel.send(content=message_content)
