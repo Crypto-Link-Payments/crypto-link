@@ -68,11 +68,11 @@ def filter_transaction(new_transactions: list):
     return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo
 
 
-def process_tx_with_no_memo(channel,no_memo_transaction):
+async def process_tx_with_no_memo(channel, no_memo_transaction):
     for tx in no_memo_transaction:
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
-                await custom_messages.send_unidentified_deposit_msg(channel=channel,deposit_details=tx)
+                await custom_messages.send_unidentified_deposit_msg(channel=channel, deposit_details=tx)
 
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
@@ -81,7 +81,7 @@ def process_tx_with_no_memo(channel,no_memo_transaction):
             print(Fore.YELLOW + 'Unknown processed already')
 
 
-def process_tx_with_memo(msg_channel, memo_transactions):
+async def process_tx_with_memo(msg_channel, memo_transactions):
     for tx in memo_transactions:
         # check if processed if not process them
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
@@ -123,7 +123,7 @@ def process_tx_with_memo(msg_channel, memo_transactions):
             print(Fore.LIGHTCYAN_EX + 'No new legit tx')
 
 
-def process_tx_with_not_registered_memo(channel, no_registered_memo):
+async def process_tx_with_not_registered_memo(channel, no_registered_memo):
     for tx in no_registered_memo:
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
@@ -150,11 +150,11 @@ async def check_stellar_hot_wallet():
         tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions)
         channel = bot.get_channel(id=int(channel_id))
         if tx_with_registered_memo:
-            process_tx_with_memo(msg_channel=channel,memo_transactions=tx_with_registered_memo)
+            await process_tx_with_memo(msg_channel=channel, memo_transactions=tx_with_registered_memo)
         if tx_with_not_registered_memo:
-            process_tx_with_not_registered_memo(channel=channel,no_registered_memo=tx_with_not_registered_memo)
+            await process_tx_with_not_registered_memo(channel=channel, no_registered_memo=tx_with_not_registered_memo)
         if tx_with_no_memo:
-            process_tx_with_no_memo(channel=channel,no_memo_transaction = tx_with_no_memo)
+            await process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
 
         last_checked_pag = new_transactions[-1]["paging_token"]
         print(last_checked_pag)
