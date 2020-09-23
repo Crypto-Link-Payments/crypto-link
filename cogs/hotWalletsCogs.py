@@ -34,7 +34,7 @@ class HotWalletCommands(commands.Cog):
         """
         if ctx.invoked_subcommand is None:
             value = [{'name': f'***{d["command"]}hot stellar*** ',
-                      'value': f"Returns information from wallet RPC on stellar balance"}
+                      'value': "Returns information from wallet RPC on stellar balance"}
                      ]
             await customMessages.embed_builder(ctx, title='Querying hot wallet details',
                                                description="All available commands to operate with hot wallets",
@@ -51,16 +51,16 @@ class HotWalletCommands(commands.Cog):
             title = 'Stellar hot wallet details'
             description = 'Bellow are provided all details on integrated Stellar Wallet'
 
-            list_of_values = [{'name': f'Address',
+            list_of_values = [{'name': 'Address',
                                'value': f"{data['account_id']}"},
-                              {'name': f'Balance',
+                              {'name': 'Balance',
                                'value': f"{data['balances'][0]['balance']} {CONST_STELLAR_EMOJI}"},
-                              {'name': f'In USD $',
+                              {'name': 'In USD $',
                                'value': f"$ {get_usd_value['total']}\n"
                                         f"Rate: {get_usd_value['usd']} $/ {CONST_STELLAR_EMOJI}"},
-                              {'name': f'Buying liabilities',
+                              {'name': 'Buying liabilities',
                                'value': f"{data['balances'][0]['buying_liabilities']} {CONST_STELLAR_EMOJI}"},
-                              {'name': f'Selling liabilities',
+                              {'name': 'Selling liabilities',
                                'value': f"{data['balances'][0]['selling_liabilities']} {CONST_STELLAR_EMOJI}"}
                               ]
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
