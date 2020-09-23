@@ -190,8 +190,8 @@ class CustomMessages:
         await recipient.send(embed=sys_embed)
 
     @staticmethod
-    async def coin_withdrawal_notification(coin, recipient: discord.User, amount, fee, thumbnail, tx_hash, destination,
-                                           link, ledger: int):
+    async def withdrawal_notify(coin, recipient: discord.User, amount, fee, thumbnail, tx_hash, destination,
+                                link, ledger: int):
         notify = discord.Embed(title="Withdrawal Notification",
                                description=f' {coin} withdrawal Successfully processed',
                                colour=discord.Colour.green())

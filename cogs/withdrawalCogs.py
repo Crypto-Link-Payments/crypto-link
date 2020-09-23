@@ -79,7 +79,7 @@ class WithdrawalCommands(commands.Cog):
         fee_in_stroops = int(fee_in_xlm['total'] * (10 ** 7))
         channel_id = notify_channel["stellar"]
         channel = self.bot.get_channel(
-            id=int(channel_id))  # Get the channel wer notification onw ithdrawal will be sent
+            id=int(channel_id))  # Get the channel wer notification on withdrawal will be sent
 
         if check_stellar_address(address=address):
             stroops = (int(amount * (10 ** 7)))
@@ -92,7 +92,7 @@ class WithdrawalCommands(commands.Cog):
 
                     # Confirmation message
                     message_content = f"{ctx.message.author.mention} Current withdrawal fee which will be appended " \
-                                      f"to your withdrawal amout is " \
+                                      f"to your withdrawal amount is " \
                                       f"{round(fee_in_xlm['total'], 7)} {CONST_STELLAR_EMOJI} (${stellar_fee}, " \
                                       f"Rate:{round(fee_in_xlm['usd'], 4)})." \
                                       f"Are you still willing to withdraw? answer with ***yes*** or ***no***"
@@ -132,15 +132,16 @@ class WithdrawalCommands(commands.Cog):
                                 }
 
                                 if stellar.stellar_withdrawal_history(tx_type=1, tx_data=data_new):
-                                    await customMessages.coin_withdrawal_notification(coin='XLM',
-                                                                                      recipient=ctx.message.author,
-                                                                                      tx_hash=data['hash'],
-                                                                                      amount=data_new["amount"],
-                                                                                      fee=f"${stellar_fee}, Rate:{round(fee_in_xlm['usd'], 4)}",
-                                                                                      destination=data['destination'],
-                                                                                      ledger=data['ledger'],
-                                                                                      link=data['explorer'],
-                                                                                      thumbnail=self.bot.user.avatar_url)
+                                    await customMessages.withdrawal_notify(coin='XLM',
+                                                                           recipient=ctx.message.author,
+                                                                           tx_hash=data['hash'],
+                                                                           amount=data_new["amount"],
+                                                                           fee=f"${stellar_fee},"
+                                                                               f" Rate:{round(fee_in_xlm['usd'], 4)}",
+                                                                           destination=data['destination'],
+                                                                           ledger=data['ledger'],
+                                                                           link=data['explorer'],
+                                                                           thumbnail=self.bot.user.avatar_url)
                                     try:
                                         # create withdrawal notification for channel
                                         notify = discord.Embed(title='Stellar Withdrawal Notification',
@@ -221,7 +222,8 @@ class WithdrawalCommands(commands.Cog):
                 else:
                     title = '__Insufficient balance___'
                     message = f'Amount you are willing to withdraw is greater than your current wallet balance.\n' \
-                              f'Wallet balance: {wallet_details["balance"] / 10000000} Stellar Balance {CONST_STELLAR_EMOJI}'
+                              f'Wallet balance: {wallet_details["balance"] / 10000000} Stellar ' \
+                              f'Balance {CONST_STELLAR_EMOJI}'
                     await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                         sys_msg_title=title)
 
@@ -232,7 +234,7 @@ class WithdrawalCommands(commands.Cog):
                                                     sys_msg_title=title)
         else:
             title = 'Withdrawal address error'
-            message = f'{address} is not valis for Stellar. Please reached the address and try again. ' \
+            message = f'{address} is not valid Stellar address. Please verify the address and try again. ' \
                       f'If issue persists\n please contact dev team.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
@@ -248,19 +250,22 @@ class WithdrawalCommands(commands.Cog):
         print(f'ERR WITHDRAW XLM TRIGGERED  : {error}')
 
         if isinstance(error, commands.CheckFailure):
-            message = f'You are either not registered in the system or you have tried to use command over DM with the ' \
-                      f'system itself. Head to one of the channels on community where system is accessible.'
+            message = f'You are either not registered in the system or you have tried to use command' \
+                      f' over DM with the system itself. Head to one of the channels on community' \
+                      f' where system is accessible.'
             title = f'**__Not registered__** :clipboard:'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
         elif isinstance(error, commands.MissingRequiredArgument):
-            message = f'**You have not provided one of the required arguments for the command to work. Command structure' \
-                      f' to initiate withdrawal is {d["command"]}withdraw stellar <amount> <address>'
+            message = f'**You have not provided one of the required arguments for the command ' \
+                      f'to work. Command structure ' \
+                      f'to initiate withdrawal is {d["command"]}withdraw stellar <amount> <address>'
             title = f'**__Missing required argument__** :clipboard:'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
         elif isinstance(error, commands.BadArgument):
-            message = f'**The arguments you have provided do not fit the command style. Be sure to specify appropriate' \
+            message = f'**The arguments you have provided do not fit the command style.' \
+                      f' Be sure to specify appropriate' \
                       f' amount and address format.'
             title = f'**__Bad arguments provided__** :clipboard:'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
