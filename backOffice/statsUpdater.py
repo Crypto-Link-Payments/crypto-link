@@ -28,7 +28,9 @@ class StatsManager(object):
         self.offChainActivities = self.clConnection.CLOffChainStats
 
     def update_user_deposit_stats(self, user_id: int, amount: float, key: str):
-        """Updates users deposit stats"""
+        """
+        Updates users deposit stats
+        """
 
         self.userProfiles.find_one_and_update({"userId": user_id},
                                               {"$inc": {f"{key}.depositsCount": 1,
@@ -88,11 +90,11 @@ class StatsManager(object):
         # special or not
         if special:
             if special == 'emoji':
-                data[f"transactionCounter.emojiTxCount"] = 1
+                data["transactionCounter.emojiTxCount"] = 1
             elif special == 'multiTx':
-                data[f"transactionCounter.multiTxCount"] = 1
+                data["transactionCounter.multiTxCount"] = 1
             elif special == 'rolePurchase':
-                data[f"transactionCounter.rolePurchase"] = 1
+                data["transactionCounter.rolePurchase"] = 1
 
         # Mined or not
         if mined:

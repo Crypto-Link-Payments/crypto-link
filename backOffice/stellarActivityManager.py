@@ -1,16 +1,17 @@
 """
 Class StellarManager is designed to handle off-chain and on-chain activities and store data
 into history
-
 """
+
 import os
 import sys
+
 from pymongo import MongoClient, errors
+
 from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
-
 
 helper = Helpers()
 hot = helper.read_json_file(file_name='hotWallets.json')
@@ -107,7 +108,7 @@ class StellarManager:
         Get users wallet details by unique Discord id.
         """
         result = self.stellarWallets.find_one({"userId": discord_id},
-                                              {"_id":0})
+                                              {"_id": 0})
         if result:
             return result
         else:
