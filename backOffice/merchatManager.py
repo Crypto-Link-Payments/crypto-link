@@ -255,7 +255,7 @@ class MerchantManager:
                                                           {"$inc": {"balance": amount},
                                                            "$currentDate": {"lastModified": True}})
                 return True
-            except errors.PyMongoError as e:
+            except errors.PyMongoError:
                 return False
 
     def add_user_to_payed_roles(self, community_id, community_name, user_id, user_name, start: int, end: int,
@@ -380,8 +380,7 @@ class MerchantManager:
     def delete_all_users_with_role_id(self, community_id: int, role_id: int):
         # TODO integrate into on role remove
         """
-        Delete all entries under active roles in database if community does not have 
-        that role anymore.
+        Delete all entries under active roles in database if community does not have that role anymore.
         """
         try:
             self.applied_users.delete_many({"communityId": community_id, "roleId": role_id})
