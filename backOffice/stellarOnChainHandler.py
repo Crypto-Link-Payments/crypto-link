@@ -18,14 +18,19 @@ secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load 
 public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
 
 
-class StellarWallet():
+class StellarWallet:
+    """
+    Stellar Hot Wallet Handler on chain
+    for live net use self.server = Server(horizon_url="https://horizon.stellar.org")  # Live network
+
+    """
+
     def __init__(self):
         self.public_key = public_details["xlm"]
         self.private_key = secret_details['stellar']
         self.root_keypair = Keypair.from_secret(self.private_key)
         self.root_account = Account(account_id=self.root_keypair.public_key, sequence=1)
         self.server = Server(horizon_url="https://horizon-testnet.stellar.org")  # Testnet
-        # self.server = Server(horizon_url="https://horizon.stellar.org")  # Live network
 
     def __base_fee(self):
         """
@@ -113,19 +118,18 @@ class StellarWallet():
         to_process = list()
         for tx in data['_embedded']['records']:
             # Get transaction envelope
-            if tx['source_account'] != self.public_key:  # Get only incoming transactions
-                if tx['successful'] is True:
-                    tx.pop('_links')
-                    tx.pop('fee_charged')
-                    tx.pop('fee_meta_xdr')
-                    tx.pop('ledger')
-                    tx.pop('max_fee')
-                    tx.pop('operation_count')
-                    tx.pop('result_meta_xdr')
-                    tx.pop('result_xdr')
-                    tx.pop('signatures')
-                    tx['stroop'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
-                    to_process.append(tx)
+            if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
+                tx.pop('_links')
+                tx.pop('fee_charged')
+                tx.pop('fee_meta_xdr')
+                tx.pop('ledger')
+                tx.pop('max_fee')
+                tx.pop('operation_count')
+                tx.pop('result_meta_xdr')
+                tx.pop('result_xdr')
+                tx.pop('signatures')
+                tx['stroop'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
+                to_process.append(tx)
         return to_process
 
     @staticmethod
