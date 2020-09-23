@@ -21,6 +21,9 @@ account_mng = AccountManager()
 d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+CONST_ROLE_CREATION_ERROR = "__Role creation error___"
+CONST_ROLE_STATUS_CHANGE_ERROR = "__Role status change error__"
+CONST_SYSTEM_ERROR = '__System Message error__'
 
 
 class MerchantCommunityOwner(commands.Cog):
@@ -177,40 +180,39 @@ class MerchantCommunityOwner(commands.Cog):
                                                                     color_code=0,
                                                                     destination=1)
                             else:
-                                msg_title = '__Role Creation Error___'
                                 message = f'Role could not be stores into the system at this point. Please try again' \
                                           f' later. We apologize for inconvenience.'
-                                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
+                                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                                                                    message=message,
                                                                     color_code=1,
                                                                     destination=1)
                         else:
-                            msg_title = '__Role Creation Error___'
                             message = 'The amount user will have to pay for role needs to be greater than 0.00$'
-                            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
+                            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                                                                message=message,
                                                                 color_code=1,
                                                                 destination=1)
                     else:
-                        msg_title = '__Role creation error___'
                         message = f'Role with name ***{role_name}*** already exist on the community ' \
                                   f'or in the system and can not be created.'
-                        await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
+                        await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                                                            message=message,
                                                             color_code=1,
                                                             destination=1)
                 else:
-                    msg_title = '__Role creation error___'
                     message = f'Role with name ***{role_name}*** is too long. Max allowed length is 10 characters'
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
+                    await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                                                        message=message,
                                                         color_code=1,
                                                         destination=1)
             else:
-                msg_title = '__Role creation error___'
                 message = f'Role with name ***{role_name}*** includes special characters which are' \
                           f' not allowed. Please repeat the process'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
+                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
+                                                    color_code=1,
                                                     destination=1)
 
         else:
-            msg_title = '__Role creation error___'
             message = f'Role could not be create since the length of the role is either' \
                       f' limitless or expiration time is' \
                       f' not in future. In order to create a role data for week, days hours and minutes needs ' \
@@ -221,7 +223,8 @@ class MerchantCommunityOwner(commands.Cog):
                       f'minute: whole number greater than 0\n' \
                       f'Note: 0 is also acceptable however the sum of all variables needs to be greater than 0 at ' \
                       f'the end. '
-            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
+            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
+                                                color_code=1,
                                                 destination=1)
 
     @merchant.command()
@@ -302,22 +305,22 @@ class MerchantCommunityOwner(commands.Cog):
                     await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                         destination=1)
                 else:
-                    title = '__Role status change error__'
                     message = 'Role could not be deactivated, please try again later. Please try again. If the issue ' \
                               'persists, contact one staff. '
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+                    await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE_ERROR,
+                                                        message=message, color_code=1,
                                                         destination=1)
 
             else:
-                title = '__Role status change error__'
                 message = f'Role {role} has been already deactivate. '
-                await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE_ERROR,
+                                                    message=message, color_code=1,
                                                     destination=1)
         else:
-            title = '__Role status change error__'
             message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
                       f'{d["command"]} monetize community_roles to obtain all roles on the community'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE_ERROR, message=message,
+                                                color_code=1,
                                                 destination=1)
 
     @merchant.command()
@@ -344,8 +347,8 @@ class MerchantCommunityOwner(commands.Cog):
                                                         destination=1)
                 else:
                     title = '__Role status change error__'
-                    message = 'Role could not be re-activated, please try again later. Please try again. If the issue ' \
-                              'persists, contact one staff. '
+                    message = 'Role could not be re-activated, please try again later. Please try again. If the ' \
+                              'issue persists, contact one staff. '
                     await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
                                                         destination=1)
             else:
@@ -535,26 +538,23 @@ class MerchantCommunityOwner(commands.Cog):
                         await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                             sys_msg_title=sys_msg_title)
                 else:
-                    sys_msg_title = '__System Message error__'
                     message = 'There has been an error while trying to withdraw total balance from Stellar Merchant ' \
                               'Community Wallet. Please try again later and if the issue persists contact support ' \
                               'staff.'
                     await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                        sys_msg_title=sys_msg_title)
+                                                        sys_msg_title=CONST_SYSTEM_ERROR)
             else:
-                sys_msg_title = '__System Message error__'
                 message = f'Fees are currently greater than the balance amount to initiate withdrawal' \
                           f'Current Balance is {balance / 10000000} {CONST_STELLAR_EMOJI} while ' \
                           f'fee is {total_xlm}{CONST_STELLAR_EMOJI}'
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                    sys_msg_title=sys_msg_title)
+                                                    sys_msg_title=CONST_SYSTEM_ERROR)
         else:
-            sys_msg_title = '__System Message error__'
             message = f'You have insufficient balance in Stellar Merchant Community wallet, to initiate withdrawal ' \
                       f'system. Current minimum balance for withdrawal is set to {total_xlm} {CONST_STELLAR_EMOJI}' \
                       f' XLM and your balance is {balance / 10000000} {CONST_STELLAR_EMOJI}'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=sys_msg_title)
+                                                sys_msg_title=CONST_SYSTEM_ERROR)
 
     @create_role.error
     async def create_role_on_error(self, ctx, error):
