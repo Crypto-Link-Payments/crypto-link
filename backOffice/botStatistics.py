@@ -4,7 +4,9 @@ Script to handle statistics of the bot
 
 import os
 import sys
+
 from pymongo import MongoClient, errors
+
 from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -12,14 +14,19 @@ sys.path.append(project_path)
 
 helper = Helpers()
 d = helper.read_json_file(file_name='botSetup.json')
+CONST_CURRENT_DATE='$currentDate'
 
 
 class BotStatsManager(object):
+    """
+    Class handling bot statistics
+    """
+
     def __init__(self):
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
-        self.botStuff = self.connection['CryptoLink']
-        self.chainActivities = self.botStuff.CLOnChainStats
-        self.offChainActivities = self.botStuff.CLOffChainStats
+        self.bot_stuff = self.connection['CryptoLink']
+        self.chain_activities = self.bot_stuff.CLOnChainStats
+        self.off_chain_activities = self.bot_stuff.CLOffChainStats
 
     def update_chain_activity_stats(self, type_of: str, ticker: str, amount: int):
         """
@@ -28,15 +35,15 @@ class BotStatsManager(object):
         try:
             if ticker == 'stellar':
                 if type_of == "deposit":
-                    self.chainActivities.update_one({"ticker": "xlm"},
-                                                    {"$inc": {"depositCount": 1,
-                                                              "depositAmount": amount},
-                                                     "$currentDate": {"lastModified": True}})
+                    self.chain_activities.update_one({"ticker": "xlm"},
+                                                     {"$inc": {"depositCount": 1,
+                                                               "depositAmount": amount},
+                                                      "$currentDate": {"lastModified": True}})
                 elif type_of == "withdrawal":
-                    self.chainActivities.update_one({"ticker": "xlm"},
-                                                    {"$inc": {"withdrawalCount": 1,
-                                                              "withdrawalAmount": amount},
-                                                     "$currentDate": {"lastModified": True}})
+                    self.chain_activities.update_one({"ticker": "xlm"},
+                                                     {"$inc": {"withdrawalCount": 1,
+                                                               "withdrawalAmount": amount},
+                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
             return True
         except errors.PyMongoError:
             return False
@@ -48,10 +55,10 @@ class BotStatsManager(object):
         """
         try:
             if ticker == 'stellar':
-                self.offChainActivities.update_one({"ticker": "xlm"},
-                                                   {"$inc": {"transactionCount": 1,
-                                                             "offChainMoved": amount},
-                                                    "$currentDate": {"lastModified": True}})
+                self.off_chain_activities.update_one({"ticker": "xlm"},
+                                                     {"$inc": {"transactionCount": 1,
+                                                               "offChainMoved": amount},
+                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
             return True
         except errors.PyMongoError:
             return False
@@ -60,9 +67,9 @@ class BotStatsManager(object):
         """
         Get all bot stats on request
         """
-        off_chain_xlm = self.offChainActivities.find_one({"ticker": "xlm"},
-                                                        {"_id": 0})
-        on_chain_xlm = self.chainActivities.find_one({"ticker": "xlm"},
+        off_chain_xlm = self.off_chain_activities.find_one({"ticker": "xlm"},
+                                                           {"_id": 0})
+        on_chain_xlm = self.chain_activities.find_one({"ticker": "xlm"},
                                                       {"_id": 0})
 
         data = {"xlm": {"ofChain": off_chain_xlm,
