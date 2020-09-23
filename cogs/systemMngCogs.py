@@ -31,6 +31,9 @@ extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs'
 
 class BotManagementCommands(commands.Cog):
     def __init__(self, bot):
+        """
+        Passing discord bot instance
+        """
         self.bot = bot
 
     @commands.group()
