@@ -324,7 +324,6 @@ async def check_merchant_licences():
     else:
         print(Fore.CYAN + 'No communities with overdue license\n'
                           ' ===================================')
-    return
 
 
 def start_scheduler():
