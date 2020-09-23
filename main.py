@@ -180,7 +180,7 @@ async def check_expired_roles():
             mem_role_id = mem['roleId']
             mem_role_community_id = mem['communityId']
 
-            # Check if community where role was created still has bot 
+            # Check if community where role was created still has bot
             if [guild.id for guild in bot_guilds if mem_role_community_id == guild.id]:
                 # get guild and member
                 guild = bot.get_guild(id=mem_role_community_id)

@@ -1,7 +1,3 @@
-"""
-File responsible to deal with the database of users
-"""
-
 import os
 import sys
 
