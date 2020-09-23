@@ -133,7 +133,6 @@ class BotWalletCommands(commands.Cog):
                         pass
                     else:
                         print(Fore.RED + "could not store in history")
-                        pass
 
                     # notification to corp account discord channel
                     stellar_channel_id = auto_channels['stellar']
