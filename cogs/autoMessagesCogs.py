@@ -30,6 +30,9 @@ class AutoFunctions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
+        """
+        Global error for on command error
+        """
         if isinstance(error, commands.CommandNotFound):
             title = 'System Command Error'
             message = f':no_entry: Sorry, this command does not exist! Please' \
@@ -46,14 +49,14 @@ class AutoFunctions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
-        """Deletes command executed by user from the channel"""
+        """
+        global function activated everytime when command is executed
+        """
         if isinstance(ctx.message.channel, TextChannel):
             try:
                 await ctx.message.delete()
             except Exception as e:
                 print(f'Bot could not delete command from channel: {e}')
-        else:
-            pass
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -102,16 +105,13 @@ class AutoFunctions(commands.Cog):
                 await member.send(embed=join_info)
             except commands.NoPrivateMessage:
                 pass
-        else:
-            pass
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         """
         Clean up process once member leaves the guild
-        Args:
-            member ([type]): [description]
         """
+
         if not member.bot:
             print(Fore.LIGHTYELLOW_EX + f'{member} left {member.guild}... Notifying him on funds')
 
@@ -125,15 +125,11 @@ class AutoFunctions(commands.Cog):
                                     inline=False)
             await member.send(embed=warning_embed)
             print(f'==============DONE=================')
-        else:
-            pass
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         """
         Triggering message to system channel when bot joins new guild
-        Args:
-            guild ([discord.Guild])
         """
         print(Fore.LIGHTMAGENTA_EX + f'{self.bot.user} joined {guild} ')
 
@@ -177,8 +173,6 @@ class AutoFunctions(commands.Cog):
     async def on_guild_remove(self, guild):
         """
         Triggered when bot is removed from guild and system message is sent to channel on removal
-        Args:
-            guild (discord.Guild): [description]
         """
         print(Fore.LIGHTMAGENTA_EX + f'{self.bot.user} left {guild} ')
         removed_guild = Embed(title='__GUILD REMOVED!!!!__',
