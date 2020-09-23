@@ -143,104 +143,104 @@ class UserAccountCommands(commands.Cog):
                            description='Bellow are latest details on your Stellar Lumen Crypto Link wallet',
                            colour=Colour.light_grey(),
                            timestamp=utc_now)
-        xlm_wallet.add_field(name=f'Hot Wallet Address',
+        xlm_wallet.add_field(name='Hot Wallet Address',
                              value=f'```{hot_wallets["xlm"]}```',
                              inline=False)
-        xlm_wallet.add_field(name=f'Deposit Memo',
+        xlm_wallet.add_field(name='Deposit Memo',
                              value=f'{stellar_wallet_data["depositId"]}',
                              inline=False)
-        xlm_wallet.add_field(name=f'Stellar Lumen (XLM) Balance',
+        xlm_wallet.add_field(name='Stellar Lumen (XLM) Balance',
                              value=f'{stellar_balance} {CONST_STELLAR_EMOJI}',
                              inline=False)
-        xlm_wallet.add_field(name=f'Wallet Conversions',
+        xlm_wallet.add_field(name='Wallet Conversions',
                              value=f'$ {in_usdt}\n'
                                    f'€ {in_eur}\n'
                                    f'₿ {in_btc}\n'
                                    f'Ξ {in_eth}',
                              inline=True)
-        xlm_wallet.add_field(name=f'Market Rate',
+        xlm_wallet.add_field(name='Market Rate',
                              value=f'$ {rates["stellar"]["usd"]}\n'
                                    f'€ {rates["stellar"]["eur"]}\n'
                                    f'₿ {scientific_conversion(rates["stellar"]["btc"], 8)}\n'
                                    f'Ξ {rates["stellar"]["eth"]}\n',
                              inline=True)
 
-        xlm_wallet.add_field(name=f'Σ Deposits',
+        xlm_wallet.add_field(name='Σ Deposits',
                              value=f'{stellar_stats["depositsCount"]}',
                              inline=False)
-        xlm_wallet.add_field(name=f'Σ Total Deposited',
+        xlm_wallet.add_field(name='Σ Total Deposited',
                              value=f'{stellar_stats["totalDeposited"]}')
-        xlm_wallet.add_field(name=f'Σ Withdrawals',
+        xlm_wallet.add_field(name='Σ Withdrawals',
                              value=f'{stellar_stats["withdrawalsCount"]}',
                              inline=True)
-        xlm_wallet.add_field(name=f'Σ Withdrawn',
+        xlm_wallet.add_field(name='Σ Withdrawn',
                              value=f'{stellar_stats["totalWithdrawn"]}',
                              inline=True)
-        xlm_wallet.add_field(name=f'Σ XLM Sent',
+        xlm_wallet.add_field(name='Σ XLM Sent',
                              value=f'{stellar_stats["sent"]}')
-        xlm_wallet.add_field(name=f'Σ XLM Received',
+        xlm_wallet.add_field(name='Σ XLM Received',
                              value=f'{stellar_stats["received"]}')
-        xlm_wallet.add_field(name=f'Σ Public Tx',
+        xlm_wallet.add_field(name='Σ Public Tx',
                              value=f'{stellar_stats["publicTxCount"]}',
                              inline=True)
-        xlm_wallet.add_field(name=f'Σ Private Tx',
+        xlm_wallet.add_field(name='Σ Private Tx',
                              value=f'{stellar_stats["privateTxCount"]}',
                              inline=True)
 
         await ctx.author.send(embed=xlm_wallet)
 
-        token_wallet = Embed(title=f':sweat_drops: Crypto Link Token Details :sweat_drops:',
+        token_wallet = Embed(title=':sweat_drops: Crypto Link Token Details :sweat_drops:',
                              description='Bellow are latest details on your Crypto Link Token wallet',
                              colour=Colour.blue(),
                              timestamp=utc_now)
-        token_wallet.add_field(name=f'Hot Wallet Address',
+        token_wallet.add_field(name='Hot Wallet Address',
                                value=f'```{hot_wallets["xlm"]}```',
                                inline=False)
-        token_wallet.add_field(name=f'Deposit Memo',
+        token_wallet.add_field(name='Deposit Memo',
                                value=f'{stellar_wallet_data["depositId"]}',
                                inline=False)
-        token_wallet.add_field(name=f'Crypto Link Token Balance',
+        token_wallet.add_field(name='Crypto Link Token Balance',
                                value=f'{stellar_balance} :sweat_drops:',
                                inline=False)
 
-        token_wallet.add_field(name=f'Σ Deposits',
+        token_wallet.add_field(name='Σ Deposits',
                                value=f'{clCoin_stats["depositsCount"]}')
-        token_wallet.add_field(name=f'Σ Total Deposited',
+        token_wallet.add_field(name='Σ Total Deposited',
                                value=f'{clCoin_stats["totalDeposited"]}')
-        token_wallet.add_field(name=f'Σ Withdrawals',
+        token_wallet.add_field(name='Σ Withdrawals',
                                value=f'{clCoin_stats["withdrawalsCount"]}',
                                inline=True)
-        token_wallet.add_field(name=f'Σ Withdrawn',
+        token_wallet.add_field(name='Σ Withdrawn',
                                value=f'{clCoin_stats["totalWithdrawn"]}',
                                inline=True)
-        token_wallet.add_field(name=f'Σ :sweat_drops: Sent',
+        token_wallet.add_field(name='Σ :sweat_drops: Sent',
                                value=f'{clCoin_stats["sent"]}')
-        token_wallet.add_field(name=f'Σ :sweat_drops: Received',
+        token_wallet.add_field(name='Σ :sweat_drops: Received',
                                value=f'{clCoin_stats["received"]}')
-        token_wallet.add_field(name=f':pick: Mined',
+        token_wallet.add_field(name=':pick: Mined',
                                value=f'{clCoin_stats["mined"]}')
-        token_wallet.add_field(name=f'Σ Public Tx',
+        token_wallet.add_field(name='Σ Public Tx',
                                value=f'{clCoin_stats["publicTxCount"]}',
                                inline=True)
-        token_wallet.add_field(name=f'Σ Private Tx',
+        token_wallet.add_field(name='Σ Private Tx',
                                value=f'{clCoin_stats["privateTxCount"]}',
                                inline=True)
         await ctx.author.send(embed=token_wallet)
 
         membership_statas = account_details["membershipStats"]
 
-        merchant_info = Embed(title=f':convenience_store: Membership Statistics :convenience_store: ',
+        merchant_info = Embed(title=':convenience_store: Membership Statistics :convenience_store: ',
                               description='Statistics on Merchant System Usage and Role purchases',
                               colour=Colour.orange(),
                               timestamp=utc_now)
-        merchant_info.add_field(name=f'Roles purchased',
+        merchant_info.add_field(name='Roles purchased',
                                 value=f'{membership_statas["rolePurchased"]}',
                                 inline=False)
-        merchant_info.add_field(name=f'USD Spent',
+        merchant_info.add_field(name='USD Spent',
                                 value=f'${membership_statas["spentOnRolesUsd"]}')
-        merchant_info.add_field(name=f'CL Token Spent',
+        merchant_info.add_field(name='CL Token Spent',
                                 value=f'{membership_statas["spentOnRolesCl"]} :sweat_drops:')
-        merchant_info.add_field(name=f'XLM Spent',
+        merchant_info.add_field(name='XLM Spent',
                                 value=f'{membership_statas["spentOnRolesXlm"]} {CONST_STELLAR_EMOJI}')
         await ctx.author.send(embed=merchant_info)
 
