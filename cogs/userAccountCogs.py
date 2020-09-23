@@ -227,21 +227,21 @@ class UserAccountCommands(commands.Cog):
                                inline=True)
         await ctx.author.send(embed=token_wallet)
 
-        membership_statas = account_details["membershipStats"]
+        membership_stats = account_details["membershipStats"]
 
         merchant_info = Embed(title=':convenience_store: Membership Statistics :convenience_store: ',
                               description='Statistics on Merchant System Usage and Role purchases',
                               colour=Colour.orange(),
                               timestamp=utc_now)
         merchant_info.add_field(name='Roles purchased',
-                                value=f'{membership_statas["rolePurchased"]}',
+                                value=f'{membership_stats["rolePurchased"]}',
                                 inline=False)
         merchant_info.add_field(name='USD Spent',
-                                value=f'${membership_statas["spentOnRolesUsd"]}')
+                                value=f'${membership_stats["spentOnRolesUsd"]}')
         merchant_info.add_field(name='CL Token Spent',
-                                value=f'{membership_statas["spentOnRolesCl"]} :sweat_drops:')
+                                value=f'{membership_stats["spentOnRolesCl"]} :sweat_drops:')
         merchant_info.add_field(name='XLM Spent',
-                                value=f'{membership_statas["spentOnRolesXlm"]} {CONST_STELLAR_EMOJI}')
+                                value=f'{membership_stats["spentOnRolesXlm"]} {CONST_STELLAR_EMOJI}')
         await ctx.author.send(embed=merchant_info)
 
     @commands.command()
