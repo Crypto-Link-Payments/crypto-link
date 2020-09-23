@@ -180,214 +180,203 @@ class ConsumerCommands(commands.Cog):
         """
         ticker = 'xlm'
         tickers = ['xlm']
-        if not re.search("[~!#$%^&*()_+{}:;\']", ticker):
-            if merchant_manager.check_if_community_exist(community_id=ctx.message.guild.id):
-                if ticker in tickers:
-                    role_details = merchant_manager.find_role_details(role_id=role.id)
-                    # Check if community has activated merchant
-                    if role_details:
-                        # Check role status
-                        if role_details['status'] == 'active':
-                            # Check if user has already applied for the role
-                            if role.id not in [author_role.id for author_role in ctx.message.author.roles]:
-                                convert_to_dollar = role_details["pennyValues"] / 100  # Convert to $
-                                coin_usd_price = self.get_coin_usd_value(ticker)
-                                role_value_crypto = float(convert_to_dollar / coin_usd_price)
-                                role_rounded = round(role_value_crypto, self.get_round(ticker=ticker))
-                                # in atomic
-                                crypto_price_atomic = self.make_atomic(amount=role_value_crypto, coin_name=ticker)
-                                balance = account_mng.get_balance_based_on_ticker(user_id=int(ctx.message.author.id),
-                                                                                  ticker=ticker)
-                                # Check if user has sufficient balance
-                                if balance >= crypto_price_atomic:
-                                    # Update the community wallet
-                                    if merchant_manager.modify_funds_in_community_merchant_wallet(
-                                            community_id=int(ctx.message.guild.id),
-                                            amount=int(crypto_price_atomic),
-                                            direction=0,
-                                            wallet_tick=ticker):
+        if not re.search("[~!#$%^&*()_+{}:;\']", ticker) and ticker in tickers:
+            role_details = merchant_manager.find_role_details(role_id=role.id)
+            # Check if community has activated merchant
+            if role_details:
+                # Check role status
+                if role_details['status'] == 'active':
+                    # Check if user has already applied for the role
+                    if role.id not in [author_role.id for author_role in ctx.message.author.roles]:
+                        convert_to_dollar = role_details["pennyValues"] / 100  # Convert to $
+                        coin_usd_price = self.get_coin_usd_value(ticker)
+                        role_value_crypto = float(convert_to_dollar / coin_usd_price)
+                        role_rounded = round(role_value_crypto, self.get_round(ticker=ticker))
+                        # in atomic
+                        crypto_price_atomic = self.make_atomic(amount=role_value_crypto, coin_name=ticker)
+                        balance = account_mng.get_balance_based_on_ticker(user_id=int(ctx.message.author.id),
+                                                                          ticker=ticker)
+                        # Check if user has sufficient balance
+                        if balance >= crypto_price_atomic:
+                            # Update the community wallet
+                            if merchant_manager.modify_funds_in_community_merchant_wallet(
+                                    community_id=int(ctx.message.guild.id),
+                                    amount=int(crypto_price_atomic),
+                                    direction=0,
+                                    wallet_tick=ticker):
 
-                                        if account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
-                                                                                  ticker=ticker,
-                                                                                  direction=1,
-                                                                                  amount=crypto_price_atomic):
+                                if account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
+                                                                          ticker=ticker,
+                                                                          direction=1,
+                                                                          amount=crypto_price_atomic):
 
-                                            # Assign the role to the user
-                                            await ctx.message.author.add_roles(role,
-                                                                               reason='you just got yourself a role')
+                                    # Assign the role to the user
+                                    await ctx.message.author.add_roles(role,
+                                                                       reason='you just got yourself a role')
 
-                                            emoji = self.get_emoji(ticker=ticker)
+                                    emoji = self.get_emoji(ticker=ticker)
 
-                                            # Current time
-                                            start = datetime.utcnow()
+                                    # Current time
+                                    start = datetime.utcnow()
 
-                                            # get the timedelta from the role description
-                                            td = timedelta(weeks=role_details['weeks'],
-                                                           days=role_details['days'],
-                                                           hours=role_details['hours'],
-                                                           minutes=role_details['minutes'])
+                                    # get the timedelta from the role description
+                                    td = timedelta(weeks=role_details['weeks'],
+                                                   days=role_details['days'],
+                                                   hours=role_details['hours'],
+                                                   minutes=role_details['minutes'])
 
-                                            # calculate future date
-                                            end = start + td
-                                            gap = end - start
-                                            unix_today = (int(time.mktime(start.timetuple())))
-                                            unix_future = (int(time.mktime(end.timetuple())))
-                                            if merchant_manager.add_user_to_payed_roles(
-                                                    community_id=ctx.message.guild.id,
-                                                    community_name=ctx.message.guild.name,
-                                                    user_id=ctx.message.author.id,
-                                                    user_name=str(ctx.message.author),
-                                                    start=unix_today,
-                                                    end=unix_future,
-                                                    role_id=role.id,
-                                                    role_name=role.name,
-                                                    currency=ticker,
-                                                    currency_value_atom=crypto_price_atomic,
-                                                    pennies=int(
-                                                        role_details["pennyValues"])):
+                                    # calculate future date
+                                    end = start + td
+                                    gap = end - start
+                                    unix_today = (int(time.mktime(start.timetuple())))
+                                    unix_future = (int(time.mktime(end.timetuple())))
+                                    if merchant_manager.add_user_to_payed_roles(
+                                            community_id=ctx.message.guild.id,
+                                            community_name=ctx.message.guild.name,
+                                            user_id=ctx.message.author.id,
+                                            user_name=str(ctx.message.author),
+                                            start=unix_today,
+                                            end=unix_future,
+                                            role_id=role.id,
+                                            role_name=role.name,
+                                            currency=ticker,
+                                            currency_value_atom=crypto_price_atomic,
+                                            pennies=int(
+                                                role_details["pennyValues"])):
 
-                                                # Send notification to user
-                                                role_embed = discord.Embed(name='Membership Status Information',
-                                                                           title='Congratulations on '
-                                                                                 'obtaining the role',
-                                                                           description='Details on obtained role',
-                                                                           colour=discord.Colour.gold())
-                                                role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
-                                                role_embed.add_field(name='Community',
-                                                                     value=f'{ctx.message.guild}  \n'
-                                                                           f'ID:{ctx.message.guild.id}',
-                                                                     inline=False)
-                                                role_embed.add_field(name='Role:',
-                                                                     value=f'{role.name}  ID:{role.id}',
-                                                                     inline=False)
-                                                role_embed.add_field(name='Role Expiration',
-                                                                     value=f'{end} (in: {gap})',
-                                                                     inline=False)
-                                                role_embed.add_field(name='Role Value',
-                                                                     value=f'{convert_to_dollar} $ \n'
-                                                                           f'{role_rounded} {emoji}\n'
-                                                                           f'{coin_usd_price} / 1{emoji}',
-                                                                     inline=False)
-                                                try:
-                                                    await ctx.author.send(embed=role_embed)
-                                                except Exception:
-                                                    await ctx.channel.send(embed=role_embed, delete_after=10)
+                                        # Send notification to user
+                                        role_embed = discord.Embed(name='Membership Status Information',
+                                                                   title='Congratulations on '
+                                                                         'obtaining the role',
+                                                                   description='Details on obtained role',
+                                                                   colour=discord.Colour.gold())
+                                        role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
+                                        role_embed.add_field(name='Community',
+                                                             value=f'{ctx.message.guild}  \n'
+                                                                   f'ID:{ctx.message.guild.id}',
+                                                             inline=False)
+                                        role_embed.add_field(name='Role:',
+                                                             value=f'{role.name}  ID:{role.id}',
+                                                             inline=False)
+                                        role_embed.add_field(name='Role Expiration',
+                                                             value=f'{end} (in: {gap})',
+                                                             inline=False)
+                                        role_embed.add_field(name='Role Value',
+                                                             value=f'{convert_to_dollar} $ \n'
+                                                                   f'{role_rounded} {emoji}\n'
+                                                                   f'{coin_usd_price} / 1{emoji}',
+                                                             inline=False)
+                                        try:
+                                            await ctx.author.send(embed=role_embed)
+                                        except Exception:
+                                            await ctx.channel.send(embed=role_embed, delete_after=10)
 
-                                                # Inform the owner to DM about having community wallet credited
-                                                owner = ctx.message.guild.owner
-                                                incoming_funds = discord.Embed(name='__Merchant system funds credited',
-                                                                               title='__Incoming funds to corporate '
-                                                                                     'wallet___',
-                                                                               description='You have received this '
-                                                                                           'notification'
-                                                                                           ' because of new funds '
-                                                                                           'being inbound '
-                                                                                           ' through the merchant '
-                                                                                           'service. '
-                                                                                           'Details are presented'
-                                                                                           ' below',
-                                                                               colour=discord.Colour.green())
-                                                incoming_funds.add_field(name='Amount',
-                                                                         value=f'{convert_to_dollar} $ \n'
-                                                                               f'{role_rounded} {emoji}\n'
-                                                                               f'{coin_usd_price}$ /  {emoji}', )
-                                                incoming_funds.add_field(name='User Details',
-                                                                         value=f"User: {ctx.message.author}\n"
-                                                                               f"Id: {ctx.message.author.id}",
-                                                                         inline=False)
-                                                incoming_funds.add_field(name='Role Obtained',
-                                                                         value=f"Name: {role.name}\n"
-                                                                               f"Id: {role.id}\n"
-                                                                               f"Duration:\n"
-                                                                               f"Weeks: {role_details['weeks']}\n"
-                                                                               f"Days: {role_details['days']}\n"
-                                                                               f"Hours: {role_details['hours']}\n"
-                                                                               f"Minutes: {role_details['minutes']}",
-                                                                         inline=False)
+                                        # Inform the owner to DM about having community wallet credited
+                                        owner = ctx.message.guild.owner
+                                        incoming_funds = discord.Embed(name='__Merchant system funds credited',
+                                                                       title='__Incoming funds to corporate '
+                                                                             'wallet___',
+                                                                       description='You have received this '
+                                                                                   'notification'
+                                                                                   ' because of new funds '
+                                                                                   'being inbound '
+                                                                                   ' through the merchant '
+                                                                                   'service. '
+                                                                                   'Details are presented'
+                                                                                   ' below',
+                                                                       colour=discord.Colour.green())
+                                        incoming_funds.add_field(name='Amount',
+                                                                 value=f'{convert_to_dollar} $ \n'
+                                                                       f'{role_rounded} {emoji}\n'
+                                                                       f'{coin_usd_price}$ /  {emoji}', )
+                                        incoming_funds.add_field(name='User Details',
+                                                                 value=f"User: {ctx.message.author}\n"
+                                                                       f"Id: {ctx.message.author.id}",
+                                                                 inline=False)
+                                        incoming_funds.add_field(name='Role Obtained',
+                                                                 value=f"Name: {role.name}\n"
+                                                                       f"Id: {role.id}\n"
+                                                                       f"Duration:\n"
+                                                                       f"Weeks: {role_details['weeks']}\n"
+                                                                       f"Days: {role_details['days']}\n"
+                                                                       f"Hours: {role_details['hours']}\n"
+                                                                       f"Minutes: {role_details['minutes']}",
+                                                                 inline=False)
 
-                                                await owner.send(embed=incoming_funds)
+                                        await owner.send(embed=incoming_funds)
 
-                                                # Merchant system notification
-                                                disc_channel = self.bot.get_channel(id=int(notf_channels['merchant']))
-                                                role_notf = discord.Embed(title='Role purchased',
-                                                                          description="Role has been obtained through "
-                                                                                      "the Merchant "
-                                                                                      "system",
-                                                                          color=discord.Colour.gold())
-                                                role_notf.add_field(name='Community details',
-                                                                    value=f'Community:\n{ctx.message.guild} '
-                                                                          f'(ID:{ctx.message.guild.id})\n'
-                                                                          f'Owner: \n{ctx.message.guild.owner}\n'
-                                                                          f'{ctx.message.guild.owner.id}')
-                                                role_notf.add_field(name='Time of purchase',
-                                                                    value=f"{start} (UTC)",
-                                                                    inline=False)
-                                                role_notf.add_field(name='Customer',
-                                                                    value=f"User: {ctx.message.author}\n"
-                                                                          f"Id: {ctx.message.author.id}",
-                                                                    inline=False)
-                                                role_notf.add_field(name='Amount',
-                                                                    value=f'{convert_to_dollar} $ \n'
-                                                                          f'{role_rounded} {emoji}\n'
-                                                                          f'{coin_usd_price}$/ 1{emoji}',
-                                                                    inline=False)
-                                                await disc_channel.send(embed=role_notf)
+                                        # Merchant system notification
+                                        disc_channel = self.bot.get_channel(id=int(notf_channels['merchant']))
+                                        role_notf = discord.Embed(title='Role purchased',
+                                                                  description="Role has been obtained through "
+                                                                              "the Merchant "
+                                                                              "system",
+                                                                  color=discord.Colour.gold())
+                                        role_notf.add_field(name='Community details',
+                                                            value=f'Community:\n{ctx.message.guild} '
+                                                                  f'(ID:{ctx.message.guild.id})\n'
+                                                                  f'Owner: \n{ctx.message.guild.owner}\n'
+                                                                  f'{ctx.message.guild.owner.id}')
+                                        role_notf.add_field(name='Time of purchase',
+                                                            value=f"{start} (UTC)",
+                                                            inline=False)
+                                        role_notf.add_field(name='Customer',
+                                                            value=f"User: {ctx.message.author}\n"
+                                                                  f"Id: {ctx.message.author.id}",
+                                                            inline=False)
+                                        role_notf.add_field(name='Amount',
+                                                            value=f'{convert_to_dollar} $ \n'
+                                                                  f'{role_rounded} {emoji}\n'
+                                                                  f'{coin_usd_price}$/ 1{emoji}',
+                                                            inline=False)
+                                        await disc_channel.send(embed=role_notf)
 
-                                        else:
-                                            message = f'Error while trying to deduct funds from user'
-                                            title = '__User wallet update error__'
-                                            await customMessages.system_message(ctx=ctx, message=message,
-                                                                                sys_msg_title=title,
-                                                                                color_code=1, destination=1)
-                                    else:
-                                        message = f'Error while trying to update fund in community Merchant wallet'
-                                        title = '__Merchant wallet update error __'
-                                        await customMessages.system_message(ctx=ctx, message=message,
-                                                                            sys_msg_title=title,
-                                                                            color_code=1, destination=1)
                                 else:
-                                    message = f'You have insufficient balance in your wallet to purchase this ' \
-                                              f'role. Please' \
-                                              f'top-up your account with desired currency.'
-                                    title = '__Insufficient balance __'
-                                    await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title,
-                                                                        color_code=1, destination=0)
-
+                                    message = f'Error while trying to deduct funds from user'
+                                    title = '__User wallet update error__'
+                                    await customMessages.system_message(ctx=ctx, message=message,
+                                                                        sys_msg_title=title,
+                                                                        color_code=1, destination=1)
                             else:
-                                message = f'You have already obtained role with name ***{role}***. In order ' \
-                                          f'to extend the role you will need to first wait that role expires.'
+                                message = f'Error while trying to update fund in community Merchant wallet'
+                                title = '__Merchant wallet update error __'
                                 await customMessages.system_message(ctx=ctx, message=message,
-                                                                    sys_msg_title=CONST_MERCHANT_ROLE_ERROR,
-                                                                    color_code=1, destination=0)
+                                                                    sys_msg_title=title,
+                                                                    color_code=1, destination=1)
                         else:
-                            message = f'Role {role} is deactivated at this moment on  {ctx.message.guild} and can ' \
-                                      f'' \
-                                      f'not ' \
-                                      f'be obtained.' \
-                                      f' Please contact the owner of the community or use ***{d["command"]}membership' \
-                                      f' roles*** to ' \
-                                      f'familiarize yourself with all available roles and their status'
-                            await customMessages.system_message(ctx=ctx, message=message,
-                                                                sys_msg_title=CONST_MERCHANT_ROLE_ERROR,
-                                                                color_code=1,
-                                                                destination=1)
+                            message = f'You have insufficient balance in your wallet to purchase this ' \
+                                      f'role. Please' \
+                                      f'top-up your account with desired currency.'
+                            title = '__Insufficient balance __'
+                            await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title,
+                                                                color_code=1, destination=0)
+
                     else:
-                        message = f'Role {role} is not monetized on {ctx.message.guild}. Please use ***{d["command"]}' \
-                                  f'membership roles*** ' \
-                                  f' to find all available monetized roles on the community.'
+                        message = f'You have already obtained role with name ***{role}***. In order ' \
+                                  f'to extend the role you will need to first wait that role expires.'
                         await customMessages.system_message(ctx=ctx, message=message,
-                                                            sys_msg_title=CONST_MERCHANT_ROLE_ERROR, color_code=1,
-                                                            destination=1)
+                                                            sys_msg_title=CONST_MERCHANT_ROLE_ERROR,
+                                                            color_code=1, destination=0)
                 else:
-                    message = f'Only allowed currencies are Stellar Lumen (xlm) and Monero (xmr)'
-                    title = '__Merchant System Notification__'
-                    await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title, color_code=1,
+                    message = f'Role {role} is deactivated at this moment on  {ctx.message.guild} and can ' \
+                              f'' \
+                              f'not ' \
+                              f'be obtained.' \
+                              f' Please contact the owner of the community or use ***{d["command"]}membership' \
+                              f' roles*** to ' \
+                              f'familiarize yourself with all available roles and their status'
+                    await customMessages.system_message(ctx=ctx, message=message,
+                                                        sys_msg_title=CONST_MERCHANT_ROLE_ERROR,
+                                                        color_code=1,
                                                         destination=1)
             else:
-                message = f'***{ctx.message.guild} does not have Merchant System Activated***'
-                title = '__Merchant System Notification__'
-                await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title, color_code=1,
+                message = f'Role {role} is not monetized on {ctx.message.guild}. Please use ***{d["command"]}' \
+                          f'membership roles*** ' \
+                          f' to find all available monetized roles on the community.'
+                await customMessages.system_message(ctx=ctx, message=message,
+                                                    sys_msg_title=CONST_MERCHANT_ROLE_ERROR, color_code=1,
                                                     destination=1)
+
         else:
             msg_title = '__Role creation error___'
             message = f'Ticker you have provided ***{ticker}*** includes special characters which are not allowed.' \
