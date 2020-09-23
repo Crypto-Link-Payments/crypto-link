@@ -36,11 +36,11 @@ class AutoFunctions(commands.Cog):
                                                  sys_msg_title=title)
 
         else:
-            print(f'=============BUG===========')
+            print('=============BUG===========')
             print(ctx.message.author)
             print(error)
             print(ctx.message.content)
-            print(f'=============BUG===========')
+            print('=============BUG===========')
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
