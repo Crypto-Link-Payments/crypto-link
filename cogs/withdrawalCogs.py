@@ -1,6 +1,5 @@
 import time
 
-import discord
 from discord.ext import commands
 
 from backOffice.botStatistics import BotStatsManager
@@ -113,8 +112,6 @@ class WithdrawalCommands(commands.Cog):
                             # Initiate on chain withdrawal
                             data = stellar_wallet.withdraw(address=address,
                                                            xlm_amount=str(xlm_with_amount))
-                            # data = await stellar_wallet.as_withdraw(address=address,
-                            #                                         xlm_amount=str(xlm_with_amount))
 
                             if data:
                                 data_new = {
@@ -131,63 +128,28 @@ class WithdrawalCommands(commands.Cog):
                                     "hash": data["hash"]
                                 }
 
-                                if stellar.stellar_withdrawal_history(tx_type=1, tx_data=data_new):
-                                    await customMessages.withdrawal_notify(coin='XLM',
-                                                                           recipient=ctx.message.author,
-                                                                           tx_hash=data['hash'],
-                                                                           amount=data_new["amount"],
-                                                                           fee=f"${stellar_fee},"
-                                                                               f" Rate:{round(fee_in_xlm['usd'], 4)}",
-                                                                           destination=data['destination'],
-                                                                           ledger=data['ledger'],
-                                                                           link=data['explorer'],
-                                                                           thumbnail=self.bot.user.avatar_url)
-                                    try:
-                                        # create withdrawal notification for channel
-                                        notify = discord.Embed(title='Stellar Withdrawal Notification',
-                                                               description='Withdrawal has been processed',
-                                                               colour=discord.Colour.gold())
-                                        notify.add_field(name='Guild',
-                                                         value=f'{ctx.message.guild} ID; {ctx.message.guild.id}',
-                                                         inline=False)
-                                        notify.add_field(name='User details',
-                                                         value=f'{ctx.message.author} \nID; {ctx.message.author.id}',
-                                                         inline=False)
-                                        notify.add_field(name='Withdrawal details',
-                                                         value=f'Time: {data_new["time"]}\n'
-                                                               f'Destination: {data_new["destination"]}\n'
-                                                               f'Amount: {data_new["amount"]} {CONST_STELLAR_EMOJI}',
-                                                         inline=False)
-                                        await channel.send(embed=notify)
+                                stellar.stellar_withdrawal_history(tx_type=1, tx_data=data_new)
 
-                                    except Exception:
-                                        error_msg = discord.Embed(title=f'Withdrawal Notification',
-                                                                  description=f'You have received this message because'
-                                                                              f' withdrawal notification could not be'
-                                                                              f' send to DM. Please allow bot to send'
-                                                                              f' you messages',
-                                                                  colour=discord.Colour.green())
-                                        error_msg.add_field(name='Explorer Link',
-                                                            value=data['explorer'])
-                                        error_msg.set_thumbnail(url=self.bot.user.avatar_url)
-                                        error_msg.set_footer(text='This message will self-destruct in 360 seconds')
-                                        await ctx.channel.send(embed=error_msg, content=f'{ctx.message.author.mention}',
-                                                               delete_after=360)
+                                # Send user withdrawal notification
+                                await customMessages.withdrawal_notify(ctx=ctx,
+                                                                       withdrawal_data=data_new,
+                                                                       coin='XLM',
+                                                                       fee=f"${stellar_fee},"
+                                                                           f" Rate:{round(fee_in_xlm['usd'], 4)}",
+                                                                       link=data['explorer'],
+                                                                       thumbnail=self.bot.user.avatar_url)
 
-                                else:
-                                    print('Could not store withdrawal to history')
-
-                                # UPDATE BOT WALLET
+                                # Send withdrawal notification to CL system
+                                await customMessages.withdrawal_notification_channel(ctx=ctx,
+                                                                                     channel=channel,
+                                                                                     withdrawal_data=data_new)
 
                                 if bot_manager.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm',
                                                                          direction=1):
-                                    notify = discord.Embed(title='Bot Stellar Wallet Activity',
-                                                           description='Bot Wallet has been credited because user '
-                                                                       'has initiated on-chain withdrawal',
-                                                           color=discord.Colour.blurple())
-                                    notify.add_field(name='Value',
-                                                     value=f'{fee_in_stroops / 10000000}{CONST_STELLAR_EMOJI}')
-                                    await channel.send(embed=notify)
+                                    sys_channel = self.bot.get_channel(id=int(channel_id))
+
+                                    await customMessages.cl_staff_incoming_funds_notification(sys_channel=sys_channel,
+                                                                                              amount=fee_in_stroops)
 
                                 # Update bot stats
                                 stats_manager.update_bot_chain_stats(type_of='withdrawal', ticker='xlm',
@@ -270,7 +232,6 @@ class WithdrawalCommands(commands.Cog):
             title = f'**__Bad arguments provided__** :clipboard:'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
-        return
 
 
 def setup(bot):
