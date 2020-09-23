@@ -134,7 +134,7 @@ class StellarManager:
         try:
             result = self.xlm_wallets.update_one({"depositId": memo},
                                                  {'$inc': {"balance": stroops},
-                                                     "$currentDate": {"lastModified": True}})
+                                                  "$currentDate": {"lastModified": True}})
 
             return result.matched_count > 0
         except errors.PyMongoError as e:
@@ -157,7 +157,7 @@ class StellarManager:
         try:
             result = self.xlm_wallets.update_one({"userId": discord_id},
                                                  {'$inc': {"balance": int(stroops)},
-                                                     "$currentDate": {"lastModified": True}})
+                                                  "$currentDate": {"lastModified": True}})
 
             return result.matched_count > 0
         except errors.PyMongoError as e:
