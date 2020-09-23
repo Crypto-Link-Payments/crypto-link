@@ -66,7 +66,6 @@ class StatsManager(object):
 
     def update_user_transaction_stats(self, user_id: int, key, amount: float, direction: str, tx_type: str,
                                       special: str = None, mined: float = None):
-        """Key = xlmStats or clCoinStats"""
 
         data = dict()
         # Public or private and direction of funds
@@ -103,9 +102,8 @@ class StatsManager(object):
                 data["transactionCounter.rolePurchase"] = 1
 
         # Mined or not
-        if mined:
-            if direction == 'outgoing':
-                data[f"clCoinStats.mined"] = mined
+        if mined and direction == 'outgoing':
+            data[f"clCoinStats.mined"] = mined
 
         self.user_profiles.find_one_and_update({"userId": user_id}, {f"{CONST_INC}": data})
 
