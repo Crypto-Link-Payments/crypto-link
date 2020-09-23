@@ -34,7 +34,7 @@ class FeeManagementAndControl(commands.Cog):
         elif fee_type == 'merch_license':
             fee_type = "Merchant Monthly License cost"
         elif fee_type == 'merch_transfer_min':
-            fee_type = 'Merchant mnimum transfer'
+            fee_type = 'Merchant minimum transfer'
 
         return fee_type
 
@@ -61,7 +61,8 @@ class FeeManagementAndControl(commands.Cog):
 
         fee_info.set_thumbnail(url=self.bot.user.avatar_url)
         fee_info.set_footer(text='Conversion rates provided by CoinGecko',
-                            icon_url='https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
+                            icon_url='https://static.coingecko.com/s/thumbnail-'
+                                     '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
         await ctx.channel.send(embed=fee_info)
 
     @commands.group()
@@ -88,7 +89,7 @@ class FeeManagementAndControl(commands.Cog):
     @fee.group()
     async def change(self, ctx):
         """
-        Commande endry for sub categories to manipulate fees
+        Commands entry for sub categories to manipulate fees
         :param ctx:
         :return:
         """
@@ -114,19 +115,20 @@ class FeeManagementAndControl(commands.Cog):
     async def minimum_merchant_transfer_value(self, ctx, value: float):
         """
         Set minimum amount in merchant wallet for withdrawal from it
+        :param ctx: Discord Context
         :param value:
         :return:
         """
         # Get value in in pennies
-        pennnies = (int(value * (10 ** 2)))
-        rounded = round(pennnies / 100, 2)
+        penny = (int(value * (10 ** 2)))
+        rounded = round(penny / 100, 2)
         if bot_manager.license_fee_handling(fee=rounded, key='merchant_min'):
             message = f'You have successfully set merchant minimum withdrawal to be {rounded}$ per currency used.'
             title = '__Merchant monthly license change information__'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
                                                  sys_msg_title=title)
         else:
-            message = f'There has been an error while trying to set merchant minimum withdrawalamount to {rounded}$.' \
+            message = f'There has been an error while trying to set merchant minimum withdrawal amount to {rounded}$.' \
                       f'Please try again later or contact system administrator!'
             title = '__Merchant monthly license change information__'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -135,13 +137,14 @@ class FeeManagementAndControl(commands.Cog):
     @change.command()
     async def merchant_license_fee(self, ctx, value: float):
         """
-        Change merchantq license fee
+        Change merchant license fee
+        :param ctx: Discord Context
         :param value:
         :return:
         """
         # Get value in in pennies
-        pennnies = (int(value * (10 ** 2)))
-        rounded = round(pennnies / 100, 2)
+        penny = (int(value * (10 ** 2)))
+        rounded = round(penny / 100, 2)
         if bot_manager.license_fee_handling(fee=rounded, key='license'):
             message = f'You have successfully set merchant monthly license fee to be {rounded}$.'
             title = '__Merchant monthly license change information__'
@@ -158,12 +161,13 @@ class FeeManagementAndControl(commands.Cog):
     async def merchant_wallet_transfer_fee(self, ctx, value: float):
         """
         Change fee for merchant wallet transfer in $
+        :param ctx: Discord Context
         :param value:
         :return:
         """
         # Get value in in pennies
-        pennnies = (int(value * (10 ** 2)))
-        rounded = round(pennnies / 100, 2)
+        penny = (int(value * (10 ** 2)))
+        rounded = round(penny / 100, 2)
         if bot_manager.license_fee_handling(fee=rounded, key='wallet_transfer'):
             message = f'You have successfully set merchant wallet transfer fee to be {rounded}$.'
             title = '__Merchant wallet transfer fee information__'
@@ -181,8 +185,8 @@ class FeeManagementAndControl(commands.Cog):
         """
         Setting up discord user withdrawal fee
         """
-        pennnies = (int(value * (10 ** 2)))
-        rounded = round(pennnies / 100, 2)
+        penny = (int(value * (10 ** 2)))
+        rounded = round(penny / 100, 2)
         if bot_manager.license_fee_handling(fee=rounded, key="xlm"):
             message = f'You have successfully set Stellar Lumen withdrawal fee to be {rounded}$.'
             title = '__Stellar Lumen withdrawal fee information__'
@@ -194,6 +198,7 @@ class FeeManagementAndControl(commands.Cog):
             title = '__Stellar Lumen withdrawal fee information__'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
+
 
 def setup(bot):
     bot.add_cog(FeeManagementAndControl(bot))

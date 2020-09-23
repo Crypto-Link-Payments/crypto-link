@@ -39,8 +39,8 @@ class BotWalletCommands(commands.Cog):
         """
         Function send information to corporate channel on corp wallet activity
         :param ctx: Discord Context
-        :param member: Member to where funds have been transfered
-        :param channel_id: channel ID applied for notifcations
+        :param member: Member to where funds have been transferred
+        :param channel_id: channel ID applied for notifications
         :param normal_amount: converted amount from atomic
         :param emoji: emoji identification for the currency
         :param chain_name: name of the chain used in transactions
@@ -183,7 +183,7 @@ class BotWalletCommands(commands.Cog):
                               inline=False)
         stats_embed.add_field(name='Off-Chain Stellar Stats',
                               value=f"P2P Tx Count:{data['xlm']['ofChain']['transactionCount']}\n"
-                                    f"Total P2P Transfered: {int(data['xlm']['ofChain']['offChainMoved']) / 10000000}"
+                                    f"Total P2P Transferred: {int(data['xlm']['ofChain']['offChainMoved']) / 10000000}"
                                     f" <:stelaremoji:684676687425961994>",
                               inline=False)
 

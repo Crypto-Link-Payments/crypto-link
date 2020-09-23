@@ -97,11 +97,13 @@ class CustomMessages:
     async def transaction_report_to_user(ctx, user, destination, amount, symbol, direction: int, message: str = None):
         """
         Transaction report to user
+        :param ctx: Discord Context
         :param user:
         :param destination:
         :param amount:
         :param symbol:
         :param direction:
+        :param message: Optional user message
         :return:
         """
         title = ''
@@ -142,7 +144,8 @@ class CustomMessages:
                             value=f"{in_dollar['total']}$ ({in_dollar['usd']}$/XLM)",
                             inline=False)
         tx_report.set_footer(text='Conversion rates provided by CoinGecko',
-                             icon_url='https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
+                             icon_url='https://static.coingecko.com/s/thumbnail-'
+                                      '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
         try:
             await destination.send(embed=tx_report)
         except Exception as e:
@@ -205,7 +208,7 @@ class CustomMessages:
         notify.add_field(name='Transaction hash',
                          value=tx_hash,
                          inline=False)
-        notify.add_field(name='Withdrawed amount',
+        notify.add_field(name='Withdrawal amount',
                          value=f'{amount} {CONST_STELLAR_EMOJI}',
                          inline=False)
         notify.add_field(name='Crypto Link Fee',

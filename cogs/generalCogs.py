@@ -83,7 +83,7 @@ class HelpCommands(commands.Cog):
                                     f'You can do that by executing command on any public Discord channel, where system'
                                     f' is present with: __{d["command"]}register__ .\n'
                                     f'Once successful, you will create personal wallets with details which you can use '
-                                    f' to move or deposit funds. To further familliarize yourself with other'
+                                    f' to move or deposit funds. To further familiarize yourself with other'
                                     f' commands use __{d["command"]}help__ ',
                               inline=False)
         await ctx.author.send(embed=start_embed)

@@ -21,7 +21,7 @@ d = helper.read_json_file(file_name='botSetup.json')
 class BotStructureCheck(object):
     def __init__(self):
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
-        self.cryptolink = self.connection["CryptoLink"]  #
+        self.crypto_link = self.connection["CryptoLink"]  #
 
         self.required_collections = ["CLOnChainStats",
                                      "CLOffChainStats",
@@ -47,11 +47,11 @@ class BotStructureCheck(object):
         Check all required collections
         """
         # Check collections for bot stats
-        bot_collections = self.cryptolink.list_collection_names()
+        bot_collections = self.crypto_link.list_collection_names()
         print(Fore.GREEN + "1. Checking collections")
         for collection in self.required_collections:
             if collection not in bot_collections:
-                self.cryptolink.create_collection(name=collection)
+                self.crypto_link.create_collection(name=collection)
                 print(Fore.YELLOW + f"{collection.upper()} has been created!")
             else:
                 print(Fore.GREEN + f'{collection.upper()} already exists')
@@ -62,8 +62,8 @@ class BotStructureCheck(object):
         Checking document for statistical entry
         """
         # Connection to collections
-        on_chain = self.cryptolink.CLOnChainStats
-        off_chain = self.cryptolink.CLOffChainStats
+        on_chain = self.crypto_link.CLOnChainStats
+        off_chain = self.crypto_link.CLOffChainStats
 
         stats_on_chain = len(list(on_chain.find()))
         stats_off_chain = len(list(off_chain.find()))
@@ -138,8 +138,8 @@ class BotStructureCheck(object):
         """
         Check if bot wallets exists and if not than create them
         """
-        bot_wallets = self.cryptolink.CLWallets
-        bot_fees = self.cryptolink.CLFees
+        bot_wallets = self.crypto_link.CLWallets
+        bot_fees = self.crypto_link.CLFees
 
         count_bot_wallets = len(list((bot_wallets.find({}))))
         count_bot_fees = len(list(bot_fees.find()))
@@ -147,11 +147,12 @@ class BotStructureCheck(object):
 
         if count_bot_wallets == 0:
             print(Fore.YELLOW + "MAKING BOT OFF CHAIN WALLET")
-            mylist = [
+            my_list = [
                 {"ticker": "xlm", "balance": 0}
             ]
-            bot_wallets.insert_many(mylist)
+            bot_wallets.insert_many(my_list)
             print(Fore.GREEN + "DONE")
+
         else:
             print(Fore.LIGHTGREEN_EX + "BOT OFF CHAIN XLM WALLET OK ")
 

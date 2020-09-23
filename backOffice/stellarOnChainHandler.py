@@ -64,7 +64,7 @@ class StellarWallet():
 
     def get_stellar_hot_wallet_details(self):
         """
-        Return the stellar hot wallet balance... check fo rkey status if error
+        Return the stellar hot wallet balance
         :return:
         """
         data = self.server.accounts().account_id(account_id=self.public_key).call()
@@ -112,7 +112,7 @@ class StellarWallet():
             desc=False).cursor(cursor=pag).limit(200).call()
         to_process = list()
         for tx in data['_embedded']['records']:
-            # Get ransaction envelope
+            # Get transaction envelope
             if tx['source_account'] != self.public_key:  # Get only incoming transactions
                 if tx['successful'] is True:
                     tx.pop('_links')

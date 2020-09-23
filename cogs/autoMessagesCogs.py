@@ -1,5 +1,5 @@
 """
-COG: Dealing with automessages to Discord Community and single users.
+COG: Dealing with automatic messages to Discord Community and single users.
 """
 
 import os
@@ -83,7 +83,7 @@ class AutoFunctions(commands.Cog):
                                       "vendors, customers, merchants, and/ or contributors of content. "
                                       "We do not keep your information or sell it all information gathered "
                                       "is used for the creation of the wallet to help facilitate your own "
-                                      "ability to trade, swap, or pay users or organisations for thier"
+                                      "ability to trade, swap, or pay users or organisations for their"
                                       " goods and or services.",
                                 inline=False)
 

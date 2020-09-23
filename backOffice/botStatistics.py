@@ -51,7 +51,7 @@ class BotStatsManager(object):
     def update_off_chain_activity_stats(self, ticker: str, amount: int):
 
         """
-        Update off chain activity when off fchain happens
+        Update off chain activity when off chain happens
         """
         try:
             if ticker == 'stellar':

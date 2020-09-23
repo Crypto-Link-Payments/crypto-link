@@ -157,7 +157,8 @@ class ConsumerCommands(commands.Cog):
                           {"name": 'Fiat value', "value": f"{value} $"},
                           {"name": 'Conversion to crypto', "value": f"{value_in_stellar:.7} {CONST_STELLAR_EMOJI}"},
                           {"name": 'Role Length',
-                           "value": f"{role['weeks']} week/s {role['days']} day/s {role['hours']} hour/s {role['minutes']} minute/s"}]
+                           "value": f"{role['weeks']} week/s {role['days']} day/s {role['hours']} "
+                                    f"hour/s {role['minutes']} minute/s"}]
                 description = "Role details"
                 await customMessages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
                                                    data=values)
@@ -172,6 +173,7 @@ class ConsumerCommands(commands.Cog):
     async def subscribe(self, ctx, role: discord.Role):
         """
         Obtain a role available from community
+        :param ctx: Discord Context
         :param role:
         :return:
         """
@@ -245,7 +247,8 @@ class ConsumerCommands(commands.Cog):
 
                                                 # Send notification to user
                                                 role_embed = discord.Embed(name='Membership Status Information',
-                                                                           title='Congratulations on obtaining the role',
+                                                                           title='Congratulations on '
+                                                                                 'obtaining the role',
                                                                            description='Details on obtained role',
                                                                            colour=discord.Colour.gold())
                                                 role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
@@ -272,11 +275,16 @@ class ConsumerCommands(commands.Cog):
                                                 # Inform the owner to DM about having community wallet credited
                                                 owner = ctx.message.guild.owner
                                                 incoming_funds = discord.Embed(name='__Merchant system funds credited',
-                                                                               title='__Incoming funds to corporate wallet___',
-                                                                               description='You have received this notification'
-                                                                                           ' because of new funds beeing inbound '
-                                                                                           ' through the merchant service. '
-                                                                                           'Details are presented below',
+                                                                               title='__Incoming funds to corporate '
+                                                                                     'wallet___',
+                                                                               description='You have received this '
+                                                                                           'notification'
+                                                                                           ' because of new funds '
+                                                                                           'being inbound '
+                                                                                           ' through the merchant '
+                                                                                           'service. '
+                                                                                           'Details are presented'
+                                                                                           ' below',
                                                                                colour=discord.Colour.green())
                                                 incoming_funds.add_field(name='Amount',
                                                                          value=f'{convert_to_dollar} $ \n'

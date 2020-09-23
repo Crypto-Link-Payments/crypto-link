@@ -30,10 +30,10 @@ class StellarManager:
 
         # Collections connections
         self.stellarWallets = self.stellarCoin.StellarWallets  # Access to all stellar wallets
-        self.stellarDeposits = self.stellarCoin.StellarDeposits  # Access to history of successfull deposits
-        self.stellarWithdrawals = self.stellarCoin.StellarWithdrawals  # Access to history of successfull withdrawals
-        self.stellarUnprocessedDep = self.stellarCoin.StellarUnprocessedDeposits  # Accaes to history of unsuccessfull deposits
-        self.stellarUnprocessedWith = self.stellarCoin.StellarUnprocessedWithdrawals  # Access to history of unprocessed withdrawals
+        self.stellarDeposits = self.stellarCoin.StellarDeposits  # Access to history of successful deposits
+        self.stellarWithdrawals = self.stellarCoin.StellarWithdrawals  # Access to history of successful withdrawals
+        self.stellarUnprocessedDep = self.stellarCoin.StellarUnprocessedDeposits  # history of successful deposits
+        self.stellarUnprocessedWith = self.stellarCoin.StellarUnprocessedWithdrawals  # history of error withdrawals
         self.stellarCorpWallets = self.stellarCoin.StellarCorporateWallets
 
     def stellar_deposit_history(self, deposit_type: int, tx_data):
@@ -61,7 +61,7 @@ class StellarManager:
         :param tx_data:
         :return:
         """
-        if tx_type == 1:  # IF Successfull
+        if tx_type == 1:  # IF successful
             result = self.stellarWithdrawals.insert_one(tx_data)
         elif tx_type == 2:  # IF error
             result = self.stellarUnprocessedWith.insert_one(tx_data)
