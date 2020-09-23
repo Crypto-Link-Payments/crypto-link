@@ -2,7 +2,7 @@
 Cogs to handle commands for licensing with the bot
 
 Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won uppon withdrawal.
+from Merchant wallet to their won upon withdrawal.
 """
 
 import time
@@ -27,9 +27,14 @@ helper = Helpers()
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 d = helper.read_json_file(file_name='botSetup.json')
 
-CONST_STELAR_EMOJI = "<:stelaremoji:684676687425961994>"
+CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
+
 
 class MerchantLicensingCommands(commands.Cog):
+    """
+    Discord Commands dealing with Merchant Licensing
+    """
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -87,7 +92,7 @@ class MerchantLicensingCommands(commands.Cog):
         :return:
         """
 
-        data = bot_manager.get_fees_by_category(all_fees=False,key='license')
+        data = bot_manager.get_fees_by_category(all_fees=False, key='license')
         fee_value = data['fee']
         in_lumen = convert_to_currency(fee_value, coin_name='stellar')
         fee_info = Embed(title="__Merchant license information__",
@@ -97,7 +102,7 @@ class MerchantLicensingCommands(commands.Cog):
         fee_info.add_field(name='License information',
                            value=f'Duration: 1 moth from the day of purchase\n'
                                  f'Fiat value: {fee_value}$\n'
-                                 f'Stellar Lumen: {in_lumen["total"]} {CONST_STELAR_EMOJI}\n')
+                                 f'Stellar Lumen: {in_lumen["total"]} {CONST_STELLAR_EMOJI}\n')
         fee_info.set_footer(text="Conversion rates provided by CoinGecko",
                             icon_url='https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
         await ctx.message.channel.send(embed=fee_info)
@@ -159,10 +164,10 @@ class MerchantLicensingCommands(commands.Cog):
 
         # Check if community does not have license yet
         if not merchant_manager.check_community_license_status(community_id=ctx.message.guild.id):
-            data = bot_manager.get_fees_by_category(all_fees=False,key='license')  # Get the fee value for the license
+            data = bot_manager.get_fees_by_category(all_fees=False, key='license')  # Get the fee value for the license
             fee_value = data['fee']  # Get out fee
             in_lumen = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
-            total = (in_lumen['total'])  # Get total in lumne
+            total = (in_lumen['total'])  # Get total in lumen
             rate = (in_lumen['usd'])  # Get conversion rate for info
             stroops = (int(total * (10 ** 7)))  # Convert to stroops 
 
@@ -173,7 +178,7 @@ class MerchantLicensingCommands(commands.Cog):
                                                                 direction=0):
                     if bot_manager.update_lpi_wallet_balance(amount=stroops, wallet='xlm', direction=1):
                         license_start = datetime.utcnow()  # Current UTC date
-                        four_week_range = timedelta(days=31)  # Determening the range
+                        four_week_range = timedelta(days=31)  # Determining the range
                         license_end = license_start + four_week_range  # Calculation of expiration date
 
                         unix_today = (int(time.mktime(license_start.timetuple())))  # Conversion to tuple
@@ -201,12 +206,13 @@ class MerchantLicensingCommands(commands.Cog):
                                                 value=f'{fee_value}$',
                                                 inline=False)
                             user_info.add_field(name='Value Payed',
-                                                value=f'XLM: {total}{CONST_STELAR_EMOJI}\n'
-                                                      f'Rate: {rate}$ / {CONST_STELAR_EMOJI}',
+                                                value=f'XLM: {total}{CONST_STELLAR_EMOJI}\n'
+                                                      f'Rate: {rate}$ / {CONST_STELLAR_EMOJI}',
                                                 inline=False)
                             try:
                                 await ctx.author.send(embed=user_info)
-                            except Exception:
+                            except Exception as e:
+                                print(e)
                                 await ctx.channel.send(embed=user_info)
 
                             # send notifcation to merchant channel of LPI community
@@ -227,8 +233,8 @@ class MerchantLicensingCommands(commands.Cog):
                                                    value=f'{license_end}',
                                                    inline=False)
                             license_slip.add_field(name='Value Payed',
-                                                   value=f'XLM: {total}{CONST_STELAR_EMOJI}\n'
-                                                         f'Rate: {rate}$ / {CONST_STELAR_EMOJI}',
+                                                   value=f'XLM: {total}{CONST_STELLAR_EMOJI}\n'
+                                                         f'Rate: {rate}$ / {CONST_STELLAR_EMOJI}',
                                                    inline=False)
 
                             notf_channel = self.bot.get_channel(id=int(channel_id))
@@ -250,22 +256,21 @@ class MerchantLicensingCommands(commands.Cog):
                                                                      direction=1)
                         title = "__Merchant License Purchase error__"
                         message = f" There has been an issue with the system. Please try again later. If the " \
-                                  f"issue persists"
-                        "contact Crypto Link Staff. Thank you for your understanding."
+                                  f"issue persists contact Crypto Link Staff. Thank you for your understanding."
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                              sys_msg_title=title)
 
                 else:
                     title = "__Merchant License Purchase error__"
-                    message = f" There has been an issue with the system. Please try again later. If the issue persists"
-                    "contact Crypto Link Staff. Thank you for your understanding."
+                    message = f" There has been an issue with the system. Please try again later. If the issue" \
+                              f" persists contact Crypto Link Staff. Thank you for your understanding."
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                          sys_msg_title=title)
             else:
                 title = "__Merchant License Purchase error__"
-                message = f"You can not purchase license due to insufficient funds:\n"
-                f"License price: {total} <:stelaremoji:684676687425961994>\n"
-                f"Wallet balance: {wallet_value / 10000000}{CONST_STELAR_EMOJI}. "
+                message = f"You can not purchase license due to insufficient funds:\n" \
+                          f"License price: {total} <:stelaremoji:684676687425961994>\n" \
+                          f"Wallet balance: {wallet_value / 10000000}{CONST_STELLAR_EMOJI}. "
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                      sys_msg_title=title)
         else:

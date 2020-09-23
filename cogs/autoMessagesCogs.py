@@ -52,7 +52,6 @@ class AutoFunctions(commands.Cog):
                 await ctx.message.delete()
             except Exception as e:
                 print(f'Bot could not delete command from channel: {e}')
-                pass
         else:
             pass
 
