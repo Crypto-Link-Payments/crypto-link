@@ -40,13 +40,12 @@ class FeeManagementAndControl(commands.Cog):
 
     @commands.command()
     async def fees(self, ctx):
-        fees = bot_manager.get_fees_by_category(all=1)
+        fees = bot_manager.get_fees_by_category(all_fees=True)
         fee_info = discord.Embed(title='Applied fees for system',
                                  description='State of fees for each segment of the bot',
                                  colour=discord.Colour.blue())
 
         rates = get_rates(coin_name='stellar')
-        print(rates)
         for data in fees:
             conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
             type = self.filter_db_keys(type=data['type'])

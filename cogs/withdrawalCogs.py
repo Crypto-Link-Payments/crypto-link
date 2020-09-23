@@ -89,7 +89,7 @@ class WithdrawalCommands(commands.Cog):
 
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
 
-        stellar_fee = bot_manager.get_fees_by_category(key='xlm')['fee']
+        stellar_fee = bot_manager.get_fees_by_category(all_fees=False,key='xlm')['fee']
         fee_in_xlm = convert_to_currency(amount=stellar_fee, coin_name='stellar')
         fee_in_stroops = int(fee_in_xlm['total'] * (10 ** 7))
         channel_id = notify_channel["stellar"]

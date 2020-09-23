@@ -402,7 +402,7 @@ class MerchantCommunityOwner(commands.Cog):
 
         # Check merchant situatioan and modify fee accordingly
         if not merchant_manager.check_community_license_status(community_id=ctx.message.author.id):
-            fee_dollar_details = lpi_wallet.get_fees_by_category(key='wallet_transfer')
+            fee_dollar_details = lpi_wallet.get_fees_by_category(all_fees=False,key='wallet_transfer')
             fee_value = fee_dollar_details['fee']  # Get out fee
             in_stellar = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
             total = (in_stellar['total'])  # Get total in lumne
@@ -410,7 +410,7 @@ class MerchantCommunityOwner(commands.Cog):
             fee_in_stroops = (int(total * (10 ** 7)))  # Convert to stroops
 
         # Get the current minimum withdrawal fee in Dollars
-        minimum_with_limit = lpi_wallet.get_fees_by_category(key='merchant_min')
+        minimum_with_limit = lpi_wallet.get_fees_by_category(all_fees=False,key='merchant_min')
         with_fee = minimum_with_limit['fee']  # Get out fee
         with_fee_stellar = convert_to_currency(with_fee, coin_name='stellar')  # Convert fee to currency
         total_xlm = (with_fee_stellar['total'])

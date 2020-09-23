@@ -71,14 +71,14 @@ class BotManager(object):
         except errors.PyMongoError:
             return False
 
-    def get_fees_by_category(self, all: int = None, key: str = None):
+    def get_fees_by_category(self, all_fees: bool, key: str = None):
         """
         Return details on the fees from database
         :param all:
         :param key:
         :return:
         """
-        if all:
+        if all_fees:
             data = list(self.botFees.find({}))
             return data
         else:

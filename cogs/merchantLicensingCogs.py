@@ -87,7 +87,7 @@ class MerchantLicensingCommands(commands.Cog):
         :return:
         """
 
-        data = bot_manager.get_fees_by_category(key='license')
+        data = bot_manager.get_fees_by_category(all_fees=False,key='license')
         fee_value = data['fee']
         in_lumen = convert_to_currency(fee_value, coin_name='stellar')
         fee_info = Embed(title="__Merchant license information__",
@@ -159,7 +159,7 @@ class MerchantLicensingCommands(commands.Cog):
 
         # Check if community does not have license yet
         if not merchant_manager.check_community_license_status(community_id=ctx.message.guild.id):
-            data = bot_manager.get_fees_by_category(key='license')  # Get the fee value for the license
+            data = bot_manager.get_fees_by_category(all_fees=False,key='license')  # Get the fee value for the license
             fee_value = data['fee']  # Get out fee
             in_lumen = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
             total = (in_lumen['total'])  # Get total in lumne
