@@ -66,7 +66,7 @@ class CustomMessages:
             await ctx.channel.send(embed=sys_embed, delete_after=100)
 
     @staticmethod
-    async def transaction_report_to_user(user, destination, amount, symbol, direction: int, message:str = None):
+    async def transaction_report_to_user(ctx, user, destination, amount, symbol, direction: int, message:str = None):
         """
         Transaction report to user
         :param user:
@@ -85,21 +85,29 @@ class CustomMessages:
             title = 'Outgoing transaction'
             col = discord.Colour.red()
             destination_txt = 'Recipient'
+            avatar= user.avatar_url
 
         elif direction == 1:
             title = 'Incoming transaction'
             col = discord.Colour.green()
             destination_txt = 'Sender:'
+            avatar = destination.avatar_url
 
         tx_report = discord.Embed(title=title,
-                                  colour=col)
+                                  colour=col,
+                                  timestamp=datetime.utcnow())
+        tx_report.set_thumbnail(url=avatar)
         tx_report.add_field(name=destination_txt,
                             value=f'{user}',
+                            inline=False)
+        tx_report.add_field(name='Guild Origin',
+                            value=f'{ctx.message.guild} ({ctx.message.guild.id})',
                             inline=False)
         tx_report.add_field(name='Subject',
                             value=message)
         tx_report.add_field(name=f'Transaction value',
-                            value=f'{amount_str}')
+                            value=f'{amount_str}',
+                            inline=False)
         tx_report.add_field(name=f'Conversion Rate',
                             value=f'{in_dollar["usd"]}$/XLM')
         tx_report.add_field(name=':currency_exchange: Fiat Value :currency_exchange: ',

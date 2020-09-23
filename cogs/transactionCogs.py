@@ -35,7 +35,6 @@ class TransactionCommands(commands.Cog):
 
         return message
 
-
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
@@ -68,7 +67,6 @@ class TransactionCommands(commands.Cog):
         :return:
         """
 
-
         print(f'SEND XLM: {ctx.author} -> {ctx.message.content}')
         stroops = (int(amount * (10 ** 7)))
         if stroops > 0:
@@ -95,13 +93,14 @@ class TransactionCommands(commands.Cog):
                             msg = self.process_message(message=message)
 
                             # report to sender
-                            await customMessages.transaction_report_to_user(direction=0, amount=amount, symbol='xlm',
+                            await customMessages.transaction_report_to_user(ctx=ctx, direction=0, amount=amount,
+                                                                            symbol='xlm',
                                                                             user=recipient,
                                                                             destination=ctx.message.author,
                                                                             message=msg)
 
                             # report to recipient
-                            await customMessages.transaction_report_to_user(direction=1, amount=amount,
+                            await customMessages.transaction_report_to_user(ctx=ctx, direction=1, amount=amount,
                                                                             symbol='xlm', user=ctx.message.author,
                                                                             destination=recipient, message=msg)
 
@@ -175,7 +174,7 @@ class TransactionCommands(commands.Cog):
                                                 sys_msg_title=title)
         elif isinstance(error, commands.CommandOnCooldown):
             title = f'__Command on cooldown__!'
-            message = f'You have tried to use the same command to fast. Please wait few momemnts.'
+            message = f'{error}'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
 
