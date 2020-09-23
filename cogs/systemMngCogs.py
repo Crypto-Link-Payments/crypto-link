@@ -45,11 +45,6 @@ class BotManagementCommands(commands.Cog):
         :return:
         """
 
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if ctx.invoked_subcommand is None:
             value = [{'name': 'Entry for commands to manage whole system',
                       'value': f"{d['command']}mng system*** "},
