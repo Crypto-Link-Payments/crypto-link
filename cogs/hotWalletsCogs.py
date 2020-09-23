@@ -23,6 +23,10 @@ CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 
 class HotWalletCommands(commands.Cog):
+    """
+    Discord commands to operate with hot wallets
+    """
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -74,14 +78,17 @@ class HotWalletCommands(commands.Cog):
     @hot.group()
     @commands.check(is_one_of_gods)
     async def scan(self):
+        print('TODO')
         pass
 
     @scan.command()
     async def memo(self):
+        print('TODO')
         pass
 
     @scan.command()
     async def tx_id(self):
+        print('TODO')
         pass
 
 
