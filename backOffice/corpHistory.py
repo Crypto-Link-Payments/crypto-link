@@ -4,7 +4,6 @@ Class handling the corporate wallet activities
 import os
 import sys
 
-import pymongo
 from pymongo import MongoClient
 from pymongo import errors
 
@@ -48,6 +47,6 @@ class CorporateHistoryManager:
         try:
             self.fromCorpTransfers.insert_one(data)
             return True
-        except pymongo.errors.PyMongoError as e:
+        except errors.PyMongoError as e:
             print(e)
             return False
