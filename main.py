@@ -67,7 +67,7 @@ async def send_channel_system_message(user, stroops):
     await channel.send(embed=notify)
 
 
-def filter_transaction(new_transactions:list):
+def filter_transaction(new_transactions: list):
     """
     Filtering transactions
     """
@@ -82,7 +82,73 @@ def filter_transaction(new_transactions:list):
     tx_with_not_registered_memo = [tx for tx in tx_with_memo if
                                    tx not in tx_with_registered_memo]  # GET tx with not registered memo
 
-    return tx_with_registered_memo, tx_with_not_registered_memo,tx_with_no_memo
+    return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo
+
+
+def process_tx_with_no_memo(no_memo_transaction):
+    for tx in no_memo_transaction:
+        if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
+            if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
+                print(Fore.GREEN + 'Processed successfully')
+            else:
+                print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
+                                 f'HASH{tx["hash"]}')
+        else:
+            print(Fore.YELLOW + 'Unknown processed already')
+
+
+def process_tx_with_memo(memo_transactions):
+    for tx in memo_transactions:
+        # check if processed if not process them
+        if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
+            if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
+                tx_memo = tx['memo']
+                tx_hash = tx['hash']
+                tx_from = tx["source_account"]
+                tx_stroop = tx['stroop']
+
+                # Get user_id based on transaction memo
+                user_id = stellar_manager.get_discord_id_from_deposit_id(deposit_id=tx_memo)
+
+                # Update balance
+                if stellar_manager.update_stellar_balance_by_memo(memo=tx_memo, stroops=tx_stroop, direction=1):
+                    # If balance updated successfully send the message to user of processed deposit
+                    dest = await bot.fetch_user(user_id=int(user_id['userId']))
+                    await custom_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
+                                                                             memo=tx_memo,
+                                                                             tx_hash=tx_hash, source_acc=tx_from,
+                                                                             amount=tx_stroop, color_code=0)
+
+                    # Channel system message on deposit
+                    await send_channel_system_message(user=dest, stroops=tx_stroop)
+
+                    # TODO check if it can be transferred to await async
+                    # Update user deposit stats
+                    stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
+                                                            key="xlmStats")
+
+                    # Update Bot Global stats
+                    stats_manager.update_bot_chain_stats(type_of='deposit', ticker='xlm',
+                                                         amount=round(tx_stroop / 10000000, 7))
+                else:
+                    print(Fore.RED + f'TX Processing error: \n'
+                                     f'{tx}')
+            else:
+                print(Fore.RED + 'Could not store to history')
+        else:
+            print(Fore.LIGHTCYAN_EX + 'No new legit tx')
+
+
+def process_tx_with_not_registered_memo(no_registered_memo):
+    for tx in no_registered_memo:
+        if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
+            if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
+                print(Fore.GREEN + 'Processed successfully')
+            else:
+                print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
+                                 f'HASH{tx["hash"]}')
+        else:
+            print(Fore.YELLOW + 'Unknown processed already')
 
 
 async def check_stellar_hot_wallet():
@@ -91,7 +157,6 @@ async def check_stellar_hot_wallet():
     :return:
     """
     print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
-
     pag = helper.read_json_file('stellarPag.json')
     new_transactions = stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
 
@@ -99,66 +164,13 @@ async def check_stellar_hot_wallet():
         # Filter transactions
         tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions)
 
-        # Check all transactions with memo
-        for tx in tx_with_registered_memo:
-            # check if processed if not process them
-            if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
-                if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
-                    tx_memo = tx['memo']
-                    tx_hash = tx['hash']
-                    tx_from = tx["source_account"]
-                    tx_stroop = tx['stroop']
-
-                    # Get user_id based on transaction memo
-                    user_id = stellar_manager.get_discord_id_from_deposit_id(deposit_id=tx_memo)
-
-                    # Update balance
-                    if stellar_manager.update_stellar_balance_by_memo(memo=tx_memo, stroops=tx_stroop, direction=1):
-                        # If balance updated successfully send the message to user of processed deposit
-                        dest = await bot.fetch_user(user_id=int(user_id['userId']))
-                        await custom_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
-                                                                                 memo=tx_memo,
-                                                                                 tx_hash=tx_hash, source_acc=tx_from,
-                                                                                 amount=tx_stroop, color_code=0)
-
-                        # Channel system message on deposit
-                        await send_channel_system_message(user=dest, stroops=tx_stroop)
-
-                        # TODO check if it can be transferred to await async
-                        # Update user deposit stats
-                        stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
-                                                                key="xlmStats")
-
-                        # Update Bot Global stats
-                        stats_manager.update_bot_chain_stats(type_of='deposit', ticker='xlm',
-                                                             amount=round(tx_stroop / 10000000, 7))
-                    else:
-                        print(Fore.RED + f'TX Processing error: \n'
-                                         f'{tx}')
-                else:
-                    print(Fore.RED + 'Could not store to history')
-            else:
-                print(Fore.LIGHTCYAN_EX + 'No new legit tx')
+        if tx_with_registered_memo:
+            process_tx_with_memo(tx_with_registered_memo)
         if tx_with_not_registered_memo:
-            for tx in tx_with_not_registered_memo:
-                if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
-                    if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
-                        print(Fore.GREEN + 'Processed successfully')
-                    else:
-                        print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
-                                         f'HASH{tx["hash"]}')
-                else:
-                    print(Fore.YELLOW + 'Unknown processed already')
+            process_tx_with_not_registered_memo(tx_with_not_registered_memo)
+        if tx_with_no_memo:
+            process_tx_with_no_memo(tx_with_no_memo)
 
-        for tx in tx_with_no_memo:
-            if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
-                if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
-                    print(Fore.GREEN + 'Processed successfully')
-                else:
-                    print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
-                                     f'HASH{tx["hash"]}')
-            else:
-                print(Fore.YELLOW + 'Unknown processed already')
         last_checked_pag = new_transactions[-1]["paging_token"]
         print(last_checked_pag)
         if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
@@ -173,7 +185,6 @@ async def check_stellar_hot_wallet():
         print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
         print('==============================================')
         return
-    return
 
 
 async def check_expired_roles():
