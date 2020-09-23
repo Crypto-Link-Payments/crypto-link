@@ -130,7 +130,7 @@ async def check_stellar_hot_wallet():
                 print(Fore.LIGHTCYAN_EX + 'No new legit tx')
         if tx_with_not_registered_memo:
             for tx in tx_with_not_registered_memo:
-                if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(hash=tx['hash']):
+                if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
                     if stellar_manager.stellar_deposit_history(type=2, data=tx):
                         print(Fore.GREEN + 'Processed successfully')
                     else:
@@ -140,7 +140,7 @@ async def check_stellar_hot_wallet():
                     print(Fore.YELLOW + 'Unknown processed already')
 
         for tx in tx_with_no_memo:
-            if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(hash=tx['hash']):
+            if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
                 if stellar_manager.stellar_deposit_history(type=2, data=tx):
                     print(Fore.GREEN + 'Processed successfully')
                 else:

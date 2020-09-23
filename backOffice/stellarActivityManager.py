@@ -80,22 +80,22 @@ class StellarManager:
         else:
             return False
 
-    def check_if_deposit_hash_processed_succ_deposits(self, hash):
+    def check_if_deposit_hash_processed_succ_deposits(self, tx_hash):
         """
         Function which checks if HASH has been already processed
         """
-        result = self.stellarDeposits.find_one({"hash": hash})
+        result = self.stellarDeposits.find_one({"hash": tx_hash})
 
         if result:
             return True
         else:
             return False
 
-    def check_if_deposit_hash_processed_unprocessed_deposits(self, hash):
+    def check_if_deposit_hash_processed_unprocessed_deposits(self, tx_hash):
         """
         Check if hash is stored in unprocessed deposits
         """
-        result = self.stellarUnprocessedDep.find_one({"hash": hash})
+        result = self.stellarUnprocessedDep.find_one({"hash": tx_hash})
 
         if result:
             return True
