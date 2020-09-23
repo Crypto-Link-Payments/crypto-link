@@ -14,7 +14,7 @@ sys.path.append(project_path)
 
 helper = Helpers()
 d = helper.read_json_file(file_name='botSetup.json')
-CONST_CURRENT_DATE='$currentDate'
+CONST_CURRENT_DATE = '$currentDate'
 
 
 class BotStatsManager(object):
