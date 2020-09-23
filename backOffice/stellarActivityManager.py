@@ -48,18 +48,18 @@ class StellarManager:
         else:
             return False
 
-    def stellar_withdrawal_history(self, type: int, data: dict):
+    def stellar_withdrawal_history(self, tx_type: int, tx_data: dict):
         """
         Managing history off withdrawals
 
-        :param type:
-        :param data:
+        :param tx_type:
+        :param tx_data:
         :return:
         """
-        if type == 1:  # IF Successfull
-            result = self.stellarWithdrawals.insert_one(data)
-        elif type == 2:  # IF error
-            result = self.stellarUnprocessedWith.insert_one(data)
+        if tx_type == 1:  # IF Successfull
+            result = self.stellarWithdrawals.insert_one(tx_data)
+        elif tx_type == 2:  # IF error
+            result = self.stellarUnprocessedWith.insert_one(tx_data)
 
         if result.inserted_id:
             return True

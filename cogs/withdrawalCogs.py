@@ -147,7 +147,7 @@ class WithdrawalCommands(commands.Cog):
                                     "hash": data["hash"]
                                 }
 
-                                if stellar.stellar_withdrawal_history(type=1, data=data_new):
+                                if stellar.stellar_withdrawal_history(tx_type=1, tx_data=data_new):
                                     await customMessages.coin_withdrawal_notification(coin='XLM',
                                                                                       recipient=ctx.message.author,
                                                                                       hash=data['hash'],
