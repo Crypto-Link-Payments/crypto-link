@@ -48,7 +48,8 @@ class AutoFunctions(commands.Cog):
         if isinstance(ctx.message.channel, TextChannel):
             try:
                 await ctx.message.delete()
-            except Exception:
+            except Exception as e:
+                print(f'Bot could not delete command from channel: {e}')
                 pass
 
     @commands.Cog.listener()
