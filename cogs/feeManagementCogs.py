@@ -72,11 +72,6 @@ class FeeManagementAndControl(commands.Cog):
         :param ctx:
         :return:
         """
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if ctx.invoked_subcommand is None:
             title = '__All available commands to manipulate system fees__'
             description = "Commands presented bellow allow for manipulation of fees and their review per each segment."
