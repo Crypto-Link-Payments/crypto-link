@@ -20,6 +20,8 @@ custom_messages = CustomMessages()
 
 d = helpers.read_json_file(file_name='botSetup.json')
 auto_messaging = helpers.read_json_file(file_name='autoMessagingChannels.json')
+KAVIC_ID = 455916314238648340
+ANIMUS_ID = 360367188432912385
 
 
 class AutoFunctions(commands.Cog):
@@ -155,8 +157,8 @@ class AutoFunctions(commands.Cog):
                             value=f'{guild.member_count}',
                             inline=False)
 
-        kavic = await self.bot.fetch_user(user_id=int(455916314238648340))
-        animus = await self.bot.fetch_user(user_id=int(360367188432912385))
+        kavic = await self.bot.fetch_user(user_id=int(KAVIC_ID))
+        animus = await self.bot.fetch_user(user_id=int(ANIMUS_ID))
 
         channel_id = auto_messaging["sys"]
         dest = self.bot.get_channel(id=int(channel_id))
@@ -193,8 +195,8 @@ class AutoFunctions(commands.Cog):
                                 value=f'{guild.member_count}',
                                 inline=False)
 
-        kavic = await self.bot.fetch_user(user_id=int(455916314238648340))
-        animus = await self.bot.fetch_user(user_id=int(360367188432912385))
+        kavic = await self.bot.fetch_user(user_id=int(KAVIC_ID))
+        animus = await self.bot.fetch_user(user_id=int(ANIMUS_ID))
 
         channel_id = auto_messaging["sys"]
         dest = self.bot.get_channel(id=int(channel_id))
