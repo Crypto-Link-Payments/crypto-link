@@ -93,39 +93,39 @@ class BotStructureCheck(object):
         if stats_off_chain == 0:
             print(Fore.YELLOW + "MAKING OFF CHAIN DOCUMENT ENTRY")
             stats_off = [{
-                "ticker":"xlm",
+                "ticker": "xlm",
                 "totalTx": int(0),
                 "totalMoved": float(0.0),
                 "totalPrivateCount": int(0),
-                "totalPrivateMoved":float(0.0),
+                "totalPrivateMoved": float(0.0),
                 "totalPublicCount": int(0),
-                "totalPublicMoved":float(0.0),
-                "totalEmojiTx":int(0),
-                "totalEmojiMoved":float(0),
-                "rolePurchaseTxCount":int(0),
-                "roleMoved":float(0.0),
-                "spentInUsd":float(0.0),
-                "multiTxCount":int(0),
-                "multiTxMoved":float(0.0)
+                "totalPublicMoved": float(0.0),
+                "totalEmojiTx": int(0),
+                "totalEmojiMoved": float(0),
+                "rolePurchaseTxCount": int(0),
+                "roleMoved": float(0.0),
+                "spentInUsd": float(0.0),
+                "multiTxCount": int(0),
+                "multiTxMoved": float(0.0)
             }, {
-                "ticker":"xlm",
+                "ticker": "xlm",
                 "totalTx": int(0),
                 "totalMoved": float(0.0),
                 "totalPrivateCount": int(0),
-                "totalPrivateMoved":float(0.0),
+                "totalPrivateMoved": float(0.0),
                 "totalPublicCount": int(0),
-                "totalPublicMoved":float(0.0),
-                "totalEmojiTx":int(0),
-                "totalEmojiMoved":float(0),
-                "rolePurchaseTxCount":int(0),
-                "roleMoved":float(0.0),
-                "totalSpentUsd":float(0.0),
-                "multiTxCount":int(0),
-                "multiTxMoved":float(0.0)
-            },{
-                "ticker":"merchant",
-                "totalSpentInUsd":float(0.0),
-                "totalSpentInXlm":float(0.0),
+                "totalPublicMoved": float(0.0),
+                "totalEmojiTx": int(0),
+                "totalEmojiMoved": float(0),
+                "rolePurchaseTxCount": int(0),
+                "roleMoved": float(0.0),
+                "totalSpentUsd": float(0.0),
+                "multiTxCount": int(0),
+                "multiTxMoved": float(0.0)
+            }, {
+                "ticker": "merchant",
+                "totalSpentInUsd": float(0.0),
+                "totalSpentInXlm": float(0.0),
                 "totalSpentInClToken": float(0.0)
             }]
 
@@ -138,11 +138,11 @@ class BotStructureCheck(object):
         """
         Check if bot wallets exists and if not than create them
         """
-        BotWallets = self.cryptolink.CLWallets
-        BotFees = self.cryptolink.CLFees
+        bot_wallets = self.cryptolink.CLWallets
+        bot_fees = self.cryptolink.CLFees
 
-        count_bot_wallets = len(list((BotWallets.find({}))))
-        count_bot_fees = len(list(BotFees.find()))
+        count_bot_wallets = len(list((bot_wallets.find({}))))
+        count_bot_fees = len(list(bot_fees.find()))
         print(Fore.LIGHTBLUE_EX + "=====Checking BOT OFF CHAIN WALLET AND BOT FEES DOCUMENT======")
 
         if count_bot_wallets == 0:
@@ -150,20 +150,20 @@ class BotStructureCheck(object):
             mylist = [
                 {"ticker": "xlm", "balance": 0}
             ]
-            BotWallets.insert_many(mylist)
+            bot_wallets.insert_many(mylist)
             print(Fore.GREEN + "DONE")
         else:
             print(Fore.LIGHTGREEN_EX + "BOT OFF CHAIN XLM WALLET OK ")
 
         if count_bot_fees == 0:
             print(Fore.YELLOW + "MAKING FEE STRUCTURE DOCS")
-            mylist = [
+            fee_list = [
                 {"type": "with_xlm", "key": 'xlm', 'fee': float(1.0)},
                 {"type": "merch_transfer_cost", "key": 'wallet_transfer', 'fee': float(1.0)},
                 {"type": "merch_license", "key": 'license', 'fee': float(1.0)},
                 {"type": "merch_transfer_min", "key": 'merchant_min', 'fee': float(1.0)}]
 
-            BotFees.insert_many(mylist)
+            bot_fees.insert_many(fee_list)
             print(Fore.GREEN + "DONE")
         else:
             print(Fore.LIGHTGREEN_EX + "BOT FEE SETTINGS EXIST ALREADY ")
