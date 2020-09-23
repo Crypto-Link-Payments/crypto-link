@@ -3,13 +3,43 @@ from datetime import datetime
 import discord
 
 from cogs.utils.monetaryConversions import convert_to_usd
+from utils.tools import Helpers
 
+helper = Helpers()
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 
 class CustomMessages:
     def __init__(self):
         pass
+
+    @staticmethod
+    async def send_deposit_notification_channel(channel, avatar, user, stroops):
+        """
+        Sending message to user on successful processed deposit
+        """
+
+        notify = discord.Embed(title='System Deposit Notification',
+                               description='Deposit has been processed')
+        notify.set_thumbnail(url=avatar)
+        notify.add_field(name='User details',
+                         value=f'{user} ID; {user.id}',
+                         inline=False)
+        notify.add_field(name='Deposit details',
+                         value=f'Amount: {stroops / 10000000:.7f} {CONST_STELLAR_EMOJI}',
+                         inline=False)
+        await channel.send(embed=notify)
+
+    @staticmethod
+    async def send_unidentified_deposit_msg(channel, deposit_details):
+        """
+        deposit or memo could not be identifies
+        """
+
+        deposit_unidentified = f"```json\n{deposit_details}```"
+
+        await channel.send(content=deposit_unidentified)
 
     @staticmethod
     async def embed_builder(ctx, title, description, data: list, destination=None, thumbnail=None):

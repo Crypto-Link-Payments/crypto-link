@@ -42,29 +42,12 @@ extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs'
 
 
 def get_time():
+    """
+    Get local time on the computer
+    """
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
     return current_time
-
-
-async def send_channel_system_message(user, stroops):
-    """
-    Sending message to user on successful processed deposit
-    """
-    channel_id = notification_channels["stellar"]
-    channel = bot.get_channel(id=int(channel_id))
-
-    # create withdrawal notification for channel
-    notify = discord.Embed(title='System Deposit Notification',
-                           description='Deposit has been processed')
-    notify.set_thumbnail(url=bot.user.avatar_url)
-    notify.add_field(name='User details',
-                     value=f'{user} ID; {user.id}',
-                     inline=False)
-    notify.add_field(name='Deposit details',
-                     value=f'Amount: {stroops / 10000000:.7f} {CONST_STELLAR_EMOJI}',
-                     inline=False)
-    await channel.send(embed=notify)
 
 
 def filter_transaction(new_transactions: list):
@@ -85,11 +68,12 @@ def filter_transaction(new_transactions: list):
     return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo
 
 
-def process_tx_with_no_memo(no_memo_transaction):
+def process_tx_with_no_memo(channel,no_memo_transaction):
     for tx in no_memo_transaction:
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
-                print(Fore.GREEN + 'Processed successfully')
+                await custom_messages.send_unidentified_deposit_msg(channel=channel,deposit_details=tx)
+
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
@@ -97,7 +81,7 @@ def process_tx_with_no_memo(no_memo_transaction):
             print(Fore.YELLOW + 'Unknown processed already')
 
 
-def process_tx_with_memo(memo_transactions):
+def process_tx_with_memo(msg_channel, memo_transactions):
     for tx in memo_transactions:
         # check if processed if not process them
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
@@ -120,9 +104,9 @@ def process_tx_with_memo(memo_transactions):
                                                                              amount=tx_stroop, color_code=0)
 
                     # Channel system message on deposit
-                    await send_channel_system_message(user=dest, stroops=tx_stroop)
-
-                    # TODO check if it can be transferred to await async
+                    await custom_messages.send_deposit_notification_channel(channel=msg_channel,
+                                                                            avatar=bot.user.avatar_url,
+                                                                            user=dest, stroops=tx_stroop)
                     # Update user deposit stats
                     stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
                                                             key="xlmStats")
@@ -139,10 +123,11 @@ def process_tx_with_memo(memo_transactions):
             print(Fore.LIGHTCYAN_EX + 'No new legit tx')
 
 
-def process_tx_with_not_registered_memo(no_registered_memo):
+def process_tx_with_not_registered_memo(channel, no_registered_memo):
     for tx in no_registered_memo:
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
+                await custom_messages.send_unidentified_deposit_msg(channel=channel, deposit_details=tx)
                 print(Fore.GREEN + 'Processed successfully')
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
@@ -154,22 +139,22 @@ def process_tx_with_not_registered_memo(no_registered_memo):
 async def check_stellar_hot_wallet():
     """
     Functions initiates the check for stellar incoming deposits and processes them
-    :return:
     """
     print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
     pag = helper.read_json_file('stellarPag.json')
     new_transactions = stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
+    channel_id = notification_channels["stellar"]  # Sys cgannel where details are sent
 
     if new_transactions:
         # Filter transactions
         tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions)
-
+        channel = bot.get_channel(id=int(channel_id))
         if tx_with_registered_memo:
-            process_tx_with_memo(tx_with_registered_memo)
+            process_tx_with_memo(msg_channel=channel,memo_transactions=tx_with_registered_memo)
         if tx_with_not_registered_memo:
-            process_tx_with_not_registered_memo(tx_with_not_registered_memo)
+            process_tx_with_not_registered_memo(channel=channel,no_registered_memo=tx_with_not_registered_memo)
         if tx_with_no_memo:
-            process_tx_with_no_memo(tx_with_no_memo)
+            process_tx_with_no_memo(channel=channel,no_memo_transaction = tx_with_no_memo)
 
         last_checked_pag = new_transactions[-1]["paging_token"]
         print(last_checked_pag)
@@ -184,13 +169,11 @@ async def check_stellar_hot_wallet():
     else:
         print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
         print('==============================================')
-        return
 
 
 async def check_expired_roles():
     """
     Function checks for expired users on community nad removes them if necessary
-    :return:
     """
     print(Fore.GREEN + f"{get_time()} --> CHECKING FOR USERS WITH EXPIRED ROLES ")
     now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
@@ -262,12 +245,11 @@ async def check_expired_roles():
     else:
         print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
         print('===========================================================')
-        return
 
 
 async def check_merchant_licences():
     """
-    :return:
+    Script which checks merchant license situation
     """
     print(Fore.GREEN + f"{get_time()} --> CHECKING FOR COMMUNITIES WITH EXPIRED MERCHANT LICENSE")
 
