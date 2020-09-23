@@ -406,7 +406,6 @@ class MerchantCommunityOwner(commands.Cog):
             fee_value = fee_dollar_details['fee']  # Get out fee
             in_stellar = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
             total = (in_stellar['total'])  # Get total in lumne
-            rate = (in_stellar['usd'])  # Get conversion rate for info
             fee_in_stroops = (int(total * (10 ** 7)))  # Convert to stroops
 
         # Get the current minimum withdrawal fee in Dollars
