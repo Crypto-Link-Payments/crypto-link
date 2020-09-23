@@ -86,7 +86,9 @@ class WithdrawalCommands(commands.Cog):
                 final_stroop = stroops + fee_in_stroops
                 # Check user balance
                 wallet_details = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
+
                 if wallet_details['balance'] >= final_stroop:
+                    #TODO check for withdrawal bugs
                     xlm_with_amount = stroops / 10000000
 
                     # Confirmation message

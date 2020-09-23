@@ -12,7 +12,14 @@ notification_channels = helper.read_json_file(file_name='autoMessagingChannels.j
 
 
 class CustomMessages:
+    """
+    Class holding custom messages for Crypto Link system
+    """
+
     def __init__(self):
+        """
+        For initiation
+        """
         pass
 
     @staticmethod
