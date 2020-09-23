@@ -174,7 +174,7 @@ class TransactionCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
         elif isinstance(error, commands.CommandOnCooldown):
-            title = f'__Command on cooldown__!'
+            title = f'__Command on cool-down__!'
             message = f'{error}'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
@@ -191,13 +191,6 @@ class TransactionCommands(commands.Cog):
                       f'transaction request needs to be executed on one of the text channels on {ctx.message.guild}'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
-
-        elif isinstance(error, commands.CommandOnCooldown):
-            title = f':timer:  __System Transaction Error__ :timer: '
-            message = f'You wanted to make another transaction too fast. Limit is set to 1 TX per 1 minute '
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
-
         elif isinstance(error, AssertionError):
             print(error)
 
