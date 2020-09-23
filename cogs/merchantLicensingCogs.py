@@ -28,6 +28,7 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 d = helper.read_json_file(file_name='botSetup.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
+CONST_MERCHANT_LICENSE_PURCHASE_ERROR = '__Merchant License Purchase error__'
 
 
 class MerchantLicensingCommands(commands.Cog):
@@ -245,40 +246,35 @@ class MerchantLicensingCommands(commands.Cog):
                             stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                          stroops=stroops, direction=1)
                             bot_manager.update_lpi_wallet_balance(amount=stroops, wallet='xlm', direction=0)
-                            title = "__Merchant License Purchase error__"
                             message = f" There has been an issue with the system. Please try again later. If " \
                                       f"the issue persists " \
                                       f"contact Crypto Link Staff. Thank you for your understanding."
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                                 sys_msg_title=title)
+                                                                 sys_msg_title=CONST_MERCHANT_LICENSE_PURCHASE_ERROR)
                     else:
                         # Return funds to user since LPI wallet could not be credited
                         stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id, stroops=stroops,
                                                                      direction=1)
-                        title = "__Merchant License Purchase error__"
                         message = f" There has been an issue with the system. Please try again later. If the " \
                                   f"issue persists contact Crypto Link Staff. Thank you for your understanding."
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                             sys_msg_title=title)
+                                                             sys_msg_title=CONST_MERCHANT_LICENSE_PURCHASE_ERROR)
 
                 else:
-                    title = "__Merchant License Purchase error__"
                     message = f" There has been an issue with the system. Please try again later. If the issue" \
                               f" persists contact Crypto Link Staff. Thank you for your understanding."
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                         sys_msg_title=title)
+                                                         sys_msg_title=CONST_MERCHANT_LICENSE_PURCHASE_ERROR)
             else:
-                title = "__Merchant License Purchase error__"
                 message = f"You can not purchase license due to insufficient funds:\n" \
                           f"License price: {total} <:stelaremoji:684676687425961994>\n" \
                           f"Wallet balance: {wallet_value / 10000000}{CONST_STELLAR_EMOJI}. "
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                     sys_msg_title=title)
+                                                     sys_msg_title=CONST_MERCHANT_LICENSE_PURCHASE_ERROR)
         else:
-            title = "__Merchant License Purchase error__"
             message = f"It looks like you have already purchased license for Merchant System. "
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=title)
+                                                 sys_msg_title=CONST_MERCHANT_LICENSE_PURCHASE_ERROR)
 
 
 def setup(bot):
