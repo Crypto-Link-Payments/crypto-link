@@ -26,15 +26,15 @@ stellar_manager = StellarManager()
 merchant_manager = MerchantManager()
 stats_manager = StatsManager()
 
-custo_messages = CustomMessages()
+custom_messages = CustomMessages()
 helper = Helpers()
-notf_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
+notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 d = helper.read_json_file(file_name='botSetup.json')
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(d['command']))  # Test commands
 bot.remove_command('help')  # removing the old help command
 
-CONST_STELAR_EMOJI = "<:stelaremoji:684676687425961994>"
+CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
               'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
@@ -49,9 +49,9 @@ def get_time():
 
 async def send_channel_system_message(user, stroops):
     """
-    Sending message to user on successfull processed deposit
+    Sending message to user on successful processed deposit
     """
-    channel_id = notf_channels["stellar"]
+    channel_id = notification_channels["stellar"]
     channel = bot.get_channel(id=int(channel_id))
 
     # create withdrawal notification for channel
@@ -62,7 +62,7 @@ async def send_channel_system_message(user, stroops):
                      value=f'{user} ID; {user.id}',
                      inline=False)
     notify.add_field(name='Deposit details',
-                     value=f'Amount: {stroops / 10000000:.7f} {CONST_STELAR_EMOJI}',
+                     value=f'Amount: {stroops / 10000000:.7f} {CONST_STELLAR_EMOJI}',
                      inline=False)
     await channel.send(embed=notify)
 
@@ -98,22 +98,22 @@ async def check_stellar_hot_wallet():
                     tx_from = tx["source_account"]
                     tx_stroop = tx['stroop']
 
-                    # Get user_id based on transaciton memo
+                    # Get user_id based on transaction memo
                     user_id = stellar_manager.get_discord_id_from_deposit_id(deposit_id=tx_memo)
 
                     # Update balance
                     if stellar_manager.update_stellar_balance_by_memo(memo=tx_memo, stroops=tx_stroop, direction=1):
                         # If balance updated successfully send the message to user of processed deposit
                         dest = await bot.fetch_user(user_id=int(user_id['userId']))
-                        await custo_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
-                                                                                memo=tx_memo,
-                                                                                tx_hash=tx_hash, source_acc=tx_from,
-                                                                                amount=tx_stroop, color_code=0)
+                        await custom_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
+                                                                                 memo=tx_memo,
+                                                                                 tx_hash=tx_hash, source_acc=tx_from,
+                                                                                 amount=tx_stroop, color_code=0)
 
                         # Channel system message on deposit
                         await send_channel_system_message(user=dest, stroops=tx_stroop)
 
-                        # TODO check if it can be transfered to await async
+                        # TODO check if it can be transferred to await async
                         # Update user deposit stats
                         stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
                                                                 key="xlmStats")
@@ -148,10 +148,10 @@ async def check_stellar_hot_wallet():
                                      f'HASH{tx["hash"]}')
             else:
                 print(Fore.YELLOW + 'Unknown processed already')
-        last_chekc_peg = new_transactions[-1]["paging_token"]
-        print(last_chekc_peg)
-        if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_chekc_peg)):
-            print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_chekc_peg}')
+        last_checked_pag = new_transactions[-1]["paging_token"]
+        print(last_checked_pag)
+        if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
+            print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
         else:
             print(Fore.RED + 'There was an issue with updating pag')
 
@@ -167,7 +167,7 @@ async def check_stellar_hot_wallet():
 
 async def check_expired_roles():
     """
-    Function checks for expired users on community nad removes them if neccessary
+    Function checks for expired users on community nad removes them if necessary
     :return:
     """
     print(Fore.GREEN + f"{get_time()} --> CHECKING FOR USERS WITH EXPIRED ROLES ")
@@ -209,7 +209,7 @@ async def check_expired_roles():
                                 await member.send(embed=expired)
                             else:
                                 channel_sys = channels["merchant"]
-                                # send notifcation to merchant for system if user could not be removed from database
+                                # send notification to merchant for system if user could not be removed from database
                                 expired_sys = discord.Embed(title='__Expired user could not be removed from system__',
                                                             colour=discord.Color.red())
                                 expired_sys.set_thumbnail(url=bot.user.avatar_url)
@@ -264,7 +264,7 @@ async def check_merchant_licences():
 
             if merchant_manager.remove_over_due_community(discord_id=int(community_id)):
 
-                # Send notifcation to owner ,
+                # Send notification to owner ,
                 expired = discord.Embed(title='__Merchant License Expiration Notification!__',
                                         colour=discord.Colour.dark_red(),
                                         description='You have received this notification because '
@@ -283,7 +283,7 @@ async def check_merchant_licences():
                 await dest.send(embed=expired)
 
                 channel_sys = channels["merchant"]
-                # send notifcation to merchant channel of LPI community
+                # send notification to merchant channel of LPI community
                 expired_sys = discord.Embed(title='Merchant license expired and removed successfully!',
                                             colour=discord.Color.red())
                 expired_sys.set_thumbnail(url=bot.user.avatar_url)
@@ -300,7 +300,7 @@ async def check_merchant_licences():
                 await merch_channel.send(embed=expired_sys)
             else:
                 sys_error = discord.Embed(title='__Merchant License System error__!',
-                                          description='This error has been triggered becasue merchan community license'
+                                          description='This error has been triggered because merchant community license'
                                                       ' could not be removed from database. Community details '
                                                       'are presented below',
                                           colour=discord.Color.red())
@@ -317,7 +317,7 @@ async def check_merchant_licences():
                                     value=f'{end_date} (UNIX {end})',
                                     inline=False)
 
-                channel_id_details = notf_channels['merchant']
+                channel_id_details = notification_channels['merchant']
                 channel_to_send = bot.get_channel(id=int(channel_id_details))
                 await channel_to_send.send(embed=sys_error)
 
@@ -328,7 +328,7 @@ async def check_merchant_licences():
 
 
 def start_scheduler():
-    print(Fore.LIGHTBLUE_EX + 'Started Chroned Monitors')
+    print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
 
     scheduler.add_job(check_stellar_hot_wallet,
                       CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
