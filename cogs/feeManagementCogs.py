@@ -25,18 +25,18 @@ class FeeManagementAndControl(commands.Cog):
         self.bot = bot
 
     @staticmethod
-    def filter_db_keys(type: str):
+    def filter_db_keys(fee_type: str):
 
-        if type == 'with_xlm':
-            type = "XLM Withdrawal fee"
-        elif type == 'merch_transfer_cost':
-            type = "Merchant wallet withdrawal fee"
-        elif type == 'merch_license':
-            type = "Merchant Monthly License cost"
-        elif type == 'merch_transfer_min':
-            type = 'Merchant mnimum transfer'
+        if fee_type == 'with_xlm':
+            fee_type = "XLM Withdrawal fee"
+        elif fee_type == 'merch_transfer_cost':
+            fee_type = "Merchant wallet withdrawal fee"
+        elif fee_type == 'merch_license':
+            fee_type = "Merchant Monthly License cost"
+        elif fee_type == 'merch_transfer_min':
+            fee_type = 'Merchant mnimum transfer'
 
-        return type
+        return fee_type
 
     @commands.command()
     async def fees(self, ctx):
@@ -48,9 +48,9 @@ class FeeManagementAndControl(commands.Cog):
         rates = get_rates(coin_name='stellar')
         for data in fees:
             conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
-            type = self.filter_db_keys(type=data['type'])
+            fee_type = self.filter_db_keys(fee_type=data['type'])
 
-            fee_info.add_field(name=type,
+            fee_info.add_field(name=fee_type,
                                value=f"XLM = {conversion['total']} {CONST_STELLAR_EMOJI}\n"
                                      f"Dollar = {data['fee']}$",
                                inline=False)
