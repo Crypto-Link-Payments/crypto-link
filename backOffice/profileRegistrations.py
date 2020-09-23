@@ -1,17 +1,16 @@
 import os
 import sys
+from uuid import uuid4
 
 from pymongo import MongoClient
 from pymongo import errors
 
-from backOffice.tools.helppersOffice import VariousTools
 from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 helper = Helpers()
-vt = VariousTools()
 d = helper.read_json_file(file_name='botSetup.json')
 hot = helper.read_json_file(file_name='hotWallets.json')
 
@@ -33,6 +32,17 @@ class AccountManager(object):
 
         # Stellar connection
         self.stellar_wallets = self.cl_connection.StellarWallets  # Access to all stellar wallets
+
+    @staticmethod
+    def get_xlm_payment_id():
+        """
+        Create user memo when wallet is created for deposits
+        :return: STR
+        """
+        string_length = 20
+        random_string = uuid4().hex  # get a random string in a UUID fromat
+        memo = random_string.upper().lower()[0:string_length]
+        return str(memo)
 
     def __create_stellar_wallet(self, discord_id: int, discord_username: str, deposit_id):
         """
@@ -105,7 +115,7 @@ class AccountManager(object):
         :return: bool
 
         """
-        stellar_deposit_id = vt.get_xlm_payment_id()
+        stellar_deposit_id = self.get_xlm_payment_id()
 
         self.__create_stellar_wallet(discord_id=discord_id, discord_username=discord_username,
                                      deposit_id=stellar_deposit_id)
