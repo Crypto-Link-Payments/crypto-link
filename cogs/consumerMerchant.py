@@ -1,7 +1,3 @@
-"""
-
-"""
-
 import datetime
 import re
 import time
@@ -414,8 +410,8 @@ class ConsumerCommands(commands.Cog):
     @membership.error
     async def membership_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            title = f'__Membership and Merchant system error!__'
-            message = f'Community has not activated merchant service or you have used command over the DM with the bot.'
+            title = '__Membership and Merchant system error!__'
+            message = 'Community has not activated merchant service or you have used command over the DM with the bot.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
 
