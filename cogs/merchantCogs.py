@@ -24,6 +24,10 @@ CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 
 class MerchantCommunityOwner(commands.Cog):
+    """
+    Discord COGS handling commands for merchant system from community owner perspective
+    """
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -32,6 +36,7 @@ class MerchantCommunityOwner(commands.Cog):
     @commands.check(has_wallet)
     @commands.check(is_public)
     async def merchant_initiate(self, ctx):
+
         """
         Command to initiate merchant setup process and register community into the Merchant system
         :param ctx:
@@ -70,11 +75,11 @@ class MerchantCommunityOwner(commands.Cog):
             title = "💱 __Merchant System Message Setup__💱 "
             description = 'All available commands under ***merchant*** category.'
             list_of_commands = [
-                {"name": f'!merchant manual',
+                {"name": f'{d["command"]}merchant manual',
                  "value": 'Step by step guide how to set-up and monetize community'},
-                {"name": f'!merchant monetize',
+                {"name": f'{d["command"]}merchant monetize',
                  "value": 'All available commands to monetize the roles on Discord'},
-                {"name": f'!merchant wallet',
+                {"name": f'{d["command"]}merchant wallet',
                  "value": 'All commands available for community wallet operations'},
                 {"name": f'{d["command"]}merchant create_role <role name> <value in dollars > '
                          f'<weeks> <days> <hours> <minutes>',
@@ -178,7 +183,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                                     destination=1)
                         else:
                             msg_title = '__Role Creation Error___'
-                            message = f'The amount user will have to pay for role needs to be greater than 0.00$'
+                            message = 'The amount user will have to pay for role needs to be greater than 0.00$'
                             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
                                                                 color_code=1,
                                                                 destination=1)
@@ -231,18 +236,18 @@ class MerchantCommunityOwner(commands.Cog):
                                                                   community_id=ctx.message.guild.id):
                 await discord_role.delete()
                 title = '__Role Delete System notification__'
-                message = f'Monetized role has been successfully delete from the Merchant System, Community and from, ' \
-                          f' all the users who obtained it.'
+                message = 'Monetized role has been successfully delete from the Merchant System, Community and from, '\
+                          ' all the users who obtained it.'
                 await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                     destination=1)
             else:
                 title = '__Role Delete System error__'
-                message = f'Role could not be removed from the Merchant System. Please contact the team with details.'
+                message = 'Role could not be removed from the Merchant System. Please contact the team with details.'
                 await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                     destination=1)
         else:
             title = '__Unknown role error__'
-            message = f'This Role could not be deleted as it is not registered in the merchant system'
+            message = 'This Role could not be deleted as it is not registered in the merchant system'
             await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                 destination=1)
 
@@ -338,7 +343,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                         destination=1)
                 else:
                     title = '__Role status change error__'
-                    message = 'Role could not be re-activated, please try again later. Please try again. If the issue ' \
+                    message = 'Role could not be re-activated, please try again later. Please try again. If the issue '\
                               'persists, contact one staff. '
                     await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
                                                         destination=1)
@@ -402,14 +407,14 @@ class MerchantCommunityOwner(commands.Cog):
 
         # Check merchant situatioan and modify fee accordingly
         if not merchant_manager.check_community_license_status(community_id=ctx.message.author.id):
-            fee_dollar_details = lpi_wallet.get_fees_by_category(all_fees=False,key='wallet_transfer')
+            fee_dollar_details = lpi_wallet.get_fees_by_category(all_fees=False, key='wallet_transfer')
             fee_value = fee_dollar_details['fee']  # Get out fee
             in_stellar = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
             total = (in_stellar['total'])  # Get total in lumne
             fee_in_stroops = (int(total * (10 ** 7)))  # Convert to stroops
 
         # Get the current minimum withdrawal fee in Dollars
-        minimum_with_limit = lpi_wallet.get_fees_by_category(all_fees=False,key='merchant_min')
+        minimum_with_limit = lpi_wallet.get_fees_by_category(all_fees=False, key='merchant_min')
         with_fee = minimum_with_limit['fee']  # Get out fee
         with_fee_stellar = convert_to_currency(with_fee, coin_name='stellar')  # Convert fee to currency
         total_xlm = (with_fee_stellar['total'])
@@ -476,7 +481,7 @@ class MerchantCommunityOwner(commands.Cog):
                             corp_info.add_field(name="Owner",
                                                 value=f"{ctx.message.author}",
                                                 inline=False)
-                            corp_info.add_field(name="Income amount to corpo wallet",
+                            corp_info.add_field(name="Income amount to corporate wallet",
                                                 value=f"Amount: {fee_in_stroops / 10000000} {CONST_STELLAR_EMOJI}\n"
                                                       f"Amount is 0 if community has purchased monthly license",
                                                 inline=False)
@@ -522,8 +527,8 @@ class MerchantCommunityOwner(commands.Cog):
                         await channel_id.send(embed=merch_fee)
 
                         sys_msg_title = '__System Withdrawal error__'
-                        message = f'There has been an issue with withdrawal from Merchant Corporate account to your ' \
-                                  f'personal wallet. Please try again later, or contact the staff members. '
+                        message = 'There has been an issue with withdrawal from Merchant Corporate account to your ' \
+                                  'personal wallet. Please try again later, or contact the staff members. '
                         await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                             sys_msg_title=sys_msg_title)
                 else:
@@ -550,6 +555,7 @@ class MerchantCommunityOwner(commands.Cog):
 
     @create_role.error
     async def create_role_on_error(self, ctx, error):
+
         """
         Custom error handlers for role creation procedure
         :param ctx:
@@ -576,6 +582,7 @@ class MerchantCommunityOwner(commands.Cog):
 
     @merchant.error
     async def merchant_error(self, ctx, error):
+
         """
         Custom error handler for merchant system registration
         :param ctx:
@@ -583,18 +590,19 @@ class MerchantCommunityOwner(commands.Cog):
         :return:
         """
         if isinstance(error, commands.CheckFailure):
-            message = f'Something went wrong while trying to access **merchant platform**:\n' \
-                      f'\n' \
-                      f'All checks need to be met in order for access to be granted:\n' \
-                      f' --> You need to be the owner of community \n' \
-                      f' --> You need to have personal discord wallet  \n' \
-                      f'--> Community needs to be registered in the system \n' \
-                      f'--> Command needs to be executed on public channel \n' \
-                      f'If issue persists please contact staff.'
+            message = 'Something went wrong while trying to access **merchant platform**:\n' \
+                      '\n' \
+                      'All checks need to be met in order for access to be granted:\n' \
+                      ' --> You need to be the owner of community \n' \
+                      ' --> You need to have personal discord wallet  \n' \
+                      '--> Community needs to be registered in the system \n' \
+                      '--> Command needs to be executed on public channel \n' \
+                      'If issue persists please contact staff.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1)
 
     @merchant_initiate.error
     async def merchant_initiate_error(self, ctx, error):
+
         """
         Custom error handler for merchant system registration
         :param ctx:
@@ -651,21 +659,21 @@ class MerchantCommunityOwner(commands.Cog):
     @stop_role.error
     async def stop_role_error(self, ctx, error):
         if isinstance(error, commands.BadArgument):
-            message = f"You have provided bad argument for Role parameter. Use @ infront of the role name and tag it"
+            message = "You have provided bad argument for Role parameter. Use @ infront of the role name and tag it"
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
         elif isinstance(error, commands.CheckFailure):
-            message = f'In order to be able to deactivate role you need to execute the function on public channel ' \
-                      f' and be the owner of the community. Please try again and if issue persist contact staff.'
+            message = 'In order to be able to deactivate role you need to execute the function on public channel ' \
+                      ' and be the owner of the community. Please try again and if issue persist contact staff.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
 
     @start_role.error
     async def start_role_error(self, ctx, error):
         if isinstance(error, commands.BadArgument):
-            message = f"You have provided bad argument for Role parameter. Use @ infront of the role name and tag it"
+            message = f"You have provided bad argument for Role parameter. Use @ in-front of the role name and tag it"
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
         elif isinstance(error, commands.CheckFailure):
-            message = f'In order to be able to re-activate role you need to execute the function on public channel ' \
-                      f' and be the owner of the community. Please try again and if issue persist contact staff.'
+            message = 'In order to be able to re-activate role you need to execute the function on public channel ' \
+                      ' and be the owner of the community. Please try again and if issue persist contact staff.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
 
 
