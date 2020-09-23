@@ -69,6 +69,7 @@ class TransactionCommands(commands.Cog):
         :param ctx:
         :param amount:
         :param recipient:
+        :param message: User message to recipient
         :return:
         """
 
@@ -139,7 +140,8 @@ class TransactionCommands(commands.Cog):
 
                 else:
                     title = '__Insufficient balance__'
-                    message = f'You have insufficient balance! Your current wallet balance is {wallet_value / 10000000} XLM'
+                    message = f'You have insufficient balance! Your current wallet balance is' \
+                              f' {wallet_value / 10000000} XLM'
                     await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                         sys_msg_title=title)
             else:
@@ -159,7 +161,7 @@ class TransactionCommands(commands.Cog):
         if isinstance(error, commands.CheckFailure):
             title = f':warning:  __Conditions not met __ :warning: '
             message = f'In order to successfully execute transaction, following conditions need to be met:\n' \
-                      f'```-> You have to have registered wallet and sufficinet balance\n' \
+                      f'```-> You have to have registered wallet and sufficient balance\n' \
                       f'-> Command needs to be executed on public channel```'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
