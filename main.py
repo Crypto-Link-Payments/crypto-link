@@ -67,6 +67,24 @@ async def send_channel_system_message(user, stroops):
     await channel.send(embed=notify)
 
 
+def filter_transaction(new_transactions:list):
+    """
+    Filtering transactions
+    """
+    # Building list of deposits if memo included
+    tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys()]  # GET Transactions who have memo
+
+    tx_with_no_memo = [tx for tx in new_transactions if tx not in tx_with_memo]  # GET transactions without memo
+
+    tx_with_registered_memo = [tx for tx in tx_with_memo if stellar_manager.check_if_stellar_memo_exists(
+        tx_memo=tx['memo'])]  # GET tx with registered memo
+
+    tx_with_not_registered_memo = [tx for tx in tx_with_memo if
+                                   tx not in tx_with_registered_memo]  # GET tx with not registered memo
+
+    return tx_with_registered_memo, tx_with_not_registered_memo,tx_with_no_memo
+
+
 async def check_stellar_hot_wallet():
     """
     Functions initiates the check for stellar incoming deposits and processes them
@@ -78,16 +96,9 @@ async def check_stellar_hot_wallet():
     new_transactions = stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
 
     if new_transactions:
-        # Building list of deposits if memo included
-        tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys()]  # GET Transactions who have memo
+        # Filter transactions
+        tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions)
 
-        tx_with_no_memo = [tx for tx in new_transactions if tx not in tx_with_memo]  # GET transactions without memo
-
-        tx_with_registered_memo = [tx for tx in tx_with_memo if stellar_manager.check_if_stellar_memo_exists(
-            tx_memo=tx['memo'])]  # GET tx with registered memo
-
-        tx_with_not_registered_memo = [tx for tx in tx_with_memo if
-                                       tx not in tx_with_registered_memo]  # GET tx with not registered memo
         # Check all transactions with memo
         for tx in tx_with_registered_memo:
             # check if processed if not process them
