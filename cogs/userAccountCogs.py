@@ -384,7 +384,7 @@ class UserAccountCommands(commands.Cog):
                                                 sys_msg_title=title)
 
     @bal.error
-    async def balance_error(self, ctx, error):
+    async def bal_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__Balance check error__'
             message = f'You have not registered yourself into the system yet. Please head to one of the public ' \
