@@ -32,7 +32,7 @@ class AccountManager(object):
         self.cl_token_wallets = self.cl_connection.ClTokenWallets
 
         # Stellar connection
-        self.stellar_walets = self.cl_connection.StellarWallets  # Access to all stellar wallets
+        self.stellar_wallets = self.cl_connection.StellarWallets  # Access to all stellar wallets
 
     def __create_stellar_wallet(self, discord_id: int, discord_username: str, deposit_id):
         """
@@ -48,7 +48,7 @@ class AccountManager(object):
             "balance": int(0)
         }
 
-        result = self.stellar_walets.insert_one(stellar_wallet)
+        result = self.stellar_wallets.insert_one(stellar_wallet)
 
         if result.inserted_id:
             return True
@@ -79,9 +79,9 @@ class AccountManager(object):
 
         if ticker == 'xlm':
             try:
-                self.stellar_walets.update_one({"userId": int(discord_id)},
-                                               {"$inc": {"balance": amount},
-                                                "$currentDate": {"lastModified": True}})
+                self.stellar_wallets.update_one({"userId": int(discord_id)},
+                                                {"$inc": {"balance": amount},
+                                                 "$currentDate": {"lastModified": True}})
                 return True
             except errors.PyMongoError as e:
                 print(f' Could not update user wallet with xlm: {e}')
@@ -197,10 +197,10 @@ class AccountManager(object):
         :param discord_id:
         :return:
         """
-        stellar = self.stellar_walets.find_one({"userId": discord_id},
-                                               {"_id": 0,
-                                                "balance": 1,
-                                                "depositId": 1})
+        stellar = self.stellar_wallets.find_one({"userId": discord_id},
+                                                {"_id": 0,
+                                                 "balance": 1,
+                                                 "depositId": 1})
 
         try:
             if stellar:
@@ -218,7 +218,7 @@ class AccountManager(object):
     def get_balance_based_on_ticker(self, user_id, ticker):
 
         if ticker == 'xlm':
-            stellar_wallet = self.stellar_walets.find_one({"userId": int(user_id)},
-                                                          {"_id": 0,
-                                                           "balance": 1})
+            stellar_wallet = self.stellar_wallets.find_one({"userId": int(user_id)},
+                                                           {"_id": 0,
+                                                            "balance": 1})
             return stellar_wallet['balance']
