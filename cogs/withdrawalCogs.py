@@ -89,7 +89,7 @@ class WithdrawalCommands(commands.Cog):
 
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
 
-        stellar_fee = bot_manager.get_fees_by_category(all_fees=False,key='xlm')['fee']
+        stellar_fee = bot_manager.get_fees_by_category(all_fees=False, key='xlm')['fee']
         fee_in_xlm = convert_to_currency(amount=stellar_fee, coin_name='stellar')
         fee_in_stroops = int(fee_in_xlm['total'] * (10 ** 7))
         channel_id = notify_channel["stellar"]
@@ -104,9 +104,6 @@ class WithdrawalCommands(commands.Cog):
                 wallet_details = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
                 if wallet_details['balance'] >= final_stroop:
                     xlm_with_amount = stroops / 10000000
-
-                    # Get withdrawal fee
-                    convert_fee = convert_to_currency(fee_in_stroops, coin_name='stellar')
 
                     # Confirmation message
                     message_content = f"{ctx.message.author.mention} Current withdrawal fee which will be appended to your withdrawal amout is " \
