@@ -16,26 +16,24 @@ class BotManager(object):
     """
     Class dealing with the management of Crypto Link own bot wallet and fees management
     """
+
     def __init__(self):
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
-        self.botStuff = self.connection['CryptoLink']
-        self.botWallet = self.botStuff.CLWallets
-        self.botFees = self.botStuff.CLFees
+        self.bot_stuff = self.connection['CryptoLink']
+        self.bot_wallet = self.bot_stuff.CLWallets
+        self.bot_fees = self.bot_stuff.CLFees
 
     def update_lpi_wallet_balance(self, amount: int, wallet: str, direction: int):
         """
         manipulating wallet balance when transactions happens
         """
-        if direction == 1:
-            pass
-
-        else:
+        if direction != 1:
             amount *= (-1)
 
         try:
-            result = self.botWallet.update_one({"ticker": f"{wallet}"},
-                                               {"$inc": {"balance": int(amount)},
-                                                "$currentDate": {"lastModified": True}})
+            result = self.bot_wallet.update_one({"ticker": f"{wallet}"},
+                                                {"$inc": {"balance": int(amount)},
+                                                 "$currentDate": {"lastModified": True}})
             return result.matched_count > 0
         except errors.PyMongoError as e:
             print(e)
@@ -45,14 +43,14 @@ class BotManager(object):
         """
         Obtain Crypto link off chain wallet balance
         """
-        query = list(self.botWallet.find({},
-                                         {"_id": 0}))
+        query = list(self.bot_wallet.find({},
+                                          {"_id": 0}))
         return query
 
     def get_bot_wallet_balance_by_ticker(self, ticker):
-        query = self.botWallet.find_one({"ticker": ticker},
-                                        {"_id": 0,
-                                         "balance": 1})
+        query = self.bot_wallet.find_one({"ticker": ticker},
+                                         {"_id": 0,
+                                          "balance": 1})
         return query['balance']
 
     def license_fee_handling(self, fee: float, key: str):
@@ -63,9 +61,9 @@ class BotManager(object):
         :return:
         """
         try:
-            self.botFees.update_one({"key": key},
-                                    {"$set": {"fee": fee},
-                                     "$currentDate": {"lastModified": True}})
+            self.bot_fees.update_one({"key": key},
+                                     {"$set": {"fee": fee},
+                                      "$currentDate": {"lastModified": True}})
             return True
         except errors.PyMongoError:
             return False
@@ -78,9 +76,9 @@ class BotManager(object):
         :return:
         """
         if all_fees:
-            data = list(self.botFees.find({}))
+            data = list(self.bot_fees.find({}))
             return data
         else:
-            data = self.botFees.find_one({"key": key},
-                                         {"_id": 0})
+            data = self.bot_fees.find_one({"key": key},
+                                          {"_id": 0})
             return data
