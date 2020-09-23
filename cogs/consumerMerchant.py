@@ -24,6 +24,7 @@ d = helper.read_json_file(file_name='botSetup.json')
 notf_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+CONST_MERCHANT_ROLE_ERROR = "__Merchant System Role Error__"
 
 
 class ConsumerCommands(commands.Cog):
@@ -355,8 +356,8 @@ class ConsumerCommands(commands.Cog):
                             else:
                                 message = f'You have already obtained role with name ***{role}***. In order ' \
                                           f'to extend the role you will need to first wait that role expires.'
-                                title = '__Merchant System Role Error__'
-                                await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title,
+                                await customMessages.system_message(ctx=ctx, message=message,
+                                                                    sys_msg_title=CONST_MERCHANT_ROLE_ERROR,
                                                                     color_code=1, destination=0)
                         else:
                             message = f'Role {role} is deactivated at this moment on  {ctx.message.guild} and can ' \
@@ -366,16 +367,16 @@ class ConsumerCommands(commands.Cog):
                                       f' Please contact the owner of the community or use ***{d["command"]}membership' \
                                       f' roles*** to ' \
                                       f'familiarize yourself with all available roles and their status'
-                            title = '__Merchant System Role Error__'
-                            await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title,
+                            await customMessages.system_message(ctx=ctx, message=message,
+                                                                sys_msg_title=CONST_MERCHANT_ROLE_ERROR,
                                                                 color_code=1,
                                                                 destination=1)
                     else:
                         message = f'Role {role} is not monetized on {ctx.message.guild}. Please use ***{d["command"]}' \
                                   f'membership roles*** ' \
                                   f' to find all available monetized roles on the community.'
-                        title = '__Merchant System Role Error__'
-                        await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title, color_code=1,
+                        await customMessages.system_message(ctx=ctx, message=message,
+                                                            sys_msg_title=CONST_MERCHANT_ROLE_ERROR, color_code=1,
                                                             destination=1)
                 else:
                     message = f'Only allowed currencies are Stellar Lumen (xlm) and Monero (xmr)'

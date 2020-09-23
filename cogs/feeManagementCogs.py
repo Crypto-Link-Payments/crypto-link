@@ -17,6 +17,7 @@ helper = Helpers()
 
 d = helper.read_json_file(file_name='botSetup.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+CONST_MERCHANT_LICENSE_CHANGE = '__Merchant monthly license change information__'
 
 
 class FeeManagementAndControl(commands.Cog):
@@ -124,15 +125,13 @@ class FeeManagementAndControl(commands.Cog):
         rounded = round(penny / 100, 2)
         if bot_manager.license_fee_handling(fee=rounded, key='merchant_min'):
             message = f'You have successfully set merchant minimum withdrawal to be {rounded}$ per currency used.'
-            title = '__Merchant monthly license change information__'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
-                                                 sys_msg_title=title)
+                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
         else:
             message = f'There has been an error while trying to set merchant minimum withdrawal amount to {rounded}$.' \
                       f'Please try again later or contact system administrator!'
-            title = '__Merchant monthly license change information__'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
+                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
 
     @change.command()
     async def merchant_license_fee(self, ctx, value: float):
@@ -147,15 +146,13 @@ class FeeManagementAndControl(commands.Cog):
         rounded = round(penny / 100, 2)
         if bot_manager.license_fee_handling(fee=rounded, key='license'):
             message = f'You have successfully set merchant monthly license fee to be {rounded}$.'
-            title = '__Merchant monthly license change information__'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
-                                                 sys_msg_title=title)
+                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
         else:
             message = f'There has been an error while trying to set monthly merchant license fee to {rounded}$.' \
                       f'Please try again later or contact system administrator!'
-            title = '__Merchant monthly license change information__'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
+                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
 
     @change.command()
     async def merchant_wallet_transfer_fee(self, ctx, value: float):
