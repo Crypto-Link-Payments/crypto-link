@@ -4,7 +4,6 @@ import time
 from datetime import datetime
 
 import discord
-from colorama import Fore
 from discord.ext import commands
 
 from backOffice.botStatistics import BotStatsManager
@@ -109,8 +108,6 @@ class BotWalletCommands(commands.Cog):
         Transfer funds from Crypto Link to develop wallet
         """
         print(f'CL SWEEP  : {ctx.author} -> {ctx.message.content}')
-        author = ctx.message.author.id
-
         balance = int(bot_manager.get_bot_wallet_balance_by_ticker(ticker='xlm'))
         if balance > 0:  # Check if balance greater than -
             # Checks if recipient exists
@@ -125,14 +122,12 @@ class BotWalletCommands(commands.Cog):
                     dec_point = get_decimal_point(symbol='xlm')
                     normal_amount = get_normal(str(balance), decimal_point=dec_point)
 
-                    # Store transaction details into corp history
-                    if corporate_hist_mng.store_transfer_from_corp_wallet(time_utc=int(time.time()), author=author,
-                                                                          destination=int(ctx.message.author.id),
-                                                                          amount_atomic=balance, amount=normal_amount,
-                                                                          currency='xlm'):
-                        pass
-                    else:
-                        print(Fore.RED + "could not store in history")
+                    # Store into the history of corporate transfers
+                    corporate_hist_mng.store_transfer_from_corp_wallet(time_utc=int(time.time()),
+                                                                       author=f'{ctx.message.author}',
+                                                                       destination=int(ctx.message.author.id),
+                                                                       amount_atomic=balance, amount=normal_amount,
+                                                                       currency='xlm')
 
                     # notification to corp account discord channel
                     stellar_channel_id = auto_channels['stellar']
