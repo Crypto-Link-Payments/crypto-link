@@ -51,6 +51,8 @@ class AutoFunctions(commands.Cog):
             except Exception as e:
                 print(f'Bot could not delete command from channel: {e}')
                 pass
+        else:
+            pass
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
