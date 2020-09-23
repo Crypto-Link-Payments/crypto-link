@@ -1,7 +1,3 @@
-"""
-Script to handle bot off chain wallet and bot fees
-"""
-
 import os
 import sys
 
