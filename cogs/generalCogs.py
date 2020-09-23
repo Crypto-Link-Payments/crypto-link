@@ -139,11 +139,6 @@ class HelpCommands(commands.Cog):
     @help.group()
     @commands.check(is_owner)
     async def owner(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if ctx.invoked_subcommand is None:
             title = '__Available help categories__'
             description = "All available commands for you to familiarize yourself with payment and merchant " \
