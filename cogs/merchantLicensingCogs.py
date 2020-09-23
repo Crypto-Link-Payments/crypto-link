@@ -240,8 +240,8 @@ class MerchantLicensingCommands(commands.Cog):
                             bot_manager.update_lpi_wallet_balance(amount=stroops, wallet='xlm', direction=0)
                             title = "__Merchant License Purchase error__"
                             message = f" There has been an issue with the system. Please try again later. If " \
-                                      f"the issue persists"
-                            "contact Crypto Link Staff. Thank you for your understanding."
+                                      f"the issue persists " \
+                                      f"contact Crypto Link Staff. Thank you for your understanding."
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                                  sys_msg_title=title)
                     else:
