@@ -107,7 +107,7 @@ async def check_stellar_hot_wallet():
                         dest = await bot.fetch_user(user_id=int(user_id['userId']))
                         await custo_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
                                                                                 memo=tx_memo,
-                                                                                hash=tx_hash, source_acc=tx_from,
+                                                                                tx_hash=tx_hash, source_acc=tx_from,
                                                                                 amount=tx_stroop, color_code=0)
 
                         # Channel system message on deposit

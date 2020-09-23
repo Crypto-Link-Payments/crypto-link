@@ -141,7 +141,7 @@ class CustomMessages:
         await ctx.channel.send(content=message, delete_after=360)
 
     @staticmethod
-    async def coin_activity_notification_message(coin, recipient: discord.User, memo, hash, source_acc, amount,
+    async def coin_activity_notification_message(coin, recipient: discord.User, memo, tx_hash, source_acc, amount,
                                                  color_code: int):
         if color_code == 0:
             signal = 0x319f6b
@@ -154,7 +154,7 @@ class CustomMessages:
         sys_embed.add_field(name='From',
                             value=source_acc, inline=False)
         sys_embed.add_field(name='Tx hash',
-                            value=hash,
+                            value=tx_hash,
                             inline=False)
         sys_embed.add_field(name="Amount",
                             value=f"{amount / 10000000:9.7f} <:stelaremoji:684676687425961994>",
