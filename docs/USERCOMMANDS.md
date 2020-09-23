@@ -43,9 +43,10 @@ or
 ***Note***: Be sure to provide exact Stellar Deposit address and your unique MEMO otherwise funds might get lost
 
 ### Transaction related commands
+
 #### Normal Peer to Peer transaction
 ```text
-!send xlm <amount> <@discor.User>
+!send xlm <amount> <@discord.User> <message>
 ```
 ***Note***: Transaction can be executed 1x/1min/user
 
