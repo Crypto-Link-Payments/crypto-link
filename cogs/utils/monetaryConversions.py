@@ -1,7 +1,3 @@
-"""
-Used for converting crypto numbers to minimal units
-"""
-
 from pycoingecko import CoinGeckoAPI
 
 gecko = CoinGeckoAPI()
