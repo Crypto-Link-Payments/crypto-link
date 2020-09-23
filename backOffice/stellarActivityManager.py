@@ -24,17 +24,17 @@ class StellarManager:
     """
 
     def __init__(self):
-        self.xlmHotWallet = hot['xlm']
+        self.hot_wallet = hot['xlm']
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
-        self.stellarCoin = self.connection['CryptoLink']
+        self.stellar_coin = self.connection['CryptoLink']
 
         # Collections connections
-        self.stellarWallets = self.stellarCoin.StellarWallets  # Access to all stellar wallets
-        self.stellarDeposits = self.stellarCoin.StellarDeposits  # Access to history of successful deposits
-        self.stellarWithdrawals = self.stellarCoin.StellarWithdrawals  # Access to history of successful withdrawals
-        self.stellarUnprocessedDep = self.stellarCoin.StellarUnprocessedDeposits  # history of successful deposits
-        self.stellarUnprocessedWith = self.stellarCoin.StellarUnprocessedWithdrawals  # history of error withdrawals
-        self.stellarCorpWallets = self.stellarCoin.StellarCorporateWallets
+        self.xlm_wallets = self.stellar_coin.StellarWallets  # Access to all stellar wallets
+        self.xlm_deposits = self.stellar_coin.StellarDeposits  # Access to history of successful deposits
+        self.xlm_withdrawals = self.stellar_coin.StellarWithdrawals  # Access to history of successful withdrawals
+        self.xlm_unprocessed = self.stellar_coin.StellarUnprocessedDeposits  # history of successful deposits
+        self.xlm_unprocessed_withdrawals = self.stellar_coin.StellarUnprocessedWithdrawals  # history of error withdrawals
+        self.xlm_guild_wallets = self.stellar_coin.StellarCorporateWallets
 
     def stellar_deposit_history(self, deposit_type: int, tx_data):
         """
@@ -44,9 +44,9 @@ class StellarManager:
         :return:
         """
         if deposit_type == 1:
-            result = self.stellarDeposits.insert_one(tx_data)
+            result = self.xlm_deposits.insert_one(tx_data)
         elif deposit_type == 2:
-            result = self.stellarUnprocessedDep.insert_one(tx_data)
+            result = self.xlm_unprocessed.insert_one(tx_data)
 
         if result.inserted_id:
             return True
@@ -62,9 +62,9 @@ class StellarManager:
         :return:
         """
         if tx_type == 1:  # IF successful
-            result = self.stellarWithdrawals.insert_one(tx_data)
+            result = self.xlm_withdrawals.insert_one(tx_data)
         elif tx_type == 2:  # IF error
-            result = self.stellarUnprocessedWith.insert_one(tx_data)
+            result = self.xlm_unprocessed_withdrawals.insert_one(tx_data)
 
         if result.inserted_id:
             return True
@@ -78,7 +78,7 @@ class StellarManager:
         :return: boolean
         """
 
-        result = self.stellarWallets.find_one({"depositId": tx_memo})
+        result = self.xlm_wallets.find_one({"depositId": tx_memo})
 
         if result:
             return True
@@ -89,7 +89,7 @@ class StellarManager:
         """
         Function which checks if HASH has been already processed
         """
-        result = self.stellarDeposits.find_one({"hash": tx_hash})
+        result = self.xlm_deposits.find_one({"hash": tx_hash})
 
         if result:
             return True
@@ -100,7 +100,7 @@ class StellarManager:
         """
         Check if hash is stored in unprocessed deposits
         """
-        result = self.stellarUnprocessedDep.find_one({"hash": tx_hash})
+        result = self.xlm_unprocessed.find_one({"hash": tx_hash})
 
         if result:
             return True
@@ -111,8 +111,8 @@ class StellarManager:
         """
         Get users wallet details by unique Discord id.
         """
-        result = self.stellarWallets.find_one({"userId": discord_id},
-                                              {"_id": 0})
+        result = self.xlm_wallets.find_one({"userId": discord_id},
+                                           {"_id": 0})
         if result:
             return result
         else:
@@ -132,8 +132,8 @@ class StellarManager:
             stroops *= (-1)  # Deduct
 
         try:
-            result = self.stellarWallets.update_one({"depositId": memo},
-                                                    {'$inc': {"balance": stroops},
+            result = self.xlm_wallets.update_one({"depositId": memo},
+                                                 {'$inc': {"balance": stroops},
                                                      "$currentDate": {"lastModified": True}})
 
             return result.matched_count > 0
@@ -155,8 +155,8 @@ class StellarManager:
             stroops *= (-1)  # Deduct
 
         try:
-            result = self.stellarWallets.update_one({"userId": discord_id},
-                                                    {'$inc': {"balance": int(stroops)},
+            result = self.xlm_wallets.update_one({"userId": discord_id},
+                                                 {'$inc': {"balance": int(stroops)},
                                                      "$currentDate": {"lastModified": True}})
 
             return result.matched_count > 0
@@ -168,5 +168,5 @@ class StellarManager:
         """
         Query unique users discord if based on deposit_id / memo
         """
-        result = self.stellarWallets.find_one({"depositId": deposit_id})
+        result = self.xlm_wallets.find_one({"depositId": deposit_id})
         return result
