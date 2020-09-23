@@ -374,7 +374,7 @@ class UserAccountCommands(commands.Cog):
     @balance.error
     async def balance_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            title = f'__Balance check error__'
+            title = f'__System Error__'
             message = f'You have not registered yourself into the system yet. Please head to one of the public ' \
                       f'channels, where Virtual Interactive Pilot is Accessible and  execute {d["command"]}register'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -384,8 +384,7 @@ class UserAccountCommands(commands.Cog):
     async def quick_bal_check_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__Balance check error__'
-            message = f'You have not registered yourself into the system yet. Please head to one of the public ' \
-                      f'channels, where Virtual Interactive Pilot is Accessible and  execute {d["command"]}register'
+            message = f'In order to check balance you need to be registered into the system'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
 
