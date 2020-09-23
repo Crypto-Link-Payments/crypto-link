@@ -84,7 +84,7 @@ async def check_stellar_hot_wallet():
         tx_with_no_memo = [tx for tx in new_transactions if tx not in tx_with_memo]  # GET transactions without memo
 
         tx_with_registered_memo = [tx for tx in tx_with_memo if stellar_manager.check_if_stellar_memo_exists(
-            memo=tx['memo'])]  # GET tx with registered memo
+            tx_memo=tx['memo'])]  # GET tx with registered memo
 
         tx_with_not_registered_memo = [tx for tx in tx_with_memo if
                                        tx not in tx_with_registered_memo]  # GET tx with not registered memo
@@ -92,7 +92,7 @@ async def check_stellar_hot_wallet():
         for tx in tx_with_registered_memo:
             # check if processed if not process them
             if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
-                if stellar_manager.stellar_deposit_history(type=1, data=tx):
+                if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
                     tx_memo = tx['memo']
                     tx_hash = tx['hash']
                     tx_from = tx["source_account"]
@@ -131,7 +131,7 @@ async def check_stellar_hot_wallet():
         if tx_with_not_registered_memo:
             for tx in tx_with_not_registered_memo:
                 if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
-                    if stellar_manager.stellar_deposit_history(type=2, data=tx):
+                    if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                         print(Fore.GREEN + 'Processed successfully')
                     else:
                         print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
@@ -141,7 +141,7 @@ async def check_stellar_hot_wallet():
 
         for tx in tx_with_no_memo:
             if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
-                if stellar_manager.stellar_deposit_history(type=2, data=tx):
+                if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                     print(Fore.GREEN + 'Processed successfully')
                 else:
                     print(Fore.RED + f'There has been an issue while processing tx with no memo \n'

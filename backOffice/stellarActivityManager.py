@@ -19,6 +19,10 @@ d = helper.read_json_file(file_name='botSetup.json')
 
 
 class StellarManager:
+    """
+    Manages Stellar on chain activities
+    """
+
     def __init__(self):
         self.xlmHotWallet = hot['xlm']
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
@@ -32,17 +36,17 @@ class StellarManager:
         self.stellarUnprocessedWith = self.stellarCoin.StellarUnprocessedWithdrawals  # Access to history of unprocessed withdrawals
         self.stellarCorpWallets = self.stellarCoin.StellarCorporateWallets
 
-    def stellar_deposit_history(self, type: int, data):
+    def stellar_deposit_history(self, deposit_type: int, tx_data):
         """
         Managing history of deposits
-        :param type:
-        :param data:
+        :param deposit_type: Deposit based on if MEMO is found or not. 1=found , 2= not found
+        :param tx_data: dictionary of data from TX to be stored on deposit
         :return:
         """
-        if type == 1:
-            result = self.stellarDeposits.insert_one(data)
-        elif type == 2:
-            result = self.stellarUnprocessedDep.insert_one(data)
+        if deposit_type == 1:
+            result = self.stellarDeposits.insert_one(tx_data)
+        elif deposit_type == 2:
+            result = self.stellarUnprocessedDep.insert_one(tx_data)
 
         if result.inserted_id:
             return True
@@ -67,14 +71,14 @@ class StellarManager:
         else:
             return False
 
-    def check_if_stellar_memo_exists(self, memo):
+    def check_if_stellar_memo_exists(self, tx_memo):
         """
         Check if deposit payment ID exists in the system
-        :param memo: Deposit payment ID for Stellar Wallet
+        :param tx_memo: Deposit payment ID for Stellar Wallet
         :return: boolean
         """
 
-        result = self.stellarWallets.find_one({"depositId": memo})
+        result = self.stellarWallets.find_one({"depositId": tx_memo})
 
         if result:
             return True
@@ -103,7 +107,7 @@ class StellarManager:
         else:
             return False
 
-    def get_stellar_wallet_data_by_discord_id(self, discord_id):
+    def get_stellar_wallet_data_by_discord_id(self, discord_id: int):
         """
         Get users wallet details by unique Discord id.
         """
@@ -119,6 +123,7 @@ class StellarManager:
         Updates the balance based on stellar memo with stroops
         :param memo: Deposit payment id
         :param stroops: minimal stellar unit stroop as int
+        :param direction: updating stellar balance based on memo. if 1 = append otherwise deduct
         :return:
         """
         if direction == 1:  # Append
@@ -133,6 +138,7 @@ class StellarManager:
 
             return result.matched_count > 0
         except errors.PyMongoError as e:
+            print(f'Could not update balance by memo: {e}')
             return False
 
     def update_stellar_balance_by_discord_id(self, discord_id: int, stroops: int, direction: int):
@@ -140,6 +146,7 @@ class StellarManager:
         Updates the balance based on discord id  with stroops
         :param discord_id: Unique Discord id
         :param stroops: micro unit of stellar chain
+        :param direction: updating stellar balance based on memo. if 1 = append otherwise deduct
         :return:
         """
         if direction == 1:  # Append
