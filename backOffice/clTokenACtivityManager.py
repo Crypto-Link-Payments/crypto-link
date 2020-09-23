@@ -1,8 +1,8 @@
 """
 Class StellarManager is designed to handle off-chain and on-chain activities and store data
 into history
-
 """
+
 import os
 import sys
 
@@ -19,7 +19,14 @@ d = helper.read_json_file(file_name='botSetup.json')
 
 
 class ClTokenManager:
+    """
+    Handler for Crypto Link Custom Token built on Stellar Chain
+    """
+
     def __init__(self):
+        """
+        Init for the class
+        """
         self.xlmHotWallet = hot['xlm']
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
         self.clConnection = self.connection['CryptoLink']
@@ -38,21 +45,22 @@ class ClTokenManager:
         else:
             return {}
 
-    def update_token_balance_by_id(self, discord_id: int, stroops: int, direction: int):
+    def update_token_balance_by_id(self, discord_id: int, token_micro: int, append: bool):
         """
         Updates the balance based on discord id  with stroops
         :param discord_id: Unique Discord id
-        :param stroops: stroops
+        :param token_micro: micro unit of crypto link token
+        :param append: boolean True will append to user wallet, False deducts funds
         :return:
         """
-        if direction == 1:  # Append
+        if append == 1:  # Append
             pass
         else:
-            stroops *= (-1)  # Deduct
+            token_micro *= (-1)  # Deduct
 
         try:
             result = self.clTokenWallets.update_one({"userId": discord_id},
-                                                    {'$inc': {"balance": int(stroops)},
+                                                    {'$inc': {"balance": int(token_micro)},
                                                      "$currentDate": {"lastModified": True}})
 
             return result.matched_count > 0

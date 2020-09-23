@@ -139,7 +139,7 @@ class StellarManager:
         """
         Updates the balance based on discord id  with stroops
         :param discord_id: Unique Discord id
-        :param stroops: stroops
+        :param stroops: micro unit of stellar chain
         :return:
         """
         if direction == 1:  # Append
