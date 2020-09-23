@@ -27,7 +27,7 @@ class AccountManager(object):
 
         # Database of bot users
         self.cl_connection = self.connection['CryptoLink']
-        self.user_profiles = self.cl_connection.user_profiles
+        self.user_profiles = self.cl_connection.userProfile
         self.cl_token_wallets = self.cl_connection.ClTokenWallets
 
         # Stellar connection
@@ -232,3 +232,6 @@ class AccountManager(object):
                                                            {"_id": 0,
                                                             "balance": 1})
             return stellar_wallet['balance']
+
+
+print(AccountManager().check_user_existence(user_id=360367188432912385))

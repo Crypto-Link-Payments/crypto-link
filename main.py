@@ -204,6 +204,7 @@ async def check_expired_roles():
                                                                     'because the role you have purchased has expired'
                                                                     ' and has been therefore removed. More details '
                                                                     'bellow.')
+
                                 expired.set_thumbnail(url=bot.user.avatar_url)
                                 expired.add_field(name='Community',
                                                   value=guild.name,
