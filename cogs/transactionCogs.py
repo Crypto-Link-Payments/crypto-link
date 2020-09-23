@@ -191,9 +191,6 @@ class TransactionCommands(commands.Cog):
                       f'transaction request needs to be executed on one of the text channels on {ctx.message.guild}'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
-        elif isinstance(error, AssertionError):
-            print(error)
-
         else:
             print(f"Unknown error which ahs not been handled: {error}")
 
