@@ -21,7 +21,7 @@ d = helper.read_json_file(file_name='botSetup.json')
 class BotStructureCheck(object):
     def __init__(self):
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
-        self.cryptoLink = self.connection["CryptoLink"]  #
+        self.cryptolink = self.connection["CryptoLink"]  #
 
         self.required_collections = ["CLOnChainStats",
                                      "CLOffChainStats",
@@ -47,11 +47,11 @@ class BotStructureCheck(object):
         Check all required collections
         """
         # Check collections for bot stats
-        bot_collections = self.cryptoLink.list_collection_names()
+        bot_collections = self.cryptolink.list_collection_names()
         print(Fore.GREEN + "1. Checking collections")
         for collection in self.required_collections:
             if collection not in bot_collections:
-                self.cryptoLink.create_collection(name=collection)
+                self.cryptolink.create_collection(name=collection)
                 print(Fore.YELLOW + f"{collection.upper()} has been created!")
             else:
                 print(Fore.GREEN + f'{collection.upper()} already exists')
@@ -62,8 +62,8 @@ class BotStructureCheck(object):
         Checking document for statistical entry
         """
         # Connection to collections
-        on_chain = self.cryptoLink.CLOnChainStats
-        off_chain = self.cryptoLink.CLOffChainStats
+        on_chain = self.cryptolink.CLOnChainStats
+        off_chain = self.cryptolink.CLOffChainStats
 
         stats_on_chain = len(list(on_chain.find()))
         stats_off_chain = len(list(off_chain.find()))
@@ -138,8 +138,8 @@ class BotStructureCheck(object):
         """
         Check if bot wallets exists and if not than create them
         """
-        BotWallets = self.cryptoLink.CLWallets
-        BotFees = self.cryptoLink.CLFees
+        BotWallets = self.cryptolink.CLWallets
+        BotFees = self.cryptolink.CLFees
 
         count_bot_wallets = len(list((BotWallets.find({}))))
         count_bot_fees = len(list(BotFees.find()))
