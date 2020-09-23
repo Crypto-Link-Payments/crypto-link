@@ -17,18 +17,22 @@ hot = helper.read_json_file(file_name='hotWallets.json')
 
 
 class AccountManager(object):
+    """
+    Class handling discord user accounts
+    """
+
     def __init__(self):
-        self.xlmHotWallet = hot['xlm']
+        self.hot_wallet_addr = hot['xlm']
         # main db connection
         self.connection = MongoClient(d['database']['connection'])
 
         # Database of bot users
-        self.clConnection = self.connection['CryptoLink']
-        self.userProfiles = self.clConnection.userProfiles
-        self.clTokenWallets = self.clConnection.ClTokenWallets
+        self.cl_connection = self.connection['CryptoLink']
+        self.user_profiles = self.cl_connection.user_profiles
+        self.cl_token_wallets = self.cl_connection.ClTokenWallets
 
         # Stellar connection
-        self.stellarWallets = self.clConnection.StellarWallets  # Access to all stellar wallets
+        self.stellar_walets = self.cl_connection.StellarWallets  # Access to all stellar wallets
 
     def __create_stellar_wallet(self, discord_id: int, discord_username: str, deposit_id):
         """
@@ -44,7 +48,7 @@ class AccountManager(object):
             "balance": int(0)
         }
 
-        result = self.stellarWallets.insert_one(stellar_wallet)
+        result = self.stellar_walets.insert_one(stellar_wallet)
 
         if result.inserted_id:
             return True
@@ -59,7 +63,7 @@ class AccountManager(object):
             'balance': int(0)
         }
 
-        result = self.clTokenWallets.insert_one(cl_token_wallet)
+        result = self.cl_token_wallets.insert_one(cl_token_wallet)
 
         if result.inserted_id:
             return True
@@ -70,14 +74,12 @@ class AccountManager(object):
         """
         Updating the user wallet balance used with merchant system
         """
-        if direction == 0:
-            pass
-        else:
+        if direction != 0:
             amount = amount * (-1)
 
         if ticker == 'xlm':
             try:
-                self.stellarWallets.update_one({"userId": int(discord_id)},
+                self.stellar_walets.update_one({"userId": int(discord_id)},
                                                {"$inc": {"balance": amount},
                                                 "$currentDate": {"lastModified": True}})
                 return True
@@ -87,8 +89,8 @@ class AccountManager(object):
 
     def get_account_details(self, discord_id: int):
         """Get basic account details from user"""
-        result = self.userProfiles.find_one({"userId": discord_id},
-                                            {"_id": 0})
+        result = self.user_profiles.find_one({"userId": discord_id},
+                                             {"_id": 0})
 
         if result:
             return result
@@ -154,7 +156,7 @@ class AccountManager(object):
         }
 
         try:
-            self.userProfiles.insert_one(new_user)
+            self.user_profiles.insert_one(new_user)
             return True
         except errors.PyMongoError:
             return False
@@ -166,7 +168,7 @@ class AccountManager(object):
         :return: bool
         """
 
-        result = self.userProfiles.find_one({"userId": user_id})
+        result = self.user_profiles.find_one({"userId": user_id})
 
         if result:
             return True
@@ -180,9 +182,9 @@ class AccountManager(object):
         :param user_id: Unique Discord ID
         :return: dictionary of data
         """
-        result = self.userProfiles.find_one({"userId": user_id},
-                                            {"_id": 0,
-                                             "stellarDepositId": 1})
+        result = self.user_profiles.find_one({"userId": user_id},
+                                             {"_id": 0,
+                                              "stellarDepositId": 1})
 
         if result:
             return result
@@ -195,7 +197,7 @@ class AccountManager(object):
         :param discord_id:
         :return:
         """
-        stellar = self.stellarWallets.find_one({"userId": discord_id},
+        stellar = self.stellar_walets.find_one({"userId": discord_id},
                                                {"_id": 0,
                                                 "balance": 1,
                                                 "depositId": 1})
@@ -216,7 +218,7 @@ class AccountManager(object):
     def get_balance_based_on_ticker(self, user_id, ticker):
 
         if ticker == 'xlm':
-            stellar_wallet = self.stellarWallets.find_one({"userId": int(user_id)},
+            stellar_wallet = self.stellar_walets.find_one({"userId": int(user_id)},
                                                           {"_id": 0,
                                                            "balance": 1})
             return stellar_wallet['balance']

@@ -23,7 +23,7 @@ class StatsManager(object):
 
         # Database of bot users
         self.clConnection = self.connection['CryptoLink']
-        self.userProfiles = self.clConnection.userProfiles
+        self.userProfiles = self.clConnection.user_profiles
         self.chainActivities = self.clConnection.CLOnChainStats
         self.offChainActivities = self.clConnection.CLOffChainStats
 
