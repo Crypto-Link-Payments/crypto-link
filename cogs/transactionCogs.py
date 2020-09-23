@@ -20,20 +20,21 @@ d = helper.read_json_file(file_name='botSetup.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 
+def process_message(message):
+    if message:
+        if len(message) <= 100:
+            pass
+        else:
+            message = message[:98] + '...'
+    else:
+        message = 'None'
+
+    return message
+
+
 class TransactionCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    def process_message(self, message):
-        if message:
-            if len(message) <= 100:
-                pass
-            else:
-                message = message[:98] + '...'
-        else:
-            message = 'None'
-
-        return message
 
     @commands.group()
     @commands.check(is_public)
