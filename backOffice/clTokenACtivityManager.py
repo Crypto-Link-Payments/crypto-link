@@ -27,19 +27,19 @@ class ClTokenManager:
         """
         Init for the class
         """
-        self.xlmHotWallet = hot['xlm']
+        self.hot_wallet_address = hot['xlm']
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
-        self.clConnection = self.connection['CryptoLink']
+        self.cl_connection = self.connection['CryptoLink']
 
         # Collections connections
-        self.clTokenWallets = self.clConnection.ClTokenWallets
+        self.cl_token_wallets = self.cl_connection.ClTokenWallets
 
     def get_cl_token_data_by_id(self, discord_id):
         """
         Get users wallet details by unique Discord id.
         """
-        result = self.clTokenWallets.find_one({"userId": discord_id},
-                                              {"_id": 0})
+        result = self.cl_token_wallets.find_one({"userId": discord_id},
+                                                {"_id": 0})
         if result:
             return result
         else:
@@ -59,8 +59,8 @@ class ClTokenManager:
             token_micro *= (-1)  # Deduct
 
         try:
-            result = self.clTokenWallets.update_one({"userId": discord_id},
-                                                    {'$inc': {"balance": int(token_micro)},
+            result = self.cl_token_wallets.update_one({"userId": discord_id},
+                                                      {'$inc': {"balance": int(token_micro)},
                                                      "$currentDate": {"lastModified": True}})
 
             return result.matched_count > 0
@@ -72,5 +72,5 @@ class ClTokenManager:
         """
         Query unique users discord if based on deposit_id / memo
         """
-        result = self.clTokenWallets.find_one({"depositId": deposit_id})
+        result = self.cl_token_wallets.find_one({"depositId": deposit_id})
         return result
