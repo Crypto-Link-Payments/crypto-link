@@ -150,7 +150,7 @@ class WithdrawalCommands(commands.Cog):
                                 if stellar.stellar_withdrawal_history(tx_type=1, tx_data=data_new):
                                     await customMessages.coin_withdrawal_notification(coin='XLM',
                                                                                       recipient=ctx.message.author,
-                                                                                      hash=data['hash'],
+                                                                                      tx_hash=data['hash'],
                                                                                       amount=data_new["amount"],
                                                                                       fee=f"${stellar_fee}, Rate:{round(fee_in_xlm['usd'], 4)}",
                                                                                       destination=data['destination'],

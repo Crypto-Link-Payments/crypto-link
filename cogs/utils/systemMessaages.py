@@ -66,7 +66,7 @@ class CustomMessages:
             await ctx.channel.send(embed=sys_embed, delete_after=100)
 
     @staticmethod
-    async def transaction_report_to_user(ctx, user, destination, amount, symbol, direction: int, message:str = None):
+    async def transaction_report_to_user(ctx, user, destination, amount, symbol, direction: int, message: str = None):
         """
         Transaction report to user
         :param user:
@@ -85,7 +85,7 @@ class CustomMessages:
             title = 'Outgoing transaction'
             col = discord.Colour.red()
             destination_txt = 'Recipient'
-            avatar= user.avatar_url
+            avatar = user.avatar_url
 
         elif direction == 1:
             title = 'Incoming transaction'
@@ -163,7 +163,8 @@ class CustomMessages:
         await recipient.send(embed=sys_embed)
 
     @staticmethod
-    async def coin_withdrawal_notification(coin, recipient: discord.User, amount, fee, thumbnail,hash, destination, link, ledger: int):
+    async def coin_withdrawal_notification(coin, recipient: discord.User, amount, fee, thumbnail, tx_hash, destination,
+                                           link, ledger: int):
         notify = discord.Embed(title="Withdrawal Notification",
                                description=f' {coin} withdrawal Successfully processed',
                                colour=discord.Colour.green())
@@ -175,7 +176,7 @@ class CustomMessages:
                          value=destination,
                          inline=False)
         notify.add_field(name='Transaction hash',
-                         value=hash,
+                         value=tx_hash,
                          inline=False)
         notify.add_field(name='Withdrawed amount',
                          value=f'{amount} {CONST_STELLAR_EMOJI}',
