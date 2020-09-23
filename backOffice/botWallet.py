@@ -71,8 +71,8 @@ class BotManager(object):
     def get_fees_by_category(self, all_fees: bool, key: str = None):
         """
         Return details on the fees from database
-        :param all:
-        :param key:
+        :param all_fees: boolean True if all keys returned
+        :param key: Key names
         :return:
         """
         if all_fees:
