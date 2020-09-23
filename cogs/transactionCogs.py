@@ -33,6 +33,10 @@ def process_message(message):
 
 
 class TransactionCommands(commands.Cog):
+    """
+    Class handling off-chain discord transactions
+    """
+
     def __init__(self, bot):
         self.bot = bot
 
