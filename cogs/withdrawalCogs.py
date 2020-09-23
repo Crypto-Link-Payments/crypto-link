@@ -48,12 +48,6 @@ class WithdrawalCommands(commands.Cog):
     @commands.check(user_has_wallet)
     async def withdraw(self, ctx):
         print(f'WITHDRAW: {ctx.author} -> {ctx.message.content}')
-
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if ctx.invoked_subcommand is None:
             title = '__Available withdrawal commands__'
             description = "All commands available to withdraw funds from Discord Wallet"
