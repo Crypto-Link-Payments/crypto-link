@@ -28,11 +28,6 @@ class AutoFunctions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         if isinstance(error, commands.CommandNotFound):
             title = 'System Command Error'
             message = f':no_entry: Sorry, this command does not exist! Please' \
