@@ -50,8 +50,8 @@ class HelpCommands(commands.Cog):
                               description='Description about the system',
                               colour=discord.Colour.purple())
         about.add_field(name='About',
-                        value=f'System is a property of the Launch Pad Investments Group and is designed to provide '
-                              f'payment solution for discord and means of magnetization of community activities',
+                        value='System is a property of the Launch Pad Investments Group and is designed to provide '
+                              'payment solution for discord and means of magnetization of community activities',
                         inline=False)
         about.add_field(name="Peer to Peer transactions",
                         value="With the system present on community, members can execute instant peer to peer "
@@ -62,8 +62,9 @@ class HelpCommands(commands.Cog):
                               " which are timely oriented.",
                         inline=False)
         about.add_field(name='Terms of service',
-                        value=f'blablabla',
+                        value='blablabla',
                         inline=False)
+        # TODO write up still
         await ctx.author.send(embed=about)
 
     @help.command()
