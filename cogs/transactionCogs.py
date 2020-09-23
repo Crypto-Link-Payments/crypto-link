@@ -21,10 +21,11 @@ CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
 
 def process_message(message):
+    """
+    Filter message so it is not too long for transaction report
+    """
     if message:
-        if len(message) <= 100:
-            pass
-        else:
+        if len(message) > 100:
             message = message[:98] + '...'
     else:
         message = 'None'
