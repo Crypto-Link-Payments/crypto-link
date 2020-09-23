@@ -1,7 +1,3 @@
-"""
-Scipt handling withdrawal commands
-"""
-
 import time
 
 import discord
@@ -116,7 +112,7 @@ class WithdrawalCommands(commands.Cog):
                     await ctx.channel.delete_messages([verification, msg_usr])
 
                     if str(msg_usr.content.lower()) == 'yes':
-                        processing_msg = f'Processing withdrawal request, please wait few moments....'
+                        processing_msg = 'Processing withdrawal request, please wait few moments....'
                         processing_msg = await ctx.channel.send(content=processing_msg)
 
                         # Update stellar balance discord id
