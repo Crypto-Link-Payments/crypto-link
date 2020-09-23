@@ -1,4 +1,3 @@
-
 def scientific_conversion(value, decimals):
     """
     Converts from scientific notation to normal float
