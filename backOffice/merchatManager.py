@@ -36,7 +36,7 @@ class MerchantManager:
         self.applied_users = self.communities.MerchantAppliedUsers
 
         # Collection of all applied communities who payed for the fees
-        self.activeLicenses = self.communities.MerchantPurchasedLicenses
+        self.active_licenses = self.communities.MerchantPurchasedLicenses
 
     def check_community_license_status(self, community_id):
         """
@@ -44,7 +44,7 @@ class MerchantManager:
         :param community_id:
         :return:
         """
-        data = self.activeLicenses.find_one({"communityId": int(community_id)})
+        data = self.active_licenses.find_one({"communityId": int(community_id)})
         if data:
             return True
         else:
@@ -56,19 +56,13 @@ class MerchantManager:
         :param community_id:
         :return:
         """
-        data = self.activeLicenses.find_one({"communityId": int(community_id)},
-                                            {"_id": 0})
+        data = self.active_licenses.find_one({"communityId": int(community_id)},
+                                             {"_id": 0})
         return data
 
     def insert_license(self, community_name, owner_id, community_id, start, end, ticker, value):
         """
         Insert license into directory of active licenses
-        :param community_name:
-        :param community_id:
-        :param date:
-        :param ticker:
-        :param value:
-        :return:
         """
         try:
             data = {
@@ -80,7 +74,7 @@ class MerchantManager:
                 "ticker": ticker,
                 "value": value
             }
-            self.activeLicenses.insert_one(data)
+            self.active_licenses.insert_one(data)
             return True
         except errors.PyMongoError:
             return False
@@ -91,7 +85,7 @@ class MerchantManager:
         :param timestamp: unix time stamp
         :return:
         """
-        all_communities = list(self.activeLicenses.find({"end": {"$lt": timestamp}}))
+        all_communities = list(self.active_licenses.find({"end": {"$lt": timestamp}}))
         return all_communities
 
     def remove_over_due_community(self, discord_id):
@@ -101,7 +95,7 @@ class MerchantManager:
         :return:
         """
         try:
-            self.activeLicenses.delete_one({'communityId': int(discord_id)})
+            self.active_licenses.delete_one({'communityId': int(discord_id)})
             return True
         except errors.PyMongoError:
             return False
@@ -110,7 +104,7 @@ class MerchantManager:
         """
         Check if community is registered into the system
         :param community_id: unique community ID provided by discord
-        :return: booleasn
+        :return: boolean
         """
         result = self.community_profiles.find_one({"communityId": community_id})
         if result:
@@ -122,7 +116,7 @@ class MerchantManager:
         """
         Check if community is not registered in system
         :param community_id: unique community ID provided by discord
-        :return: booleasn
+        :return: boolean
         """
         result = self.community_profiles.find_one({"communityId": community_id})
         if result:
@@ -134,15 +128,7 @@ class MerchantManager:
                       hours: int,
                       minutes: int):
         """
-        Register community role into the system and make it availabale for menetization
-        :param community_id: unique community id
-        :param role_id: created role id
-        :param penny_value: value in pennies
-        :param weeks: duration in weeks
-        :param days:duration in days
-        :param hours:
-        :param minutes:
-        :return:
+        Register community role into the system and make it available to be monetized
         """
         new_role = {
             "roleId": int(role_id),
@@ -173,7 +159,7 @@ class MerchantManager:
 
     def find_role_details(self, role_id: int):
         """
-        Returns the information on specifc role ID
+        Returns the information on specific role ID
         :param role_id: Unique role id
         :return: role details as dict, or empty dict
         """
@@ -188,8 +174,9 @@ class MerchantManager:
     def register_community_wallet(self, community_id: int, community_owner_id: int, community_name: str):
         """
         Makes community wallets once owner of the community registers details
-        :param community_id:
-        :param community_owner_id:
+        :param community_id: discord community ID
+        :param community_owner_id: discord community owner
+        :param community_name: Discord Community name
         :return: boolean
         """
         # Data for registration entry
@@ -237,19 +224,18 @@ class MerchantManager:
     def modify_funds_in_community_merchant_wallet(self, community_id: int, amount: int, wallet_tick: str,
                                                   direction: int):
         """
-        Trasnfers funds to community merchant wallet once user has payed for it
+        Transfers funds to community merchant wallet once user has payed for it
         :param community_id: Unique community ID
         :param amount: atomic amount as integer of any currency
-        :param wallet_tick: ticker to crossreference the wallet for update
+        :param wallet_tick: ticker to cross-reference the wallet for update
+        :param direction:
         :return: boolean
         """
-        if direction == 0:
-            pass
-        else:
+        if direction != 0:
             amount = amount * (-1)
 
         if wallet_tick == 'xlm':
-            # Trasnfer funds to xlm wallet
+            # Transfer funds to xlm wallet
             try:
                 self.community_stellar_wallets.update_one({"communityId": community_id},
                                                           {"$inc": {"balance": amount},
@@ -267,6 +253,9 @@ class MerchantManager:
         :param user_id: user ID unique
         :param user_name: user nae
         :param start:
+        :param currency: currency used to pay for role
+        :param currency_value_atom: atomic value of the currency
+        :param pennies: atomic value of dollars
         :param end:
         :param role_id:
         :param role_name:
@@ -280,7 +269,7 @@ class MerchantManager:
                 "roleName": role_name,
                 "start": start,
                 "end": end,
-                "currency": currency,  # Monero or Stellar
+                "currency": currency,
                 "atomicValue": currency_value_atom,
                 "pennies": pennies,
                 "communityName": community_name,
@@ -331,7 +320,7 @@ class MerchantManager:
 
     def get_over_due_users(self, timestamp: int):
         """
-        Returns all users whos role is overdue based on the timestamp
+        Returns all users who's role is overdue based on the timestamp
         :param timestamp: unix time stamp
         :return:
         """
@@ -340,7 +329,7 @@ class MerchantManager:
 
     def remove_overdue_user_role(self, community_id, user_id, role_id):
         """
-        Remove user from the active role database uppon expirey
+        Remove user from the active role database upon expiration
         :param community_id:
         :param user_id:
         :param role_id:
@@ -391,7 +380,7 @@ class MerchantManager:
     def bulk_user_clear(self, community_id, role_id):
         """
         Delete all users who have applied for the role however owner of the community has delete the role from the
-        system and is not avialabale anymore. Function used to kepp database in check
+        system and is not available anymore. Function used to keep database in check
         :param community_id:
         :param role_id:
         :return:
