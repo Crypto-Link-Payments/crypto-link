@@ -24,6 +24,7 @@ CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_ROLE_CREATION_ERROR = "__Role creation error___"
 CONST_ROLE_STATUS_CHANGE_ERROR = "__Role status change error__"
 CONST_SYSTEM_ERROR = '__System Message error__'
+CONST_ROLE_STATUS_CHANGE = '__Role status change error__'
 
 
 class MerchantCommunityOwner(commands.Cog):
@@ -346,21 +347,21 @@ class MerchantCommunityOwner(commands.Cog):
                     await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                         destination=1)
                 else:
-                    title = '__Role status change error__'
                     message = 'Role could not be re-activated, please try again later. Please try again. If the ' \
                               'issue persists, contact one staff. '
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+                    await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE,
+                                                        message=message, color_code=1,
                                                         destination=1)
             else:
-                title = '__Role status change error__'
                 message = f'Role {role} is already active. '
-                await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE, message=message,
+                                                    color_code=1,
                                                     destination=1)
         else:
-            title = '__Role status change error__'
             message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
                       f'{d["command"]} monetize community_roles to obtain all roles on the community'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE, message=message,
+                                                color_code=1,
                                                 destination=1)
 
     @merchant.command()
