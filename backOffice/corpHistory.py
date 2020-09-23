@@ -17,10 +17,13 @@ sys.path.append(project_path)
 
 
 class CorporateHistoryManager:
+    """
+    Class dealing with corporate withdrawal history
+    """
     def __init__(self):
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
-        self.corporateActivity = self.connection['CryptoLink']
-        self.fromCorpTransfers = self.corporateActivity.CORPFromTransactions
+        self.corp_activity = self.connection['CryptoLink']
+        self.corp_withdrawals = self.corp_activity.CORPFromTransactions
 
     def store_transfer_from_corp_wallet(self, time_utc, author, destination, amount_atomic, amount, currency):
         """
@@ -45,7 +48,7 @@ class CorporateHistoryManager:
         }
 
         try:
-            self.fromCorpTransfers.insert_one(data)
+            self.corp_withdrawals.insert_one(data)
             return True
         except errors.PyMongoError as e:
             print(e)
