@@ -143,7 +143,7 @@ async def check_stellar_hot_wallet():
     print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
     pag = helper.read_json_file('stellarPag.json')
     new_transactions = stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-    channel_id = notification_channels["stellar"]  # Sys cgannel where details are sent
+    channel_id = notification_channels["stellar"]  # Sys channel where details are sent
 
     if new_transactions:
         # Filter transactions

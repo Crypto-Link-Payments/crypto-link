@@ -5,11 +5,17 @@ import sys
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
-class Helpers():
+
+class Helpers:
+    """
+    Class including helper functions
+    """
+
     def __init__(self):
         pass
 
-    def read_json_file(self, file_name: str):
+    @staticmethod
+    def read_json_file(file_name: str):
         """
         Loads the last block height which was stored in last_block.json
         :return: Block height as INT
@@ -26,9 +32,7 @@ class Helpers():
 
     def update_json_file(self, file_name: str, key, value):
         """
-        Stores the height of last block which was monitored for incoming transactions
-        :param block_height: block height from RPC Daemon as INT
-        :return: Updates the value in last_block.json
+        Updates Json file based on file name key and value
         """
         try:
             # read data
@@ -38,5 +42,6 @@ class Helpers():
             with open(path, 'w') as f:
                 json.dump(data, f)
             return True
-        except Exception:
+        except FileExistsError as e:
+            print(e)
             return False
