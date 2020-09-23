@@ -91,7 +91,7 @@ class TransactionCommands(commands.Cog):
                             await customMessages.transaction_report_to_channel(ctx=ctx, recipient=recipient,
                                                                                amount=amount, currency='xlm')
 
-                            msg = self.process_message(message=message)
+                            msg = process_message(message=message)
 
                             # report to sender
                             await customMessages.transaction_report_to_user(ctx=ctx, direction=0, amount=amount,
