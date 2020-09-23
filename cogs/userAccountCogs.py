@@ -31,13 +31,12 @@ class UserAccountCommands(commands.Cog):
     @commands.command()
     @commands.check(user_has_wallet)
     async def bal(self, ctx):
-        print(f'BAL: {ctx.author}-> {ctx.message.content}')
         """
         Gets the user balances
         :param ctx:
         :return:
         """
-
+        print(f'BAL: {ctx.author}-> {ctx.message.content}')
         values = account_mng.get_wallet_balances_based_on_discord_id(discord_id=ctx.message.author.id)
         if values:
             stellar_balance = get_normal(value=str(values['stellar']['balance']),

@@ -81,8 +81,6 @@ class CustomMessages:
 
         if sys_msg_title is None:
             sys_msg_title = 'System Message'
-        else:
-            pass
 
         sys_embed = discord.Embed(title=f"{emoji} System Message {emoji}",
                                   description=sys_msg_title,
@@ -151,7 +149,6 @@ class CustomMessages:
             print('Transaction report to user could not be send due to:')
             print(e)
             print('========================')
-            pass
 
     @staticmethod
     async def transaction_report_to_channel(ctx, recipient: discord.User, amount, currency):
