@@ -27,6 +27,7 @@ d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+CONST_CORP_TRANSFER_ERROR_TITLE = '__Corporate Transfer Error__'
 
 
 class BotWalletCommands(commands.Cog):
@@ -141,20 +142,18 @@ class BotWalletCommands(commands.Cog):
                     stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                  stroops=int(balance), direction=2)
 
-                    title = '__Corporate Transfer Error__'
                     message = f"Stellar funds could not be deducted from corporate account. Please try again later"
                     await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
-                                                        sys_msg_title=title)
+                                                        sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
             else:
-                title = '__Corporate Transfer Error__'
                 message = f"Stellar funds could not be moved from corporate account to {ctx.message.author}." \
                           f"Please try again later "
                 await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
-                                                    sys_msg_title=title)
+                                                    sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
         else:
-            title = '__Corporate Transfer Error__'
             message = f"You can not sweep the account as its balance is 0.0000000 {CONST_STELLAR_EMOJI}"
-            await customMessages.system_message(ctx, color_code=1, message=message, destination=0, sys_msg_title=title)
+            await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
+                                                sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
 
     @cl.command()
     @commands.check(is_one_of_gods)
