@@ -12,6 +12,9 @@ class Helpers:
     """
 
     def __init__(self):
+        """
+        initiate a object Helper
+        """
         pass
 
     @staticmethod
