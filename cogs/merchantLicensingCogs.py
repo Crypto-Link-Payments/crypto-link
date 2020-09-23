@@ -104,7 +104,8 @@ class MerchantLicensingCommands(commands.Cog):
                                  f'Fiat value: {fee_value}$\n'
                                  f'Stellar Lumen: {in_lumen["total"]} {CONST_STELLAR_EMOJI}\n')
         fee_info.set_footer(text="Conversion rates provided by CoinGecko",
-                            icon_url='https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
+                            icon_url='https://static.coingecko.com/s/thumbnail-'
+                                     '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
         await ctx.message.channel.send(embed=fee_info)
 
     @license.command()
@@ -215,7 +216,7 @@ class MerchantLicensingCommands(commands.Cog):
                                 print(e)
                                 await ctx.channel.send(embed=user_info)
 
-                            # send notifcation to merchant channel of LPI community
+                            # send notification to merchant channel of LPI community
                             license_slip = Embed(title='Merchant license order processed',
                                                  description='This report was sent because, some community\n'
                                                              'obtained merchant license for 31 days. Details :',
@@ -237,8 +238,8 @@ class MerchantLicensingCommands(commands.Cog):
                                                          f'Rate: {rate}$ / {CONST_STELLAR_EMOJI}',
                                                    inline=False)
 
-                            notf_channel = self.bot.get_channel(id=int(channel_id))
-                            await notf_channel.send(embed=license_slip)
+                            notification_channel = self.bot.get_channel(id=int(channel_id))
+                            await notification_channel.send(embed=license_slip)
                         else:
                             # Revert value to user and remove value from LPI wallet
                             stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
