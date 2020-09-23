@@ -24,6 +24,18 @@ class TransactionCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def process_message(self, message):
+        if message:
+            if len(message) <= 100:
+                pass
+            else:
+                message = message[:98] + '...'
+        else:
+            message = 'None'
+
+        return message
+
+
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
@@ -47,7 +59,7 @@ class TransactionCommands(commands.Cog):
 
     @send.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def xlm(self, ctx, amount: float, recipient: discord.User):
+    async def xlm(self, ctx, amount: float, recipient: discord.User, *, message: str = None):
         """
         Initiates off chain transaction for stellar lumen currency
         :param ctx:
@@ -55,6 +67,7 @@ class TransactionCommands(commands.Cog):
         :param recipient:
         :return:
         """
+
 
         print(f'SEND XLM: {ctx.author} -> {ctx.message.content}')
         stroops = (int(amount * (10 ** 7)))
@@ -79,14 +92,18 @@ class TransactionCommands(commands.Cog):
                             await customMessages.transaction_report_to_channel(ctx=ctx, recipient=recipient,
                                                                                amount=amount, currency='xlm')
 
+                            msg = self.process_message(message=message)
+
                             # report to sender
                             await customMessages.transaction_report_to_user(direction=0, amount=amount, symbol='xlm',
                                                                             user=recipient,
-                                                                            destination=ctx.message.author)
+                                                                            destination=ctx.message.author,
+                                                                            message=msg)
+
                             # report to recipient
                             await customMessages.transaction_report_to_user(direction=1, amount=amount,
                                                                             symbol='xlm', user=ctx.message.author,
-                                                                            destination=recipient)
+                                                                            destination=recipient, message=msg)
 
                             # Updating bot stats
                             stats_manager.update_bot_off_chain_stats(ticker='xlm', tx_amount=1,

@@ -66,7 +66,7 @@ class CustomMessages:
             await ctx.channel.send(embed=sys_embed, delete_after=100)
 
     @staticmethod
-    async def transaction_report_to_user(user, destination, amount, symbol, direction: int):
+    async def transaction_report_to_user(user, destination, amount, symbol, direction: int, message:str = None):
         """
         Transaction report to user
         :param user:
@@ -96,6 +96,8 @@ class CustomMessages:
         tx_report.add_field(name=destination_txt,
                             value=f'{user}',
                             inline=False)
+        tx_report.add_field(name='Subject',
+                            value=message)
         tx_report.add_field(name=f'Transaction value',
                             value=f'{amount_str}')
         tx_report.add_field(name=f'Conversion Rate',
