@@ -13,6 +13,9 @@ d = helper.read_json_file(file_name='botSetup.json')
 
 
 class BotManager(object):
+    """
+    Class dealing with the management of Crypto Link own bot wallet and fees management
+    """
     def __init__(self):
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
         self.botStuff = self.connection['CryptoLink']
