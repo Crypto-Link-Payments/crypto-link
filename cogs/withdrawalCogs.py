@@ -72,11 +72,6 @@ class WithdrawalCommands(commands.Cog):
         :param address: Destination address of withdrawal
         :return:
         """
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
 
         stellar_fee = bot_manager.get_fees_by_category(all_fees=False, key='xlm')['fee']

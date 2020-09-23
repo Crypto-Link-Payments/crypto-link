@@ -152,11 +152,9 @@ class HelpCommands(commands.Cog):
 
     @owner.command()
     async def merchant(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
+        """
+        Entry point for merchant system
+        """
         merchant_nfo = discord.Embed(title='__About Merchant System__',
                                      description='Basic explanation on what is merchant system.',
                                      colour=discord.Color.magenta())
