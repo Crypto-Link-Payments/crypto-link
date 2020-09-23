@@ -22,6 +22,7 @@ d = helper.read_json_file(file_name='botSetup.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+CONST_ACC_REG_STATUS = '__Account registration status__'
 
 
 class UserAccountCommands(commands.Cog):
@@ -75,14 +76,14 @@ class UserAccountCommands(commands.Cog):
         transaction_counter = account_details["transactionCounter"]
 
         stellar_stats = account_details["xlmStats"]
-        clCoin_stats = account_details["clCoinStats"]
+        cl_coin_stats = account_details["clCoinStats"]
 
-        total_deposits_done = clCoin_stats["totalDeposited"] + stellar_stats["totalDeposited"]
-        total_withdrawals_done = clCoin_stats["totalWithdrawn"] + stellar_stats["totalWithdrawn"]
-        total_public_tx = clCoin_stats["publicTxCount"] + stellar_stats["publicTxCount"]
-        total_private_tx = clCoin_stats["privateTxCount"] + stellar_stats["privateTxCount"]
+        total_deposits_done = cl_coin_stats["totalDeposited"] + stellar_stats["totalDeposited"]
+        total_withdrawals_done = cl_coin_stats["totalWithdrawn"] + stellar_stats["totalWithdrawn"]
+        total_public_tx = cl_coin_stats["publicTxCount"] + stellar_stats["publicTxCount"]
+        total_private_tx = cl_coin_stats["privateTxCount"] + stellar_stats["privateTxCount"]
         total_executed_tx = total_private_tx + total_public_tx
-        total_received_tx = clCoin_stats["received"] + stellar_stats["received"]
+        total_received_tx = cl_coin_stats["received"] + stellar_stats["received"]
 
         xlm_balance = round(float(stellar_wallet_data["balance"]) / 10000000, 7)
         stellar_balance = get_normal(value=str(stellar_wallet_data["balance"]),
@@ -134,7 +135,7 @@ class UserAccountCommands(commands.Cog):
 
         rates = get_rates(coin_name='stellar')
         in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
-        in_usdt = rate_converter(xlm_balance, rates["stellar"]["usd"])
+        in_usd = rate_converter(xlm_balance, rates["stellar"]["usd"])
         in_btc = rate_converter(xlm_balance, rates["stellar"]["btc"])
         in_eth = rate_converter(xlm_balance, rates["stellar"]["eth"])
 
@@ -152,7 +153,7 @@ class UserAccountCommands(commands.Cog):
                              value=f'{stellar_balance} {CONST_STELLAR_EMOJI}',
                              inline=False)
         xlm_wallet.add_field(name='Wallet Conversions',
-                             value=f'$ {in_usdt}\n'
+                             value=f'$ {in_usd}\n'
                                    f'€ {in_eur}\n'
                                    f'₿ {in_btc}\n'
                                    f'Ξ {in_eth}',
@@ -203,26 +204,26 @@ class UserAccountCommands(commands.Cog):
                                inline=False)
 
         token_wallet.add_field(name='Σ Deposits',
-                               value=f'{clCoin_stats["depositsCount"]}')
+                               value=f'{cl_coin_stats["depositsCount"]}')
         token_wallet.add_field(name='Σ Total Deposited',
-                               value=f'{clCoin_stats["totalDeposited"]}')
+                               value=f'{cl_coin_stats["totalDeposited"]}')
         token_wallet.add_field(name='Σ Withdrawals',
-                               value=f'{clCoin_stats["withdrawalsCount"]}',
+                               value=f'{cl_coin_stats["withdrawalsCount"]}',
                                inline=True)
         token_wallet.add_field(name='Σ Withdrawn',
-                               value=f'{clCoin_stats["totalWithdrawn"]}',
+                               value=f'{cl_coin_stats["totalWithdrawn"]}',
                                inline=True)
         token_wallet.add_field(name='Σ :sweat_drops: Sent',
-                               value=f'{clCoin_stats["sent"]}')
+                               value=f'{cl_coin_stats["sent"]}')
         token_wallet.add_field(name='Σ :sweat_drops: Received',
-                               value=f'{clCoin_stats["received"]}')
+                               value=f'{cl_coin_stats["received"]}')
         token_wallet.add_field(name=':pick: Mined',
-                               value=f'{clCoin_stats["mined"]}')
+                               value=f'{cl_coin_stats["mined"]}')
         token_wallet.add_field(name='Σ Public Tx',
-                               value=f'{clCoin_stats["publicTxCount"]}',
+                               value=f'{cl_coin_stats["publicTxCount"]}',
                                inline=True)
         token_wallet.add_field(name='Σ Private Tx',
-                               value=f'{clCoin_stats["privateTxCount"]}',
+                               value=f'{cl_coin_stats["privateTxCount"]}',
                                inline=True)
         await ctx.author.send(embed=token_wallet)
 
@@ -256,22 +257,19 @@ class UserAccountCommands(commands.Cog):
 
         if not account_mng.check_user_existence(user_id=ctx.message.author.id):
             if account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
-                title = '__Account registration status__'
                 message = f'Account has been successfully registered into the system and wallets created.' \
                           f' Please use {d["command"]}bal or {d["command"]}wallet.'
                 await customMessages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
-                                                    sys_msg_title=title)
+                                                    sys_msg_title=CONST_ACC_REG_STATUS)
             else:
-                title = '__Account registration status__'
                 message = f'Account could not be registered at this moment please try again later.'
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                    sys_msg_title=title)
+                                                    sys_msg_title=CONST_ACC_REG_STATUS)
         else:
-            title = '__Account registration status__'
             message = f'You have already registered account into the system. Please use ***{d["command"]}bal*** or ' \
                       f'***{d["command"]}wallet*** to obtain details on balances and your profile'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=title)
+                                                sys_msg_title=CONST_ACC_REG_STATUS)
 
     @commands.group()
     @commands.check(user_has_wallet)
@@ -305,9 +303,9 @@ class UserAccountCommands(commands.Cog):
 
         user_profile = account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
-            description = ' :warning: To top up your Discord wallets, you will need to send from your preferred wallet' \
-                          ' (GUI, CLI) to the address and deposit ID provided below. Have in mind that there is ' \
-                          'difference between Stellar and Scala deposit values. Providing wrong details for either ' \
+            description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
+                          ' wallet(GUI, CLI) to the address and deposit ID provided below. Have in mind that there is'\
+                          ' difference bet ween Stellar and Scala deposit values. Providing wrong details for either '\
                           'of them will result in funds being lost to which staff of Launch Pad Investments is not ' \
                           'responsible for. :warning:'
 
@@ -383,7 +381,7 @@ class UserAccountCommands(commands.Cog):
                                                 sys_msg_title=title)
 
     @bal.error
-    async def bal_error(self, ctx, error):
+    async def quick_bal_check_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__Balance check error__'
             message = f'You have not registered yourself into the system yet. Please head to one of the public ' \
@@ -412,8 +410,8 @@ class UserAccountCommands(commands.Cog):
     async def wallet_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__{d["command"]}wallet Error__'
-            message = f'In order to access your wallet you need to be first registered into payment system. You can do' \
-                      f' that with {d["command"]}register!'
+            message = f'In order to access your wallet you need to be first registered into payment system. You' \
+                      f' can do that with {d["command"]}register!'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
 
