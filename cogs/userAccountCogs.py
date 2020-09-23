@@ -116,6 +116,9 @@ class UserAccountCommands(commands.Cog):
         acc_entry.add_field(name=f'On Chain withdrawals',
                             value=f'{total_withdrawals_done}',
                             inline=False)
+        acc_entry.add_field(name=f'Transaction counter',
+                            value=f'{transaction_counter}',
+                            inline=False)
         acc_entry.add_field(name=f'Total Outgoing Transactions',
                             value=f'{total_executed_tx}',
                             inline=False)
