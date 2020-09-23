@@ -97,9 +97,9 @@ class BotManagementCommands(commands.Cog):
                                 ' Latest commits pulled :green_circle: \n' \
                                 '=============================================\n'
         except InvalidGitRepositoryError:
-            notification_str += f'GIT UPDATE: There has been an error while pulling latest commits :red_circle:  \n' \
-                                f'Error: Git Repository could not be found\n' \
-                                f'=============================================\n'
+            notification_str += 'GIT UPDATE: There has been an error while pulling latest commits :red_circle:  \n' \
+                                'Error: Git Repository could not be found\n' \
+                                '=============================================\n'
             await channel.send(content=notification_str)
 
         notification_str += 'STATUS OF COGS AFTER RELOAD\n'
