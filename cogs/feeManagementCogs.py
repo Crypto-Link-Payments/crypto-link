@@ -102,13 +102,13 @@ class FeeManagementAndControl(commands.Cog):
             description = "Representation of all commands needed to be execute if you are willing to change the fee"
             list_of_values = [
                 {"name": f"{d['command']}fee change minimum_merchant_transfer_value <value in $ in format 0.00>",
-                 "value": f"Minimum amount in $ crypto value to be eligible for withdrawal from it"},
+                 "value": "Minimum amount in $ crypto value to be eligible for withdrawal from it"},
                 {"name": f"{d['command']}fee change merchant_license_fee <value in $ in format 0.00>",
-                 "value": f"Monthly License Fee for Merchant"},
+                 "value": "Monthly License Fee for Merchant"},
                 {"name": f"{d['command']}fee change merchant_wallet_transfer_fee <value in $ in format 0.00>",
-                 "value": f"Fee when transferring from merchant wallet of the community"},
+                 "value": "Fee when transferring from merchant wallet of the community"},
                 {"name": f"{d['command']}fee change xlm_withdrawal_fee <value in $ in format 0.00>",
-                 "value": f"Withdrawal fee from personal wallet to outside wallet on Stellar chain"},
+                 "value": "Withdrawal fee from personal wallet to outside wallet on Stellar chain"},
 
             ]
 
