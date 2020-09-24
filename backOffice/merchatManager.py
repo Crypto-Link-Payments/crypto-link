@@ -19,6 +19,10 @@ d = helper.read_json_file(file_name='botSetup.json')
 
 
 class MerchantManager:
+    """
+    Class handling Merchant system. Storing licenses, purchases, etc.
+    """
+
     def __init__(self):
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
         self.communities = self.connection['CryptoLink']
@@ -57,7 +61,7 @@ class MerchantManager:
                                              {"_id": 0})
         return data
 
-    def insert_license(self, new_license:dict):
+    def insert_license(self, new_license: dict):
         """
         Insert license into directory of active licenses
         """
@@ -109,7 +113,7 @@ class MerchantManager:
         else:
             return True
 
-    def register_role(self,new_role_data:dict):
+    def register_role(self, new_role_data: dict):
         """
         Register community role into the system and make it available to be monetized
         """
@@ -330,4 +334,3 @@ class MerchantManager:
         else:
             return None
             return None
-
