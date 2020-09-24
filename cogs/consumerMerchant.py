@@ -262,8 +262,6 @@ class ConsumerCommands(commands.Cog):
                                     await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
                                                                                        role_details=purchase_role_data)
 
-                                    # TODO branch out
-
                                     # Merchant system notification
                                     disc_channel = self.bot.get_channel(id=int(notf_channels['merchant']))
                                     role_notf = discord.Embed(title='Role purchased',

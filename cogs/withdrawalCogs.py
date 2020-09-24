@@ -24,6 +24,7 @@ d = helper.read_json_file(file_name='botSetup.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 notify_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+CONST_WITHDRAWAL_ERROR = "__Withdrawal error___"
 
 
 def check(author):
@@ -42,6 +43,17 @@ def check(author):
 class WithdrawalCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @staticmethod
+    def update_withdrawal_stats(ctx, stroops):
+        # Update bot stats
+        stats_manager.update_bot_chain_stats(type_of='withdrawal', ticker='xlm',
+                                             amount=round(stroops / 10000000, 7))
+
+        # Update user stats
+        stats_manager.update_user_withdrawal_stats(user_id=ctx.message.author.id,
+                                                   amount=round(stroops / 10000000, 7),
+                                                   key='xlmStats')
 
     @commands.group()
     @commands.check(user_has_wallet)
@@ -88,7 +100,6 @@ class WithdrawalCommands(commands.Cog):
                 wallet_details = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
 
                 if wallet_details['balance'] >= final_stroop:
-                    #TODO check for withdrawal bugs
                     xlm_with_amount = stroops / 10000000
 
                     # Confirmation message
@@ -153,55 +164,43 @@ class WithdrawalCommands(commands.Cog):
                                     await customMessages.cl_staff_incoming_funds_notification(sys_channel=sys_channel,
                                                                                               amount=fee_in_stroops)
 
-                                # Update bot stats
-                                stats_manager.update_bot_chain_stats(type_of='withdrawal', ticker='xlm',
-                                                                     amount=round(stroops / 10000000, 7))
-
-                                # Update user stats
-                                stats_manager.update_user_withdrawal_stats(user_id=ctx.message.author.id,
-                                                                           amount=round(stroops / 10000000, 7),
-                                                                           key='xlmStats')
+                                # Update user and bot withdrawal stats
+                                self.update_withdrawal_stats(ctx=ctx, stroops=stroops)
 
                             else:
-                                title = '__Withdrawal error___'
                                 message = f'Funds could not be withdrawn at this point. Please try again later.'
                                 await customMessages.system_message(ctx=ctx, color_code=1, message=message,
                                                                     destination=0,
-                                                                    sys_msg_title=title)
+                                                                    sys_msg_title=CONST_WITHDRAWAL_ERROR)
                                 stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                              stroops=final_stroop,
                                                                              direction=1)
                         else:
-                            title = '__Withdrawal error___'
                             message = f'Funds could not be withdrawn at this point. Please try again later.'
                             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                                sys_msg_title=title)
+                                                                sys_msg_title=CONST_WITHDRAWAL_ERROR)
                         await ctx.channel.delete_messages([processing_msg])
                     else:
-                        title = '__Withdrawal request canceled___'
                         message = f'You have cancelled withdrawal request of {round(xlm_with_amount, 7)}'
                         await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                            sys_msg_title=title)
+                                                            sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
                 else:
-                    title = '__Insufficient balance___'
                     message = f'Amount you are willing to withdraw is greater than your current wallet balance.\n' \
                               f'Wallet balance: {wallet_details["balance"] / 10000000} Stellar ' \
                               f'Balance {CONST_STELLAR_EMOJI}'
                     await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                        sys_msg_title=title)
+                                                        sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
             else:
-                title = '__Amount error___'
                 message = f'Wrong amount for withdrawal provided. Amount needs to be greater than 30 XLM'
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                    sys_msg_title=title)
+                                                    sys_msg_title=CONST_WITHDRAWAL_ERROR)
         else:
-            title = 'Withdrawal address error'
             message = f'{address} is not valid Stellar address. Please verify the address and try again. ' \
                       f'If issue persists\n please contact dev team.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=title)
+                                                sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
     @xlm.error
     async def stellar_withdrawal_error(self, ctx, error):
