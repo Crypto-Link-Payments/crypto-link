@@ -157,7 +157,6 @@ async def check_stellar_hot_wallet():
             await process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
 
         last_checked_pag = new_transactions[-1]["paging_token"]
-        print(last_checked_pag)
         if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
             print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
         else:
@@ -165,7 +164,6 @@ async def check_stellar_hot_wallet():
 
         print(Fore.GREEN + '==============DONE=================\n'
                            '==========GOING TO SLEEP FROM 1 MINUTES=====')
-
     else:
         print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
         print('==============================================')

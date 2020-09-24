@@ -32,11 +32,6 @@ class UserAccountCommands(commands.Cog):
     @commands.command()
     @commands.check(user_has_wallet)
     async def bal(self, ctx):
-        """
-        Gets the user balances
-        :param ctx:
-        :return:
-        """
         print(f'BAL: {ctx.author}-> {ctx.message.content}')
         values = account_mng.get_wallet_balances_based_on_discord_id(discord_id=ctx.message.author.id)
         if values:
@@ -67,9 +62,6 @@ class UserAccountCommands(commands.Cog):
     @commands.command()
     @commands.check(user_has_wallet)
     async def acc(self, ctx):
-        """
-        Full account report on the wallet
-        """
         stellar_wallet_data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
         token_wallet_data = clToken.get_cl_token_data_by_id(discord_id=ctx.message.author.id)
         account_details = account_mng.get_account_details(discord_id=ctx.message.author.id)
@@ -270,12 +262,6 @@ class UserAccountCommands(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):
         print(f'WALLET: {ctx.author} -> {ctx.message.content}')
-        """
-        Get the details
-        :param ctx:
-        :return:
-        """
-
         if ctx.invoked_subcommand is None:
             title = '__Available Wallets__'
             description = "All commands to check wallet details for each available cryptocurrency"
@@ -288,18 +274,12 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def deposit(self, ctx):
-        """
-        Returns instructions on how to deposit to the Discord Wallet
-        :param ctx:
-        :return:
-        """
         print(f'WALLET DEPOSIT: {ctx.author} -> {ctx.message.content}')
-
         user_profile = account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
-                          ' wallet(GUI, CLI) to the address and deposit ID provided below. Have in mind that there is'\
-                          ' difference bet ween Stellar and Scala deposit values. Providing wrong details for either '\
+                          ' wallet(GUI, CLI) to the address and deposit ID provided below. Have in mind that there is' \
+                          ' difference bet ween Stellar and Scala deposit values. Providing wrong details for either ' \
                           'of them will result in funds being lost to which staff of Launch Pad Investments is not ' \
                           'responsible for. :warning:'
 
@@ -329,11 +309,6 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def balance(self, ctx):
-        """
-        Querying account details for the Stellar Lumen Wallet
-        :param ctx:
-        :return:
-        """
         print(f'WALLET BALANCE: {ctx.author} -> {ctx.message.content}')
 
         data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
