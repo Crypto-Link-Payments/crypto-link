@@ -244,38 +244,13 @@ class MerchantManager:
             except errors.PyMongoError:
                 return False
 
-    def add_user_to_payed_roles(self, community_id, community_name, user_id, user_name, start: int, end: int,
-                                role_id: int, role_name, currency: str, currency_value_atom: int, pennies: int):
+    def add_user_to_payed_roles(self, purchase_data: dict):
         """
         add users to the payed roles in the system
-        :param community_id: Discord ID
-        :param community_name: Community Name
-        :param user_id: user ID unique
-        :param user_name: user nae
-        :param start:
-        :param currency: currency used to pay for role
-        :param currency_value_atom: atomic value of the currency
-        :param pennies: atomic value of dollars
-        :param end:
-        :param role_id:
-        :param role_name:
         :return: boolean
         """
         try:
-            new_user_with_role = {
-                "userId": int(user_id),
-                "userName": user_name,
-                "roleId": role_id,
-                "roleName": role_name,
-                "start": start,
-                "end": end,
-                "currency": currency,
-                "atomicValue": currency_value_atom,
-                "pennies": pennies,
-                "communityName": community_name,
-                "communityId": community_id}
-
-            self.applied_users.insert_one(new_user_with_role)
+            self.applied_users.insert_one(purchase_data)
             return True
         except errors.WriteConcernError:
             return False
@@ -291,10 +266,7 @@ class MerchantManager:
         """
         result = self.monetized_roles.delete_one({"roleId": role_id, "communityId": community_id})
 
-        if result.deleted_count == 1:
-            return True
-        else:
-            return False
+        return result.deleted_count == 1
 
     def remove_all_monetized_roles(self, guild_id):
         try:
@@ -313,10 +285,7 @@ class MerchantManager:
         applied_roles = list(self.applied_users.find({'userId': user_id, "communityId": discord_id},
                                                      {"_id": 0}))
 
-        if applied_roles:
-            return applied_roles
-        else:
-            return []
+        return applied_roles
 
     def get_over_due_users(self, timestamp: int):
         """
@@ -351,23 +320,16 @@ class MerchantManager:
         result = self.monetized_roles.update_one({'_id': ObjectId(role_data['_id'])},
                                                  {"$set": role_data,
                                                   "$currentDate": {"lastModified": True}})
-        if result.modified_count > 0:
-            return True
-        else:
-            return False
+        return result.modified_count > 0
 
     def delete_user_from_applied(self, community_id: int, user_id: int):
         """
         Removing user from database of active purchased roles as he/she does not exist anymore
         """
         result = self.applied_users.delete_many({"communityId": community_id, "userId": user_id})
-        if result.deleted_count > 0:
-            return True
-        else:
-            return False
+        return result.deleted_count > 0
 
     def delete_all_users_with_role_id(self, community_id: int, role_id: int):
-        # TODO integrate into on role remove
         """
         Delete all entries under active roles in database if community does not have that role anymore.
         """
@@ -386,15 +348,18 @@ class MerchantManager:
         :return:
         """
         result = self.applied_users.delete_many({"communityId": community_id, "roleId": role_id})
-        if result.deleted_count > 0:
-            return True
-        else:
-            return False
+        return result.deleted_count > 0
 
     def get_balance_based_on_ticker(self, community_id, ticker):
+        """
+        Return guild balance based on guild's ID
+        """
 
         if ticker == 'xlm':
             stellar_wallet = self.community_stellar_wallets.find_one({"communityId": community_id},
                                                                      {"_id": 0,
                                                                       "balance": 1})
             return stellar_wallet['balance']
+
+        else:
+            return None

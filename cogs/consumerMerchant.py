@@ -228,22 +228,24 @@ class ConsumerCommands(commands.Cog):
                                 gap = end - start
                                 unix_today = (int(time.mktime(start.timetuple())))
                                 unix_future = (int(time.mktime(end.timetuple())))
-                                if merchant_manager.add_user_to_payed_roles(
-                                        community_id=ctx.message.guild.id,
-                                        community_name=ctx.message.guild.name,
-                                        user_id=ctx.message.author.id,
-                                        user_name=str(ctx.message.author),
-                                        start=unix_today,
-                                        end=unix_future,
-                                        role_id=role.id,
-                                        role_name=role.name,
-                                        currency=ticker,
-                                        currency_value_atom=crypto_price_atomic,
-                                        pennies=int(
-                                            role_details["pennyValues"])):
 
+                                # make data for store in database
+                                purchase_data = {
+                                    "userId": int(ctx.message.author.id),
+                                    "userName": str(ctx.message.author),
+                                    "roleId": int(role.id),
+                                    "roleName": f'{role.name}',
+                                    "start": unix_today,
+                                    "end": unix_future,
+                                    "currency": ticker,
+                                    "atomicValue": crypto_price_atomic,
+                                    "pennies": int(role_details["pennyValues"]),
+                                    "communityName": f'{ctx.message.guild}',
+                                    "communityId": int(ctx.message.guild.id)}
+
+                                if merchant_manager.add_user_to_payed_roles(purchase_data=purchase_data):
                                     purchase_role_data = {
-                                        "roleStart":f"{start} UTC",
+                                        "roleStart": f"{start} UTC",
                                         "roleEnd": end,
                                         "roleLeft": gap,
                                         "dollarValue": convert_to_dollar,
