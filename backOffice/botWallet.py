@@ -12,12 +12,11 @@ helper = Helpers()
 d = helper.read_json_file(file_name='botSetup.json')
 
 
-class BotManager(object):
-    """
-    Class dealing with the management of Crypto Link own bot wallet and fees management
-    """
+class BotManager:
+    """Class dealing with the management of Crypto Link own bot wallet and fees management"""
 
     def __init__(self):
+        """Connection to Database and Crypto Link collections"""
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
         self.bot_stuff = self.connection['CryptoLink']
         self.bot_wallet = self.bot_stuff.CLWallets
@@ -77,8 +76,7 @@ class BotManager(object):
         """
         if all_fees:
             data = list(self.bot_fees.find({}))
-            return data
         else:
             data = self.bot_fees.find_one({"key": key},
                                           {"_id": 0})
-            return data
+        return data
