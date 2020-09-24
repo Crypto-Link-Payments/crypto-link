@@ -49,6 +49,7 @@ class UserAccountCommands(commands.Cog):
                       f'web: https://www.stellar.org/\n'
                       f'cmc: https://coinmarketcap.com/currencies/stellar/',
                 inline=False)
+
             balance_embed.set_footer(text='Conversion rates provided by CoinGecko')
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
 
@@ -59,25 +60,25 @@ class UserAccountCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
 
-    @commands.command()
+    @commands.group()
     @commands.check(user_has_wallet)
     async def acc(self, ctx):
         stellar_wallet_data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
         token_wallet_data = clToken.get_cl_token_data_by_id(discord_id=ctx.message.author.id)
         account_details = account_mng.get_account_details(discord_id=ctx.message.author.id)
+        xlm_balance = round(float(stellar_wallet_data["balance"]) / 10000000, 7)
+
+        rates = get_rates(coin_name='stellar')
+        in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
+        in_usd = rate_converter(xlm_balance, rates["stellar"]["usd"])
+        in_btc = rate_converter(xlm_balance, rates["stellar"]["btc"])
+        in_eth = rate_converter(xlm_balance, rates["stellar"]["eth"])
+
         transaction_counter = account_details["transactionCounter"]
 
         stellar_stats = account_details["xlmStats"]
         cl_coin_stats = account_details["clCoinStats"]
 
-        total_deposits_done = cl_coin_stats["totalDeposited"] + stellar_stats["totalDeposited"]
-        total_withdrawals_done = cl_coin_stats["totalWithdrawn"] + stellar_stats["totalWithdrawn"]
-        total_public_tx = cl_coin_stats["publicTxCount"] + stellar_stats["publicTxCount"]
-        total_private_tx = cl_coin_stats["privateTxCount"] + stellar_stats["privateTxCount"]
-        total_executed_tx = total_private_tx + total_public_tx
-        total_received_tx = cl_coin_stats["received"] + stellar_stats["received"]
-
-        xlm_balance = round(float(stellar_wallet_data["balance"]) / 10000000, 7)
         stellar_balance = get_normal(value=str(stellar_wallet_data["balance"]),
                                      decimal_point=get_decimal_point('xlm'))
 
@@ -96,40 +97,23 @@ class UserAccountCommands(commands.Cog):
                             value=f'{ctx.message.author.id}',
                             inline=True)
         acc_entry.add_field(name=f'Stellar Lumen Balance',
-                            value=f'{stellar_balance} {CONST_STELLAR_EMOJI}',
-                            inline=False)
+                            value=f'{stellar_balance} {CONST_STELLAR_EMOJI} (${in_usd})',
+                            inline=True)
         acc_entry.add_field(name=f'Crypto Link Token Balance',
-                            value=f'{cl_token_balance} :sweat_drops:  ',
+                            value=f'{cl_token_balance} :sweat_drops:',
+                            inline=True)
+        acc_entry.add_field(name='Sent Transactions',
+                            value=f'{transaction_counter["sentTxCount"]}',
                             inline=False)
-
-        acc_entry.add_field(name=f'On Chain Deposits',
-                            value=f'{total_deposits_done}',
-                            inline=False)
-        acc_entry.add_field(name=f'On Chain withdrawals',
-                            value=f'{total_withdrawals_done}',
-                            inline=False)
-        acc_entry.add_field(name=f'Transaction counter',
-                            value=f'{transaction_counter}',
-                            inline=False)
-        acc_entry.add_field(name=f'Total Outgoing Transactions',
-                            value=f'{total_executed_tx}',
-                            inline=False)
-        acc_entry.add_field(name=f'Total Incoming Transactions',
-                            value=f'{total_received_tx}',
-                            inline=False)
-        acc_entry.add_field(name=f'Total Public Transactions',
-                            value=f'{total_public_tx}',
-                            inline=False)
-        acc_entry.add_field(name=f'Total Private Transactions',
-                            value=f'{total_private_tx}',
-                            inline=False)
+        acc_entry.add_field(name='Received Transactions',
+                            value=f'{transaction_counter["receivedCount"]}')
+        acc_entry.add_field(name='Multi Transactions',
+                            value=f'{transaction_counter["multiTxCount"]}')
+        acc_entry.add_field(name='Emoji Transactions',
+                            value=f'{transaction_counter["emojiTxCount"]}')
+        acc_entry.add_field(name='Roles Purchased',
+                            value=f'{transaction_counter["rolePurchase"]}')
         await ctx.author.send(embed=acc_entry)
-
-        rates = get_rates(coin_name='stellar')
-        in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
-        in_usd = rate_converter(xlm_balance, rates["stellar"]["usd"])
-        in_btc = rate_converter(xlm_balance, rates["stellar"]["btc"])
-        in_eth = rate_converter(xlm_balance, rates["stellar"]["eth"])
 
         xlm_wallet = Embed(title=f'{CONST_STELLAR_EMOJI} Stellar Lumen Wallet Details {CONST_STELLAR_EMOJI}',
                            description='Bellow are latest details on your Stellar Lumen Crypto Link wallet',
@@ -267,10 +251,45 @@ class UserAccountCommands(commands.Cog):
             description = "All commands to check wallet details for each available cryptocurrency"
             list_of_values = [{"name": "Quick balance check", "value": f"{d['command']}bal"},
                               {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet deposit"},
+                              {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet stats"},
                               {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet balance"}]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                destination=1)
+
+    @wallet.command()
+    async def stats(self, ctx):
+        utc_now = datetime.utcnow()
+        account_details = account_mng.get_account_details(discord_id=ctx.message.author.id)
+        from pprint import pprint
+        pprint(account_details)
+        stellar_stats = account_details["xlmStats"]
+        token_stats = account_details["clCoinStats"]
+        transaction_stats = account_details["transactionCounter"]
+
+        sum_sent = transaction_stats["sentTxCount"] + transaction_stats["multiTxCount"] + transaction_stats[
+            "emojiTxCount"] + transaction_stats["rolePurchase"]
+
+        acc_entry = Embed(title='__Account Statistics__',
+                          colour=Colour.dark_blue(),
+                          timestamp=utc_now)
+        acc_entry.set_thumbnail(url=ctx.author.avatar_url)
+        acc_entry.add_field(name=f'Account Owner',
+                            value=f'{ctx.message.author} (ID: {ctx.message.author.id})',
+                            inline=False)
+        acc_entry.add_field(name=f':abacus: Sent ',
+                            value=f'{sum_sent}')
+        acc_entry.add_field(name=':outbox_tray:  Tx',
+                            value=f'{transaction_stats["sentTxCount"]}')
+        acc_entry.add_field(name=':inbox_tray:  Tx',
+                            value=f'{transaction_stats["receivedCount"]}')
+        acc_entry.add_field(name=':cloud_rain: Multi Tx',
+                            value=f'{transaction_stats["multiTxCount"]}')
+        acc_entry.add_field(name=':slight_smile: Tx',
+                            value=f'{transaction_stats["emojiTxCount"]}')
+        acc_entry.add_field(name=':man_juggling:  Purchase Tx',
+                            value=f'{transaction_stats["rolePurchase"]}')
+        await ctx.author.send(embed=acc_entry)
 
     @wallet.command()
     async def deposit(self, ctx):
