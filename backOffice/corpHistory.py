@@ -17,9 +17,8 @@ sys.path.append(project_path)
 
 
 class CorporateHistoryManager:
-    """
-    Class dealing with corporate withdrawal history
-    """
+    """Class dealing with corporate withdrawal history"""
+
     def __init__(self):
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
         self.corp_activity = self.connection['CryptoLink']
