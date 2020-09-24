@@ -249,12 +249,6 @@ class UserAccountCommands(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def register(self, ctx):
         print(f'REGISTER: {ctx.author} -> {ctx.message.content}')
-        """
-        Register user in the system
-        :param ctx:
-        :return:
-        """
-
         if not account_mng.check_user_existence(user_id=ctx.message.author.id):
             if account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
