@@ -149,14 +149,20 @@ class MerchantCommunityOwner(commands.Cog):
                             created_role = await ctx.guild.create_role(
                                 name=role_name)  # Create role and return its details
 
-                            if merchant_manager.register_role(community_id=ctx.message.guild.id,
-                                                              role_id=int(created_role.id),
-                                                              role_name=created_role.name,
-                                                              penny_value=in_penny,
-                                                              weeks=weeks_count,
-                                                              days=days_count,
-                                                              hours=hours_count,
-                                                              minutes=minutes_count):
+                            # TO Store in database
+                            new_role = {
+                                "roleId": int(created_role.id),
+                                "roleName": f'{created_role}',
+                                "communityId": int(ctx.guild.id),
+                                "pennyValues": int(in_penny),
+                                "weeks": int(weeks_count),
+                                "days": int(days_count),
+                                "hours": int(hours_count),
+                                "minutes": int(minutes_count),
+                                "status": "active"
+                            }
+
+                            if merchant_manager.register_role(new_role):
 
                                 # Send the message to the owner
                                 msg_title = '__Role Creation Status___'
@@ -294,8 +300,6 @@ class MerchantCommunityOwner(commands.Cog):
         Command used to change activity status of the role
         """
         role_details = merchant_manager.find_role_details(role_id=role.id)
-        from pprint import pprint
-        pprint(role_details)
         if role_details:
             if role_details['status'] == 'active':
                 role_details['status'] = 'inactive'
@@ -336,8 +340,6 @@ class MerchantCommunityOwner(commands.Cog):
         """
 
         role_details = merchant_manager.find_role_details(role_id=role.id)
-        from pprint import pprint
-        pprint(role_details)
         if role_details:
             if role_details['status'] == 'inactive':
                 role_details['status'] = 'active'

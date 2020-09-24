@@ -124,25 +124,12 @@ class MerchantManager:
         else:
             return True
 
-    def register_role(self, community_id: int, role_id: int, role_name: str, penny_value: int, weeks: int, days: int,
-                      hours: int,
-                      minutes: int):
+    def register_role(self,new_role_data:dict):
         """
         Register community role into the system and make it available to be monetized
         """
-        new_role = {
-            "roleId": int(role_id),
-            "roleName": role_name,
-            "communityId": int(community_id),
-            "pennyValues": int(penny_value),
-            "weeks": int(weeks),
-            "days": int(days),
-            "hours": int(hours),
-            "minutes": int(minutes),
-            "status": "active"
-        }
         try:
-            self.monetized_roles.insert_one(new_role)
+            self.monetized_roles.insert_one(new_role_data)
             return True
         except errors.PyMongoError:
             return False
@@ -166,10 +153,7 @@ class MerchantManager:
         role_details = self.monetized_roles.find_one({"roleId": role_id},
                                                      {'lastModified': 0})
 
-        if role_details:
-            return role_details
-        else:
-            return {}
+        return role_details
 
     def register_community_wallet(self, community_id: int, community_owner_id: int, community_name: str):
         """
@@ -213,13 +197,7 @@ class MerchantManager:
                                                                  {"_id": 0,
                                                                   "balance": 1})
 
-        if stellar_wallet:
-            details = {
-                "stellar": stellar_wallet
-            }
-            return details
-        else:
-            return {}
+        return stellar_wallet
 
     def modify_funds_in_community_merchant_wallet(self, community_id: int, amount: int, wallet_tick: str,
                                                   direction: int):
@@ -235,14 +213,17 @@ class MerchantManager:
             amount = amount * (-1)
 
         if wallet_tick == 'xlm':
-            # Transfer funds to xlm wallet
             try:
                 self.community_stellar_wallets.update_one({"communityId": community_id},
                                                           {"$inc": {"balance": amount},
                                                            "$currentDate": {"lastModified": True}})
                 return True
-            except errors.PyMongoError:
+            except errors.PyMongoError as e:
+                print(e)
                 return False
+        else:
+            print('Currency in community merchant wallet not found')
+            return False
 
     def add_user_to_payed_roles(self, purchase_data: dict):
         """
