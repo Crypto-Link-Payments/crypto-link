@@ -182,7 +182,7 @@ class TransactionCommands(commands.Cog):
                                                 sys_msg_title=title)
         elif isinstance(error, commands.CommandOnCooldown):
             title = f'__Command on cool-down__!'
-            message = f'{error}'
+            message = f'{error}. Please try again after {error.retry_after}s'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
 
