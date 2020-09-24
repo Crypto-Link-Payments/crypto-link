@@ -264,31 +264,7 @@ class ConsumerCommands(commands.Cog):
                                     await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
                                                                                        role_details=purchase_role_data)
 
-                                    # Merchant system notification
-                                    disc_channel = self.bot.get_channel(id=int(notf_channels['merchant']))
-                                    role_notf = discord.Embed(title='Role purchased',
-                                                              description="Role has been obtained through "
-                                                                          "the Merchant "
-                                                                          "system",
-                                                              color=discord.Colour.gold())
-                                    role_notf.add_field(name='Community details',
-                                                        value=f'Community:\n{ctx.message.guild} '
-                                                              f'(ID:{ctx.message.guild.id})\n'
-                                                              f'Owner: \n{ctx.message.guild.owner}\n'
-                                                              f'{ctx.message.guild.owner.id}')
-                                    role_notf.add_field(name='Time of purchase',
-                                                        value=f"{start} (UTC)",
-                                                        inline=False)
-                                    role_notf.add_field(name='Customer',
-                                                        value=f"User: {ctx.message.author}\n"
-                                                              f"Id: {ctx.message.author.id}",
-                                                        inline=False)
-                                    role_notf.add_field(name='Amount',
-                                                        value=f'{convert_to_dollar} $ \n'
-                                                              f'{role_rounded} {emoji}\n'
-                                                              f'{coin_usd_price}$/ 1{emoji}',
-                                                        inline=False)
-                                    await disc_channel.send(embed=role_notf)
+
 
                             else:
                                 message = f'Error while trying to deduct funds from user'
