@@ -45,10 +45,7 @@ class MerchantManager:
         :return:
         """
         data = self.active_licenses.find_one({"communityId": int(community_id)})
-        if data:
-            return True
-        else:
-            return False
+        return data
 
     def get_community_license_details(self, community_id):
         """
