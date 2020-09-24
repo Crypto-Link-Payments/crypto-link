@@ -51,7 +51,7 @@ def is_owner(ctx):
     return int(ctx.message.author.id) == int(ctx.message.guild.owner.id)
 
 
-def community_registration_status(ctx):
+def merchant_com_reg_stats(ctx):
     """
     Checks if community is registered in the merchant system
     """

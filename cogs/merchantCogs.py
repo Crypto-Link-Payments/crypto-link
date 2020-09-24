@@ -7,7 +7,7 @@ from discord.ext import commands
 from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
-from cogs.utils.customCogChecks import is_owner, has_wallet, is_public, community_registration_status
+from cogs.utils.customCogChecks import is_owner, has_wallet, is_public, merchant_com_reg_stats
 from cogs.utils.monetaryConversions import convert_to_currency, get_decimal_point
 from cogs.utils.monetaryConversions import get_normal
 from cogs.utils.systemMessaages import CustomMessages
@@ -72,7 +72,7 @@ class MerchantCommunityOwner(commands.Cog):
     @commands.group()
     @commands.check(is_public)
     @commands.check(is_owner)  # Check if author is community owner
-    @commands.check(community_registration_status)  # Check if community has been registered in the system
+    @commands.check(merchant_com_reg_stats)  # Check if community has been registered in the system
     @commands.check(has_wallet)  # Check if owner has community wallet
     @commands.bot_has_permissions(manage_roles=True)
     async def merchant(self, ctx):

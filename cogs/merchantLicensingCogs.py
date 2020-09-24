@@ -14,7 +14,7 @@ from discord.ext import commands
 from backOffice.botWallet import BotManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.stellarActivityManager import StellarManager
-from cogs.utils.customCogChecks import is_owner, has_wallet, community_registration_status, is_public
+from cogs.utils.customCogChecks import is_owner, has_wallet, merchant_com_reg_stats, is_public
 from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -42,7 +42,7 @@ class MerchantLicensingCommands(commands.Cog):
     @commands.group()
     @commands.check(is_owner)
     @commands.check(has_wallet)
-    @commands.check(community_registration_status)
+    @commands.check(merchant_com_reg_stats)
     @commands.check(is_public)
     async def license(self, ctx):
         """

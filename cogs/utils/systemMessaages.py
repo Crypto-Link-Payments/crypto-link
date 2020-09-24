@@ -2,6 +2,7 @@ from datetime import datetime
 
 import discord
 from discord import errors
+from discord import Role
 
 from cogs.utils.monetaryConversions import convert_to_usd
 from utils.tools import Helpers
@@ -271,3 +272,32 @@ class CustomMessages:
         notify.add_field(name='Value',
                          value=f'{amount / 10000000}{CONST_STELLAR_EMOJI}')
         await sys_channel.send(embed=notify)
+
+    @staticmethod
+    async def user_role_purchase_msg(ctx, role: Role, role_datails: dict):
+        # Send notification to user
+        role_embed = discord.Embed(name='Membership Status Information',
+                                   title='Congratulations on '
+                                         'obtaining the role',
+                                   description='Details on obtained role',
+                                   colour=discord.Colour.gold())
+        role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
+        role_embed.add_field(name='Community',
+                             value=f'{ctx.message.guild}  \n'
+                                   f'ID:{ctx.message.guild.id}',
+                             inline=False)
+        role_embed.add_field(name='Role:',
+                             value=f'{role.name}  ID:{role.id}',
+                             inline=False)
+        role_embed.add_field(name='Role Expiration',
+                             value=f'{role_datails["end"]} (in: {role_datails["gap"]})',
+                             inline=False)
+        role_embed.add_field(name='Role Value',
+                             value=f'{role_datails["dollarValue"]} $ \n'
+                                   f'{role_datails["roleRounded"]} {CONST_STELLAR_EMOJI}\n'
+                                   f'{role_datails["usdRate"]} / 1{CONST_STELLAR_EMOJI}',
+                             inline=False)
+        try:
+            await ctx.author.send(embed=role_embed)
+        except Exception:
+            await ctx.channel.send(embed=role_embed, delete_after=10)
