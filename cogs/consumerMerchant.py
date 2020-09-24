@@ -243,49 +243,24 @@ class ConsumerCommands(commands.Cog):
                                             role_details["pennyValues"])):
 
                                     purchase_role_data = {
+                                        "roleStart":f"{start} UTC",
                                         "roleEnd": end,
                                         "roleLeft": gap,
                                         "dollarValue": convert_to_dollar,
                                         "roleRounded": role_rounded,
-                                        "usdRate": coin_usd_price
+                                        "usdRate": coin_usd_price,
+                                        "roleDetails": f"weeks: {role_details['weeks']}\n"
+                                                       f"days: {role_details['days']},"
+                                                       f"hours: {role_details['hours']},"
+                                                       f"minutes: {role_details['minutes']}"
                                     }
 
                                     # Send user payment slip info on purchased role
-                                    await customMessages.user_role_purchase_msg(ctx=ctx,role=role,
-                                                                                role_datails=purchase_role_data)
+                                    await customMessages.user_role_purchase_msg(ctx=ctx, role=role,
+                                                                                role_details=purchase_role_data)
 
-                                    owner = ctx.message.guild.owner
-                                    incoming_funds = discord.Embed(name='__Merchant system funds credited',
-                                                                   title='__Incoming funds to corporate '
-                                                                         'wallet___',
-                                                                   description='You have received this '
-                                                                               'notification'
-                                                                               ' because of new funds '
-                                                                               'being inbound '
-                                                                               ' through the merchant '
-                                                                               'service. '
-                                                                               'Details are presented'
-                                                                               ' below',
-                                                                   colour=discord.Colour.green())
-                                    incoming_funds.add_field(name='Amount',
-                                                             value=f'{convert_to_dollar} $ \n'
-                                                                   f'{role_rounded} {emoji}\n'
-                                                                   f'{coin_usd_price}$ /  {emoji}', )
-                                    incoming_funds.add_field(name='User Details',
-                                                             value=f"User: {ctx.message.author}\n"
-                                                                   f"Id: {ctx.message.author.id}",
-                                                             inline=False)
-                                    incoming_funds.add_field(name='Role Obtained',
-                                                             value=f"Name: {role.name}\n"
-                                                                   f"Id: {role.id}\n"
-                                                                   f"Duration:\n"
-                                                                   f"Weeks: {role_details['weeks']}\n"
-                                                                   f"Days: {role_details['days']}\n"
-                                                                   f"Hours: {role_details['hours']}\n"
-                                                                   f"Minutes: {role_details['minutes']}",
-                                                             inline=False)
-
-                                    await owner.send(embed=incoming_funds)
+                                    await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
+                                                                                       role_details=purchase_role_data)
 
                                     # TODO branch out
 

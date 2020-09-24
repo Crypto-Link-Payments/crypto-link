@@ -274,30 +274,65 @@ class CustomMessages:
         await sys_channel.send(embed=notify)
 
     @staticmethod
-    async def user_role_purchase_msg(ctx, role: Role, role_datails: dict):
+    async def user_role_purchase_msg(ctx, role: Role, role_details: dict):
         # Send notification to user
-        role_embed = discord.Embed(name='Membership Status Information',
+        role_embed = discord.Embed(name=':shopping_cart: __Membership purchase successful__ :shopping_cart: ',
                                    title='Congratulations on '
                                          'obtaining the role',
                                    description='Details on obtained role',
                                    colour=discord.Colour.gold())
         role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
-        role_embed.add_field(name='Community',
+        role_embed.add_field(name=':convenience_store: Community :convenience_store:',
                              value=f'{ctx.message.guild}  \n'
                                    f'ID:{ctx.message.guild.id}',
                              inline=False)
-        role_embed.add_field(name='Role:',
+        role_embed.add_field(name=':japanese_ogre: Role: :japanese_ogre: ',
                              value=f'{role.name}  ID:{role.id}',
                              inline=False)
-        role_embed.add_field(name='Role Expiration',
-                             value=f'{role_datails["end"]} (in: {role_datails["gap"]})',
+        role_embed.add_field(name=f':calendar: Role Purchase Date :calendar: ',
+                             value=f'{role_details["roleStart"]}')
+        role_embed.add_field(name=':timer: Role Expiration :timer: ',
+                             value=f'{role_details["end"]} (in: {role_details["gap"]})',
                              inline=False)
-        role_embed.add_field(name='Role Value',
-                             value=f'{role_datails["dollarValue"]} $ \n'
-                                   f'{role_datails["roleRounded"]} {CONST_STELLAR_EMOJI}\n'
-                                   f'{role_datails["usdRate"]} / 1{CONST_STELLAR_EMOJI}',
+        role_embed.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
+                             value=f'{role_details["dollarValue"]} $ \n'
+                                   f'{role_details["roleRounded"]} {CONST_STELLAR_EMOJI}\n'
+                                   f'{role_details["usdRate"]} / 1{CONST_STELLAR_EMOJI}',
                              inline=False)
         try:
             await ctx.author.send(embed=role_embed)
         except Exception:
             await ctx.channel.send(embed=role_embed, delete_after=10)
+
+    @staticmethod
+    async def guild_owner_role_purchase_msg(ctx, role: Role, role_details: dict):
+        incoming_funds = discord.Embed(
+            name=':convenience_store: __Merchant system funds credited__ :convenience_store: ',
+            title='__Incoming funds to corporate '
+                  'wallet___',
+            description=f'Role has been purchased on your community '
+                        f'at {role_details["roleStart"]}.',
+            colour=discord.Colour.green())
+
+        incoming_funds.add_field(name=':japanese_ogre: Role Purchased :japanese_ogre: ',
+                                 value=f"Name: {role.name}\n"
+                                       f"Id: {role.id}",
+                                 inline=False)
+        incoming_funds.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
+                                 value=f'${role_details["dollarValue"]}\n'
+                                       f'{role_details["roleRounded"]} {CONST_STELLAR_EMOJI}\n'
+                                       f'{role_details["usdRate"]} / 1{CONST_STELLAR_EMOJI}',
+                                 inline=False)
+        incoming_funds.add_field(name=':cowboy: User Details :cowboy: ',
+                                 value=f"User: {ctx.message.author}\n"
+                                       f"Id: {ctx.message.author.id}",
+                                 inline=False)
+
+        incoming_funds.add_field(name=':clipboard: Role Duration Details :clipboard:  ',
+                                 value=f"weeks: {role_details['weeks']}\n"
+                                       f"days: {role_details['days']},"
+                                       f"hours: {role_details['hours']},"
+                                       f"minutes: {role_details['minutes']}",
+                                 inline=False)
+
+        await ctx.message.guild.owner.send(embed=incoming_funds)
