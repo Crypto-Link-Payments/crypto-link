@@ -60,21 +60,12 @@ class MerchantManager:
                                              {"_id": 0})
         return data
 
-    def insert_license(self, community_name, owner_id, community_id, start, end, ticker, value):
+    def insert_license(self, new_license:dict):
         """
         Insert license into directory of active licenses
         """
         try:
-            data = {
-                "communityName": community_name,
-                "communityId": int(community_id),
-                "ownerId": int(owner_id),
-                "start": int(start),
-                "end": int(end),
-                "ticker": ticker,
-                "value": value
-            }
-            self.active_licenses.insert_one(data)
+            self.active_licenses.insert_one(new_license)
             return True
         except errors.PyMongoError:
             return False
@@ -107,10 +98,7 @@ class MerchantManager:
         :return: boolean
         """
         result = self.community_profiles.find_one({"communityId": community_id})
-        if result:
-            return True
-        else:
-            return False
+        return result
 
     def check_if_community_does_not_exist(self, community_id):
         """
@@ -344,3 +332,5 @@ class MerchantManager:
 
         else:
             return None
+            return None
+

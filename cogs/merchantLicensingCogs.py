@@ -186,11 +186,17 @@ class MerchantLicensingCommands(commands.Cog):
                         unix_today = (int(time.mktime(license_start.timetuple())))  # Conversion to tuple
                         unix_future = (int(time.mktime(license_end.timetuple())))  # Converting future date to unix
 
-                        if merchant_manager.insert_license(community_name=f'{ctx.guild}',
-                                                           owner_id=ctx.author.id,
-                                                           community_id=ctx.guild.id, start=unix_today,
-                                                           end=unix_future,
-                                                           ticker='xlm', value=stroops):
+                        new_license = {
+                            "communityName": f'{ctx.guild}',
+                            "communityId": int(ctx.guild.id),
+                            "ownerId": int(ctx.author.id),
+                            "start": int(unix_today),
+                            "end": int(unix_future),
+                            "ticker": 'xlm',
+                            "value": stroops
+                        }
+
+                        if merchant_manager.insert_license(new_license):
 
                             # Send notification to the user on purchased licence details
                             user_info = Embed(title='Merchant License Slip',
