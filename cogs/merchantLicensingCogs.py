@@ -149,7 +149,7 @@ class MerchantLicensingCommands(commands.Cog):
             title = "__Available options to purchase license__"
             description = 'Representation of all available currencies and options to purchase license.'
             list_of_commands = [
-                {"name": f'!license buy with_xlm',
+                {"name": '!license buy with_xlm',
                  "value": 'Use Stellar Lumen to purchase license'}
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands)

@@ -220,16 +220,16 @@ class MerchantCommunityOwner(commands.Cog):
                                                     destination=1)
 
         else:
-            message = f'Role could not be create since the length of the role is either' \
-                      f' limitless or expiration time is' \
-                      f' not in future. In order to create a role data for week, days hours and minutes needs ' \
-                      f'to be provide as followed:\n' \
-                      f'week: whole number greater than 0\n' \
-                      f'day: whole number greater than 0\n' \
-                      f'hour: whole number greater than 0\n' \
-                      f'minute: whole number greater than 0\n' \
-                      f'Note: 0 is also acceptable however the sum of all variables needs to be greater than 0 at ' \
-                      f'the end. '
+            message = 'Role could not be create since the length of the role is either' \
+                      ' limitless or expiration time is' \
+                      ' not in future. In order to create a role data for week, days hours and minutes needs ' \
+                      'to be provide as followed:\n' \
+                      'week: whole number greater than 0\n' \
+                      'day: whole number greater than 0\n' \
+                      'hour: whole number greater than 0\n' \
+                      'minute: whole number greater than 0\n' \
+                      'Note: 0 is also acceptable however the sum of all variables needs to be greater than 0 at ' \
+                      'the end. '
             await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
                                                 color_code=1,
                                                 destination=1)
@@ -676,7 +676,7 @@ class MerchantCommunityOwner(commands.Cog):
     @start_role.error
     async def start_role_error(self, ctx, error):
         if isinstance(error, commands.BadArgument):
-            message = f"You have provided bad argument for Role parameter. Use @ in-front of the role name and tag it"
+            message = "You have provided bad argument for Role parameter. Use @ in-front of the role name and tag it"
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
         elif isinstance(error, commands.CheckFailure):
             message = 'In order to be able to re-activate role you need to execute the function on public channel ' \

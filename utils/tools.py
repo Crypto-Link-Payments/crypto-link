@@ -7,9 +7,7 @@ sys.path.append(project_path)
 
 
 class Helpers:
-    """
-    Class including helper functions
-    """
+    """Class including helper functions"""
 
     def __init__(self):
         """

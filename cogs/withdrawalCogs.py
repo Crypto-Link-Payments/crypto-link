@@ -168,7 +168,7 @@ class WithdrawalCommands(commands.Cog):
                                 self.update_withdrawal_stats(ctx=ctx, stroops=stroops)
 
                             else:
-                                message = f'Funds could not be withdrawn at this point. Please try again later.'
+                                message = 'Funds could not be withdrawn at this point. Please try again later.'
                                 await customMessages.system_message(ctx=ctx, color_code=1, message=message,
                                                                     destination=0,
                                                                     sys_msg_title=CONST_WITHDRAWAL_ERROR)
@@ -176,7 +176,7 @@ class WithdrawalCommands(commands.Cog):
                                                                              stroops=final_stroop,
                                                                              direction=1)
                         else:
-                            message = f'Funds could not be withdrawn at this point. Please try again later.'
+                            message = 'Funds could not be withdrawn at this point. Please try again later.'
                             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                                 sys_msg_title=CONST_WITHDRAWAL_ERROR)
                         await ctx.channel.delete_messages([processing_msg])

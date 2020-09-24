@@ -152,7 +152,7 @@ class TransactionCommands(commands.Cog):
                                                     sys_msg_title=title)
         else:
             title = '__Amount error__'
-            message = f'Amount needs to be greater than 0.0000000 XLM'
+            message = 'Amount needs to be greater than 0.0000000 XLM'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=title)
 

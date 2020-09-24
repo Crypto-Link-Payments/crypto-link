@@ -35,7 +35,7 @@ class StatsManager(object):
 
     def update_user_deposit_stats(self, user_id: int, amount: float, key: str):
         """
-        Updates users deposit stats
+        Updates users deposit stats.
         """
 
         self.user_profiles.find_one_and_update({"userId": user_id},
@@ -43,14 +43,16 @@ class StatsManager(object):
                                                          f"{key}.totalDeposited": amount}})
 
     def update_user_withdrawal_stats(self, user_id, amount, key: str):
-        """Updates users withdrawal stats"""
+        """
+        Updates users withdrawal stats.
+        """
         self.user_profiles.find_one_and_update({"userId": user_id},
                                                {f"{CONST_INC}": {f"{key}.withdrawalsCount": 1,
                                                                  f"{key}.totalWithdrawn": amount}})
 
     def update_bot_chain_stats(self, type_of: str, ticker: str, amount: float):
         """
-        Update stats when on chain activity happens
+        Update stats when on chain activity happens.
         """
 
         if type_of == "deposit":
