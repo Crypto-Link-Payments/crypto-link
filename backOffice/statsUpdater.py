@@ -66,19 +66,19 @@ class StatsManager(object):
                                                                "withdrawnAmount": round(float(amount), 7)},
                                               f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
-    def update_user_transaction_stats(self, user_id: int, key, amount: float, direction: str, tx_type: str,
+    def update_user_transaction_stats(self, user_id: int, key, amount: float, direction: str, tx_type: str = None,
                                       special: str = None, mined: float = None):
 
         data = dict()
         # Public or private and direction of funds
-        if tx_type == 'public':
+        if tx_type and tx_type == 'public':
             data[f'{key}.publicTxCount'] = 1
             if direction == 'outgoing':
                 data[f'{key}.publicSent'] = amount
             elif direction == 'incoming':
                 data[f'{key}.publicReceived'] = amount
 
-        elif tx_type == 'private':
+        elif tx_type and tx_type == 'private':
             data[f'{key}.privateTxCount'] = 1
             if direction == 'outgoing':
                 data[f'{key}.privateSent'] = amount
@@ -102,6 +102,7 @@ class StatsManager(object):
                 data["transactionCounter.multiTxCount"] = 1
             elif special == 'rolePurchase':
                 data["transactionCounter.rolePurchase"] = 1
+                data[f"{key}.spentOnRoles"] = amount
 
         # Mined or not
         if mined and direction == 'outgoing':

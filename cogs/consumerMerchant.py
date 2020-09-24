@@ -12,6 +12,7 @@ from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
 from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_wallet
 from cogs.utils.systemMessaages import CustomMessages
+from backOffice.statsUpdater import StatsManager
 from utils import numbers
 from utils.tools import Helpers
 
@@ -20,6 +21,7 @@ account_mng = AccountManager()
 customMessages = CustomMessages()
 gecko = CoinGeckoAPI()
 merchant_manager = MerchantManager()
+stats_manager = StatsManager()
 d = helper.read_json_file(file_name='botSetup.json')
 notf_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
@@ -264,7 +266,19 @@ class ConsumerCommands(commands.Cog):
                                     await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
                                                                                        role_details=purchase_role_data)
 
+                                    #Update user transaction stats
+                                    stats_manager.update_user_transaction_stats(user_id=ctx.message.author.id,
+                                                                                key='xlmStats',
+                                                                                amount=float(role_rounded),
+                                                                                direction='outgoing',
+                                                                                special='rolePurchase')
 
+                                    # Update bot stats
+                                    stats_manager.update_bot_off_chain_stats(ticker='xlm', tx_amount=1,
+                                                                             xlm_amount=float(role_rounded),
+                                                                             tx_type='rolePurchase')
+                                else:
+                                    print('Purchased role could not be added to the purchased role in the system')
 
                             else:
                                 message = f'Error while trying to deduct funds from user'

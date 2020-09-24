@@ -158,11 +158,7 @@ class AccountManager(object):
                             "received": float(0.0),
                             "sent": float(0.0),
                             "mined": float(0.0),
-                            'spentOnRoles': float(0.0)},
-            "membershipStats": {"rolePurchased": int(0),
-                                'spentOnRolesUsd': float(0.0),
-                                "spentOnRolesXlm": int(0),
-                                "spentOnRolesCl": int(0)}
+                            'spentOnRoles': float(0.0)}
         }
 
         try:
@@ -232,7 +228,6 @@ class AccountManager(object):
                                                            {"_id": 0,
                                                             "balance": 1})
             return stellar_wallet['balance']
-
 
     def get_all(self):
         users = list(self.user_profiles.find({}))
