@@ -247,20 +247,20 @@ class MerchantCommunityOwner(commands.Cog):
             if merchant_manager.remove_monetized_role_from_system(role_id=discord_role.id,
                                                                   community_id=ctx.message.guild.id):
                 await discord_role.delete()
-                title = '__Role Delete System notification__'
-                message = 'Monetized role has been successfully delete from the Merchant System, Community and from, ' \
-                          ' all the users who obtained it.'
+                title = '__System Notification__'
+                message = 'Monetized role has been successfully removed from the Merchant System, Community and from, ' \
+                          ' all the users who has obtained it.'
                 await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                     destination=1)
             else:
-                title = '__Role Delete System error__'
                 message = 'Role could not be removed from the Merchant System. Please contact the team with details.'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
+                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_SYSTEM_ERROR, message=message,
+                                                    color_code=0,
                                                     destination=1)
         else:
-            title = '__Unknown role error__'
-            message = 'This Role could not be deleted as it is not registered in the merchant system'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
+            message = 'This Role could not be removed as it is not registered in the merchant system'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_SYSTEM_ERROR, message=message,
+                                                color_code=0,
                                                 destination=1)
 
     @merchant.command()

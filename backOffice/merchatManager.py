@@ -333,4 +333,3 @@ class MerchantManager:
 
         else:
             return None
-            return None
