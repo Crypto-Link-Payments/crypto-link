@@ -75,22 +75,6 @@ class HotWalletCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=sys_msg_title)
 
-    @hot.group()
-    @commands.check(is_one_of_gods)
-    async def scan(self):
-        print('TODO')
-        pass
-
-    @scan.command()
-    async def memo(self):
-        print('TODO')
-        pass
-
-    @scan.command()
-    async def tx_id(self):
-        print('TODO')
-        pass
-
 
 def setup(bot):
     bot.add_cog(HotWalletCommands(bot))
