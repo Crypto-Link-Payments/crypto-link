@@ -256,9 +256,13 @@ class ConsumerCommands(commands.Cog):
                                 await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
                                                                                    role_details=purchase_role_data)
 
+                                user_stats_update = {
+                                    'xlmStats.spentOnRoles': float(0.0),
+                                    'xlmStats.roleTxCount': int(0),
+                                }
+
                                 await stats_manager.as_update_role_purchase_stats(user_id=ctx.message.author.id,
-                                                                                  key_to_update='xlmStats',
-                                                                                  amount=role_rounded)
+                                                                                  merchant_data=user_stats_update)
 
                                 global_merchant_stats = {
                                     'totalSpentInUsd': convert_to_dollar,
@@ -272,6 +276,7 @@ class ConsumerCommands(commands.Cog):
                                 await stats_manager.update_cl_merchant_stats(ticker='xlm',
                                                                              merchant_stats=global_merchant_stats,
                                                                              ticker_stats=global_ticker_stats)
+
                         else:
                             message = f'Error while trying to deduct funds from user'
                             await customMessages.system_message(ctx=ctx, message=message,
