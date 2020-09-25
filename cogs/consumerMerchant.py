@@ -136,10 +136,9 @@ class ConsumerCommands(commands.Cog):
 
                 await ctx.author.send(embed=role_embed)
         else:
-            title = "__Merchant System Message__"
             message = f"You have not purchased any roles on {ctx.message.guild}, or all of them have expired."
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
+                                                sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
     @membership.command()
     @commands.check(is_public)
@@ -167,10 +166,9 @@ class ConsumerCommands(commands.Cog):
                 await customMessages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
                                                    data=values)
         else:
-            title = "__Merchant System Message__"
             message = f"{ctx.message.guild} does not have any available roles for purchase at this moment."
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
+                                                sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
     @membership.command()
     @commands.bot_has_permissions(manage_roles=True)
@@ -322,16 +320,17 @@ class ConsumerCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
                                                 destination=1)
         elif isinstance(error, commands.BotMissingPermissions):
-            title = 'Bot permission error'
-            message = f'role can not be given as bot does not have sufficient rights please contact guild owner.' \
+            message = f'Role can not be given as bot does not have sufficient rights please contact guild ' \
+                      f'owner {ctx.guild.owner.mention}.' \
                       f' Current missing permissions are:\n' \
                       f'{error.missing_perms}'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_ROLE_ERROR, message=message,
+                                                color_code=1,
                                                 destination=1)
         elif isinstance(error, commands.BadArgument):
-            title = '__System Error__'
             message = f'Either you have provided bad argument or role does not exist int he merchant system'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_ROLE_ERROR, message=message,
+                                                color_code=1,
                                                 destination=0)
 
         else:
