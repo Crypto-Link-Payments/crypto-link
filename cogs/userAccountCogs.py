@@ -61,7 +61,7 @@ class UserAccountCommands(commands.Cog):
         acc_details.add_field(name=f':flag_eu: EUR',
                               value=f'€ {scientific_conversion(in_eur, 4)}')
         acc_details.add_field(name=f':flag_ru:  RUB',
-                              value=f'€ {scientific_conversion(in_rub, 4)}')
+                              value=f'₽ {scientific_conversion(in_rub, 4)}')
         acc_details.add_field(name=f'BTC',
                               value=f'₿ {scientific_conversion(in_btc, 8)}')
         acc_details.add_field(name=f'ETH',
