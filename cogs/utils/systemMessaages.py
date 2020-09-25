@@ -2,7 +2,7 @@ from datetime import datetime
 
 import discord
 from discord import errors
-from discord import Role
+from discord import Role, Embed, Colour
 
 from cogs.utils.monetaryConversions import convert_to_usd
 from utils.tools import Helpers
@@ -331,3 +331,33 @@ class CustomMessages:
                                  inline=False)
 
         await ctx.message.guild.owner.send(embed=incoming_funds)
+
+    @staticmethod
+    async def wallet_overall_stats(ctx, utc_now,transaction_stats:dict):
+        tx_stats = Embed(title='__Global Account Statistics__',
+                         timestamp=utc_now,
+                         colour=Colour.blue())
+        tx_stats.set_thumbnail(url=ctx.author.avatar_url)
+        tx_stats.add_field(name=f':abacus: Outgoing ',
+                           value=transaction_stats["sentTxCount"] + transaction_stats["rolePurchase"],
+                           inline=True)
+        tx_stats.add_field(name=f':abacus: Incoming',
+                           value=transaction_stats["receivedCount"],
+                           inline=True)
+
+        tx_stats.add_field(name=f':incoming_envelope: Sent P2P ',
+                           value=transaction_stats["sentTxCount"],
+                           inline=True)
+
+        tx_stats.add_field(name=f':slight_smile: Sent P2P ',
+                           value=transaction_stats["emojiTxCount"],
+                           inline=True)
+
+        tx_stats.add_field(name=f':cloud_rain: Multi Transactions',
+                           value=transaction_stats["multiTxCount"],
+                           inline=True)
+
+        tx_stats.add_field(name=f':man_juggling: Role Purchases  ',
+                           value=transaction_stats["rolePurchase"],
+                           inline=True)
+        await ctx.author.send(embed=tx_stats)
