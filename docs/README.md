@@ -102,6 +102,10 @@ Once you receive successful report to DM on registration you can proceed with:
 ```text
 !wallet      --> Instructions on all available commands to operate with your personal wallet
 ```
+#### Fast balance check and address
+```text
+!acc
+```
 
 #### :dollar: Making P2P (Peer To Peer) transaction :dollar:
 
