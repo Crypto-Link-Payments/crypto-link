@@ -256,9 +256,10 @@ class ConsumerCommands(commands.Cog):
                                 await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
                                                                                    role_details=purchase_role_data)
 
+                                print('Updating user role stats')
                                 user_stats_update = {
-                                    'xlmStats.spentOnRoles': float(0.0),
-                                    'xlmStats.roleTxCount': int(0),
+                                    'xlmStats.spentOnRoles': float(role_rounded),
+                                    'xlmStats.roleTxCount': int(1),
                                 }
 
                                 await stats_manager.as_update_role_purchase_stats(user_id=ctx.message.author.id,
