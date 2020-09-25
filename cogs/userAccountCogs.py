@@ -84,7 +84,7 @@ class UserAccountCommands(commands.Cog):
         if not account_mng.check_user_existence(user_id=ctx.message.author.id):
             if account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
-                          f' Please use {d["command"]}bal or {d["command"]}wallet.'
+                          f' Please use {d["command"]}acc or {d["command"]}wallet.'
                 await customMessages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
                                                     sys_msg_title=CONST_ACC_REG_STATUS)
             else:
