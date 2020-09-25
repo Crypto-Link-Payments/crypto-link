@@ -292,7 +292,7 @@ class CustomMessages:
         role_embed.add_field(name=f':calendar: Role Purchase Date :calendar: ',
                              value=f'{role_details["roleStart"]}')
         role_embed.add_field(name=':timer: Role Expiration :timer: ',
-                             value=f'{role_details["end"]} (in: {role_details["gap"]})',
+                             value=f'{role_details["roleEnd"]} (in: {role_details["roleLeft"]})',
                              inline=False)
         role_embed.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
                              value=f'{role_details["dollarValue"]} $ \n'
@@ -318,6 +318,7 @@ class CustomMessages:
                                  value=f"Name: {role.name}\n"
                                        f"Id: {role.id}",
                                  inline=False)
+        incoming_funds.set_thumbnail(url=f'{ctx.message.author.avatar_url}')
         incoming_funds.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
                                  value=f'${role_details["dollarValue"]}\n'
                                        f'{role_details["roleRounded"]} {CONST_STELLAR_EMOJI}\n'
@@ -329,10 +330,7 @@ class CustomMessages:
                                  inline=False)
 
         incoming_funds.add_field(name=':clipboard: Role Duration Details :clipboard:  ',
-                                 value=f"weeks: {role_details['weeks']}\n"
-                                       f"days: {role_details['days']},"
-                                       f"hours: {role_details['hours']},"
-                                       f"minutes: {role_details['minutes']}",
+                                 value=f'{role_details["roleDetails"]}',
                                  inline=False)
 
         await ctx.message.guild.owner.send(embed=incoming_funds)
