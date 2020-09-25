@@ -131,23 +131,18 @@ class AccountManager(object):
                          "totalDeposited": float(0.0),
                          "withdrawalsCount": int(0),
                          "totalWithdrawn": float(0.0),
-
-                         'privateTxCount': int(0),
+                         'privateTxSendCount': int(0),
+                         "privateTxReceivedCount": int(0),
                          'privateSent': float(0.0),
                          'privateReceived': float(0.0),
-
                          'publicTxSendCount': int(0),
-                         "publicTxReceivedCount":int(0),
+                         "publicTxReceivedCount": int(0),
                          'publicSent': float(0.0),
                          'publicReceived': float(0.0),
-
-
                          'spentOnRoles': float(0.0),
                          'roleTxCount': int(0),
-
                          'emojiTxCount': int(0),
                          'emojiTotalCount': float(0.0),
-
                          'multiTxCount': int(0),
                          'multiTotalCount': float(0.0)
                          },
@@ -156,23 +151,21 @@ class AccountManager(object):
                             "totalDeposited": float(0.0),
                             "withdrawalsCount": int(0),
                             "totalWithdrawn": float(0.0),
-
-                            'privateTxCount': int(0),
+                            'privateTxSendCount': int(0),
+                            "privateTxReceivedCount": int(0),
                             'privateSent': float(0.0),
                             'privateReceived': float(0.0),
-
-                            'publicTxCount': int(0),
+                            'publicTxSendCount': int(0),
+                            "publicTxReceivedCount": int(0),
                             'publicSent': float(0.0),
                             'publicReceived': float(0.0),
-
                             'spentOnRoles': float(0.0),
                             'roleTxCount': int(0),
-
                             'emojiTxCount': int(0),
                             'emojiTotalCount': float(0.0),
-
                             'multiTxCount': int(0),
-                            'multiTotalCount': float(0.0)}}
+                            'multiTotalCount': float(0.0)
+                            }}
 
         try:
             self.user_profiles.insert_one(new_user)

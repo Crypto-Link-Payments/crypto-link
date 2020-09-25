@@ -121,8 +121,8 @@ class TransactionCommands(commands.Cog):
                             await stats_manager.update_cl_tx_stats(ticker='xlm', ticker_stats=global_ticker_stats)
 
                             sender_stats = {
-                                "xlmStats.publicTxSendCount":1,
-                                "xlmStats.publicSent":final_xlm,
+                                "xlmStats.publicTxSendCount": 1,
+                                "xlmStats.publicSent": final_xlm,
                             }
 
                             recipient_stats = {
