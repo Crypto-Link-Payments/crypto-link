@@ -54,6 +54,7 @@ def filter_transaction(new_transactions: list):
     """
     Filtering transactions
     """
+
     # Building list of deposits if memo included
     tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys()]  # GET Transactions who have memo
 
