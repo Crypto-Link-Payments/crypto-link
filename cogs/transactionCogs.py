@@ -111,18 +111,33 @@ class TransactionCommands(commands.Cog):
                                                                             symbol='xlm', user=ctx.message.author,
                                                                             destination=recipient, message=msg)
 
-                            # Updating bot stats
-                            stats_manager.update_bot_off_chain_stats(ticker='xlm', tx_amount=1,
-                                                                     xlm_amount=final_xlm,
-                                                                     tx_type='public')
+                            global_ticker_stats = {
+                                "totalTx": 1,
+                                'totalMoved': final_xlm,
+                                "totalPublicCount": 1,
+                                "totalPublicMoved": final_xlm,
+                            }
 
-                            # Update discord personal wallet stats
-                            stats_manager.update_user_transaction_stats(user_id=ctx.message.author.id, key='xlmStats',
-                                                                        amount=final_xlm, direction='outgoing',
-                                                                        tx_type='public', )
-                            stats_manager.update_user_transaction_stats(user_id=recipient.id, key='xlmStats',
-                                                                        amount=final_xlm, direction='incoming',
-                                                                        tx_type='public', )
+                            await stats_manager.update_cl_tx_stats(ticker='xlm', ticker_stats=global_ticker_stats)
+
+                            sender_stats = {
+                                "transactionCounter.sentTxCount": 1,
+                                "xlmStats.publicTxCount": 1,
+                                "xlmStats.publicSent": final_xlm,
+                                "xlmStats.sent": final_xlm
+                            }
+
+                            recipient_stats = {
+                                "transactionCounter.receivedCount": 1,
+                                "xlmStats.publicReceived": final_xlm,
+                                "xlmStats.received": final_xlm
+
+                            }
+
+                            # Updates sender and recipient public transaction stats
+                            await stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
+                                                                    tx_stats_data=sender_stats)
+                            await stats_manager.update_usr_tx_stats(user_id=recipient.id, tx_stats_data=recipient_stats)
 
                         else:
                             stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
