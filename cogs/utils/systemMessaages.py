@@ -121,15 +121,15 @@ class CustomMessages:
             in_dollar = convert_to_usd(amount=amount, coin_name='stellar')
 
         if direction == 0:
-            title = 'Outgoing transaction'
+            title = ':outbox_tray: Outgoing transaction :outbox_tray: '
             col = discord.Colour.red()
-            destination_txt = 'Recipient'
+            destination_txt = ':cowboy: Recipient :cowboy: '
             avatar = user.avatar_url
 
         elif direction == 1:
-            title = 'Incoming transaction'
+            title = ':inbox_tray: Incoming transaction :inbox_tray: '
             col = discord.Colour.green()
-            destination_txt = 'Sender:'
+            destination_txt = ':postbox:  Sender :postbox: '
             avatar = destination.avatar_url
 
         tx_report = discord.Embed(title=title,
@@ -139,19 +139,16 @@ class CustomMessages:
         tx_report.add_field(name=destination_txt,
                             value=f'{user}',
                             inline=False)
-        tx_report.add_field(name='Guild Origin',
+        tx_report.add_field(name=':post_office: Guild Origin :post_office: ',
                             value=f'{ctx.message.guild} ({ctx.message.guild.id})',
                             inline=False)
-        tx_report.add_field(name='Subject',
+        tx_report.add_field(name=':love_letter: Note :love_letter: ',
                             value=message)
         tx_report.add_field(name=f'Transaction value',
-                            value=f'{amount_str}',
+                            value=f'{amount_str} (${in_dollar["total"]})',
                             inline=False)
-        tx_report.add_field(name=f'Conversion Rate',
+        tx_report.add_field(name=f':currency_exchange: Conversion Rate :currency_exchange: ',
                             value=f'{in_dollar["usd"]}$/XLM')
-        tx_report.add_field(name=':currency_exchange: Fiat Value :currency_exchange: ',
-                            value=f"{in_dollar['total']}$ ({in_dollar['usd']}$/XLM)",
-                            inline=False)
         tx_report.set_footer(text='Conversion rates provided by CoinGecko',
                              icon_url='https://static.coingecko.com/s/thumbnail-'
                                       '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
