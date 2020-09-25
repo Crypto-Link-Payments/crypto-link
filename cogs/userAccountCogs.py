@@ -115,116 +115,10 @@ class UserAccountCommands(commands.Cog):
                             value=f'{transaction_counter["rolePurchase"]}')
         await ctx.author.send(embed=acc_entry)
 
-        xlm_wallet = Embed(title=f'{CONST_STELLAR_EMOJI} Stellar Lumen Wallet Details {CONST_STELLAR_EMOJI}',
-                           description='Bellow are latest details on your Stellar Lumen Crypto Link wallet',
-                           colour=Colour.light_grey(),
-                           timestamp=utc_now)
-        xlm_wallet.add_field(name='Hot Wallet Address',
-                             value=f'```{hot_wallets["xlm"]}```',
-                             inline=False)
-        xlm_wallet.add_field(name='Deposit Memo',
-                             value=f'{stellar_wallet_data["depositId"]}',
-                             inline=False)
-        xlm_wallet.add_field(name='Stellar Lumen (XLM) Balance',
-                             value=f'{stellar_balance} {CONST_STELLAR_EMOJI}',
-                             inline=False)
-        xlm_wallet.add_field(name='Wallet Conversions',
-                             value=f'$ {in_usd}\n'
-                                   f'€ {in_eur}\n'
-                                   f'₿ {in_btc}\n'
-                                   f'Ξ {in_eth}',
-                             inline=True)
-        xlm_wallet.add_field(name='Market Rate',
-                             value=f'$ {rates["stellar"]["usd"]}\n'
-                                   f'€ {rates["stellar"]["eur"]}\n'
-                                   f'₿ {scientific_conversion(rates["stellar"]["btc"], 8)}\n'
-                                   f'Ξ {rates["stellar"]["eth"]}\n',
-                             inline=True)
-
-        xlm_wallet.add_field(name='Σ Deposits',
-                             value=f'{stellar_stats["depositsCount"]}',
-                             inline=False)
-        xlm_wallet.add_field(name='Σ Total Deposited',
-                             value=f'{stellar_stats["totalDeposited"]}')
-        xlm_wallet.add_field(name='Σ Withdrawals',
-                             value=f'{stellar_stats["withdrawalsCount"]}',
-                             inline=True)
-        xlm_wallet.add_field(name='Σ Withdrawn',
-                             value=f'{stellar_stats["totalWithdrawn"]}',
-                             inline=True)
-        xlm_wallet.add_field(name='Σ XLM Sent',
-                             value=f'{stellar_stats["sent"]}')
-        xlm_wallet.add_field(name='Σ XLM Received',
-                             value=f'{stellar_stats["received"]}')
-        xlm_wallet.add_field(name='Σ Public Tx',
-                             value=f'{stellar_stats["publicTxCount"]}',
-                             inline=True)
-        xlm_wallet.add_field(name='Σ Private Tx',
-                             value=f'{stellar_stats["privateTxCount"]}',
-                             inline=True)
-
-        await ctx.author.send(embed=xlm_wallet)
-
-        token_wallet = Embed(title=':sweat_drops: Crypto Link Token Details :sweat_drops:',
-                             description='Bellow are latest details on your Crypto Link Token wallet',
-                             colour=Colour.blue(),
-                             timestamp=utc_now)
-        token_wallet.add_field(name='Hot Wallet Address',
-                               value=f'```{hot_wallets["xlm"]}```',
-                               inline=False)
-        token_wallet.add_field(name='Deposit Memo',
-                               value=f'{stellar_wallet_data["depositId"]}',
-                               inline=False)
-        token_wallet.add_field(name='Crypto Link Token Balance',
-                               value=f'{stellar_balance} :sweat_drops:',
-                               inline=False)
-
-        token_wallet.add_field(name='Σ Deposits',
-                               value=f'{cl_coin_stats["depositsCount"]}')
-        token_wallet.add_field(name='Σ Total Deposited',
-                               value=f'{cl_coin_stats["totalDeposited"]}')
-        token_wallet.add_field(name='Σ Withdrawals',
-                               value=f'{cl_coin_stats["withdrawalsCount"]}',
-                               inline=True)
-        token_wallet.add_field(name='Σ Withdrawn',
-                               value=f'{cl_coin_stats["totalWithdrawn"]}',
-                               inline=True)
-        token_wallet.add_field(name='Σ :sweat_drops: Sent',
-                               value=f'{cl_coin_stats["sent"]}')
-        token_wallet.add_field(name='Σ :sweat_drops: Received',
-                               value=f'{cl_coin_stats["received"]}')
-        token_wallet.add_field(name=':pick: Mined',
-                               value=f'{cl_coin_stats["mined"]}')
-        token_wallet.add_field(name='Σ Public Tx',
-                               value=f'{cl_coin_stats["publicTxCount"]}',
-                               inline=True)
-        token_wallet.add_field(name='Σ Private Tx',
-                               value=f'{cl_coin_stats["privateTxCount"]}',
-                               inline=True)
-        await ctx.author.send(embed=token_wallet)
-
-        membership_stats = account_details["membershipStats"]
-
-        merchant_info = Embed(title=':convenience_store: Membership Statistics :convenience_store: ',
-                              description='Statistics on Merchant System Usage and Role purchases',
-                              colour=Colour.orange(),
-                              timestamp=utc_now)
-        merchant_info.add_field(name='Roles purchased',
-                                value=f'{membership_stats["rolePurchased"]}',
-                                inline=False)
-        merchant_info.add_field(name='USD Spent',
-                                value=f'${membership_stats["spentOnRolesUsd"]}')
-        merchant_info.add_field(name='CL Token Spent',
-                                value=f'{membership_stats["spentOnRolesCl"]} :sweat_drops:')
-        merchant_info.add_field(name='XLM Spent',
-                                value=f'{membership_stats["spentOnRolesXlm"]} {CONST_STELLAR_EMOJI}')
-        await ctx.author.send(embed=merchant_info)
-
     @commands.command()
     @commands.check(is_public)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def register(self, ctx):
-        print(f'REGISTER: {ctx.author} -> {ctx.message.content}')
         if not account_mng.check_user_existence(user_id=ctx.message.author.id):
             if account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
@@ -245,14 +139,13 @@ class UserAccountCommands(commands.Cog):
     @commands.check(user_has_wallet)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):
-        print(f'WALLET: {ctx.author} -> {ctx.message.content}')
         if ctx.invoked_subcommand is None:
             title = '__Available Wallets__'
             description = "All commands to check wallet details for each available cryptocurrency"
             list_of_values = [{"name": "Quick balance check", "value": f"{d['command']}bal"},
                               {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet deposit"},
                               {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet stats"},
-                              {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet balance"}]
+                              {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet xlm"}]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                destination=1)
@@ -261,39 +154,13 @@ class UserAccountCommands(commands.Cog):
     async def stats(self, ctx):
         utc_now = datetime.utcnow()
         account_details = account_mng.get_account_details(discord_id=ctx.message.author.id)
-        from pprint import pprint
-        pprint(account_details)
         stellar_stats = account_details["xlmStats"]
-        token_stats = account_details["clCoinStats"]
-        transaction_stats = account_details["transactionCounter"]
 
-        sum_sent = transaction_stats["sentTxCount"] + transaction_stats["multiTxCount"] + transaction_stats[
-            "emojiTxCount"] + transaction_stats["rolePurchase"]
-
-        acc_entry = Embed(title='__Account Statistics__',
-                          colour=Colour.dark_blue(),
-                          timestamp=utc_now)
-        acc_entry.set_thumbnail(url=ctx.author.avatar_url)
-        acc_entry.add_field(name=f'Account Owner',
-                            value=f'{ctx.message.author} (ID: {ctx.message.author.id})',
-                            inline=False)
-        acc_entry.add_field(name=f':abacus: Sent ',
-                            value=f'{sum_sent}')
-        acc_entry.add_field(name=':outbox_tray:  Tx',
-                            value=f'{transaction_stats["sentTxCount"]}')
-        acc_entry.add_field(name=':inbox_tray:  Tx',
-                            value=f'{transaction_stats["receivedCount"]}')
-        acc_entry.add_field(name=':cloud_rain: Multi Tx',
-                            value=f'{transaction_stats["multiTxCount"]}')
-        acc_entry.add_field(name=':slight_smile: Tx',
-                            value=f'{transaction_stats["emojiTxCount"]}')
-        acc_entry.add_field(name=':man_juggling:  Purchase Tx',
-                            value=f'{transaction_stats["rolePurchase"]}')
-        await ctx.author.send(embed=acc_entry)
+        # Send XLM Wallet stats
+        await customMessages.stellar_wallet_overall(ctx=ctx, utc_now=utc_now, stellar_stats=stellar_stats)
 
     @wallet.command()
     async def deposit(self, ctx):
-        print(f'WALLET DEPOSIT: {ctx.author} -> {ctx.message.content}')
         user_profile = account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
