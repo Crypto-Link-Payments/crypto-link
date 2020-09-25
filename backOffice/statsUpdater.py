@@ -49,6 +49,15 @@ class StatsManager(object):
                                               {f"{CONST_INC}": merchant_stats,
                                                f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
+    async def update_cl_tx_stats(self, ticker: str, ticker_stats: dict):
+        """
+        Updating crypto link transaction stats
+        """
+        await self.as_cl_off_chain.update_one({"ticker": ticker},
+                                              {f"{CONST_INC}": ticker_stats,
+                                               f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+
+
     def update_bot_off_chain_stats(self, ticker: str, tx_amount: int, xlm_amount: float, tx_type: str):
         """
         update bot stats based on transaction type in the system
