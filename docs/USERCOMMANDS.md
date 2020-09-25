@@ -26,6 +26,12 @@ or
 !acc
 ```
 
+#### Wallet statistics
+
+```text
+!wallet stats
+```
+
 #### Check balance of wallet (detailed)
 ```text
 !wallet balance
