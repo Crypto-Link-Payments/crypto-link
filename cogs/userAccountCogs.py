@@ -117,7 +117,6 @@ class UserAccountCommands(commands.Cog):
         utc_now = datetime.utcnow()
         account_details = account_mng.get_account_details(discord_id=ctx.message.author.id)
         stellar_stats = account_details["xlmStats"]
-
         # Send XLM Wallet stats
         await customMessages.stellar_wallet_overall(ctx=ctx, utc_now=utc_now, stellar_stats=stellar_stats)
 
