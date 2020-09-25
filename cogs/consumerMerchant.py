@@ -27,6 +27,7 @@ notf_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_MERCHANT_ROLE_ERROR = "__Merchant System Role Error__"
+CONST_MERCHANT_PURCHASE_ERROR = ":warning: __Merchant System Purchase Error__:warning: "
 
 
 class ConsumerCommands(commands.Cog):
@@ -197,135 +198,120 @@ class ConsumerCommands(commands.Cog):
                     balance = account_mng.get_balance_based_on_ticker(user_id=int(ctx.message.author.id),
                                                                       ticker=ticker)
                     # Check if user has sufficient balance
-                    if balance >= crypto_price_atomic:
+                    if balance >= crypto_price_atomic and merchant_manager.modify_funds_in_community_merchant_wallet(
+                            community_id=int(ctx.message.guild.id),
+                            amount=int(crypto_price_atomic),
+                            direction=0,
+                            wallet_tick=ticker):
+
                         # Update the community wallet
-                        if merchant_manager.modify_funds_in_community_merchant_wallet(
-                                community_id=int(ctx.message.guild.id),
-                                amount=int(crypto_price_atomic),
-                                direction=0,
-                                wallet_tick=ticker):
+                        if account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
+                                                                  ticker=ticker,
+                                                                  direction=1,
+                                                                  amount=crypto_price_atomic):
 
-                            if account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
-                                                                      ticker=ticker,
-                                                                      direction=1,
-                                                                      amount=crypto_price_atomic):
+                            # Assign the role to the user
+                            await ctx.message.author.add_roles(role,
+                                                               reason='you just got yourself a role')
 
-                                # Assign the role to the user
-                                await ctx.message.author.add_roles(role,
-                                                                   reason='you just got yourself a role')
+                            # Current time
+                            start = datetime.utcnow()
 
-                                emoji = self.get_emoji(ticker=ticker)
+                            # get the timedelta from the role description
+                            td = timedelta(weeks=role_details['weeks'],
+                                           days=role_details['days'],
+                                           hours=role_details['hours'],
+                                           minutes=role_details['minutes'])
 
-                                # Current time
-                                start = datetime.utcnow()
+                            # calculate future date
+                            end = start + td
+                            gap = end - start
+                            unix_today = (int(time.mktime(start.timetuple())))
+                            unix_future = (int(time.mktime(end.timetuple())))
 
-                                # get the timedelta from the role description
-                                td = timedelta(weeks=role_details['weeks'],
-                                               days=role_details['days'],
-                                               hours=role_details['hours'],
-                                               minutes=role_details['minutes'])
+                            # make data for store in database
+                            purchase_data = {
+                                "userId": int(ctx.message.author.id),
+                                "userName": str(ctx.message.author),
+                                "roleId": int(role.id),
+                                "roleName": f'{role.name}',
+                                "start": unix_today,
+                                "end": unix_future,
+                                "currency": ticker,
+                                "atomicValue": crypto_price_atomic,
+                                "pennies": int(role_details["pennyValues"]),
+                                "communityName": f'{ctx.message.guild}',
+                                "communityId": int(ctx.message.guild.id)}
 
-                                # calculate future date
-                                end = start + td
-                                gap = end - start
-                                unix_today = (int(time.mktime(start.timetuple())))
-                                unix_future = (int(time.mktime(end.timetuple())))
+                            if merchant_manager.add_user_to_payed_roles(purchase_data=purchase_data):
+                                purchase_role_data = {
+                                    "roleStart": f"{start} UTC",
+                                    "roleEnd": end,
+                                    "roleLeft": gap,
+                                    "dollarValue": convert_to_dollar,
+                                    "roleRounded": role_rounded,
+                                    "usdRate": coin_usd_price,
+                                    "roleDetails": f"weeks: {role_details['weeks']}\n"
+                                                   f"days: {role_details['days']}\n"
+                                                   f"hours: {role_details['hours']}\n"
+                                                   f"minutes: {role_details['minutes']}"
+                                }
 
-                                # make data for store in database
-                                purchase_data = {
-                                    "userId": int(ctx.message.author.id),
-                                    "userName": str(ctx.message.author),
-                                    "roleId": int(role.id),
-                                    "roleName": f'{role.name}',
-                                    "start": unix_today,
-                                    "end": unix_future,
-                                    "currency": ticker,
-                                    "atomicValue": crypto_price_atomic,
-                                    "pennies": int(role_details["pennyValues"]),
-                                    "communityName": f'{ctx.message.guild}',
-                                    "communityId": int(ctx.message.guild.id)}
+                                # Send user payment slip info on purchased role
+                                await customMessages.user_role_purchase_msg(ctx=ctx, role=role,
+                                                                            role_details=purchase_role_data)
 
-                                if merchant_manager.add_user_to_payed_roles(purchase_data=purchase_data):
-                                    purchase_role_data = {
-                                        "roleStart": f"{start} UTC",
-                                        "roleEnd": end,
-                                        "roleLeft": gap,
-                                        "dollarValue": convert_to_dollar,
-                                        "roleRounded": role_rounded,
-                                        "usdRate": coin_usd_price,
-                                        "roleDetails": f"weeks: {role_details['weeks']}\n"
-                                                       f"days: {role_details['days']}\n"
-                                                       f"hours: {role_details['hours']}\n"
-                                                       f"minutes: {role_details['minutes']}"
-                                    }
+                                await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
+                                                                                   role_details=purchase_role_data)
 
-                                    # Send user payment slip info on purchased role
-                                    await customMessages.user_role_purchase_msg(ctx=ctx, role=role,
-                                                                                role_details=purchase_role_data)
+                                await stats_manager.as_update_role_purchase_stats(user_id=ctx.message.author.id,
+                                                                                  key_to_update='xlmStats',
+                                                                                  amount=role_rounded)
 
-                                    await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
-                                                                                       role_details=purchase_role_data)
+                                global_merchant_stats = {
+                                    'totalSpentInUsd': convert_to_dollar,
+                                    'totalSpentInXlm': role_rounded
+                                }
 
-                                    await stats_manager.as_update_role_purchase_stats(user_id=ctx.message.author.id,
-                                                                                      key_to_update='xlmStats',
-                                                                                      amount=role_rounded)
-
-                                    global_merchant_stats = {
-                                        'totalSpentInUsd': convert_to_dollar,
-                                        'totalSpentInXlm': role_rounded
-                                    }
-
-                                    global_ticker_stats = {
-                                        "rolePurchaseTxCount": 1,
-                                        "roleMoved": role_rounded
-                                    }
-                                    await stats_manager.update_cl_merchant_stats(ticker='xlm',
-                                                                                 merchant_stats=global_merchant_stats,
-                                                                                 ticker_stats=global_ticker_stats)
-
-                                else:
-                                    print('Purchased role could not be added to the purchased role in the system')
-
-                            else:
-                                message = f'Error while trying to deduct funds from user'
-                                title = '__User wallet update error__'
-                                await customMessages.system_message(ctx=ctx, message=message,
-                                                                    sys_msg_title=title,
-                                                                    color_code=1, destination=1)
+                                global_ticker_stats = {
+                                    "rolePurchaseTxCount": 1,
+                                    "roleMoved": role_rounded
+                                }
+                                await stats_manager.update_cl_merchant_stats(ticker='xlm',
+                                                                             merchant_stats=global_merchant_stats,
+                                                                             ticker_stats=global_ticker_stats)
                         else:
-                            message = f'Error while trying to update fund in community Merchant wallet'
-                            title = '__Merchant wallet update error __'
+                            message = f'Error while trying to deduct funds from user'
                             await customMessages.system_message(ctx=ctx, message=message,
-                                                                sys_msg_title=title,
+                                                                sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
                                                                 color_code=1, destination=1)
                     else:
-                        message = f'You have insufficient balance in your wallet to purchase this ' \
-                                  f'role. Please' \
-                                  f'top-up your account with desired currency.'
-                        title = '__Insufficient balance __'
-                        await customMessages.system_message(ctx=ctx, message=message, sys_msg_title=title,
+                        message = f'You have insufficient balance in your wallet to purchase {role.mention}. Your' \
+                                  f' current balance is {balance / 10000000}{CONST_STELLAR_EMOJI} and role value ' \
+                                  f'according to current rate is {role_value_crypto}{CONST_STELLAR_EMOJI}.'
+                        await customMessages.system_message(ctx=ctx, message=message,
+                                                            sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
                                                             color_code=1, destination=0)
 
                 else:
                     message = f'You have already obtained role with name ***{role}***. In order ' \
                               f'to extend the role you will need to first wait that role expires.'
                     await customMessages.system_message(ctx=ctx, message=message,
-                                                        sys_msg_title=CONST_MERCHANT_ROLE_ERROR,
+                                                        sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
                                                         color_code=1, destination=0)
             else:
                 message = f'Role {role} is either deactivated at this moment or has not bee monetized ' \
-                          f'on {ctx.message.guild} and can not be obtained.  Please contact the owner of the' \
-                          f' community or use ***{d["command"]}membership roles*** to ' \
-                          f'familiarize yourself with all available roles and their status'
+                          f'on {ctx.message.guild}. Please contact {ctx.guild.owner} or use ' \
+                          f' ***{d["command"]}membership roles*** to familiarize yourself with all available roles and ' \
+                          f'their status'
                 await customMessages.system_message(ctx=ctx, message=message,
-                                                    sys_msg_title=CONST_MERCHANT_ROLE_ERROR,
+                                                    sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
                                                     color_code=1,
                                                     destination=1)
         else:
-            msg_title = '__Role creation error___'
-            message = f'Ticker you have provided ***{ticker}*** includes special characters which are not allowed.' \
-                      f' Please repeat the process!'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
+            message = f'You can not purchase {role} with {ticker} as it is not integrated into the {self.bot.user}.'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR, message=message,
+                                                color_code=1,
                                                 destination=1)
 
     @subscribe.error
