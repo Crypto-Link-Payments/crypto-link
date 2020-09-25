@@ -167,13 +167,11 @@ class StatsManager(object):
         self.user_profiles.find_one_and_update({"userId": user_id}, {f"{CONST_INC}": data})
 
     async def update_usr_tx_stats(self,user_id: int, tx_stats_data: dict):
-        self.as_user_profiles.update_one({"userId": user_id},
+        await self.as_user_profiles.update_one({"userId": user_id},
                                          {f"{CONST_INC}": tx_stats_data,
                                           f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
-    async def as_update_role_purchase_stats(self, user_id: int, key_to_update: str, amount: float):
-        to_update = dict()
-        to_update["transactionCounter.rolePurchase"] = 1
-        to_update[f"{key_to_update}.spentOnRoles"] = amount
+    async def as_update_role_purchase_stats(self, user_id: int, merchant_data:dict):
         await self.as_user_profiles.update_one({"userId": user_id},
-                                               {f"$inc": to_update})
+                                         {f"{CONST_INC}": merchant_data,
+                                          f"{CONST_CURRENT_DATE}": {"lastModified": True}})
