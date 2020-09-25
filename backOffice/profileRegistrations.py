@@ -136,9 +136,11 @@ class AccountManager(object):
                          'privateSent': float(0.0),
                          'privateReceived': float(0.0),
 
-                         'publicTxCount': int(0),
+                         'publicTxSendCount': int(0),
+                         "publicTxReceivedCount":int(0),
                          'publicSent': float(0.0),
                          'publicReceived': float(0.0),
+
 
                          'spentOnRoles': float(0.0),
                          'roleTxCount': int(0),
