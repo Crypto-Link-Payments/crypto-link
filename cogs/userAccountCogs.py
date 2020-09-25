@@ -29,38 +29,6 @@ class UserAccountCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    @commands.check(user_has_wallet)
-    async def bal(self, ctx):
-        print(f'BAL: {ctx.author}-> {ctx.message.content}')
-
-        values = account_mng.get_wallet_balances_based_on_discord_id(discord_id=ctx.message.author.id)
-        if values:
-            stellar_balance = get_normal(value=str(values['stellar']['balance']),
-                                         decimal_point=get_decimal_point('xlm'))
-            stellar_to_usd = convert_to_usd(amount=float(stellar_balance), coin_name='stellar')
-            balance_embed = Embed(title=f"Account details for  {ctx.message.author}",
-                                  description='Bellow is the latest data on your Discord Wallet balance',
-                                  colour=Colour.green())
-
-            balance_embed.add_field(
-                name=f"{CONST_STELLAR_EMOJI} Stellar Balance {CONST_STELLAR_EMOJI}",
-                value=f'__Crypto__ {stellar_balance} {CONST_STELLAR_EMOJI}\n'
-                      f'__Fiat__: ${round(stellar_to_usd["total"], 4)} ({round(stellar_to_usd["usd"], 4)}$/XLM)\n'
-                      f'web: https://www.stellar.org/\n'
-                      f'cmc: https://coinmarketcap.com/currencies/stellar/',
-                inline=False)
-
-            balance_embed.set_footer(text='Conversion rates provided by CoinGecko')
-            balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
-
-            await ctx.author.send(embed=balance_embed)
-        else:
-            title = '__Account Balance Status__'
-            message = f'Balance could not be checked at this moment. Please try again later.'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
-
     @commands.group()
     @commands.check(user_has_wallet)
     async def acc(self, ctx):
@@ -100,6 +68,13 @@ class UserAccountCommands(commands.Cog):
                               value=f'Ξ {scientific_conversion(in_eth, 8)}')
         acc_details.add_field(name=f'LTC',
                               value=f'Ł {scientific_conversion(in_ltc, 8)}')
+
+        acc_details.add_field(name=f'More On Stellar Lumen (XLM)',
+                              value=f'[Stellar](https://www.stellar.org/)\n'
+                                    f'[Stellar Foundation](https://www.stellar.org/foundation)\n'
+                                    f'[Stellar Lumens](https://www.stellar.org/lumens)\n'
+                                    f'[CMC](https://coinmarketcap.com/currencies/stellar/)')
+        acc_details.set_footer(text='Conversion rates provided by CoinGecko')
         await ctx.author.send(embed=acc_details)
 
     @commands.command()
@@ -222,8 +197,8 @@ class UserAccountCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=title)
 
-    @bal.error
-    async def quick_bal_check_error(self, ctx, error):
+    @acc.error
+    async def quick_acc_check_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__Balance check error__'
             message = f'In order to check balance you need to be registered into the system'
