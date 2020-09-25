@@ -298,7 +298,8 @@ class CustomMessages:
                              inline=False)
         try:
             await ctx.author.send(embed=role_embed)
-        except Exception:
+        except Exception as e:
+            print(e)
             await ctx.channel.send(embed=role_embed, delete_after=10)
 
     @staticmethod
@@ -333,7 +334,7 @@ class CustomMessages:
         await ctx.message.guild.owner.send(embed=incoming_funds)
 
     @staticmethod
-    async def wallet_overall_stats(ctx, utc_now,transaction_stats:dict):
+    async def wallet_overall_stats(ctx, utc_now, transaction_stats: dict):
         tx_stats = Embed(title='__Global Account Statistics__',
                          timestamp=utc_now,
                          colour=Colour.blue())
@@ -361,3 +362,32 @@ class CustomMessages:
                            value=transaction_stats["rolePurchase"],
                            inline=True)
         await ctx.author.send(embed=tx_stats)
+
+    @staticmethod
+    async def stellar_wallet_overall(ctx, utc_now, stellar_stats: dict):
+        xlm_wallet = Embed(title=f'{CONST_STELLAR_EMOJI} Stellar Account Statistics {CONST_STELLAR_EMOJI}',
+                           description=f':bar_chart: ***__Statistical Data on Stellar Lumen Discord Wallet__** '
+                                       f':bar_chart:',
+                           colour=Colour.light_grey(),
+                           timestamp=utc_now)
+        xlm_wallet.set_thumbnail(url=ctx.author.avatar_url)
+        xlm_wallet.add_field(name=f':inbox_tray: Total Deposits {CONST_STELLAR_EMOJI}',
+                             value=f'Deposited ***{stellar_stats["depositsCount"]}*** with total '
+                                   f'***{stellar_stats["totalDeposited"]}*** {CONST_STELLAR_EMOJI}')
+        xlm_wallet.add_field(name=f':outbox_tray: Total Withdrawals {CONST_STELLAR_EMOJI}',
+                             value=f'Withdrawn ***{stellar_stats["withdrawalsCount"]}*** withdrawals with '
+                                   f'total ***{stellar_stats["totalWithdrawn"]}*** {CONST_STELLAR_EMOJI}')
+        xlm_wallet.add_field(name=f':family_man_woman_boy: Public Tx',
+                             value=f':incoming_envelope:{stellar_stats["publicTxSendCount"]}\n'
+                                   f':money_with_wings:  {stellar_stats["publicSent"]}\n'
+                                   f':envelope_with_arrow:{stellar_stats["publicTxReceivedCount"]}\n'
+                                   f':money_mouth: {stellar_stats["publicReceived"]} ')
+        xlm_wallet.add_field(name=f':detective: Private Tx',
+                             value=f':incoming_envelope:{stellar_stats["privateTxSendCount"]}\n'
+                                   f':money_with_wings: {stellar_stats["privateSent"]}\n'
+                                   f':envelope_with_arrow: {stellar_stats["privateTxReceivedCount"]}\n'
+                                   f':money_mouth: {stellar_stats["privateReceived"]}')
+        xlm_wallet.add_field(name=f'Merchant Role purchases',
+                             value=f':man_juggling: {stellar_stats["roleTxCount"]}\n'
+                                   f':money_with_wings: {stellar_stats["spentOnRoles"]}{CONST_STELLAR_EMOJI}\n')
+        await ctx.author.send(embed=xlm_wallet)
