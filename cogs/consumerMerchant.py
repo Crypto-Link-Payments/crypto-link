@@ -254,8 +254,8 @@ class ConsumerCommands(commands.Cog):
                                         "roleRounded": role_rounded,
                                         "usdRate": coin_usd_price,
                                         "roleDetails": f"weeks: {role_details['weeks']}\n"
-                                                       f"days: {role_details['days']},"
-                                                       f"hours: {role_details['hours']},"
+                                                       f"days: {role_details['days']}\n"
+                                                       f"hours: {role_details['hours']}\n"
                                                        f"minutes: {role_details['minutes']}"
                                     }
 
@@ -266,17 +266,23 @@ class ConsumerCommands(commands.Cog):
                                     await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
                                                                                        role_details=purchase_role_data)
 
-                                    #Update user transaction stats
-                                    stats_manager.update_user_transaction_stats(user_id=ctx.message.author.id,
-                                                                                key='xlmStats',
-                                                                                amount=float(role_rounded),
-                                                                                direction='outgoing',
-                                                                                special='rolePurchase')
+                                    await stats_manager.as_update_role_purchase_stats(user_id=ctx.message.author.id,
+                                                                                      key_to_update='xlmStats',
+                                                                                      amount=role_rounded)
 
-                                    # Update bot stats
-                                    stats_manager.update_bot_off_chain_stats(ticker='xlm', tx_amount=1,
-                                                                             xlm_amount=float(role_rounded),
-                                                                             tx_type='rolePurchase')
+                                    global_merchant_stats = {
+                                        'totalSpentInUsd': convert_to_dollar,
+                                        'totalSpentInXlm': role_rounded
+                                    }
+
+                                    global_ticker_stats = {
+                                        "rolePurchaseTxCount": 1,
+                                        "roleMoved": role_rounded
+                                    }
+                                    await stats_manager.update_cl_merchant_stats(ticker='xlm',
+                                                                                 merchant_stats=global_merchant_stats,
+                                                                                 ticker_stats=global_ticker_stats)
+
                                 else:
                                     print('Purchased role could not be added to the purchased role in the system')
 
