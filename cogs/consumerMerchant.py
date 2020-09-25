@@ -13,6 +13,7 @@ from backOffice.profileRegistrations import AccountManager
 from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 from backOffice.statsUpdater import StatsManager
+from cogs.utils.monetaryConversions import get_decimal_point
 from utils import numbers
 from utils.tools import Helpers
 
@@ -23,7 +24,7 @@ gecko = CoinGeckoAPI()
 merchant_manager = MerchantManager()
 stats_manager = StatsManager()
 d = helper.read_json_file(file_name='botSetup.json')
-notf_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
+sys_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_MERCHANT_ROLE_ERROR = "__Merchant System Role Error__"
@@ -33,13 +34,6 @@ CONST_MERCHANT_PURCHASE_ERROR = ":warning: __Merchant System Purchase Error__:wa
 class ConsumerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    @staticmethod
-    def get_round(ticker):
-        if ticker == 'xlm':
-            return 7
-        elif ticker == 'xmr':
-            return 12
 
     @staticmethod
     def get_emoji(ticker):
@@ -191,7 +185,7 @@ class ConsumerCommands(commands.Cog):
                     convert_to_dollar = role_details["pennyValues"] / 100  # Convert to $
                     coin_usd_price = self.get_coin_usd_value(ticker)
                     role_value_crypto = float(convert_to_dollar / coin_usd_price)
-                    role_rounded = round(role_value_crypto, self.get_round(ticker=ticker))
+                    role_rounded = round(role_value_crypto, get_decimal_point(symbol=ticker))
                     crypto_price_atomic = self.make_atomic(amount=role_value_crypto, coin_name=ticker)
                     balance = account_mng.get_balance_based_on_ticker(user_id=int(ctx.message.author.id),
                                                                       ticker=ticker)
@@ -300,8 +294,8 @@ class ConsumerCommands(commands.Cog):
             else:
                 message = f'Role {role} is either deactivated at this moment or has not bee monetized ' \
                           f'on {ctx.message.guild}. Please contact {ctx.guild.owner} or use ' \
-                          f' ***{d["command"]}membership roles*** to familiarize yourself with all available roles and ' \
-                          f'their status'
+                          f' ***{d["command"]}membership roles*** to familiarize yourself with all available ' \
+                          f'roles and their status'
                 await customMessages.system_message(ctx=ctx, message=message,
                                                     sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
                                                     color_code=1,
@@ -339,10 +333,9 @@ class ConsumerCommands(commands.Cog):
     @membership.error
     async def membership_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            title = '__Membership and Merchant system error!__'
             message = 'Community has not activated merchant service or you have used command over the DM with the bot.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=title)
+                                                sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
 
 def setup(bot):
