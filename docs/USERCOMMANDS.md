@@ -23,7 +23,7 @@ or
 
 #### Quick balance check 
 ```text
-!bal
+!acc
 ```
 
 #### Check balance of wallet (detailed)
