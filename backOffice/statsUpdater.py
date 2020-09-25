@@ -57,7 +57,6 @@ class StatsManager(object):
                                               {f"{CONST_INC}": ticker_stats,
                                                f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
-
     def update_bot_off_chain_stats(self, ticker: str, tx_amount: int, xlm_amount: float, tx_type: str):
         """
         update bot stats based on transaction type in the system
@@ -91,14 +90,6 @@ class StatsManager(object):
                                                                    "totalMoved": xlm_amount,
                                                                    "multiTxCount": 1,
                                                                    "multiTxMoved": xlm_amount},
-                                                  f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-
-        elif tx_type == 'rolePurchase':
-            self.off_chain_activities.update_one({"ticker": f"{ticker}"},
-                                                 {f"{CONST_INC}": {"totalTx": int(tx_amount),
-                                                                   "totalMoved": xlm_amount,
-                                                                   "rolePurchaseTxCount": 1,
-                                                                   "roleMoved": xlm_amount},
                                                   f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
     def update_user_deposit_stats(self, user_id: int, amount: float, key: str):
@@ -174,6 +165,11 @@ class StatsManager(object):
             data[f"clCoinStats.mined"] = mined
 
         self.user_profiles.find_one_and_update({"userId": user_id}, {f"{CONST_INC}": data})
+
+    async def update_usr_tx_stats(self,user_id: int, tx_stats_data: dict):
+        self.as_user_profiles.update_one({"userId": user_id},
+                                         {f"{CONST_INC}": tx_stats_data,
+                                          f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
     async def as_update_role_purchase_stats(self, user_id: int, key_to_update: str, amount: float):
         to_update = dict()
