@@ -5,7 +5,7 @@ Script to handle statistics of the bot
 import os
 import sys
 
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 import motor.motor_asyncio
 
 from utils.tools import Helpers
@@ -166,12 +166,12 @@ class StatsManager(object):
 
         self.user_profiles.find_one_and_update({"userId": user_id}, {f"{CONST_INC}": data})
 
-    async def update_usr_tx_stats(self,user_id: int, tx_stats_data: dict):
+    async def update_usr_tx_stats(self, user_id: int, tx_stats_data: dict):
         await self.as_user_profiles.update_one({"userId": user_id},
-                                         {f"{CONST_INC}": tx_stats_data,
-                                          f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+                                               {f"{CONST_INC}": tx_stats_data,
+                                                f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
-    async def as_update_role_purchase_stats(self, user_id: int, merchant_data:dict):
+    async def as_update_role_purchase_stats(self, user_id: int, merchant_data: dict):
         await self.as_user_profiles.update_one({"userId": user_id},
-                                         {f"{CONST_INC}": merchant_data,
-                                          f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+                                               {f"{CONST_INC}": merchant_data,
+                                                f"{CONST_CURRENT_DATE}": {"lastModified": True}})
