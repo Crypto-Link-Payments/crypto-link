@@ -64,7 +64,6 @@ class HelpCommands(commands.Cog):
         about.add_field(name='Terms of service',
                         value='blablabla',
                         inline=False)
-        # TODO write up still
         await ctx.author.send(embed=about)
 
     @help.command()
