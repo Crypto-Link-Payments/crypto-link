@@ -169,6 +169,8 @@ class AutoFunctions(commands.Cog):
         print(Fore.LIGHTGREEN_EX + f'Member reach: {reach} members')
         print(Fore.LIGHTYELLOW_EX + '===================================')
 
+        # TODO register guild into the system automatically on join for stats
+
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         """

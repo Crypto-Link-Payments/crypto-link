@@ -7,13 +7,13 @@ from discord import ChannelType
 from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
 from utils.tools import Helpers
-from backOffice.guildServicesManager import GuildProfileManagement
+from backOffice.guildServicesManager import GuildProfileManager
 
 helper = Helpers()
 d = helper.read_json_file(file_name='botSetup.json')
 merchant_manager = MerchantManager()
 account_mng = AccountManager()
-guild_manager = GuildProfileManagement()
+guild_manager = GuildProfileManager()
 
 
 def is_animus(ctx):
