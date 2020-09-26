@@ -148,7 +148,19 @@ class GuildOwnerCommands(commands.Cog):
 
     @explorer.command()
     async def remove(self, ctx):
-        pass
+        data_to_update = {
+            "explorerSettings.channelId": int(0)
+        }
+
+        if await guild_manager.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
+            await customMessages.system_message(ctx=ctx, color_code=0,
+                                                message=f'You have successfully turned OFF Crypto Link Network Feed',
+                                                destination=ctx.message.author, sys_msg_title='__System Message__')
+        else:
+            await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue and Crypto Link'
+                                                                               ' Network Feed could not be turned OFF.'
+                                                                               'Please try again later',
+                                                destination=ctx.message.channel, sys_msg_title='__System error__')
 
     @owner.group()
     async def fees(self, ctx):
