@@ -116,15 +116,25 @@ class GuildOwnerCommands(commands.Cog):
         await ctx.author.send(embed=service_info)
 
     @owner.group()
-    async def explorer(self):
-        pass
+    async def explorer(self, ctx):
+        if ctx.invoked_subcommand is None:
+            title = '__Crypto Link Explorer Manual__'
+            description = "All available commands to operate with guild system"
+            list_of_values = [
+                {"name": "Apply Channel for CL feed",
+                 "value": f"{d['command']}owner explorer apply <#discord.Channel>"},
+                {"name": "Remove Channel for CL feed", "value": f"{d['command']}owner explorer remove"}
+            ]
+
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                               destination=1)
 
     @explorer.command()
     async def apply(self, ctx, chn: TextChannel):
         pass
 
     @explorer.command()
-    async def remove(self, ctx, chn: TextChannel):
+    async def remove(self, ctx):
         pass
 
     @owner.group()
