@@ -2,14 +2,14 @@ from datetime import datetime
 
 from discord.ext import commands
 from discord import TextChannel, Embed, Colour
-from backOffice.guildServicesManager import GuildProfileManagement
+from backOffice.guildServicesManager import GuildProfileManager
 
 from cogs.utils.customCogChecks import is_owner, is_public, guild_has_stats
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
 helper = Helpers()
-guild_manager = GuildProfileManagement()
+guild_manager = GuildProfileManager()
 customMessages = CustomMessages()
 d = helper.read_json_file(file_name='botSetup.json')
 
