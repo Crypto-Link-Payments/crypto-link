@@ -40,7 +40,8 @@ class BotStructureCheck(object):
                                      "StellarWithdrawals",
                                      "StellarUnprocessedDeposits",
                                      "StellarUnprocessedWithdrawals",
-                                     "StellarCorporateWallets"]
+                                     "StellarCorporateWallets",
+                                     "guildServices"]
 
     def check_collections(self):
         """
