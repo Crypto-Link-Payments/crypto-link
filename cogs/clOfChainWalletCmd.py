@@ -3,6 +3,7 @@
 import time
 from datetime import datetime
 
+from discord import Embed
 import discord
 from discord.ext import commands
 
@@ -161,27 +162,38 @@ class BotWalletCommands(commands.Cog):
         """
         Statistical information on Crypto Link system
         """
+        #TODO fix number conversions to string
         print(f'CL STATS  : {ctx.author} -> {ctx.message.content}')
-        data = bot_stats.get_all_stats()
-        stats_embed = discord.Embed(title='__Global Crypto Link Stats__',
-                                    colour=discord.Color.green(),
-                                    timestamp=datetime.utcnow())
-        stats_embed.add_field(name='On-Chain Stellar Stats',
-                              value=f"Deposits:{data['xlm']['onChain']['depositCount']}\n"
-                                    f"Total dep. amount: {int(data['xlm']['onChain']['depositAmount']) / 10000000} "
-                                    f"<:stelaremoji:684676687425961994>\n"
-                                    f"=========================\n"
-                                    f"Withdrawals: {data['xlm']['onChain']['withdrawalCount']}\n"
-                                    f"Total with. amount: {int(data['xlm']['onChain']['withdrawalAmount']) / 10000000} "
-                                    f"<:stelaremoji:684676687425961994>",
-                              inline=False)
-        stats_embed.add_field(name='Off-Chain Stellar Stats',
-                              value=f"P2P Tx Count:{data['xlm']['ofChain']['transactionCount']}\n"
-                                    f"Total P2P Transferred: {int(data['xlm']['ofChain']['offChainMoved']) / 10000000}"
-                                    f" <:stelaremoji:684676687425961994>",
-                              inline=False)
+        cl_data = bot_stats.get_all_stats()
+        cl_off_chain = cl_data['xlm']['ofChain']
+        cl_on_chain = cl_data['xlm']['onChain']
 
-        await ctx.author.send(embed=stats_embed)
+        off_stats = Embed(title='__Crypto Link Off chain__',
+                          colour=discord.Colour.greyple())
+        off_stats.add_field(name='Total XLM moved',
+                            value=cl_off_chain["totalTx"] + ' ' + cl_off_chain["totalMoved"])
+        off_stats.add_field(name='Public',
+                            value=cl_off_chain["totalPublicCount"] + ' ' + cl_off_chain["totalPublicMoved"])
+        off_stats.add_field(name='Private',
+                            value=cl_off_chain["totalPrivateCount"] + ' ' + cl_off_chain["totalPrivateMoved"])
+        off_stats.add_field(name='Role Statistics',
+                            value=cl_off_chain["rolePurchaseTxCount"] + ' ' + cl_off_chain["roleMoved"])
+
+        await ctx.author.send(embed=off_stats)
+
+        on_stats = Embed(title='__Crypto Link On chain__',
+                         colour=discord.Colour.greyple())
+        on_stats.add_field(name='Deposit count',
+                           value=cl_on_chain["depositCount"])
+        on_stats.add_field(name='Deposit amount',
+                           value=cl_on_chain["depositAmount"])
+        on_stats.add_field(name='Withdrawal count',
+                           value=cl_on_chain["withdrawalCount"])
+        on_stats.add_field(name='Withdrawal amount',
+                           value=cl_on_chain["withdrawnAmount"])
+
+        await ctx.author.send(embed=on_stats)
+
         guilds = await self.bot.fetch_guilds(limit=150).flatten()
         reach = len(self.bot.users)
         world = discord.Embed(title='__Crypto Link Reach__',
