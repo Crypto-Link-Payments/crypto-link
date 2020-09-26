@@ -1,12 +1,14 @@
 """
 COGS: Help commands for the payment services
 """
-import discord
+
+from datetime import datetime
+
 from discord.ext import commands
-from discord import TextChannel
+from discord import TextChannel, Embed, Colour
 from backOffice.guildServicesManager import GuildProfileManagement
 
-from cogs.utils.customCogChecks import is_owner, is_public
+from cogs.utils.customCogChecks import is_owner, is_public, guild_has_stats
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
@@ -52,6 +54,7 @@ class GuildOwnerCommands(commands.Cog):
                 "communityStats": {"xlmVolume": float(0.0),
                                    "clTokenVolume": float(0.0),
                                    "txCount": int(0),
+                                   "clTokenTxCount": int(0),
                                    "privateCount": int(0),
                                    "publicCount": int(0),
                                    "roleTxCount": int(0),
@@ -68,8 +71,30 @@ class GuildOwnerCommands(commands.Cog):
                                                 destination=ctx.message.channel, sys_msg_title='__System error__')
 
     @owner.command()
-    async def stats(self):
-        pass
+    @commands.check(is_public)
+    @commands.check(guild_has_stats)
+    async def stats(self, ctx):
+        stats = await guild_manager.get_guild_stats(guild_id=ctx.guild.id)
+
+        stats_info = Embed(title="__Guild Statistics__",
+                           timestamp=datetime.utcnow(),
+                           colour=Colour.magenta())
+        stats_info.set_thumbnail(url=ctx.guild.avatar_url)
+        stats_info.add_field(name="Transactions sent",
+                             value=f'{stats["txCount"]}')
+        stats_info.add_field(name="Xlm Volume",
+                             value=f'{stats["xlmVolume"]}')
+        stats_info.add_field(name="Public Tx",
+                             value=f'{stats["publicCount"]}')
+        stats_info.add_field(name="Private Tx",
+                             value=f'{stats["xlmVolume"]}')
+        stats_info.add_field(name="Role purchases",
+                             value=f'{stats["roleTxCount"]}')
+        stats_info.add_field(name="Emoji tx",
+                             value=f'{stats["emojiTxCount"]}')
+        stats_info.add_field(name="Multi tx",
+                             value=f'{stats["xlmVolume"]}')
+        await ctx.author.send(embed=stats_info)
 
     @owner.commmand()
     async def services(self):
