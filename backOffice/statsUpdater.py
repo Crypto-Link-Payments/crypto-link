@@ -39,6 +39,7 @@ class StatsManager(object):
         self.as_cl_connection = self.as_connection['CryptoLink']
         self.as_user_profiles = self.as_cl_connection.userProfiles  # Connection to user profiles
         self.as_cl_off_chain = self.as_cl_connection.CLOffChainStats  # Connection to CL Off chain stats
+        self.as_cl_guild_profiles = self.as_cl_connection.guildProfiles
 
     async def update_cl_merchant_stats(self, ticker: str, merchant_stats: dict, ticker_stats: dict):
         await self.as_cl_off_chain.update_one({"ticker": ticker},
@@ -174,4 +175,9 @@ class StatsManager(object):
     async def as_update_role_purchase_stats(self, user_id: int, merchant_data: dict):
         await self.as_user_profiles.update_one({"userId": user_id},
                                                {f"{CONST_INC}": merchant_data,
+                                                f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+
+    async def update_guild_stats(self, guild_id: int, guild_stats_data: dict):
+        await self.as_user_profiles.update_one({"guildId": guild_id},
+                                               {f"{CONST_INC}": guild_stats_data,
                                                 f"{CONST_CURRENT_DATE}": {"lastModified": True}})
