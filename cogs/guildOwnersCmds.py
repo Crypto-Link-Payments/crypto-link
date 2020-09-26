@@ -1,7 +1,3 @@
-"""
-COGS: Help commands for the payment services
-"""
-
 from datetime import datetime
 
 from discord.ext import commands
