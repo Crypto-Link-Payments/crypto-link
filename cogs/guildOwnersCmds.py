@@ -71,7 +71,6 @@ class GuildOwnerCommands(commands.Cog):
                                                 destination=ctx.message.channel, sys_msg_title='__System error__')
 
     @owner.command()
-    @commands.check(is_public)
     @commands.check(guild_has_stats)
     async def stats(self, ctx):
         stats = await guild_manager.get_guild_stats(guild_id=ctx.guild.id)
@@ -97,11 +96,24 @@ class GuildOwnerCommands(commands.Cog):
         await ctx.author.send(embed=stats_info)
 
     @owner.commmand()
-    async def services(self):
-        """
-        Pull status of services
-        """
-        pass
+    @commands.check(guild_has_stats)
+    async def services(self, ctx):
+        service_status = await guild_manager.get_service_statuses(guild_id=ctx.guild.id)
+        explorer_channel = self.bot.get_channel(id=int(service_status["explorerSettings"]["channelId"]))
+
+        service_info = Embed(title="__Guild Service Status__",
+                             timestamp=datetime.utcnow(),
+                             colour=Colour.magenta())
+        service_info.set_thumbnail(url=ctx.guild.avatar_url)
+
+        if explorer_channel:
+            service_info.add_field(name='Crypto Link Feed Channel',
+                                   value=f'{explorer_channel} ({explorer_channel.id})')
+        else:
+            service_info.add_field(name='Crypto Link Feed Channel',
+                                   value=f':red_circle')
+
+        await ctx.author.send(embed=service_info)
 
     @owner.group()
     async def explorer(self):
