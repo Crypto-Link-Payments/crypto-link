@@ -4,15 +4,15 @@
 ## Short-Term project roadmap (2020)
 
 - September
-  - Integration of statistics per account, community and global scope :hammer: 
-                 -> User on chain accumulative deposits count and amount :white_check_mark: 
+  - Integration of statistics per account, community and global scope :hammer: <br />
+                 -> User on chain accumulative deposits count and amount :white_check_mark: <br />
                  -> Bot global withdrawal count and amount :white_check_mark: 
-                 ->  User on chain accumulative withdrawal count and amount :white_check_mark:  
-                 ->  Bot global global deposits count :white_check_mark: 
-                 -> Off chain P2P transaction user stats :white_check_mark: 
-                 -> Off chain tx public stats :white_check_mark:  
-                 -> User membership statistics :white_check_mark: 
-                -> Bot global stats query command :hammer: 
+                 ->  User on chain accumulative withdrawal count and amount :white_check_mark:  <br />
+                 ->  Bot global global deposits count :white_check_mark: <br />
+                 -> Off chain P2P transaction user stats :white_check_mark: <br />
+                 -> Off chain tx public stats :white_check_mark:  <br />
+                 -> User membership statistics :white_check_mark: <br />
+                 -> Bot global stats query command :hammer: <br />
          
   - Subject integrated to transaction message :white_check_mark:  
   - Private off-chain transaction :timer:
