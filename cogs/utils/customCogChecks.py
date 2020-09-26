@@ -7,11 +7,13 @@ from discord import ChannelType
 from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
 from utils.tools import Helpers
+from backOffice.guildServicesManager import GuildProfileManagement
 
 helper = Helpers()
 d = helper.read_json_file(file_name='botSetup.json')
 merchant_manager = MerchantManager()
 account_mng = AccountManager()
+guild_manager = GuildProfileManagement()
 
 
 def is_animus(ctx):
@@ -80,3 +82,10 @@ def guild_has_merchant(ctx):
     Check if community has activate merchant system
     """
     return merchant_manager.check_if_community_exist(int(ctx.message.guild.id))
+
+
+def guild_has_stats(ctx):
+    """
+    Guild registration status check for stats
+    """
+    return guild_manager.check_guild_registration_stats(guild_id=ctx.guild.id)
