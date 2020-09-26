@@ -162,7 +162,6 @@ class BotWalletCommands(commands.Cog):
         """
         Statistical information on Crypto Link system
         """
-        #TODO fix number conversions to string
         print(f'CL STATS  : {ctx.author} -> {ctx.message.content}')
         cl_data = bot_stats.get_all_stats()
         cl_off_chain = cl_data['xlm']['ofChain']
@@ -171,13 +170,13 @@ class BotWalletCommands(commands.Cog):
         off_stats = Embed(title='__Crypto Link Off chain__',
                           colour=discord.Colour.greyple())
         off_stats.add_field(name='Total XLM moved',
-                            value=cl_off_chain["totalTx"] + ' ' + cl_off_chain["totalMoved"])
+                            value=str(cl_off_chain["totalTx"]) + ' ' + str(cl_off_chain["totalMoved"]))
         off_stats.add_field(name='Public',
-                            value=cl_off_chain["totalPublicCount"] + ' ' + cl_off_chain["totalPublicMoved"])
+                            value=str(cl_off_chain["totalPublicCount"]) + ' ' + str(cl_off_chain["totalPublicMoved"]))
         off_stats.add_field(name='Private',
-                            value=cl_off_chain["totalPrivateCount"] + ' ' + cl_off_chain["totalPrivateMoved"])
+                            value=str(cl_off_chain["totalPrivateCount"]) + ' ' + str(cl_off_chain["totalPrivateMoved"]))
         off_stats.add_field(name='Role Statistics',
-                            value=cl_off_chain["rolePurchaseTxCount"] + ' ' + cl_off_chain["roleMoved"])
+                            value=str(cl_off_chain["rolePurchaseTxCount"]) + ' ' + (cl_off_chain["roleMoved"]))
 
         await ctx.author.send(embed=off_stats)
 
