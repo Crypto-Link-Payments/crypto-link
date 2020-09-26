@@ -25,8 +25,20 @@ class GuildOwnerCommands(commands.Cog):
     @commands.group()
     @commands.check(is_owner)
     @commands.check(is_public)
-    async def owner(self):
-        pass
+    async def owner(self, ctx):
+        if ctx.invoked_subcommand is None:
+            title = '__Guild Owner Manual__'
+            description = "All available commands to operate with guild system"
+            list_of_values = [
+                {"name": "Register Guild", "value": f"{d['command']}owner register"},
+                {"name": "Guild Crypto Link Stats", "value": f"{d['command']}owner stats"},
+                {"name": "Guild Applied Services", "value": f"{d['command']}owner services"},
+                {"name": "Guild CL Explorer Settings", "value": f"{d['command']}owner explorer"},
+                {"name": "Guild CL Transaction Fee Settings", "value": f"{d['command']}owner fees"},
+            ]
+
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                               destination=1)
 
     @commands.group()
     @commands.check(is_owner)
