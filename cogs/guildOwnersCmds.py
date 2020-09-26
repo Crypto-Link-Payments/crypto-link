@@ -164,7 +164,16 @@ class GuildOwnerCommands(commands.Cog):
 
     @owner.group()
     async def fees(self, ctx):
-        pass
+        if ctx.invoked_subcommand is None:
+            title = '__Crypto Link Custom Fees Manual__'
+            description = "All available commands to operate with guild system"
+            list_of_values = [
+                {"name": "Set XLM off chain Tx fee",
+                 "value": f"{d['command']}owner fee set <xlm amount as float>"}
+            ]
+
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                               destination=1)
 
     @fees.command()
     async def set(self, ctx, xlm: float):
