@@ -131,7 +131,20 @@ class GuildOwnerCommands(commands.Cog):
 
     @explorer.command()
     async def apply(self, ctx, chn: TextChannel):
-        pass
+
+        data_to_update = {
+            "explorerSettings.channelId": int(chn.id)
+        }
+
+        if await guild_manager.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
+            await customMessages.system_message(ctx=ctx, color_code=0,
+                                                message=f'You have successfully set channel {chn} to receive Crypto'
+                                                        f' Link Network Feed',
+                                                destination=ctx.message.author, sys_msg_title='__System Message__')
+        else:
+            await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue while trying'
+                                                                               'to update data.',
+                                                destination=ctx.message.channel, sys_msg_title='__System error__')
 
     @explorer.command()
     async def remove(self, ctx):
