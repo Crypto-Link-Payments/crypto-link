@@ -92,7 +92,7 @@ class UserAccountCommands(commands.Cog):
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                     sys_msg_title=CONST_ACC_REG_STATUS)
         else:
-            message = f'You have already registered account into the system. Please use ***{d["command"]}bal*** or ' \
+            message = f'You have already registered account into the system. Please use ***{d["command"]}acc*** or ' \
                       f'***{d["command"]}wallet*** to obtain details on balances and your profile'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=CONST_ACC_REG_STATUS)
