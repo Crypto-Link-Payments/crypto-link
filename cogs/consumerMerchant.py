@@ -281,6 +281,15 @@ class ConsumerCommands(commands.Cog):
                                                                              merchant_stats=global_merchant_stats,
                                                                              ticker_stats=global_ticker_stats)
 
+                                guild_stats = {
+
+                                    "communityStats.roleTxCount": 1,
+                                    "communityStats.xlmVolume": role_rounded
+
+                                }
+                                await stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
+                                                                       guild_stats_data=guild_stats)
+
                                 applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
                                 for chn_id in applied_channel_list:
                                     channel = self.bot.get_channel(id=int(chn_id))
