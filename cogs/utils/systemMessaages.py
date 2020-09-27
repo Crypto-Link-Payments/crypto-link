@@ -4,13 +4,14 @@ import discord
 from discord import errors
 from discord import Role, Embed, Colour
 
+from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils.monetaryConversions import convert_to_usd
 from utils.tools import Helpers
 
 helper = Helpers()
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
+guild_manager = GuildProfileManager()
 
 class CustomMessages:
     """
@@ -391,3 +392,9 @@ class CustomMessages:
                              value=f':man_juggling: {stellar_stats["roleTxCount"]}\n'
                                    f':money_with_wings: {stellar_stats["spentOnRoles"]}{CONST_STELLAR_EMOJI}\n')
         await ctx.author.send(embed=xlm_wallet)
+
+
+    @staticmethod
+    async def explorer_messages(destination, message):
+        await destination.send(message)
+
