@@ -12,11 +12,13 @@ from colorama import Fore, init
 from discord.ext import commands
 
 from backOffice.backendCheck import BotStructureCheck
+from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.statsUpdater import StatsManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
+from cogs.utils.monetaryConversions import convert_to_usd
 from utils.tools import Helpers
 
 init(autoreset=True)
@@ -25,7 +27,7 @@ stellar_wallet = StellarWallet()
 stellar_manager = StellarManager()
 merchant_manager = MerchantManager()
 stats_manager = StatsManager()
-
+guild_profiles = GuildProfileManager()
 custom_messages = CustomMessages()
 helper = Helpers()
 notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
@@ -38,7 +40,7 @@ CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
               'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
-              'cogs.feeManagementCogs','cogs.guildOwnersCmds']
+              'cogs.feeManagementCogs', 'cogs.guildOwnersCmds']
 
 
 def get_time():
@@ -108,6 +110,15 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
                     await custom_messages.send_deposit_notification_channel(channel=msg_channel,
                                                                             avatar=bot.user.avatar_url,
                                                                             user=dest, stroops=tx_stroop)
+
+                    applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
+                    in_dollar = convert_to_usd(amount=tx_stroop / 10000000, coin_name='stellar')
+
+                    for chn_id in applied_channel_list:
+                        channel = bot.get_channel(id=int(chn_id))
+                        msg = f':inbox_tray: {tx_stroop / 10000000} {CONST_STELLAR_EMOJI} (${in_dollar["total"]})'
+                        await custom_messages.explorer_messages(destination=channel, message=msg)
+
                     # Update user deposit stats
                     stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
                                                             key="xlmStats")

@@ -120,6 +120,7 @@ class TransactionCommands(commands.Cog):
                                 "totalPublicMoved": final_xlm,
                             }
 
+                            # Updateing bot global stats
                             await stats_manager.update_cl_tx_stats(ticker='xlm', ticker_stats=global_ticker_stats)
 
                             sender_stats = {

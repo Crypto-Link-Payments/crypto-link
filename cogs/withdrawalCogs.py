@@ -4,11 +4,12 @@ from discord.ext import commands
 
 from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
+from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.statsUpdater import StatsManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.customCogChecks import user_has_wallet, is_public
-from cogs.utils.monetaryConversions import convert_to_currency
+from cogs.utils.monetaryConversions import convert_to_currency, convert_to_usd
 from cogs.utils.securityChecks import check_stellar_address
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -20,6 +21,7 @@ bot_manager = BotManager()
 bot_stats = BotStatsManager()
 stats_manager = StatsManager()
 stellar = StellarManager()
+guild_profiles = GuildProfileManager()
 d = helper.read_json_file(file_name='botSetup.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 notify_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
@@ -166,6 +168,16 @@ class WithdrawalCommands(commands.Cog):
 
                                 # Update user and bot withdrawal stats
                                 self.update_withdrawal_stats(ctx=ctx, stroops=stroops)
+
+                                applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
+                                in_dollar = convert_to_usd(amount=xlm_with_amount, coin_name='stellar')
+
+                                for chn_id in applied_channel_list:
+                                    channel = self.bot.get_channel(id=int(chn_id))
+                                    msg = f':outbox_tray: {xlm_with_amount} {CONST_STELLAR_EMOJI} (${in_dollar["total"]}) on ' \
+                                          f'{ctx.message.guild}'
+                                    await customMessages.explorer_messages(destination=channel, message=msg)
+
 
                             else:
                                 message = 'Funds could not be withdrawn at this point. Please try again later.'
