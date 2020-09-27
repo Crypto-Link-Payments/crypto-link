@@ -38,12 +38,12 @@ class GuildOwnerCommands(commands.Cog):
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                destination=1)
 
-    @commands.group()
+    @owner.command()
     @commands.check(is_owner)
     async def register(self, ctx):
         if not guild_manager.check_guild_registration_stats(guild_id=ctx.guild.id):
             new_guild = {
-                "guildId": ctx.guild.id,
+                "guildId": ctx.message.guild.id,
                 "guildName": f'{ctx.guild}',
                 "explorerSettings": {"channelId": int(0)},
                 "txFees": {"xlmFeeValue": int(0)},
@@ -74,7 +74,7 @@ class GuildOwnerCommands(commands.Cog):
         stats_info = Embed(title="__Guild Statistics__",
                            timestamp=datetime.utcnow(),
                            colour=Colour.magenta())
-        stats_info.set_thumbnail(url=ctx.guild.avatar_url)
+        stats_info.set_thumbnail(url=self.bot.user.avatar_url)
         stats_info.add_field(name="Transactions sent",
                              value=f'{stats["txCount"]}')
         stats_info.add_field(name="Xlm Volume",
@@ -91,7 +91,7 @@ class GuildOwnerCommands(commands.Cog):
                              value=f'{stats["xlmVolume"]}')
         await ctx.author.send(embed=stats_info)
 
-    @owner.commmand()
+    @owner.command()
     @commands.check(guild_has_stats)
     async def services(self, ctx):
         service_status = await guild_manager.get_service_statuses(guild_id=ctx.guild.id)
@@ -100,14 +100,14 @@ class GuildOwnerCommands(commands.Cog):
         service_info = Embed(title="__Guild Service Status__",
                              timestamp=datetime.utcnow(),
                              colour=Colour.magenta())
-        service_info.set_thumbnail(url=ctx.guild.avatar_url)
+        service_info.set_thumbnail(url=self.bot.user.avatar_url)
 
         if explorer_channel:
             service_info.add_field(name='Crypto Link Feed Channel',
                                    value=f'{explorer_channel} ({explorer_channel.id})')
         else:
             service_info.add_field(name='Crypto Link Feed Channel',
-                                   value=f':red_circle')
+                                   value=f':red_circle:')
 
         await ctx.author.send(embed=service_info)
 
@@ -127,7 +127,6 @@ class GuildOwnerCommands(commands.Cog):
 
     @explorer.command()
     async def apply(self, ctx, chn: TextChannel):
-
         data_to_update = {
             "explorerSettings.channelId": int(chn.id)
         }
@@ -157,23 +156,23 @@ class GuildOwnerCommands(commands.Cog):
                                                                                ' Network Feed could not be turned OFF.'
                                                                                'Please try again later',
                                                 destination=ctx.message.channel, sys_msg_title='__System error__')
-
-    @owner.group()
-    async def fees(self, ctx):
-        if ctx.invoked_subcommand is None:
-            title = '__Crypto Link Custom Fees Manual__'
-            description = "All available commands to operate with guild system"
-            list_of_values = [
-                {"name": "Set XLM off chain Tx fee",
-                 "value": f"{d['command']}owner fee set <xlm amount as float>"}
-            ]
-
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1)
-
-    @fees.command()
-    async def set(self, ctx, xlm: float):
-        pass
+    #
+    # @owner.group()
+    # async def fees(self, ctx):
+    #     if ctx.invoked_subcommand is None:
+    #         title = '__Crypto Link Custom Fees Manual__'
+    #         description = "All available commands to operate with guild system"
+    #         list_of_values = [
+    #             {"name": "Set XLM off chain Tx fee",
+    #              "value": f"{d['command']}owner fee set <xlm amount as float>"}
+    #         ]
+    #
+    #         await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+    #                                            destination=1)
+    #
+    # @fees.command()
+    # async def set(self, ctx, xlm: float):
+    #     pass
 
 
 def setup(bot):
