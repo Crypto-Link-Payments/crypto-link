@@ -8,10 +8,10 @@ import sys
 
 from pymongo import MongoClient, errors
 
-from utils.tools import Helpers
-
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
+
+from utils.tools import Helpers
 
 helper = Helpers()
 hot = helper.read_json_file(file_name='hotWallets.json')
