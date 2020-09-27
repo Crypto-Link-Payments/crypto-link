@@ -10,10 +10,12 @@ from pycoingecko import CoinGeckoAPI
 
 from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
+from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_wallet
 from cogs.utils.systemMessaages import CustomMessages
+
 from backOffice.statsUpdater import StatsManager
-from cogs.utils.monetaryConversions import get_decimal_point
+from cogs.utils.monetaryConversions import get_decimal_point, convert_to_usd
 from utils import numbers
 from utils.tools import Helpers
 
@@ -22,6 +24,7 @@ account_mng = AccountManager()
 customMessages = CustomMessages()
 gecko = CoinGeckoAPI()
 merchant_manager = MerchantManager()
+guild_profiles = GuildProfileManager()
 stats_manager = StatsManager()
 d = helper.read_json_file(file_name='botSetup.json')
 sys_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
@@ -277,6 +280,14 @@ class ConsumerCommands(commands.Cog):
                                 await stats_manager.update_cl_merchant_stats(ticker='xlm',
                                                                              merchant_stats=global_merchant_stats,
                                                                              ticker_stats=global_ticker_stats)
+
+                                applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
+                                for chn_id in applied_channel_list:
+                                    channel = self.bot.get_channel(id=int(chn_id))
+                                    msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} (${convert_to_dollar}) on ' \
+                                          f'{ctx.message.guild}'
+                                    await customMessages.explorer_messages(destination=channel, message=msg)
+
 
                         else:
                             message = f'Error while trying to deduct funds from user'
