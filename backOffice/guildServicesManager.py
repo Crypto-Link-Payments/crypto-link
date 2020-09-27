@@ -61,6 +61,3 @@ class GuildProfileManager:
                                                      {"_id": 0,
                                                       "explorerSettings": 1,
                                                       "txFees": 1})
-
-
-print(GuildProfileManager().explorer())
