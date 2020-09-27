@@ -37,11 +37,9 @@ class GuildProfileManager:
         result = self.as_guild_profiles.insert_one(guild_data)
         return result
 
-    async def get_all_explorer_applied_channels(self):
-        await self.guild_profiles.find({}, {"_id": 0, "explorerSettings": 1})
-
+    def get_all_explorer_applied_channels(self):
         result = [guild["explorerSettings"]["channelId"] for guild in
-                  await self.guild_profiles.find({}, {"_id": 0, "explorerSettings.channelId": 1}) if
+                  self.guild_profiles.find({}, {"_id": 0, "explorerSettings.channelId": 1}) if
                   guild["explorerSettings"]["channelId"] > 0]
         return result
 
