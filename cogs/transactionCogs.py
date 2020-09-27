@@ -138,6 +138,15 @@ class TransactionCommands(commands.Cog):
                                                                     tx_stats_data=sender_stats)
                             await stats_manager.update_usr_tx_stats(user_id=recipient.id, tx_stats_data=recipient_stats)
 
+                            guild_stats = {
+                                "communityStats.xlmVolume": final_xlm,
+                                "communityStats.txCount": 1,
+                                "communityStats.publicCount": 1
+                            }
+
+                            await stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
+                                                                   guild_stats_data=guild_stats)
+
                             # Explorer notification
                             applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
                             in_dollar = monetaryConversions.convert_to_usd(amount=final_xlm, coin_name='stellar')
