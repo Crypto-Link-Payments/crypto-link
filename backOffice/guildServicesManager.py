@@ -40,8 +40,9 @@ class GuildProfileManager:
     async def get_all_explorer_applied_channels(self):
         await self.guild_profiles.find({}, {"_id": 0, "explorerSettings": 1})
 
-        result = [guild for guild in await self.guild_profiles.find({}, {"_id": 0, "explorerSettings": 1}) if
-                  int(guild["explorerChannel"]) > 0]
+        result = [guild["explorerSettings"]["channelId"] for guild in
+                  await self.guild_profiles.find({}, {"_id": 0, "explorerSettings.channelId": 1}) if
+                  guild["explorerSettings"]["channelId"] > 0]
         return result
 
     async def get_guild_stats(self, guild_id: int):
@@ -60,3 +61,6 @@ class GuildProfileManager:
                                                      {"_id": 0,
                                                       "explorerSettings": 1,
                                                       "txFees": 1})
+
+
+print(GuildProfileManager().explorer())
