@@ -178,6 +178,6 @@ class StatsManager(object):
                                                 f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
     async def update_guild_stats(self, guild_id: int, guild_stats_data: dict):
-        await self.as_user_profiles.update_one({"guildId": guild_id},
+        await self.as_cl_guild_profiles.update_one({"guildId": guild_id},
                                                {f"{CONST_INC}": guild_stats_data,
                                                 f"{CONST_CURRENT_DATE}": {"lastModified": True}})
