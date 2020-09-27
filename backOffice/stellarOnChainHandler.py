@@ -15,6 +15,7 @@ sys.path.append(project_path)
 
 helpers = Helpers()
 secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
+print(secret_details)
 public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
 
 
