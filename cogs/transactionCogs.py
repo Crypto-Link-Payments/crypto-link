@@ -5,6 +5,7 @@ from backOffice.botStatistics import BotStatsManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.statsUpdater import StatsManager
 from backOffice.stellarActivityManager import StellarManager
+from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils import monetaryConversions
 from cogs.utils.customCogChecks import is_public, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
@@ -15,6 +16,7 @@ account_mng = AccountManager()
 stellar = StellarManager()
 bot_stats = BotStatsManager()
 stats_manager = StatsManager()
+guild_profiles = GuildProfileManager()
 customMessages = CustomMessages()
 d = helper.read_json_file(file_name='botSetup.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -135,6 +137,14 @@ class TransactionCommands(commands.Cog):
                                                                     tx_stats_data=sender_stats)
                             await stats_manager.update_usr_tx_stats(user_id=recipient.id, tx_stats_data=recipient_stats)
 
+                            # Explorer notification
+                            applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
+                            in_dollar = monetaryConversions.convert_to_usd(amount=final_xlm, coin_name='stellar')
+                            for chn_id in applied_channel_list:
+                                channel = self.bot.get_channel(id=int(chn_id))
+                                msg = f'💵  {final_xlm} {CONST_STELLAR_EMOJI} (${in_dollar["total"]}) on ' \
+                                      f'{ctx.message.guild} channel {ctx.message.channel}'
+                                await customMessages.explorer_messages(destination=channel, message=msg)
                         else:
                             stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                          stroops=int(stroops),
