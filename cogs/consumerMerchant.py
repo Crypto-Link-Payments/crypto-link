@@ -274,8 +274,8 @@ class ConsumerCommands(commands.Cog):
                                 }
 
                                 global_ticker_stats = {
-                                    "rolePurchaseTxCount": 1,
-                                    "roleMoved": role_rounded
+                                    "merchantPurchases": 1,
+                                    "merchantMoved": role_rounded
                                 }
                                 await stats_manager.update_cl_merchant_stats(ticker='xlm',
                                                                              merchant_stats=global_merchant_stats,
