@@ -15,11 +15,17 @@
 ![Repo Size](https://img.shields.io/github/repo-size/launch-pad-investments/crypto-link?logo=github&style=plastic)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9fd3218417ba4c0db99701ce8aecfd13)](https://www.codacy.com/gh/launch-pad-investments/crypto-link/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=launch-pad-investments/crypto-link&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/launch-pad-investments/crypto-link/badge)](https://www.codefactor.io/repository/github/launch-pad-investments/crypto-link)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
 Crypto Link, Discord bot which allows for instant peer to peer (P2P) transactions, payments and Discord community 
 monetization with the help of integrated Merchant System built on top of Stellar Lumen cryptocurrency.
 Discord users can access their wallet through any community which has integrated Crypto Link in their daily operations.
- 
+
+## Code of Conduct
+The project is governed by the Launch Pad Investments. By participating, 
+you are expected to uphold this code. You can access Code of Conduct details [here](CODE_OF_CONDUCT.md).
+Please report unacceptable behavior to the project team at cryptolinkpayments@gmail.com.
+
 ## ![banner](../img/emojiLumen.png) What is Stellar and Lumen (XLM) ![banner](../img/emojiLumen.png)
 
 Stellar is an open source, decentralized protocol for digital currency to fiat money transfers which allows 
