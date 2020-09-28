@@ -174,7 +174,7 @@ async def check_stellar_hot_wallet():
             print(Fore.RED + 'There was an issue with updating pag')
 
         print(Fore.GREEN + '==============DONE=================\n'
-                           '==========GOING TO SLEEP FROM 1 MINUTES=====')
+                           '==========GOING TO SLEEP FOR 1 MINUTE=====')
     else:
         print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
         print('==============================================')
