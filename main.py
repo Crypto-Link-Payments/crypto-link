@@ -114,6 +114,7 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
                     applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
                     in_dollar = convert_to_usd(amount=tx_stroop / 10000000, coin_name='stellar')
 
+                    #TODO migrate to one file and implement to other parts
                     for chn_id in applied_channel_list:
                         channel = bot.get_channel(id=int(chn_id))
                         msg = f':inbox_tray: {tx_stroop / 10000000} {CONST_STELLAR_EMOJI} (${in_dollar["total"]})'

@@ -203,3 +203,7 @@ class StellarWallet:
 
             else:
                 return {}
+
+
+if __name__ == "__main__":
+    print(StellarWallet().public_key)
