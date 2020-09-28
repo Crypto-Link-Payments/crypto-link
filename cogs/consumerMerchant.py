@@ -14,8 +14,8 @@ from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 
-from backOffice.statsUpdater import StatsManager
-from cogs.utils.monetaryConversions import get_decimal_point, convert_to_usd
+from backOffice.statsManager import StatsManager
+from cogs.utils.monetaryConversions import get_decimal_point
 from utils import numbers
 from utils.tools import Helpers
 
@@ -37,11 +37,6 @@ CONST_MERCHANT_PURCHASE_ERROR = ":warning: __Merchant System Purchase Error__:wa
 class ConsumerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    @staticmethod
-    def get_emoji(ticker):
-        if ticker == 'xlm':
-            return CONST_STELLAR_EMOJI
 
     @staticmethod
     def get_coin_usd_value(coin_name):
@@ -274,8 +269,8 @@ class ConsumerCommands(commands.Cog):
                                 }
 
                                 global_ticker_stats = {
-                                    "rolePurchaseTxCount": 1,
-                                    "roleMoved": role_rounded
+                                    "merchantPurchases": 1,
+                                    "merchantMoved": role_rounded
                                 }
                                 await stats_manager.update_cl_merchant_stats(ticker='xlm',
                                                                              merchant_stats=global_merchant_stats,
@@ -290,13 +285,13 @@ class ConsumerCommands(commands.Cog):
                                 await stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
                                                                        guild_stats_data=guild_stats)
 
-                                applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
-                                for chn_id in applied_channel_list:
-                                    channel = self.bot.get_channel(id=int(chn_id))
-                                    msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
-                                          f'(${convert_to_dollar}) on ' \
-                                          f'{ctx.message.guild}'
-                                    await customMessages.explorer_messages(destination=channel, message=msg)
+                                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                 guild_profiles.get_all_explorer_applied_channels()]
+                                explorer_msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
+                                               f'(${convert_to_dollar}) on ' \
+                                               f'{ctx.message.guild}'
+                                await customMessages.explorer_messages(applied_channels=load_channels,
+                                                                       message=explorer_msg)
                         else:
                             message = f'Error while trying to deduct funds from user'
                             await customMessages.system_message(ctx=ctx, message=message,

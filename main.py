@@ -14,7 +14,7 @@ from discord.ext import commands
 from backOffice.backendCheck import BotStructureCheck
 from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.merchatManager import MerchantManager
-from backOffice.statsUpdater import StatsManager
+from backOffice.statsManager import StatsManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
@@ -111,13 +111,12 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
                                                                             avatar=bot.user.avatar_url,
                                                                             user=dest, stroops=tx_stroop)
 
-                    applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
+                    # Explorer messages
+                    load_channels = [bot.get_channel(id=int(chn)) for chn in
+                                     guild_profiles.get_all_explorer_applied_channels()]
                     in_dollar = convert_to_usd(amount=tx_stroop / 10000000, coin_name='stellar')
-
-                    for chn_id in applied_channel_list:
-                        channel = bot.get_channel(id=int(chn_id))
-                        msg = f':inbox_tray: {tx_stroop / 10000000} {CONST_STELLAR_EMOJI} (${in_dollar["total"]})'
-                        await custom_messages.explorer_messages(destination=channel, message=msg)
+                    explorer_msg = f':inbox_tray: {tx_stroop / 10000000} {CONST_STELLAR_EMOJI} (${in_dollar["total"]})'
+                    await custom_messages.explorer_messages(applied_channels=load_channels, message=explorer_msg)
 
                     # Update user deposit stats
                     stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
@@ -175,7 +174,7 @@ async def check_stellar_hot_wallet():
             print(Fore.RED + 'There was an issue with updating pag')
 
         print(Fore.GREEN + '==============DONE=================\n'
-                           '==========GOING TO SLEEP FROM 1 MINUTES=====')
+                           '==========GOING TO SLEEP FOR 1 MINUTE=====')
     else:
         print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
         print('==============================================')

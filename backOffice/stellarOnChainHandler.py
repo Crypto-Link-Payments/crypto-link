@@ -5,11 +5,11 @@ Handling Stellar chain
 import os
 import sys
 
-from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, \
-    AiohttpClient
-
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
+
+from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, \
+    AiohttpClient
 
 from utils.tools import Helpers
 
@@ -144,10 +144,7 @@ class StellarWallet:
         else:
             return False
 
-    def withdraw(self, address: str, xlm_amount):
-        """
-        Function to process withdrawals
-        """
+    def withdraw(self, address: str, xlm_amount: str):
         source_account = self.server.load_account(self.public_key)
         tx = TransactionBuilder(
             source_account=source_account,

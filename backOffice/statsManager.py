@@ -38,25 +38,26 @@ class StatsManager(object):
         # Async support
         self.as_cl_connection = self.as_connection['CryptoLink']
         self.as_user_profiles = self.as_cl_connection.userProfiles  # Connection to user profiles
-        self.as_cl_off_chain = self.as_cl_connection.CLOffChainStats  # Connection to CL Off chain stats
+        self.as_cl_off_chain_stats = self.as_cl_connection.CLOffChainStats  # Connection to CL Off chain stats
+        self.as_on_chain_activities = self.as_cl_connection.CLOnChainStats
         self.as_cl_guild_profiles = self.as_cl_connection.guildProfiles
 
     async def update_cl_merchant_stats(self, ticker: str, merchant_stats: dict, ticker_stats: dict):
-        await self.as_cl_off_chain.update_one({"ticker": ticker},
-                                              {f"{CONST_INC}": ticker_stats,
-                                               f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+        await self.as_cl_off_chain_stats.update_one({"ticker": ticker},
+                                                    {f"{CONST_INC}": ticker_stats,
+                                                     f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
-        await self.as_cl_off_chain.update_one({"ticker": "merchant"},
-                                              {f"{CONST_INC}": merchant_stats,
-                                               f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+        await self.as_cl_off_chain_stats.update_one({"ticker": "merchant"},
+                                                    {f"{CONST_INC}": merchant_stats,
+                                                     f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
     async def update_cl_tx_stats(self, ticker: str, ticker_stats: dict):
         """
         Updating crypto link transaction stats
         """
-        await self.as_cl_off_chain.update_one({"ticker": ticker},
-                                              {f"{CONST_INC}": ticker_stats,
-                                               f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+        await self.as_cl_off_chain_stats.update_one({"ticker": ticker},
+                                                    {f"{CONST_INC}": ticker_stats,
+                                                     f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
     def update_bot_off_chain_stats(self, ticker: str, tx_amount: int, xlm_amount: float, tx_type: str):
         """
@@ -179,5 +180,19 @@ class StatsManager(object):
 
     async def update_guild_stats(self, guild_id: int, guild_stats_data: dict):
         await self.as_cl_guild_profiles.update_one({"guildId": guild_id},
-                                               {f"{CONST_INC}": guild_stats_data,
-                                                f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+                                                   {f"{CONST_INC}": guild_stats_data,
+                                                    f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+
+    def get_all_stats(self):
+        """
+        Get all bot stats on request
+        """
+        off_chain_xlm = self.off_chain_activities.find_one({"ticker": "xlm"},
+                                                           {"_id": 0})
+        on_chain_xlm = self.chain_activities.find_one({"ticker": "xlm"},
+                                                      {"_id": 0})
+
+        data = {"xlm": {"offChain": off_chain_xlm,
+                        "onChain": on_chain_xlm}}
+
+        return data

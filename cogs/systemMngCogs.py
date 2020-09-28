@@ -9,6 +9,7 @@ from discord import Embed, Colour
 from discord.ext import commands
 from git import Repo, InvalidGitRepositoryError
 
+from backOffice.statsManager import StatsManager
 from cogs.utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -18,15 +19,15 @@ sys.path.append(project_path)
 
 helper = Helpers()
 customMessages = CustomMessages()
+stats_manager = StatsManager()
 d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 # Extensions integrated into Crypto Link
 extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
               'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
-              'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs',
-              'cogs.merchantLicensingCogs',
-              'cogs.feeManagementCogs']
+              'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
+              'cogs.feeManagementCogs', 'cogs.guildOwnersCmds']
 
 
 class BotManagementCommands(commands.Cog):
@@ -71,6 +72,68 @@ class BotManagementCommands(commands.Cog):
 
             await customMessages.embed_builder(ctx, title='Available sub commands for system',
                                                description='Available commands under category ***system***', data=value)
+
+    @system.command()
+    async def stats(self, ctx):
+        """
+        Statistical information on Crypto Link system
+        """
+        data = stats_manager.get_all_stats()
+        cl_off_chain = data["xlm"]["offChain"]
+        cl_on_chain = data['xlm']['onChain']
+
+        guilds = await self.bot.fetch_guilds(limit=150).flatten()
+        reach = len(self.bot.users)
+        world = Embed(title='__Crypto Link__',
+                      colour=Colour.magenta(),
+                      timestamp=datetime.utcnow())
+        world.add_field(name='Guild reach',
+                        value=f'{len(guilds)}',
+                        inline=False)
+        world.add_field(name='Member reach',
+                        value=f'{reach}',
+                        inline=False)
+        await ctx.author.send(embed=world)
+
+        on_stats = Embed(title='__Crypto Link On Chain__',
+                         colour=Colour.greyple())
+        on_stats.add_field(name=f'Total Deposits',
+                           value=f'{cl_on_chain["depositCount"]}')
+        on_stats.add_field(name=f'Total Deposited',
+                           value=f'{cl_on_chain["depositAmount"]} XLM')
+        on_stats.add_field(name=f'Total Withdrawals',
+                           value=f'{cl_on_chain["withdrawalCount"]}')
+        on_stats.add_field(name=f'Total Withdrawn',
+                           value=f'{cl_on_chain["withdrawnAmount"]} XLM')
+        await ctx.author.send(embed=on_stats)
+
+        off_chain = Embed(title=f'__Crypto Link off chain__',
+                          colour=Colour.greyple())
+        off_chain.add_field(name=f'Total Transactions done',
+                            value=f'{cl_off_chain["totalTx"]}')
+        off_chain.add_field(name=f'Total XLM moved',
+                            value=f'{cl_off_chain["totalMoved"]}')
+        off_chain.add_field(name=f'Total Public TX',
+                            value=f'{cl_off_chain["totalPublicCount"]}')
+        off_chain.add_field(name=f'Total Public Moved',
+                            value=f'{cl_off_chain["totalPublicMoved"]}')
+        off_chain.add_field(name=f'Total Private TX',
+                            value=f'{cl_off_chain["totalPrivateCount"]}')
+        off_chain.add_field(name=f'Total Private Moved',
+                            value=f'{cl_off_chain["totalPrivateMoved"]}')
+        off_chain.add_field(name=f'Total Emoji Tx',
+                            value=f'{cl_off_chain["totalEmojiTx"]}')
+        off_chain.add_field(name=f'Total Emoji Moved',
+                            value=f'{cl_off_chain["totalEmojiMoved"]}')
+        off_chain.add_field(name=f'Total Multi Tx',
+                            value=f'{cl_off_chain["multiTxCount"]}')
+        off_chain.add_field(name=f'Total Multi moved',
+                            value=f'{cl_off_chain["multiTxMoved"]}')
+        off_chain.add_field(name=f'Total Merchant Tx',
+                            value=f'{cl_off_chain["merchantPurchases"]}')
+        off_chain.add_field(name=f'Total Merchant moved',
+                            value=f'{cl_off_chain["merchantMoved"]}')
+        await ctx.author.send(embed=off_chain)
 
     @system.command()
     async def off(self, ctx):
