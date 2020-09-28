@@ -19,16 +19,7 @@
 Crypto Link, Discord bot which allows for instant peer to peer (P2P) transactions, payments and Discord community 
 monetization with the help of integrated Merchant System built on top of Stellar Lumen cryptocurrency.
 Discord users can access their wallet through any community which has integrated Crypto Link in their daily operations.
-
-## Table Of Contents
-
-  * [About Stellar Lumen](#code-of-conduct)
-  * [Constructs of Crypto Link](##:construction:-Crypto-Link-Use-case-:construction:)
-  
-  * [Discord Integration](##:hammer:-Integration-of-Crypto-Link-to-Discord-:hammer: )
-    + [Required Permissions](###:warning:-Required-permissions-for-Crypto-Link-to-operate-optimally-:warning:)
-
-  
+ 
 ## ![banner](../img/emojiLumen.png) What is Stellar and Lumen (XLM) ![banner](../img/emojiLumen.png)
 
 Stellar is an open source, decentralized protocol for digital currency to fiat money transfers which allows 
