@@ -7,7 +7,6 @@ from discord import Embed
 import discord
 from discord.ext import commands
 
-from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
 from backOffice.corpHistory import CorporateHistoryManager
 from backOffice.profileRegistrations import AccountManager
@@ -17,7 +16,6 @@ from cogs.utils.monetaryConversions import get_decimal_point, get_normal
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
-bot_stats = BotStatsManager()
 helper = Helpers()
 bot_manager = BotManager()
 account_mng = AccountManager()
@@ -163,48 +161,47 @@ class BotWalletCommands(commands.Cog):
         Statistical information on Crypto Link system
         """
         print(f'CL STATS  : {ctx.author} -> {ctx.message.content}')
-        cl_data = bot_stats.get_all_stats()
-        cl_off_chain = cl_data['xlm']['ofChain']
-        cl_on_chain = cl_data['xlm']['onChain']
 
-        off_stats = Embed(title='__Crypto Link Off chain__',
-                          colour=discord.Colour.greyple())
-        off_stats.add_field(name='Total XLM moved',
-                            value=str(cl_off_chain["totalTx"]) + ' ' + str(cl_off_chain["totalMoved"]))
-        off_stats.add_field(name='Public',
-                            value=str(cl_off_chain["totalPublicCount"]) + ' ' + str(cl_off_chain["totalPublicMoved"]))
-        off_stats.add_field(name='Private',
-                            value=str(cl_off_chain["totalPrivateCount"]) + ' ' + str(cl_off_chain["totalPrivateMoved"]))
-        off_stats.add_field(name='Role Statistics',
-                            value=str(cl_off_chain["rolePurchaseTxCount"]) + ' ' + (cl_off_chain["roleMoved"]))
 
-        await ctx.author.send(embed=off_stats)
-
-        on_stats = Embed(title='__Crypto Link On chain__',
-                         colour=discord.Colour.greyple())
-        on_stats.add_field(name='Deposit count',
-                           value=cl_on_chain["depositCount"])
-        on_stats.add_field(name='Deposit amount',
-                           value=cl_on_chain["depositAmount"])
-        on_stats.add_field(name='Withdrawal count',
-                           value=cl_on_chain["withdrawalCount"])
-        on_stats.add_field(name='Withdrawal amount',
-                           value=cl_on_chain["withdrawnAmount"])
-
-        await ctx.author.send(embed=on_stats)
-
-        guilds = await self.bot.fetch_guilds(limit=150).flatten()
-        reach = len(self.bot.users)
-        world = discord.Embed(title='__Crypto Link Reach__',
-                              colour=discord.Colour.magenta(),
-                              timestamp=datetime.utcnow())
-        world.add_field(name='Guild reach',
-                        value=f'{len(guilds)}',
-                        inline=False)
-        world.add_field(name='Member reach',
-                        value=f'{reach}',
-                        inline=False)
-        await ctx.author.send(embed=world)
+        #
+        # off_stats = Embed(title='__Crypto Link Off chain__',
+        #                   colour=discord.Colour.greyple())
+        # off_stats.add_field(name='Total XLM moved',
+        #                     value=str(cl_off_chain["totalTx"]) + ' ' + str(cl_off_chain["totalMoved"]))
+        # off_stats.add_field(name='Public',
+        #                     value=str(cl_off_chain["totalPublicCount"]) + ' ' + str(cl_off_chain["totalPublicMoved"]))
+        # off_stats.add_field(name='Private',
+        #                     value=str(cl_off_chain["totalPrivateCount"]) + ' ' + str(cl_off_chain["totalPrivateMoved"]))
+        # off_stats.add_field(name='Role Statistics',
+        #                     value=str(cl_off_chain["rolePurchaseTxCount"]) + ' ' + (cl_off_chain["roleMoved"]))
+        #
+        # await ctx.author.send(embed=off_stats)
+        #
+        # on_stats = Embed(title='__Crypto Link On chain__',
+        #                  colour=discord.Colour.greyple())
+        # on_stats.add_field(name='Deposit count',
+        #                    value=cl_on_chain["depositCount"])
+        # on_stats.add_field(name='Deposit amount',
+        #                    value=cl_on_chain["depositAmount"])
+        # on_stats.add_field(name='Withdrawal count',
+        #                    value=cl_on_chain["withdrawalCount"])
+        # on_stats.add_field(name='Withdrawal amount',
+        #                    value=cl_on_chain["withdrawnAmount"])
+        #
+        # await ctx.author.send(embed=on_stats)
+        #
+        # guilds = await self.bot.fetch_guilds(limit=150).flatten()
+        # reach = len(self.bot.users)
+        # world = discord.Embed(title='__Crypto Link Reach__',
+        #                       colour=discord.Colour.magenta(),
+        #                       timestamp=datetime.utcnow())
+        # world.add_field(name='Guild reach',
+        #                 value=f'{len(guilds)}',
+        #                 inline=False)
+        # world.add_field(name='Member reach',
+        #                 value=f'{reach}',
+        #                 inline=False)
+        # await ctx.author.send(embed=world)
 
     @cl.error
     async def balance_error(self, ctx, error):

@@ -2,7 +2,6 @@ import time
 
 from discord.ext import commands
 
-from backOffice.botStatistics import BotStatsManager
 from backOffice.botWallet import BotManager
 from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.statsManager import StatsManager
@@ -18,7 +17,6 @@ helper = Helpers()
 stellar_wallet = StellarWallet()
 customMessages = CustomMessages()
 bot_manager = BotManager()
-bot_stats = BotStatsManager()
 stats_manager = StatsManager()
 stellar = StellarManager()
 guild_profiles = GuildProfileManager()

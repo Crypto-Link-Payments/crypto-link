@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 
-from backOffice.botStatistics import BotStatsManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.statsManager import StatsManager
 from backOffice.stellarActivityManager import StellarManager
@@ -14,7 +13,6 @@ from utils.tools import Helpers
 helper = Helpers()
 account_mng = AccountManager()
 stellar = StellarManager()
-bot_stats = BotStatsManager()
 stats_manager = StatsManager()
 guild_profiles = GuildProfileManager()
 customMessages = CustomMessages()
