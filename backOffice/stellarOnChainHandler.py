@@ -144,7 +144,7 @@ class StellarWallet:
         else:
             return False
 
-    def withdraw(self, address: str, xlm_amount: float):
+    def withdraw(self, address: str, xlm_amount: str):
         source_account = self.server.load_account(self.public_key)
         tx = TransactionBuilder(
             source_account=source_account,
