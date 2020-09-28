@@ -39,11 +39,6 @@ class ConsumerCommands(commands.Cog):
         self.bot = bot
 
     @staticmethod
-    def get_emoji(ticker):
-        if ticker == 'xlm':
-            return CONST_STELLAR_EMOJI
-
-    @staticmethod
     def get_coin_usd_value(coin_name):
         """
         Get the USD coin value
