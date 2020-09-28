@@ -169,15 +169,14 @@ class WithdrawalCommands(commands.Cog):
                                 # Update user and bot withdrawal stats
                                 self.update_withdrawal_stats(ctx=ctx, stroops=stroops)
 
-                                applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
                                 in_dollar = convert_to_usd(amount=xlm_with_amount, coin_name='stellar')
 
-                                for chn_id in applied_channel_list:
-                                    channel = self.bot.get_channel(id=int(chn_id))
-                                    msg = f':outbox_tray: {xlm_with_amount} {CONST_STELLAR_EMOJI} (${in_dollar["total"]}) on ' \
-                                          f'{ctx.message.guild}'
-                                    await customMessages.explorer_messages(destination=channel, message=msg)
-
+                                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                 guild_profiles.get_all_explorer_applied_channels()]
+                                explorer_msg = f':outbox_tray: {xlm_with_amount} {CONST_STELLAR_EMOJI} ' \
+                                               f'(${in_dollar["total"]}) on {ctx.message.guild}'
+                                await customMessages.explorer_messages(applied_channels=load_channels,
+                                                                       message=explorer_msg)
 
                             else:
                                 message = 'Funds could not be withdrawn at this point. Please try again later.'
