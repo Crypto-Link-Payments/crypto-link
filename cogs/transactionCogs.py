@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from backOffice.botStatistics import BotStatsManager
 from backOffice.profileRegistrations import AccountManager
-from backOffice.statsUpdater import StatsManager
+from backOffice.statsManager import StatsManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils import monetaryConversions
