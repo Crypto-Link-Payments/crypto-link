@@ -5,16 +5,16 @@ Handling Stellar chain
 import os
 import sys
 
-from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, \
-    AiohttpClient
-
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
+
+from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, \
+    AiohttpClient
 
 from utils.tools import Helpers
 
 helpers = Helpers()
-secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
+secret_details = helpers.read_json_file(file_name="walletSecerets.json")  # Load Stellar wallet secrets
 public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
 
 
@@ -144,10 +144,7 @@ class StellarWallet:
         else:
             return False
 
-    def withdraw(self, address: str, xlm_amount):
-        """
-        Function to process withdrawals
-        """
+    def withdraw(self, address: str, xlm_amount: float):
         source_account = self.server.load_account(self.public_key)
         tx = TransactionBuilder(
             source_account=source_account,
@@ -203,7 +200,3 @@ class StellarWallet:
 
             else:
                 return {}
-
-
-if __name__ == "__main__":
-    print(StellarWallet().public_key)
