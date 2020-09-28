@@ -14,7 +14,7 @@ from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, 
 from utils.tools import Helpers
 
 helpers = Helpers()
-secret_details = helpers.read_json_file(file_name="walletSecerets.json")  # Load Stellar wallet secrets
+secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
 public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
 
 
