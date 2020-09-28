@@ -28,41 +28,6 @@ class BotStatsManager(object):
         self.chain_activities = self.bot_stuff.CLOnChainStats
         self.off_chain_activities = self.bot_stuff.CLOffChainStats
 
-    def update_chain_activity_stats(self, type_of: str, ticker: str, amount: int):
-        """
-        Update stats when on chain activity happens
-        """
-        try:
-            if ticker == 'stellar':
-                if type_of == "deposit":
-                    self.chain_activities.update_one({"ticker": "xlm"},
-                                                     {"$inc": {"depositCount": 1,
-                                                               "depositAmount": amount},
-                                                      "$currentDate": {"lastModified": True}})
-                elif type_of == "withdrawal":
-                    self.chain_activities.update_one({"ticker": "xlm"},
-                                                     {"$inc": {"withdrawalCount": 1,
-                                                               "withdrawalAmount": amount},
-                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-            return True
-        except errors.PyMongoError:
-            return False
-
-    def update_off_chain_activity_stats(self, ticker: str, amount: int):
-
-        """
-        Update off chain activity when off chain happens
-        """
-        try:
-            if ticker == 'stellar':
-                self.off_chain_activities.update_one({"ticker": "xlm"},
-                                                     {"$inc": {"transactionCount": 1,
-                                                               "offChainMoved": amount},
-                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-            return True
-        except errors.PyMongoError:
-            return False
-
     def get_all_stats(self):
         """
         Get all bot stats on request
