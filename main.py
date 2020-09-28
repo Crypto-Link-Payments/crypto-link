@@ -111,14 +111,12 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
                                                                             avatar=bot.user.avatar_url,
                                                                             user=dest, stroops=tx_stroop)
 
-                    applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
+                    # Explorer messages
+                    load_channels = [bot.get_channel(id=int(chn)) for chn in
+                                     guild_profiles.get_all_explorer_applied_channels()]
                     in_dollar = convert_to_usd(amount=tx_stroop / 10000000, coin_name='stellar')
-
-                    #TODO migrate to one file and implement to other parts
-                    for chn_id in applied_channel_list:
-                        channel = bot.get_channel(id=int(chn_id))
-                        msg = f':inbox_tray: {tx_stroop / 10000000} {CONST_STELLAR_EMOJI} (${in_dollar["total"]})'
-                        await custom_messages.explorer_messages(destination=channel, message=msg)
+                    explorer_msg = f':inbox_tray: {tx_stroop / 10000000} {CONST_STELLAR_EMOJI} (${in_dollar["total"]})'
+                    await custom_messages.explorer_messages(applied_channels=load_channels, message=explorer_msg)
 
                     # Update user deposit stats
                     stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
