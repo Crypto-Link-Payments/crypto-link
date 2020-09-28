@@ -15,7 +15,7 @@ from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_w
 from cogs.utils.systemMessaages import CustomMessages
 
 from backOffice.statsManager import StatsManager
-from cogs.utils.monetaryConversions import get_decimal_point, convert_to_usd
+from cogs.utils.monetaryConversions import get_decimal_point
 from utils import numbers
 from utils.tools import Helpers
 
