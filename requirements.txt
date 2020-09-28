@@ -20,6 +20,7 @@ jsonpickle==1.3
 lazy-object-proxy==1.4.3
 mccabe==0.6.1
 mnemonic==0.19
+motor==2.3.0
 multidict==4.7.4
 pycoingecko==1.2.0
 pycparser==2.20
