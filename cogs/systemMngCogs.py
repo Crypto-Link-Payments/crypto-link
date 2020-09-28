@@ -24,9 +24,8 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 # Extensions integrated into Crypto Link
 extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
               'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
-              'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs',
-              'cogs.merchantLicensingCogs',
-              'cogs.feeManagementCogs']
+              'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
+              'cogs.feeManagementCogs', 'cogs.guildOwnersCmds']
 
 
 class BotManagementCommands(commands.Cog):
