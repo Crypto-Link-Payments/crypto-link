@@ -290,13 +290,13 @@ class ConsumerCommands(commands.Cog):
                                 await stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
                                                                        guild_stats_data=guild_stats)
 
-                                applied_channel_list = guild_profiles.get_all_explorer_applied_channels()
-                                for chn_id in applied_channel_list:
-                                    channel = self.bot.get_channel(id=int(chn_id))
-                                    msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
-                                          f'(${convert_to_dollar}) on ' \
-                                          f'{ctx.message.guild}'
-                                    await customMessages.explorer_messages(destination=channel, message=msg)
+                                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                 guild_profiles.get_all_explorer_applied_channels()]
+                                explorer_msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
+                                               f'(${convert_to_dollar}) on ' \
+                                               f'{ctx.message.guild}'
+                                await customMessages.explorer_messages(applied_channels=load_channels,
+                                                                       message=explorer_msg)
                         else:
                             message = f'Error while trying to deduct funds from user'
                             await customMessages.system_message(ctx=ctx, message=message,
