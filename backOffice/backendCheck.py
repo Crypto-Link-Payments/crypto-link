@@ -103,8 +103,6 @@ class BotStructureCheck(object):
                 "totalPublicMoved": float(0.0),
                 "totalEmojiTx": int(0),
                 "totalEmojiMoved": float(0),
-                "rolePurchaseTxCount": int(0),
-                "roleMoved": float(0.0),
                 "multiTxCount": int(0),
                 "multiTxMoved": float(0.0),
                 "merchantPurchases": int(1),
@@ -119,11 +117,9 @@ class BotStructureCheck(object):
                 "totalPublicMoved": float(0.0),
                 "totalEmojiTx": int(0),
                 "totalEmojiMoved": float(0),
-                "rolePurchaseTxCount": int(0),
-                "roleMoved": float(0.0),
                 "multiTxCount": int(0),
                 "multiTxMoved": float(0.0),
-                "merchantPurchases": int(1),
+                "merchantPurchases": int(0),
                 "merchantMoved": float(0)
             }]
 
