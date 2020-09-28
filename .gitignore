@@ -142,3 +142,5 @@ __pycache__
 walletSecrets.json
 
 /CLEnvironment/
+CLEnv/
+
