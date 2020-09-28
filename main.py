@@ -14,7 +14,7 @@ from discord.ext import commands
 from backOffice.backendCheck import BotStructureCheck
 from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.merchatManager import MerchantManager
-from backOffice.statsUpdater import StatsManager
+from backOffice.statsManager import StatsManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
