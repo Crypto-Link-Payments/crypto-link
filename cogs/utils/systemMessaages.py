@@ -394,7 +394,9 @@ class CustomMessages:
         await ctx.author.send(embed=xlm_wallet)
 
     async def explorer_messages(self, applied_channels: list, message: str, tx_type: str):
-
+        """
+        Transactin reports to all explorer applied channels
+        """
         msg_streamed = self.filter_message(message=message, tx_type=tx_type)
         for explorer_channel in applied_channels:
             await explorer_channel.send(msg_streamed)
