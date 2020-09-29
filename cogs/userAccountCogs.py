@@ -165,7 +165,7 @@ class UserAccountCommands(commands.Cog):
             all_wallets = list(user_balances.keys())
 
             # initiate Discord embed
-            balance_embed = Embed(title=f"Stellar wallet details for {ctx.message.author}",
+            balance_embed = Embed(title=f"Wallet details for {ctx.message.author}",
                                   timestamp=datetime.utcnow(),
                                   colour=Colour.green())
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
