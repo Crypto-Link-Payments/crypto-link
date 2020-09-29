@@ -173,10 +173,7 @@ class AccountManager(object):
                                              {"_id": 0,
                                               "stellarDepositId": 1})
 
-        if result:
-            return result
-        else:
-            return []
+        return result
 
     def get_wallet_balances_based_on_discord_id(self, discord_id: int):
         """
