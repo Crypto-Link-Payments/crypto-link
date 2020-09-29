@@ -1,0 +1,71 @@
+"""
+Class StellarManager is designed to handle off-chain and on-chain activities and store data
+into history
+"""
+
+import os
+import sys
+from pymongo import MongoClient, errors
+import motor.motor_asyncio
+
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(project_path)
+
+from utils.tools import Helpers
+
+helper = Helpers()
+hot = helper.read_json_file(file_name='hotWallets.json')
+d = helper.read_json_file(file_name='botSetup.json')
+
+
+class UserWalletManager:
+    """
+    Manages Stellar on chain activities
+    """
+
+    def __init__(self):
+        self.hot_wallet = hot['xlm']
+        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
+        self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(d['database']['connection'])  # Async connection
+        self.crypto_link = self.connection['CryptoLink']
+
+        self.user_wallets = self.crypto_link.userWallets
+        # Collections connections async
+        self.as_cl_connection = self.as_connection['CryptoLink']
+        self.as_user_profiles = self.as_cl_connection.userProfiles  # Connection to user profiles
+        self.as_user_wallets = self.as_cl_connection.userWallets  # Connection to user profiles
+
+    def update_coin_balance(self, coin, user_id:int, amount:int, direction:int):
+        if direction == 1:  # Append
+            pass
+        else:
+            amount *= (-1)  # Deduct
+
+        result = self.user_wallets.update_one({"userId":user_id},
+                                              {"$inc":{f"{coin}":amount}})
+        return result.modified_count > 0
+
+    def get_ticker_balance(self, ticker, user_id: int):
+        result = self.user_wallets.find_one({"userId": user_id},
+                                            {"_id": 0,
+                                             f"{ticker}": 1})
+        return result[f"{ticker}"]
+
+    def get_balances(self, user_id: int):
+        """
+        Get balances of all wallets
+        """
+        result = self.user_wallets.find_one({"userId": user_id},
+                                            {"_id": 0,
+                                             "depositId": 0,
+                                             "userId": 0,
+                                             "userName": 0})
+        return result
+
+    def get_full_details(self, user_id: int):
+        """
+        Get balances of all wallets
+        """
+        result = self.user_wallets.find_one({"userId": user_id},
+                                            {"_id": 0})
+        return result

@@ -38,7 +38,7 @@ bot.remove_command('help')  # removing the old help command
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
-              'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
+              'cogs.systemMngCogs', 'cogs.withdrawalCogs',
               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
               'cogs.feeManagementCogs', 'cogs.guildOwnersCmds']
 

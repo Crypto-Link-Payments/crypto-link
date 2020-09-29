@@ -3,13 +3,19 @@ COGS: Management of the whole payment system
 """
 import os
 import sys
+import time
 from datetime import datetime
 
 from discord import Embed, Colour
 from discord.ext import commands
 from git import Repo, InvalidGitRepositoryError
-
+from backOffice.profileRegistrations import AccountManager
+from backOffice.botWallet import BotManager
+from backOffice.stellarActivityManager import StellarManager
+from backOffice.stellarOnChainHandler import StellarWallet
+from backOffice.corpHistory import CorporateHistoryManager
 from backOffice.statsManager import StatsManager
+from cogs.utils.monetaryConversions import get_decimal_point, get_normal, convert_to_usd
 from cogs.utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -18,14 +24,25 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 helper = Helpers()
+account_mng = AccountManager()
 customMessages = CustomMessages()
+stellar_manager = StellarManager()
+stellar_wallet = StellarWallet()
+corporate_hist_mng = CorporateHistoryManager()
+bot_manager = BotManager()
 stats_manager = StatsManager()
 d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
+CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
+CONST_CORP_TRANSFER_ERROR_TITLE = '__Corporate Transfer Error__'
+
+CONST_WARNING_TITLE = f':warning: __Restricted area__ :warning: '
+CONST_WARNING_MESSAGE = f'You do not have rights to access this are of the bot'
+
 # Extensions integrated into Crypto Link
 extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
-              'cogs.systemMngCogs', 'cogs.hotWalletsCogs', 'cogs.clOfChainWalletCmd', 'cogs.withdrawalCogs',
+              'cogs.systemMngCogs', 'cogs.withdrawalCogs',
               'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
               'cogs.feeManagementCogs', 'cogs.guildOwnersCmds']
 
@@ -37,43 +54,80 @@ class BotManagementCommands(commands.Cog):
         """
         self.bot = bot
 
+    async def send_transfer_notification(self, ctx, member, channel_id: int, normal_amount, emoji: str,
+                                         chain_name: str):
+        """
+        Function send information to corporate channel on corp wallet activity
+        :param ctx: Discord Context
+        :param member: Member to where funds have been transferred
+        :param channel_id: channel ID applied for notifications
+        :param normal_amount: converted amount from atomic
+        :param emoji: emoji identification for the currency
+        :param chain_name: name of the chain used in transactions
+        :return: discord.Embed
+        """
+
+        stellar_notify_channel = self.bot.get_channel(id=int(channel_id))
+        corp_channel = Embed(
+            title=f'__{emoji} Corporate account transfer activity__ {emoji}',
+            description=f'Notification on corporate funds transfer activity on {chain_name}',
+            colour=Colour.greyple())
+        corp_channel.add_field(name='Author',
+                               value=f'{ctx.message.author}',
+                               inline=False)
+        corp_channel.add_field(name='Destination',
+                               value=f'{member}')
+        corp_channel.add_field(name='Amount',
+                               value=f'{normal_amount} {emoji}')
+        await stellar_notify_channel.send(embed=corp_channel)
+
     @commands.group()
     @commands.check(is_one_of_gods)
-    async def mng(self, ctx):
+    async def cl(self, ctx):
         """
-        Category of commands under team category
-        :param ctx:
-        :return:
+        Entry point for cl sub commands
         """
-
+        print(f'CL : {ctx.author} -> {ctx.message.content}')
         if ctx.invoked_subcommand is None:
-            value = [{'name': 'Entry for commands to manage whole system',
-                      'value': f"{d['command']}mng system*** "},
-                     {'name': 'Entry for commands to manage COGS',
-                      'value': f"{d['command']}god scripts*** "}
-                     ]
-            await customMessages.embed_builder(ctx, title='Welcome to the GOD mode',
-                                               description=f"Showcase of all commands and sub-commands available "
-                                                           f"for server owner, and bot creator. In order to get "
-                                                           f"access to the categories "
-                                                           f"***{d['command']}god*** needs to be typed in first "
-                                                           f"followed by relevant sub-commands",
-                                               data=value)
+            title = '__Crypto Link commands__'
+            description = "All commands to operate with Crypto Link Corporate Wallet"
+            list_of_values = [
+                {"name": "Check Corporate Balance", "value": f"{d['command']}cl balance"},
+                {"name": "Withdrawing XLM from Corp to personal",
+                 "value": f"{d['command']}cl sweep"},
+                {"name": "Statistics of crypto link system",
+                 "value": f"{d['command']}cl stats"},
+                {"name": "Other categories",
+                 "value": f"{d['command']}system\n"
+                          f"{d['command']}manage\n"
+                          f"{d['command']}hot"}
+            ]
 
-    @mng.group()
-    @commands.check(is_animus)
-    async def system(self, ctx):
-        if ctx.invoked_subcommand is None:
-            value = [{'name': '__Turning bot off__',
-                      'value': f"***{d['command']}mng system off*** "},
-                     {'name': '__Pulling update from Github__',
-                      'value': f"***{d['command']}mng system update*** "},
-                     ]
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                               destination=ctx.message.author)
 
-            await customMessages.embed_builder(ctx, title='Available sub commands for system',
-                                               description='Available commands under category ***system***', data=value)
+    @cl.command()
+    @commands.check(is_one_of_gods)
+    async def balance(self, ctx):
+        """
+        Check the off-chain balance status of Crypto Link system
+        """
+        print(f'CL BALANCE : {ctx.author} -> {ctx.message.content}')
+        data = bot_manager.get_bot_wallets_balance()
+        values = Embed(title="Balance of Crypto-Link Off chain balance",
+                       description="Current state of Crypto Link Lumen wallet",
+                       color=Colour.blurple())
+        for bal in data:
+            ticker = bal['ticker']
+            decimal = get_decimal_point(ticker)
+            conversion = int(bal["balance"])
+            conversion = get_normal(str(conversion), decimal_point=decimal)
+            values.add_field(name=ticker.upper(),
+                             value=f'{conversion}',
+                             inline=False)
+        await ctx.channel.send(embed=values, delete_after=100)
 
-    @system.command()
+    @cl.command()
     async def stats(self, ctx):
         """
         Statistical information on Crypto Link system
@@ -135,6 +189,72 @@ class BotManagementCommands(commands.Cog):
                             value=f'{cl_off_chain["merchantMoved"]}')
         await ctx.author.send(embed=off_chain)
 
+    @cl.command()
+    @commands.check(is_one_of_gods)
+    async def sweep(self, ctx):
+        """
+        Transfer funds from Crypto Link to develop wallet
+        """
+        print(f'CL SWEEP  : {ctx.author} -> {ctx.message.content}')
+        balance = int(bot_manager.get_bot_wallet_balance_by_ticker(ticker='xlm'))
+        if balance > 0:  # Check if balance greater than -
+            # Checks if recipient exists
+            if not account_mng.check_user_existence(user_id=ctx.message.author.id):
+                account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}')
+
+            if stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
+                                                                    stroops=int(balance), direction=1):
+                # Deduct the balance from the community balance
+                if bot_manager.update_lpi_wallet_balance(amount=balance, wallet="xlm", direction=2):
+                    # Store in history and send notifications to owner and to channel
+                    dec_point = get_decimal_point(symbol='xlm')
+                    normal_amount = get_normal(str(balance), decimal_point=dec_point)
+
+                    # Store into the history of corporate transfers
+                    corporate_hist_mng.store_transfer_from_corp_wallet(time_utc=int(time.time()),
+                                                                       author=f'{ctx.message.author}',
+                                                                       destination=int(ctx.message.author.id),
+                                                                       amount_atomic=balance, amount=normal_amount,
+                                                                       currency='xlm')
+
+                    # notification to corp account discord channel
+                    stellar_channel_id = auto_channels['stellar']
+                    await self.send_transfer_notification(ctx=ctx, member=ctx.message.author,
+                                                          channel_id=stellar_channel_id,
+                                                          normal_amount=normal_amount, emoji=CONST_STELLAR_EMOJI,
+                                                          chain_name='Stellar Chain')
+
+                else:
+                    # Revert the user balance if community balance can not be updated
+                    stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
+                                                                         stroops=int(balance), direction=2)
+
+                    message = f"Stellar funds could not be deducted from corporate account. Please try again later"
+                    await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
+                                                        sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+            else:
+                message = f"Stellar funds could not be moved from corporate account to {ctx.message.author}." \
+                          f"Please try again later "
+                await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
+                                                    sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+        else:
+            message = f"You can not sweep the account as its balance is 0.0000000 {CONST_STELLAR_EMOJI}"
+            await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
+                                                sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+
+    @commands.group()
+    @commands.check(is_one_of_gods)
+    async def system(self, ctx):
+        if ctx.invoked_subcommand is None:
+            value = [{'name': '__Turning bot off__',
+                      'value': f"***{d['command']}system off*** "},
+                     {'name': '__Pulling update from Github__',
+                      'value': f"***{d['command']}system update*** "},
+                     ]
+
+            await customMessages.embed_builder(ctx, title='Available sub commands for system',
+                                               description='Available commands under category ***system***', data=value)
+
     @system.command()
     async def off(self, ctx):
         await ctx.channel.send(content='Going Offline!')
@@ -188,17 +308,34 @@ class BotManagementCommands(commands.Cog):
                               inline=False)
         await channel.send(embed=load_status)
 
-    @mng.group()
+    @commands.group()
+    @commands.check(is_one_of_gods)
+    async def manage(self, ctx):
+        """
+        Category of commands under team category
+        :param ctx:
+        :return:
+        """
+
+        if ctx.invoked_subcommand is None:
+            value = [{'name': 'Entry for commands to manage COGS',
+                      'value': f"{d['command']}manage scripts*** "}
+                     ]
+            await customMessages.embed_builder(ctx, title='Crypto Link Management commands',
+                                               description=f"",
+                                               data=value)
+
+    @manage.group()
     async def scripts(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__List all cogs__',
-                      'value': f"***{d['command']}mng scripts list_cogs*** "},
+                      'value': f"***{d['command']}manage scripts list_cogs*** "},
                      {'name': '__Loading specific cog__',
-                      'value': f"***{d['command']}mng scripts load <cog name>*** "},
+                      'value': f"***{d['command']}manage scripts load <cog name>*** "},
                      {'name': '__Unloading specific cog__',
-                      'value': f"***{d['command']}mng scripts unload <cog name>*** "},
+                      'value': f"***{d['command']}manage scripts unload <cog name>*** "},
                      {'name': '__Reload all cogs__',
-                      'value': f"***{d['command']}mng scripts reload*** "}
+                      'value': f"***{d['command']}manage scripts reload*** "}
                      ]
 
             await customMessages.embed_builder(ctx, title='Available sub commands for system',
@@ -278,6 +415,75 @@ class BotManagementCommands(commands.Cog):
         ext_load_embed.add_field(name='Status',
                                  value=notification_str)
         await ctx.channel.send(embed=ext_load_embed)
+
+    @commands.group()
+    @commands.check(is_animus)
+    async def hot(self, ctx):
+        """
+        Command entry point for hot wallet functions
+        """
+        if ctx.invoked_subcommand is None:
+            value = [{'name': f'***{d["command"]}hot stellar*** ',
+                      'value': "Returns information from wallet RPC on stellar balance"}
+                     ]
+            await customMessages.embed_builder(ctx, title='Querying hot wallet details',
+                                               description="All available commands to operate with hot wallets",
+                                               data=value, destination=1)
+
+    @hot.command()
+    async def stellar(self, ctx):
+        """
+        Check Stellar hot wallet details
+        """
+        data = stellar_wallet.get_stellar_hot_wallet_details()
+        get_usd_value = convert_to_usd(amount=float(data['balances'][0]['balance']), coin_name='stellar')
+        if data:
+            title = 'Stellar hot wallet details'
+            description = 'Bellow are provided all details on integrated Stellar Wallet'
+
+            list_of_values = [{'name': 'Address',
+                               'value': f"{data['account_id']}"},
+                              {'name': 'Balance',
+                               'value': f"{data['balances'][0]['balance']} {CONST_STELLAR_EMOJI}"},
+                              {'name': 'In USD $',
+                               'value': f"$ {get_usd_value['total']}\n"
+                                        f"Rate: {get_usd_value['usd']} $/ {CONST_STELLAR_EMOJI}"},
+                              {'name': 'Buying liabilities',
+                               'value': f"{data['balances'][0]['buying_liabilities']} {CONST_STELLAR_EMOJI}"},
+                              {'name': 'Selling liabilities',
+                               'value': f"{data['balances'][0]['selling_liabilities']} {CONST_STELLAR_EMOJI}"}
+                              ]
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                               destination=1)
+        else:
+            sys_msg_title = 'Stellar Wallet Query Server error'
+            message = 'Status of the wallet could not be obtained at this moment'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                sys_msg_title=sys_msg_title)
+
+    @cl.error
+    async def cl_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                sys_msg_title=CONST_WARNING_MESSAGE)
+
+    @system.error
+    async def system_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                sys_msg_title=CONST_WARNING_MESSAGE)
+
+    @manage.error
+    async def manage_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                sys_msg_title=CONST_WARNING_MESSAGE)
+
+    @hot.error
+    async def hot_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                sys_msg_title=CONST_WARNING_MESSAGE)
 
 
 def setup(bot):

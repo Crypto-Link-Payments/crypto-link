@@ -1,0 +1,14 @@
+{
+  "xlm": {
+    "name": "Stellar Lumen",
+    "decimal": 7,
+    "emoji": "<:stelaremoji:684676687425961994>",
+    "coinGeckoListing": true
+  },
+  "clToken": {
+    "name": "CL Token",
+    "decimal": 7,
+    "emoji": ":sweat_drops:",
+    "coinGeckoListing": false
+  }
+}
