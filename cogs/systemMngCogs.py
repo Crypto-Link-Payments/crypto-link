@@ -84,14 +84,17 @@ class BotManagementCommands(commands.Cog):
         """
         print(f'CL : {ctx.author} -> {ctx.message.content}')
         if ctx.invoked_subcommand is None:
-            title = '__Available Commands for Corp Wallet Transfers__'
+            title = '__Crypto Link commands__'
             description = "All commands to operate with Crypto Link Corporate Wallet"
             list_of_values = [
                 {"name": "Check Corporate Balance", "value": f"{d['command']}cl balance"},
                 {"name": "Withdrawing XLM from Corp to personal",
                  "value": f"{d['command']}cl sweep"},
                 {"name": "Statistics of crypto link system",
-                 "value": f"{d['command']}cl stats"}
+                 "value": f"{d['command']}cl stats"},
+                {"name": "Other categories",
+                 "value": f"{d['command']}system\n"
+                          f"{d['command']}manage"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -238,9 +241,9 @@ class BotManagementCommands(commands.Cog):
     async def system(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__Turning bot off__',
-                      'value': f"***{d['command']}mng system off*** "},
+                      'value': f"***{d['command']}system off*** "},
                      {'name': '__Pulling update from Github__',
-                      'value': f"***{d['command']}mng system update*** "},
+                      'value': f"***{d['command']}system update*** "},
                      ]
 
             await customMessages.embed_builder(ctx, title='Available sub commands for system',
