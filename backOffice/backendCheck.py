@@ -104,7 +104,7 @@ class BotStructureCheck(object):
                 "totalEmojiMoved": float(0),
                 "multiTxCount": int(0),
                 "multiTxMoved": float(0.0),
-                "merchantPurchases": int(1),
+                "merchantPurchases": int(0),
                 "merchantMoved": float(0)
             }, {
                 "ticker": "clToken",
