@@ -10,6 +10,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init
 from discord.ext import commands
+from pymongo import MongoClient, errors
 
 from backOffice.backendCheck import BotStructureCheck
 from backOffice.guildServicesManager import GuildProfileManager
@@ -31,7 +32,6 @@ guild_profiles = GuildProfileManager()
 custom_messages = CustomMessages()
 helper = Helpers()
 notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-d = helper.read_json_file(file_name='botSetup.json')
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(d['command']))  # Test commands
 bot.remove_command('help')  # removing the old help command
@@ -368,7 +368,10 @@ async def on_ready():
 
 
 if __name__ == '__main__':
-    backend_check = BotStructureCheck()
+    bot_data = helper.read_json_file(file_name='botSetup.json')
+    connection = MongoClient(bot_data['database']['connection'], maxPoolSize=20)
+
+    backend_check = BotStructureCheck(connection)
     backend_check.check_collections()
     backend_check.checking_stats_documents()
     backend_check.checking_bot_wallets()
