@@ -113,19 +113,19 @@ Once you receive successful report to DM on registration you can proceed with:
 !acc
 ```
 
-#### :dollar: Making P2P (Peer To Peer) transaction :dollar:
+#### :dollar: Making P2P (Peer To Peer) public transaction :dollar:
 
 Function Structure
 
 ```text
-!send <currency symbol> <amount> <@discord.User> <message=Optional>
+!send <amount> <currency symbol> <@discord.User> <message=Optional>
 
 Note: if transactions successful both sender and recipient will receive transaction slip with included message. 
 ```
 
 example for Stellar Lumen:
 ```text
-!send xlm 100 @Animus#4608 have a coffee # Sends N amount of XLM to targeted user
+!send 100 xlm @Animus#4608 have a coffee # Sends N amount of XLM to targeted user
 ```
 
 #### :moneybag: Making Discord Withdrawals and Deposits :moneybag:

@@ -50,11 +50,18 @@ or
 
 ### Transaction related commands
 
-#### Normal Peer to Peer transaction
+#### Public peer to peer transactions
 ```text
-!send xlm <amount> <@discord.User> <message>
+!send <amount> <ticker> <@discord.User> <message>
 ```
 ***Note***: Transaction can be executed 1x/1min/user
+
+#### Private Peer to Peer transaction
+```text
+!private <amount> <ticker> <@discord.User> <message>
+```
+***Note***: Transaction can be executed 1x/1min/user
+
 
 ### Merchant Related commands (consumer perspective)
 ```text
