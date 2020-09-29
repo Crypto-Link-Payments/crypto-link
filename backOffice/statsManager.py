@@ -103,13 +103,10 @@ class StatsManager(object):
                                                {"$inc": {f"{key}.depositsCount": 1,
                                                          f"{key}.totalDeposited": amount}})
 
-    def update_user_withdrawal_stats(self, user_id, amount, key: str):
-        """
-        Updates users withdrawal stats.
-        """
-        self.user_profiles.find_one_and_update({"userId": user_id},
-                                               {f"{CONST_INC}": {f"{key}.withdrawalsCount": 1,
-                                                                 f"{key}.totalWithdrawn": amount}})
+    async def update_bot_chain_stats_as(self, ticker, activity_data: dict):
+        await self.as_on_chain_activities.update_one({"ticker": ticker},
+                                                     {f"{CONST_INC}": activity_data,
+                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
     def update_bot_chain_stats(self, type_of: str, ticker: str, amount: float):
         """
@@ -126,47 +123,6 @@ class StatsManager(object):
                                              {f"{CONST_INC}": {"withdrawalCount": 1,
                                                                "withdrawnAmount": round(float(amount), 7)},
                                               f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-
-    def update_user_transaction_stats(self, user_id: int, key, amount: float, direction: str, tx_type: str = None,
-                                      special: str = None, mined: float = None):
-
-        data = dict()
-        # Public or private and direction of funds
-        if tx_type and tx_type == 'public':
-            data[f'{key}.publicTxCount'] = 1
-            if direction == 'outgoing':
-                data[f'{key}.publicSent'] = amount
-            elif direction == 'incoming':
-                data[f'{key}.publicReceived'] = amount
-
-        elif tx_type and tx_type == 'private':
-            data[f'{key}.privateTxCount'] = 1
-            if direction == 'outgoing':
-                data[f'{key}.privateSent'] = amount
-            elif direction == 'incoming':
-                data[f'{key}.privateReceived'] = amount
-
-        # incoming or outgoing
-        if direction == 'incoming':
-            data[f"transactionCounter.receivedCount"] = 1
-            data[f"{key}.received"] = round(float(amount), 7)
-
-        elif direction == 'outgoing':
-            data[f"transactionCounter.sentTxCount"] = 1
-            data[f"{key}.sent"] = round(float(amount), 7)
-
-        # special or not
-        if special:
-            if special == 'emoji':
-                data["transactionCounter.emojiTxCount"] = 1
-            elif special == 'multiTx':
-                data["transactionCounter.multiTxCount"] = 1
-
-        # Mined or not
-        if mined and direction == 'outgoing':
-            data[f"clCoinStats.mined"] = mined
-
-        self.user_profiles.find_one_and_update({"userId": user_id}, {f"{CONST_INC}": data})
 
     async def update_usr_tx_stats(self, user_id: int, tx_stats_data: dict):
         await self.as_user_profiles.update_one({"userId": user_id},
