@@ -145,9 +145,9 @@ class UserAccountCommands(commands.Cog):
             deposit_embed.add_field(
                 name=f' {CONST_STELLAR_EMOJI} Stellar Lumen Deposit details {CONST_STELLAR_EMOJI}',
                 value=f'Stellar wallet Address:\n'
-                      f'{hot_wallets["xlm"]}\n'
+                      f'```{hot_wallets["xlm"]}```\n'
                       f'\nMEMO:\n'
-                      f'{user_profile["stellarDepositId"]}',
+                      f'> {user_profile["stellarDepositId"]}',
                 inline=False)
             deposit_embed.set_thumbnail(url=ctx.message.author.avatar_url)
             await ctx.author.send(embed=deposit_embed)
