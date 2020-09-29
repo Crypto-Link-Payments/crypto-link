@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from backOffice.clTokenACtivityManager import ClTokenManager
 from backOffice.profileRegistrations import AccountManager
+from backOffice.userWalletManager import UserWalletManager
 from backOffice.stellarActivityManager import StellarManager
 from cogs.utils.customCogChecks import is_public, user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
@@ -17,6 +18,8 @@ account_mng = AccountManager()
 customMessages = CustomMessages()
 stellar = StellarManager()
 clToken = ClTokenManager()
+
+user_wallets = UserWalletManager()
 
 d = helper.read_json_file(file_name='botSetup.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
@@ -156,30 +159,34 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def balance(self, ctx):
-        print(f'WALLET BALANCE: {ctx.author} -> {ctx.message.content}')
+        user_balances = user_wallets.get_balances(user_id=ctx.message.author.id)
+        coin_data = helper.read_json_file(file_name='integratedCoins.json')
+        if user_balances:
+            all_wallets = list(user_balances.keys())
 
-        data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
-        stellar_balance = get_normal(value=str(data['balance']),
-                                     decimal_point=get_decimal_point('xlm'))
-        stellar_to_usd = convert_to_usd(amount=float(stellar_balance), coin_name='stellar')
-        if data:
-            stellar_balance = get_normal(value=str(data['balance']),
-                                         decimal_point=get_decimal_point('xlm'))
-
+            # initiate Discord embed
             balance_embed = Embed(title=f"Stellar wallet details for {ctx.message.author}",
+                                  timestamp=datetime.utcnow(),
                                   colour=Colour.green())
-            balance_embed.add_field(name=":map:  Wallet address :map: ",
-                                    value=hot_wallets['xlm'],
-                                    inline=False)
-            balance_embed.add_field(name=":pencil: Deposit ID:pencil: ",
-                                    value=data['depositId'],
-                                    inline=False)
-            balance_embed.add_field(
-                name=f"{CONST_STELLAR_EMOJI} Stellar Balance {CONST_STELLAR_EMOJI} ",
-                value=f'__Crypto__: \n{stellar_balance} {CONST_STELLAR_EMOJI}\n'
-                      f'__Fiat__: \n${stellar_to_usd["total"]} ({stellar_to_usd["usd"]})',
-                inline=False)
-            balance_embed.set_thumbnail(url="https://s2.coinmarketcap.com/static/img/coins/64x64/512.png")
+            balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
+            for wallet_ticker in all_wallets:
+                coin_settings = coin_data[wallet_ticker]
+
+                token_balance = get_normal(value=str(user_balances[wallet_ticker]),
+                                           decimal_point=int(coin_settings["decimal"]))
+
+                if coin_settings["coinGeckoListing"]:
+                    token_to_usd = convert_to_usd(amount=float(token_balance), coin_name='stellar')
+                else:
+                    token_to_usd = {"total": 0,
+                                    "usd": 0}
+
+                balance_embed.add_field(
+                    name=f"{coin_settings['emoji']} {coin_settings['name']} Balance {coin_settings['emoji']}",
+                    value=f'__Crypto__: \n{token_balance} {coin_settings["emoji"]}\n'
+                          f'__Fiat__: \n${token_to_usd["total"]} ({token_to_usd["usd"]})',
+                    inline=False)
+
             await ctx.author.send(embed=balance_embed)
         else:
             title = '__Stellar Wallet Error__'
