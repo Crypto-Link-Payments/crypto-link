@@ -141,7 +141,8 @@ class BotStructureCheck(object):
         if count_bot_wallets == 0:
             print(Fore.YELLOW + "MAKING BOT OFF CHAIN WALLET")
             my_list = [
-                {"ticker": "xlm", "balance": 0}
+                {"ticker": "xlm", "balance": 0},
+                {"ticker": "clToken", "balance": 0}
             ]
             bot_wallets.insert_many(my_list)
             print(Fore.GREEN + "DONE")
@@ -150,6 +151,7 @@ class BotStructureCheck(object):
             print(Fore.LIGHTGREEN_EX + "BOT OFF CHAIN XLM WALLET OK ")
 
         if count_bot_fees == 0:
+            # TODO rewrite key/value pairs for multi token purpose
             print(Fore.YELLOW + "MAKING FEE STRUCTURE DOCS")
             fee_list = [
                 {"type": "with_xlm", "key": 'xlm', 'fee': float(1.0)},
