@@ -37,17 +37,24 @@ def convert_to_usd(amount, coin_name):
     """
     Function converts crypto value to $ and returns the per unit and total amount
     """
+    try:
+        data = gecko.get_price(ids=coin_name, vs_currencies='usd')
+        details = dict()
+        if coin_name == 'stellar':
+            usd_stellar = data['stellar']['usd']
+            details = {
+                "usd": usd_stellar,
+                "total": round(float(amount * usd_stellar), 6)
 
-    data = gecko.get_price(ids=coin_name, vs_currencies='usd')
-    details = dict()
-    if coin_name == 'stellar':
-        usd_stellar = data['stellar']['usd']
+            }
+        return details
+    except Exception as e:
         details = {
-            "usd": usd_stellar,
-            "total": round(float(amount * usd_stellar), 6)
+            "usd": '0',
+            "total": f"{e}"
 
         }
-    return details
+        return details
 
 
 def get_decimal_point(symbol):
