@@ -175,30 +175,6 @@ class AccountManager(object):
 
         return result
 
-    def get_wallet_balances_based_on_discord_id(self, discord_id: int):
-        """
-        Gets both wallets details based on discord id
-        :param discord_id:
-        :return:
-        """
-        stellar = self.user_wallets.find_one({"userId": discord_id},
-                                             {"_id": 0,
-                                              "balance": 1,
-                                              "depositId": 1})
-
-        try:
-            if stellar:
-                values = {
-                    "stellar": stellar,
-                }
-
-                return values
-            else:
-                return {}
-        except errors.PyMongoError as e:
-            print(e)
-            return {}
-
     def get_balance_based_on_ticker(self, user_id, ticker):
 
         if ticker == 'xlm':
