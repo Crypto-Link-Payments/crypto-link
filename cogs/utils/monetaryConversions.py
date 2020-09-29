@@ -63,6 +63,8 @@ def get_decimal_point(symbol):
     """
     if symbol == 'xlm':
         return 7
+    elif symbol == "clToken":
+        return 7
 
 
 def get_normal(value, decimal_point: int):
