@@ -323,13 +323,13 @@ class BotManagementCommands(commands.Cog):
     async def scripts(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__List all cogs__',
-                      'value': f"***{d['command']}mng scripts list_cogs*** "},
+                      'value': f"***{d['command']}manage scripts list_cogs*** "},
                      {'name': '__Loading specific cog__',
-                      'value': f"***{d['command']}mng scripts load <cog name>*** "},
+                      'value': f"***{d['command']}manage scripts load <cog name>*** "},
                      {'name': '__Unloading specific cog__',
-                      'value': f"***{d['command']}mng scripts unload <cog name>*** "},
+                      'value': f"***{d['command']}manage scripts unload <cog name>*** "},
                      {'name': '__Reload all cogs__',
-                      'value': f"***{d['command']}mng scripts reload*** "}
+                      'value': f"***{d['command']}manage scripts reload*** "}
                      ]
 
             await customMessages.embed_builder(ctx, title='Available sub commands for system',
