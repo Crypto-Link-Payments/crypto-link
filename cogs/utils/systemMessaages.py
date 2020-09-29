@@ -401,7 +401,7 @@ class CustomMessages:
                                    f':money_with_wings: {stellar_stats["spentOnRoles"]}{CONST_STELLAR_EMOJI}\n')
         await ctx.author.send(embed=xlm_wallet)
 
-    async def explorer_messages(self, applied_channels: list, message: str, tx_type: str,on_chain:bool=None):
+    async def explorer_messages(self, applied_channels: list, message: str, tx_type: str, on_chain: bool = None):
         """
         Transactin reports to all explorer applied channels
         """
@@ -412,7 +412,6 @@ class CustomMessages:
         else:
             for explorer_channel in applied_channels:
                 await explorer_channel.send(message)
-
 
     async def transaction_report_to_channel(self, ctx, message: str, tx_type: str):
         """
