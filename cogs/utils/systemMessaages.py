@@ -42,6 +42,13 @@ class CustomMessages:
 
         return msg_streamed
 
+    def get_emoji(self, tx_type):
+        if tx_type == 'public':
+            emoji = ':cowboy:'
+        elif tx_type == 'private':
+            emoji = ':detective:'
+        return emoji
+
     @staticmethod
     async def send_deposit_notification_channel(channel, avatar, user, stroops):
         """
@@ -121,8 +128,8 @@ class CustomMessages:
         else:
             await ctx.channel.send(embed=sys_embed, delete_after=100)
 
-    @staticmethod
-    async def transaction_report_to_user(ctx, user, destination, transaction_data: dict, direction: int, tx_type: str,
+    async def transaction_report_to_user(self, ctx, user, destination, transaction_data: dict, direction: int,
+                                         tx_type: str,
                                          message: str = None):
         """
         Transaction report to user
@@ -136,15 +143,16 @@ class CustomMessages:
         :return:
         """
         title = ''
+        tx_type_emoji = self.get_emoji(tx_type=tx_type)
 
         if direction == 0:
-            title = f':outbox_tray: Outgoing **__{tx_type.title()}__** transaction :outbox_tray: '
+            title = f':outbox_tray: Outgoing {tx_type_emoji} **__{tx_type.title()}__** transaction :outbox_tray: '
             col = discord.Colour.red()
-            destination_txt = ':cowboy: Recipient :cowboy: '
+            destination_txt = f'{tx_type_emoji} Recipient {tx_type_emoji} '
             avatar = user.avatar_url
 
         elif direction == 1:
-            title = f':inbox_tray: Incoming {tx_type} transaction :inbox_tray: '
+            title = f':inbox_tray: Incoming {tx_type_emoji} {tx_type.title()} transaction :inbox_tray: '
             col = discord.Colour.green()
             destination_txt = ':postbox:  Sender :postbox: '
             avatar = destination.avatar_url
@@ -153,7 +161,7 @@ class CustomMessages:
                                   colour=col,
                                   timestamp=datetime.utcnow())
         tx_report.set_thumbnail(url=avatar)
-        tx_report.add_field(name=destination_txt,
+        tx_report.add_field(name=f'{destination_txt}',
                             value=f'{user}',
                             inline=False)
         tx_report.add_field(name=':post_office: Guild Origin :post_office: ',
