@@ -73,6 +73,7 @@ class WithdrawalCommands(commands.Cog):
         :return:
         """
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
+        # TODO make multi wallet withdrawals
 
         stellar_fee = bot_manager.get_fees_by_category(all_fees=False, key='xlm')['fee']
         fee_in_xlm = convert_to_currency(amount=stellar_fee, coin_name='stellar')
@@ -137,7 +138,7 @@ class WithdrawalCommands(commands.Cog):
                                                                         withdrawal_data=data_new,
                                                                         coin='XLM',
                                                                         fee=f"${stellar_fee},"
-                                                                           f" Rate:{round(fee_in_xlm['usd'], 4)}",
+                                                                            f" Rate:{round(fee_in_xlm['usd'], 4)}",
                                                                         link=data['explorer'],
                                                                         thumbnail=self.bot.user.avatar_url)
 
@@ -153,9 +154,6 @@ class WithdrawalCommands(commands.Cog):
                                     await custom_messages.cl_staff_incoming_funds_notification(sys_channel=sys_channel,
                                                                                                amount=fee_in_stroops)
 
-                                # Update user and bot withdrawal stats
-                                self.update_withdrawal_stats(ctx=ctx, stroops=stroops)
-
                                 withdrawal_data = {
                                     "xlmStats.withdrawalsCount": 1,
                                     "xlmStats.totalWithdrawn": 1,
@@ -170,14 +168,15 @@ class WithdrawalCommands(commands.Cog):
                                 await stats_manager.update_bot_chain_stats_as(ticker='xlm',
                                                                               activity_data=bot_stats_data)
 
+                                # Message to explorer
                                 in_dollar = convert_to_usd(amount=xlm_with_amount, coin_name='stellar')
-
                                 load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                                  guild_profiles.get_all_explorer_applied_channels()]
                                 explorer_msg = f':outbox_tray: {xlm_with_amount} {CONST_STELLAR_EMOJI} ' \
                                                f'(${in_dollar["total"]}) on {ctx.message.guild}'
                                 await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                        message=explorer_msg)
+                                                                        message=explorer_msg, tx_type='withdrawal',
+                                                                        on_chain=True)
 
                             else:
                                 message = 'Funds could not be withdrawn at this point. Please try again later.'
