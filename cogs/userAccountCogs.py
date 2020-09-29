@@ -36,8 +36,9 @@ class UserAccountCommands(commands.Cog):
     @commands.check(user_has_wallet)
     async def acc(self, ctx):
         utc_now = datetime.utcnow()
-        stellar_wallet_data = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
-        xlm_balance = round(float(stellar_wallet_data["balance"]) / 10000000, 7)
+        wallet_data = user_wallets.get_full_details(user_id=ctx.message.author.id)
+
+        xlm_balance = round(float(wallet_data["xlm"]) / 10000000, 7)
         rates = get_rates(coin_name='stellar')
         in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
         in_usd = rate_converter(xlm_balance, rates["stellar"]["usd"])
@@ -54,7 +55,7 @@ class UserAccountCommands(commands.Cog):
         acc_details.add_field(name=":map: Wallet address :map: ",
                               value=f"```{hot_wallets['xlm']}```")
         acc_details.add_field(name=":compass:  MEMO :compass: ",
-                              value=f"```{stellar_wallet_data['depositId']}```",
+                              value=f"```{wallet_data['depositId']}```",
                               inline=False)
         acc_details.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag: ',
                               value=f'{xlm_balance} {CONST_STELLAR_EMOJI}\n\n',
