@@ -12,9 +12,10 @@ from git import Repo, InvalidGitRepositoryError
 from backOffice.profileRegistrations import AccountManager
 from backOffice.botWallet import BotManager
 from backOffice.stellarActivityManager import StellarManager
+from backOffice.stellarOnChainHandler import StellarWallet
 from backOffice.corpHistory import CorporateHistoryManager
 from backOffice.statsManager import StatsManager
-from cogs.utils.monetaryConversions import get_decimal_point, get_normal
+from cogs.utils.monetaryConversions import get_decimal_point, get_normal, convert_to_usd
 from cogs.utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -25,7 +26,8 @@ sys.path.append(project_path)
 helper = Helpers()
 account_mng = AccountManager()
 customMessages = CustomMessages()
-stellar = StellarManager()
+stellar_manager = StellarManager()
+stellar_wallet = StellarWallet()
 corporate_hist_mng = CorporateHistoryManager()
 bot_manager = BotManager()
 stats_manager = StatsManager()
@@ -34,6 +36,9 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_CORP_TRANSFER_ERROR_TITLE = '__Corporate Transfer Error__'
+
+CONST_WARNING_TITLE = f':warning: __Restricted area__ :warning: '
+CONST_WARNING_MESSAGE = f'You do not have rights to access this are of the bot'
 
 # Extensions integrated into Crypto Link
 extensions = ['cogs.generalCogs', 'cogs.transactionCogs', 'cogs.userAccountCogs',
@@ -94,7 +99,8 @@ class BotManagementCommands(commands.Cog):
                  "value": f"{d['command']}cl stats"},
                 {"name": "Other categories",
                  "value": f"{d['command']}system\n"
-                          f"{d['command']}manage"}
+                          f"{d['command']}manage\n"
+                          f"{d['command']}hot"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -196,8 +202,8 @@ class BotManagementCommands(commands.Cog):
             if not account_mng.check_user_existence(user_id=ctx.message.author.id):
                 account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}')
 
-            if stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
-                                                            stroops=int(balance), direction=1):
+            if stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
+                                                                    stroops=int(balance), direction=1):
                 # Deduct the balance from the community balance
                 if bot_manager.update_lpi_wallet_balance(amount=balance, wallet="xlm", direction=2):
                     # Store in history and send notifications to owner and to channel
@@ -220,8 +226,8 @@ class BotManagementCommands(commands.Cog):
 
                 else:
                     # Revert the user balance if community balance can not be updated
-                    stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
-                                                                 stroops=int(balance), direction=2)
+                    stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
+                                                                         stroops=int(balance), direction=2)
 
                     message = f"Stellar funds could not be deducted from corporate account. Please try again later"
                     await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
@@ -410,13 +416,74 @@ class BotManagementCommands(commands.Cog):
                                  value=notification_str)
         await ctx.channel.send(embed=ext_load_embed)
 
-    @cl.error
-    async def balance_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
-            title = f':warning: __Restricted area__ :warning: '
-            message = f'You do not have rights to access this are of the bot'
+    @commands.group()
+    @commands.check(is_animus)
+    async def hot(self, ctx):
+        """
+        Command entry point for hot wallet functions
+        """
+        if ctx.invoked_subcommand is None:
+            value = [{'name': f'***{d["command"]}hot stellar*** ',
+                      'value': "Returns information from wallet RPC on stellar balance"}
+                     ]
+            await customMessages.embed_builder(ctx, title='Querying hot wallet details',
+                                               description="All available commands to operate with hot wallets",
+                                               data=value, destination=1)
+
+    @hot.command()
+    async def stellar(self, ctx):
+        """
+        Check Stellar hot wallet details
+        """
+        data = stellar_wallet.get_stellar_hot_wallet_details()
+        get_usd_value = convert_to_usd(amount=float(data['balances'][0]['balance']), coin_name='stellar')
+        if data:
+            title = 'Stellar hot wallet details'
+            description = 'Bellow are provided all details on integrated Stellar Wallet'
+
+            list_of_values = [{'name': 'Address',
+                               'value': f"{data['account_id']}"},
+                              {'name': 'Balance',
+                               'value': f"{data['balances'][0]['balance']} {CONST_STELLAR_EMOJI}"},
+                              {'name': 'In USD $',
+                               'value': f"$ {get_usd_value['total']}\n"
+                                        f"Rate: {get_usd_value['usd']} $/ {CONST_STELLAR_EMOJI}"},
+                              {'name': 'Buying liabilities',
+                               'value': f"{data['balances'][0]['buying_liabilities']} {CONST_STELLAR_EMOJI}"},
+                              {'name': 'Selling liabilities',
+                               'value': f"{data['balances'][0]['selling_liabilities']} {CONST_STELLAR_EMOJI}"}
+                              ]
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                               destination=1)
+        else:
+            sys_msg_title = 'Stellar Wallet Query Server error'
+            message = 'Status of the wallet could not be obtained at this moment'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
+                                                sys_msg_title=sys_msg_title)
+
+    @cl.error
+    async def cl_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                sys_msg_title=CONST_WARNING_MESSAGE)
+
+    @system.error
+    async def system_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                sys_msg_title=CONST_WARNING_MESSAGE)
+
+    @manage.error
+    async def manage_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                sys_msg_title=CONST_WARNING_MESSAGE)
+
+    @hot.error
+    async def hot_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                sys_msg_title=CONST_WARNING_MESSAGE)
 
 
 def setup(bot):
