@@ -176,12 +176,10 @@ class AccountManager(object):
         return result
 
     def get_balance_based_on_ticker(self, user_id, ticker):
-
-        if ticker == 'xlm':
-            stellar_wallet = self.user_wallets.find_one({"userId": int(user_id)},
-                                                        {"_id": 0,
-                                                         "balance": 1})
-            return stellar_wallet['balance']
+        balance = self.user_wallets.find_one({"userId": int(user_id)},
+                                             {"_id": 0,
+                                              f"{ticker}": 1})
+        return balance[f'{ticker}']
 
     def get_all(self):
         users = list(self.user_profiles.find({}))
