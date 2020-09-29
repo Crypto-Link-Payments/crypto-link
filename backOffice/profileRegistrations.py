@@ -53,8 +53,8 @@ class AccountManager(object):
             "userId": discord_id,
             "userName": discord_username,
             "depositId": deposit_id,
-            "xlm":int(0),
-            "clToken":int(0)
+            "xlm": int(0),
+            "clToken": int(0)
         }
 
         result = self.user_wallets.insert_one(create_multi_wallet)
@@ -71,15 +71,14 @@ class AccountManager(object):
         if direction != 0:
             amount = amount * (-1)
 
-        if ticker == 'xlm':
-            try:
-                self.user_wallets.update_one({"userId": int(discord_id)},
-                                             {"$inc": {"balance": amount},
-                                              "$currentDate": {"lastModified": True}})
-                return True
-            except errors.PyMongoError as e:
-                print(f' Could not update user wallet with xlm: {e}')
-                return False
+        try:
+            self.user_wallets.update_one({"userId": int(discord_id)},
+                                         {"$inc": {f"{ticker}": amount},
+                                          "$currentDate": {"lastModified": True}})
+            return True
+        except errors.PyMongoError as e:
+            print(f' Could not update user wallet with xlm: {e}')
+            return False
 
     def get_account_details(self, discord_id: int):
         """Get basic account details from user"""
