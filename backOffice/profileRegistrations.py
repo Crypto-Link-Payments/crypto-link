@@ -85,10 +85,7 @@ class AccountManager(object):
         result = self.user_profiles.find_one({"userId": discord_id},
                                              {"_id": 0})
 
-        if result:
-            return result
-        else:
-            return []
+        return result
 
     def register_user(self, discord_id: int, discord_username: str):
         """
