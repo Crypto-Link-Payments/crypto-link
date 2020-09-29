@@ -103,7 +103,7 @@ class UserAccountCommands(commands.Cog):
         if ctx.invoked_subcommand is None:
             title = '__Available Wallets__'
             description = "All commands to check wallet details for each available cryptocurrency"
-            list_of_values = [{"name": "Quick balance check", "value": f"{d['command']}bal"},
+            list_of_values = [{"name": "Quick balance check", "value": f"{d['command']}acc"},
                               {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet deposit"},
                               {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet stats"},
                               {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet balance"}]

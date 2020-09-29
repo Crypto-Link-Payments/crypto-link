@@ -110,8 +110,11 @@ class HelpCommands(commands.Cog):
         title = '__How to make peer to peer transaction__'
         description = "Bellow are presented all currencies available for P2P transactions"
         list_of_values = [
-            {"name": f"{CONST_STELLAR_EMOJI} Transacting Stellar Lumen {CONST_STELLAR_EMOJI} ",
-             "value": f"{d['command']}send xlm <amount> <Discord User>"}]
+            {"name": f"Public transactions ",
+             "value": f"{d['command']}send <amount> <ticker> <Discord User> <message=optional>"},
+            {"name": f"Private transactions ",
+             "value": f"{d['command']}private <amount> <ticker> <Discord User> <message=optional>"}
+        ]
 
         await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                            destination=1)
@@ -122,13 +125,15 @@ class HelpCommands(commands.Cog):
         description = "Bellow are presented all currencies available for P2P transactions"
         list_of_values = [
             {"name": "Get balance information",
-             "value": f"{d['command']}bal"},
+             "value": f"{d['command']}acc"},
             {"name": "Access wallet",
              "value": f"{d['command']}wallet"},
             {"name": "Get instructions on how to deposit",
              "value": f"{d['command']}wallet deposit"},
             {"name": "Get full account report",
              "value": f"{d['command']}wallet balance"},
+            {"name": "Wallet Statistics",
+             "value": f"{d['command']}wallet stats"},
             {"name": "Get details on how to withdraw from Discord Wallet",
              "value": f"{d['command']}withdraw"}]
 

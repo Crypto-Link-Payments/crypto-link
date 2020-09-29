@@ -3,9 +3,7 @@ from datetime import datetime
 import discord
 from discord import errors
 from discord import Role, Embed, Colour
-
 from backOffice.guildServicesManager import GuildProfileManager
-from cogs.utils.monetaryConversions import convert_to_usd
 from utils.tools import Helpers
 
 guild_profiles = GuildProfileManager()
@@ -24,6 +22,32 @@ class CustomMessages:
         For initiation
         """
         pass
+
+    def filter_message(self, message, tx_type: str):
+        msg_streamed = ''
+        if tx_type == 'public':
+            msg_streamed += message
+
+        elif tx_type == 'private':
+            msg_streamed += ":detective:"
+
+        elif tx_type == 'emoji':
+            pass
+
+        elif tx_type == 'multi':
+            pass
+
+        elif tx_type == 'squad':
+            pass
+
+        return msg_streamed
+
+    def get_emoji(self, tx_type):
+        if tx_type == 'public':
+            emoji = ':cowboy:'
+        elif tx_type == 'private':
+            emoji = ':detective:'
+        return emoji
 
     @staticmethod
     async def send_deposit_notification_channel(channel, avatar, user, stroops):
@@ -104,8 +128,9 @@ class CustomMessages:
         else:
             await ctx.channel.send(embed=sys_embed, delete_after=100)
 
-    @staticmethod
-    async def transaction_report_to_user(ctx, user, destination, amount, symbol, direction: int, message: str = None):
+    async def transaction_report_to_user(self, ctx, user, destination, transaction_data: dict, direction: int,
+                                         tx_type: str,
+                                         message: str = None):
         """
         Transaction report to user
         :param ctx: Discord Context
@@ -118,18 +143,16 @@ class CustomMessages:
         :return:
         """
         title = ''
-        if symbol == 'xlm':
-            amount_str = f"{amount:9.7f} <:stelaremoji:684676687425961994>"
-            in_dollar = convert_to_usd(amount=amount, coin_name='stellar')
+        tx_type_emoji = self.get_emoji(tx_type=tx_type)
 
         if direction == 0:
-            title = ':outbox_tray: Outgoing transaction :outbox_tray: '
+            title = f':outbox_tray: Outgoing {tx_type_emoji} **__{tx_type.title()}__** transaction :outbox_tray: '
             col = discord.Colour.red()
-            destination_txt = ':cowboy: Recipient :cowboy: '
+            destination_txt = f'{tx_type_emoji} Recipient {tx_type_emoji} '
             avatar = user.avatar_url
 
         elif direction == 1:
-            title = ':inbox_tray: Incoming transaction :inbox_tray: '
+            title = f':inbox_tray: Incoming {tx_type_emoji} {tx_type.title()} transaction :inbox_tray: '
             col = discord.Colour.green()
             destination_txt = ':postbox:  Sender :postbox: '
             avatar = destination.avatar_url
@@ -138,7 +161,7 @@ class CustomMessages:
                                   colour=col,
                                   timestamp=datetime.utcnow())
         tx_report.set_thumbnail(url=avatar)
-        tx_report.add_field(name=destination_txt,
+        tx_report.add_field(name=f'{destination_txt}',
                             value=f'{user}',
                             inline=False)
         tx_report.add_field(name=':post_office: Guild Origin :post_office: ',
@@ -146,11 +169,12 @@ class CustomMessages:
                             inline=False)
         tx_report.add_field(name=':love_letter: Note :love_letter: ',
                             value=message)
-        tx_report.add_field(name=f'Transaction value',
-                            value=f'{amount_str} (${in_dollar["total"]})',
+        tx_report.add_field(name='Transaction value',
+                            value=f'{transaction_data["amount"]} {transaction_data["emoji"]} (${transaction_data["conversion"]})',
                             inline=False)
-        tx_report.add_field(name=f':currency_exchange: Conversion Rate :currency_exchange: ',
-                            value=f'{in_dollar["usd"]}$/XLM')
+        tx_report.add_field(name='Conversion Rate',
+                            value=f'${transaction_data["conversionRate"]}/{transaction_data["ticker"]}',
+                            inline=False)
         tx_report.set_footer(text='Conversion rates provided by CoinGecko',
                              icon_url='https://static.coingecko.com/s/thumbnail-'
                                       '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
@@ -160,23 +184,6 @@ class CustomMessages:
             print('Transaction report to user could not be send due to:')
             print(e)
             print('========================')
-
-    @staticmethod
-    async def transaction_report_to_channel(ctx, recipient: discord.User, amount, currency):
-        """
-        Discord Transaction report to the channel
-        :param ctx: discord Context
-        :param recipient: discord.user
-        :param amount: amount in currency
-        :param currency: currency symbol
-        :return: embed
-        """
-        if currency == 'xlm':
-            amount_str = f"{amount:9.7f} <:stelaremoji:684676687425961994>"
-            in_dollar = convert_to_usd(amount=amount, coin_name='stellar')
-
-        message = f'{recipient.mention} user {ctx.message.author} just sent you {amount_str} ({in_dollar["total"]}$)'
-        await ctx.channel.send(content=message, delete_after=360)
 
     @staticmethod
     async def coin_activity_notification_message(coin, recipient: discord.User, memo, tx_hash, source_acc, amount,
@@ -394,7 +401,21 @@ class CustomMessages:
                                    f':money_with_wings: {stellar_stats["spentOnRoles"]}{CONST_STELLAR_EMOJI}\n')
         await ctx.author.send(embed=xlm_wallet)
 
-    @staticmethod
-    async def explorer_messages(applied_channels: list, message: str):
-        for explorer_channel in applied_channels:
-            await explorer_channel.send(message)
+    async def explorer_messages(self, applied_channels: list, message: str, tx_type: str, on_chain: bool = None):
+        """
+        Transactin reports to all explorer applied channels
+        """
+        if not on_chain:
+            msg_streamed = self.filter_message(message=message, tx_type=tx_type)
+            for explorer_channel in applied_channels:
+                await explorer_channel.send(msg_streamed)
+        else:
+            for explorer_channel in applied_channels:
+                await explorer_channel.send(message)
+
+    async def transaction_report_to_channel(self, ctx, message: str, tx_type: str):
+        """
+        Discord Transaction report to the channel
+        """
+        msg_streamed = self.filter_message(message=message, tx_type=tx_type)
+        await ctx.channel.send(content=msg_streamed, delete_after=360)
