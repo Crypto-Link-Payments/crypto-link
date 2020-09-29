@@ -15,7 +15,7 @@ from utils.tools import Helpers
 
 helper = Helpers()
 stellar_wallet = StellarWallet()
-customMessages = CustomMessages()
+custom_messages = CustomMessages()
 bot_manager = BotManager()
 stats_manager = StatsManager()
 stellar = StellarManager()
@@ -58,8 +58,8 @@ class WithdrawalCommands(commands.Cog):
                              f"\nexample:\n"
                              f"```!withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"}]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1)
+            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                                destination=1)
 
     @withdraw.command()
     @commands.check(is_public)
@@ -133,25 +133,25 @@ class WithdrawalCommands(commands.Cog):
                                 stellar.stellar_withdrawal_history(tx_type=1, tx_data=data_new)
 
                                 # Send user withdrawal notification
-                                await customMessages.withdrawal_notify(ctx=ctx,
-                                                                       withdrawal_data=data_new,
-                                                                       coin='XLM',
-                                                                       fee=f"${stellar_fee},"
+                                await custom_messages.withdrawal_notify(ctx=ctx,
+                                                                        withdrawal_data=data_new,
+                                                                        coin='XLM',
+                                                                        fee=f"${stellar_fee},"
                                                                            f" Rate:{round(fee_in_xlm['usd'], 4)}",
-                                                                       link=data['explorer'],
-                                                                       thumbnail=self.bot.user.avatar_url)
+                                                                        link=data['explorer'],
+                                                                        thumbnail=self.bot.user.avatar_url)
 
                                 # Send withdrawal notification to CL system
-                                await customMessages.withdrawal_notification_channel(ctx=ctx,
-                                                                                     channel=channel,
-                                                                                     withdrawal_data=data_new)
+                                await custom_messages.withdrawal_notification_channel(ctx=ctx,
+                                                                                      channel=channel,
+                                                                                      withdrawal_data=data_new)
 
                                 if bot_manager.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm',
                                                                          direction=1):
                                     sys_channel = self.bot.get_channel(id=int(channel_id))
 
-                                    await customMessages.cl_staff_incoming_funds_notification(sys_channel=sys_channel,
-                                                                                              amount=fee_in_stroops)
+                                    await custom_messages.cl_staff_incoming_funds_notification(sys_channel=sys_channel,
+                                                                                               amount=fee_in_stroops)
 
                                 # Update user and bot withdrawal stats
                                 self.update_withdrawal_stats(ctx=ctx, stroops=stroops)
@@ -176,43 +176,43 @@ class WithdrawalCommands(commands.Cog):
                                                  guild_profiles.get_all_explorer_applied_channels()]
                                 explorer_msg = f':outbox_tray: {xlm_with_amount} {CONST_STELLAR_EMOJI} ' \
                                                f'(${in_dollar["total"]}) on {ctx.message.guild}'
-                                await customMessages.explorer_messages(applied_channels=load_channels,
-                                                                       message=explorer_msg)
+                                await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                                        message=explorer_msg)
 
                             else:
                                 message = 'Funds could not be withdrawn at this point. Please try again later.'
-                                await customMessages.system_message(ctx=ctx, color_code=1, message=message,
-                                                                    destination=0,
-                                                                    sys_msg_title=CONST_WITHDRAWAL_ERROR)
+                                await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                     destination=0,
+                                                                     sys_msg_title=CONST_WITHDRAWAL_ERROR)
                                 stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                              stroops=final_stroop,
                                                                              direction=1)
                         else:
                             message = 'Funds could not be withdrawn at this point. Please try again later.'
-                            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                                sys_msg_title=CONST_WITHDRAWAL_ERROR)
+                            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                                 sys_msg_title=CONST_WITHDRAWAL_ERROR)
                         await ctx.channel.delete_messages([processing_msg])
                     else:
                         message = f'You have cancelled withdrawal request of {round(xlm_with_amount, 7)}'
-                        await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                            sys_msg_title=CONST_WITHDRAWAL_ERROR)
+                        await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                             sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
                 else:
                     message = f'Amount you are willing to withdraw is greater than your current wallet balance.\n' \
                               f'Wallet balance: {wallet_details["balance"] / 10000000} Stellar ' \
                               f'Balance {CONST_STELLAR_EMOJI}'
-                    await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                        sys_msg_title=CONST_WITHDRAWAL_ERROR)
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                         sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
             else:
                 message = f'Wrong amount for withdrawal provided. Amount needs to be greater than 30 XLM'
-                await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                    sys_msg_title=CONST_WITHDRAWAL_ERROR)
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=CONST_WITHDRAWAL_ERROR)
         else:
             message = f'{address} is not valid Stellar address. Please verify the address and try again. ' \
                       f'If issue persists\n please contact dev team.'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=CONST_WITHDRAWAL_ERROR)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
     @xlm.error
     async def stellar_withdrawal_error(self, ctx, error):
@@ -229,22 +229,22 @@ class WithdrawalCommands(commands.Cog):
                       f' over DM with the system itself. Head to one of the channels on community' \
                       f' where system is accessible.'
             title = f'**__Not registered__** :clipboard:'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=title)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
         elif isinstance(error, commands.MissingRequiredArgument):
             message = f'**You have not provided one of the required arguments for the command ' \
                       f'to work. Command structure ' \
                       f'to initiate withdrawal is {d["command"]}withdraw stellar <amount> <address>'
             title = f'**__Missing required argument__** :clipboard:'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=title)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
         elif isinstance(error, commands.BadArgument):
             message = f'**The arguments you have provided do not fit the command style.' \
                       f' Be sure to specify appropriate' \
                       f' amount and address format.'
             title = f'**__Bad arguments provided__** :clipboard:'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=title)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
 
 
 def setup(bot):
