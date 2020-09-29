@@ -180,7 +180,3 @@ class AccountManager(object):
                                              {"_id": 0,
                                               f"{ticker}": 1})
         return balance[f'{ticker}']
-
-    def get_all(self):
-        users = list(self.user_profiles.find({}))
-        return users
