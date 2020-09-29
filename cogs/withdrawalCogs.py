@@ -44,17 +44,6 @@ class WithdrawalCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @staticmethod
-    def update_withdrawal_stats(ctx, stroops):
-        # Update bot stats
-        stats_manager.update_bot_chain_stats(type_of='withdrawal', ticker='xlm',
-                                             amount=round(stroops / 10000000, 7))
-
-        # Update user stats
-        stats_manager.update_user_withdrawal_stats(user_id=ctx.message.author.id,
-                                                   amount=round(stroops / 10000000, 7),
-                                                   key='xlmStats')
-
     @commands.group()
     @commands.check(user_has_wallet)
     async def withdraw(self, ctx):
@@ -166,6 +155,20 @@ class WithdrawalCommands(commands.Cog):
 
                                 # Update user and bot withdrawal stats
                                 self.update_withdrawal_stats(ctx=ctx, stroops=stroops)
+
+                                withdrawal_data = {
+                                    "xlmStats.withdrawalsCount": 1,
+                                    "xlmStats.totalWithdrawn": 1,
+                                }
+                                await stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
+                                                                        tx_stats_data=withdrawal_data)
+
+                                bot_stats_data = {
+                                    "withdrawalCount": 1,
+                                    "withdrawnAmount": round(stroops / 10000000, 7)
+                                }
+                                await stats_manager.update_bot_chain_stats_as(ticker='xlm',
+                                                                              activity_data=bot_stats_data)
 
                                 in_dollar = convert_to_usd(amount=xlm_with_amount, coin_name='stellar')
 
