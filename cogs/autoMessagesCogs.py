@@ -178,15 +178,20 @@ class AutoFunctions(commands.Cog):
                 "guildName": f'{guild}',
                 "explorerSettings": {"channelId": int(0)},
                 "txFees": {"xlmFeeValue": int(0)},
-                "communityStats": {"xlmVolume": float(0.0),
-                                   "clTokenVolume": float(0.0),
-                                   "txCount": int(0),
-                                   "clTokenTxCount": int(0),
-                                   "privateCount": int(0),
-                                   "publicCount": int(0),
-                                   "roleTxCount": int(0),
-                                   "emojiTxCount": int(0),
-                                   "multiTxCount": int(0)}
+                "xlm": {"volume": float(0.0),
+                        "txCount": int(0),
+                        "privateCount": int(0),
+                        "publicCount": int(0),
+                        "roleTxCount": int(0),
+                        "emojiTxCount": int(0),
+                        "multiTxCount": int(0)},
+                "clt": {"volume": float(0.0),
+                        "txCount": int(0),
+                        "privateCount": int(0),
+                        "publicCount": int(0),
+                        "roleTxCount": int(0),
+                        "emojiTxCount": int(0),
+                        "multiTxCount": int(0)}
             }
             await guild_manager.register_guild(guild_data=new_guild)
 
