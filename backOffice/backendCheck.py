@@ -156,7 +156,7 @@ class BotStructureCheck(object):
             #TODO branchout to json file
             token_fees = {
                 "xlm": float(1.0),
-                'ctx': float(1.0)
+                'clt': float(1.0)
             }
             fee_list = [
                 {"type": "withdrawal_fees", "key": 'withdrawals', 'fee_list': token_fees},
