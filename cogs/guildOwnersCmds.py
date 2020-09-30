@@ -75,26 +75,27 @@ class GuildOwnerCommands(commands.Cog):
     @commands.check(guild_has_stats)
     async def stats(self, ctx):
         stats = await guild_manager.get_guild_stats(guild_id=ctx.guild.id)
-
-        stats_info = Embed(title="__Guild Statistics__",
-                           timestamp=datetime.utcnow(),
-                           colour=Colour.magenta())
-        stats_info.set_thumbnail(url=self.bot.user.avatar_url)
-        stats_info.add_field(name="Transactions sent",
-                             value=f'{stats["txCount"]}')
-        stats_info.add_field(name="Xlm Volume",
-                             value=f'{stats["xlmVolume"]}')
-        stats_info.add_field(name="Public Tx",
-                             value=f'{stats["publicCount"]}')
-        stats_info.add_field(name="Private Tx",
-                             value=f'{stats["xlmVolume"]}')
-        stats_info.add_field(name="Role purchases",
-                             value=f'{stats["roleTxCount"]}')
-        stats_info.add_field(name="Emoji tx",
-                             value=f'{stats["emojiTxCount"]}')
-        stats_info.add_field(name="Multi tx",
-                             value=f'{stats["xlmVolume"]}')
-        await ctx.author.send(embed=stats_info)
+        from pprint import pprint
+        pprint(stats)
+        # stats_info = Embed(title="__Guild Statistics__",
+        #                    timestamp=datetime.utcnow(),
+        #                    colour=Colour.magenta())
+        # stats_info.set_thumbnail(url=self.bot.user.avatar_url)
+        # stats_info.add_field(name="Transactions sent",
+        #                      value=f'{stats["txCount"]}')
+        # stats_info.add_field(name="Xlm Volume",
+        #                      value=f'{stats["xlmVolume"]}')
+        # stats_info.add_field(name="Public Tx",
+        #                      value=f'{stats["publicCount"]}')
+        # stats_info.add_field(name="Private Tx",
+        #                      value=f'{stats["xlmVolume"]}')
+        # stats_info.add_field(name="Role purchases",
+        #                      value=f'{stats["roleTxCount"]}')
+        # stats_info.add_field(name="Emoji tx",
+        #                      value=f'{stats["emojiTxCount"]}')
+        # stats_info.add_field(name="Multi tx",
+        #                      value=f'{stats["xlmVolume"]}')
+        # await ctx.author.send(embed=stats_info)
 
     @owner.command()
     @commands.check(guild_has_stats)
