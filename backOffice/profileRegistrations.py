@@ -31,7 +31,7 @@ class AccountManager(object):
         self.user_wallets = self.cl_connection.userWallets
 
     @staticmethod
-    def get_xlm_payment_id():
+    def generate_user_memo():
         """
         Create user memo when wallet is created for deposits
         :return: STR
@@ -41,7 +41,7 @@ class AccountManager(object):
         memo = random_string.upper().lower()[0:string_length]
         return str(memo)
 
-    def __create_stellar_wallet(self, discord_id: int, discord_username: str, deposit_id):
+    def __create_user_wallet(self, discord_id: int, discord_username: str, deposit_id):
         """
         Creates stellar wallet for the user
         :param discord_id:
@@ -80,10 +80,12 @@ class AccountManager(object):
             print(f' Could not update user wallet with xlm: {e}')
             return False
 
-    def get_account_details(self, discord_id: int):
+    def get_account_stats(self, discord_id: int):
         """Get basic account details from user"""
         result = self.user_profiles.find_one({"userId": discord_id},
-                                             {"_id": 0})
+                                             {"_id": 0,
+                                              "xlm": 1,
+                                              "clt": 1})
 
         return result
 
@@ -95,10 +97,10 @@ class AccountManager(object):
         :return: bool
 
         """
-        stellar_deposit_id = self.get_xlm_payment_id()
+        stellar_deposit_id = self.generate_user_memo()
 
-        self.__create_stellar_wallet(discord_id=discord_id, discord_username=discord_username,
-                                     deposit_id=stellar_deposit_id)
+        self.__create_user_wallet(discord_id=discord_id, discord_username=discord_username,
+                                  deposit_id=stellar_deposit_id)
         new_user = {
             "userId": discord_id,
             "userName": discord_username,
