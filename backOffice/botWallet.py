@@ -52,6 +52,7 @@ class BotManager:
                                           "balance": 1})
         return query['balance']
 
+    # TODO maybe move this to some other document
     def license_fee_handling(self, fee: float, key: str):
         """
         Function used to update licensing fees
@@ -66,6 +67,7 @@ class BotManager:
             return True
         except errors.PyMongoError:
             return False
+
 
     def get_fees_by_category(self, all_fees: bool, key: str = None):
         """
