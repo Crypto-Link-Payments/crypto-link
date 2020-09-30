@@ -12,6 +12,7 @@ from colorama import Fore, init
 from discord.ext import commands
 
 from backOffice.backendCheck import BotStructureCheck
+from backOffice.userWalletManager import UserWalletManager
 from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.statsManager import StatsManager
@@ -27,6 +28,7 @@ stellar_wallet = StellarWallet()
 stellar_manager = StellarManager()
 merchant_manager = MerchantManager()
 stats_manager = StatsManager()
+wallet_manager = UserWalletManager()
 guild_profiles = GuildProfileManager()
 custom_messages = CustomMessages()
 helper = Helpers()
@@ -76,7 +78,7 @@ async def process_tx_with_no_memo(channel, no_memo_transaction):
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                 await custom_messages.send_unidentified_deposit_msg(channel=channel, deposit_details=tx)
-
+                # TODO integrate bot global stats
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
@@ -92,37 +94,43 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
                 tx_memo = tx['memo']
                 tx_hash = tx['hash']
                 tx_from = tx["source_account"]
-                tx_stroop = tx['stroop']
+                tx_asset = tx['asset_type']
 
                 # Get user_id based on transaction memo
+                #TODO rewrite to latest specs
                 user_id = stellar_manager.get_discord_id_from_deposit_id(deposit_id=tx_memo)
 
-                # Update balance
-                if stellar_manager.update_stellar_balance_by_memo(memo=tx_memo, stroops=tx_stroop, direction=1):
+                # Update balance based on incoming asset
+                if wallet_manager.update_coin_balance_by_memo(memo=tx_memo, coin=tx_asset["code"],
+                                                              amount=int(tx_asset["amount"])):
                     # If balance updated successfully send the message to user of processed deposit
                     dest = await bot.fetch_user(user_id=int(user_id['userId']))
+                    # TODO message based on token deposited
                     await custom_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
                                                                              memo=tx_memo,
                                                                              tx_hash=tx_hash, source_acc=tx_from,
                                                                              amount=tx_stroop, color_code=0)
 
                     # Channel system message on deposit
+                    # TODO based on token deposited
                     await custom_messages.send_deposit_notification_channel(channel=msg_channel,
                                                                             avatar=bot.user.avatar_url,
                                                                             user=dest, stroops=tx_stroop)
 
                     # Explorer messages
+                    # TODO based on asset
                     load_channels = [bot.get_channel(id=int(chn)) for chn in
                                      guild_profiles.get_all_explorer_applied_channels()]
                     in_dollar = convert_to_usd(amount=tx_stroop / 10000000, coin_name='stellar')
                     explorer_msg = f':inbox_tray: {tx_stroop / 10000000} {CONST_STELLAR_EMOJI} (${in_dollar["total"]})'
                     await custom_messages.explorer_messages(applied_channels=load_channels, message=explorer_msg)
 
+                    # TODO update this to latest specs
                     # Update user deposit stats
                     stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
                                                             key="xlmStats")
 
-                    # Update Bot Global stats
+                    # TODO update this to latest specs through accumulation of all transactions
                     stats_manager.update_bot_chain_stats(type_of='deposit', ticker='xlm',
                                                          amount=round(tx_stroop / 10000000, 7))
                 else:
@@ -140,6 +148,7 @@ async def process_tx_with_not_registered_memo(channel, no_registered_memo):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                 await custom_messages.send_unidentified_deposit_msg(channel=channel, deposit_details=tx)
                 print(Fore.GREEN + 'Processed successfully')
+                # TODO integrate stats for deposit processing
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
