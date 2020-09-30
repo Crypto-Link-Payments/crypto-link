@@ -91,31 +91,19 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
         # check if processed if not process them
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
-                tx_memo = tx['memo']
-                tx_hash = tx['hash']
-                tx_from = tx["source_account"]
-                tx_asset = tx['asset_type']
+               # Update balance based on incoming asset
+                if wallet_manager.update_coin_balance_by_memo(memo=tx['memo'], coin=tx['asset_type']["code"],
+                                                              amount=int(tx['asset_type']["amount"])):
 
-                # Get user_id based on transaction memo
-                #TODO rewrite to latest specs
-                user_id = stellar_manager.get_discord_id_from_deposit_id(deposit_id=tx_memo)
-
-                # Update balance based on incoming asset
-                if wallet_manager.update_coin_balance_by_memo(memo=tx_memo, coin=tx_asset["code"],
-                                                              amount=int(tx_asset["amount"])):
                     # If balance updated successfully send the message to user of processed deposit
-                    dest = await bot.fetch_user(user_id=int(user_id['userId']))
-                    # TODO message based on token deposited
-                    await custom_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
-                                                                             memo=tx_memo,
-                                                                             tx_hash=tx_hash, source_acc=tx_from,
-                                                                             amount=tx_stroop, color_code=0)
+                    user_id = wallet_manager.get_discord_id_from_memo(memo=tx['memo'])  # Return usr int number
+                    dest = await bot.fetch_user(user_id=int(user_id))
+
+                    await custom_messages.deposit_notification_message(recipient=dest,tx_details=tx)
 
                     # Channel system message on deposit
-                    # TODO based on token deposited
-                    await custom_messages.send_deposit_notification_channel(channel=msg_channel,
-                                                                            avatar=bot.user.avatar_url,
-                                                                            user=dest, stroops=tx_stroop)
+                    await custom_messages.sys_deposit_notifications(channel=msg_channel,
+                                                                    user=dest,tx_details=tx)
 
                     # Explorer messages
                     # TODO based on asset
