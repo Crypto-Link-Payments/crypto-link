@@ -20,6 +20,7 @@ from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.monetaryConversions import convert_to_usd
+from backOffice.backOffice import BackOffice
 from utils.tools import Helpers
 
 init(autoreset=True)
@@ -368,13 +369,9 @@ async def on_ready():
 
 
 if __name__ == '__main__':
-    bot_data = helper.read_json_file(file_name='botSetup.json')
-    connection = MongoClient(bot_data['database']['connection'], maxPoolSize=20)
 
-    backend_check = BotStructureCheck(connection)
-    backend_check.check_collections()
-    backend_check.checking_stats_documents()
-    backend_check.checking_bot_wallets()
+    back_office = BackOffice()
+    back_office.check_backend()
 
     # Check file system
     backend_check = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
