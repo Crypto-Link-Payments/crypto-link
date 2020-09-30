@@ -34,6 +34,8 @@ class StellarManager:
         self.xlm_withdrawals = self.stellar_coin.StellarWithdrawals  # Access to history of successful withdrawals
         self.xlm_unprocessed = self.stellar_coin.StellarUnprocessedDeposits  # history of successful deposits
         self.xlm_unprocessed_withdrawals = self.stellar_coin.StellarUnprocessedWithdrawals  # history of error withdrawals
+
+        #TODO rewrite to fit new wallet structures!
         self.xlm_guild_wallets = self.stellar_coin.StellarCorporateWallets
 
     def stellar_deposit_history(self, deposit_type: int, tx_data):
