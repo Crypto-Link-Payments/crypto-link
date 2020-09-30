@@ -94,6 +94,14 @@ class StatsManager(object):
                                                                    "multiTxMoved": xlm_amount},
                                                   f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
+    async def update_user_on_chain_stats(self, user_id: int, stats_data: dict):
+        """
+        Updates users deposit stats.
+        """
+        await self.as_user_profiles.find_one_and_update({"userId": user_id},
+                                                        {"$inc": stats_data,
+                                                         f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+
     def update_user_deposit_stats(self, user_id: int, amount: float, key: str):
         """
         Updates users deposit stats.
@@ -113,16 +121,7 @@ class StatsManager(object):
         Update stats when on chain activity happens.
         """
 
-        if type_of == "deposit":
-            self.chain_activities.update_one({"ticker": f"{ticker}"},
-                                             {f"{CONST_INC}": {"depositCount": 1,
-                                                               "depositAmount": round(float(amount), 7)},
-                                              f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-        elif type_of == "withdrawal":
-            self.chain_activities.update_one({"ticker": f"{ticker}"},
-                                             {f"{CONST_INC}": {"withdrawalCount": 1,
-                                                               "withdrawnAmount": round(float(amount), 7)},
-                                              f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+
 
     async def update_usr_tx_stats(self, user_id: int, tx_stats_data: dict):
         await self.as_user_profiles.update_one({"userId": user_id},
