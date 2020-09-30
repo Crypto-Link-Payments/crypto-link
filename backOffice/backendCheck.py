@@ -77,7 +77,7 @@ class BotStructureCheck(object):
                 "depositAmount": float(0.0),
                 "withdrawnAmount": float(0.0)
             }, {
-                "ticker": "clToken",
+                "ticker": "clt",
                 "depositCount": int(0),
                 "withdrawalCount": int(0),
                 "depositAmount": float(0.0),
@@ -107,7 +107,7 @@ class BotStructureCheck(object):
                 "merchantPurchases": int(0),
                 "merchantMoved": float(0)
             }, {
-                "ticker": "clToken",
+                "ticker": "clt",
                 "totalTx": int(0),
                 "totalMoved": float(0.0),
                 "totalPrivateCount": int(0),
@@ -151,10 +151,15 @@ class BotStructureCheck(object):
             print(Fore.LIGHTGREEN_EX + "BOT OFF CHAIN XLM WALLET OK ")
 
         if count_bot_fees == 0:
-            # TODO rewrite key/value pairs for multi token purpose
             print(Fore.YELLOW + "MAKING FEE STRUCTURE DOCS")
+
+            #TODO branchout to json file
+            token_fees = {
+                "xlm": float(1.0),
+                'ctx': float(1.0)
+            }
             fee_list = [
-                {"type": "with_xlm", "key": 'xlm', 'fee': float(1.0)},
+                {"type": "withdrawal_fees", "key": 'withdrawals', 'fee_list': token_fees},
                 {"type": "merch_transfer_cost", "key": 'wallet_transfer', 'fee': float(1.0)},
                 {"type": "merch_license", "key": 'license', 'fee': float(1.0)},
                 {"type": "merch_transfer_min", "key": 'merchant_min', 'fee': float(1.0)}]
