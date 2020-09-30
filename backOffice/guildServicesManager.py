@@ -46,7 +46,7 @@ class GuildProfileManager:
         stats = await self.as_guild_profiles.find_one({"guildId": guild_id},
                                                       {"_id": 0,
                                                        "xlm": 1,
-                                                       "clt":1})
+                                                       "clt": 1})
         return stats
 
     async def update_guild_profile(self, guild_id, data_to_update: dict):
