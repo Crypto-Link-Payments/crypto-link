@@ -107,21 +107,17 @@ class StatsManager(object):
         Updates users deposit stats.
         """
 
-        self.user_profiles.find_one_and_update({"userId": user_id},
-                                               {"$inc": {f"{key}.depositsCount": 1,
-                                                         f"{key}.totalDeposited": amount}})
+        self.user_profiles.update_one({"userId": user_id},
+                                      {"$inc": {f"{key}.depositsCount": 1,
+                                                f"{key}.totalDeposited": amount}})
 
-    async def update_bot_chain_stats_as(self, ticker, activity_data: dict):
-        await self.as_on_chain_activities.update_one({"ticker": ticker},
-                                                     {f"{CONST_INC}": activity_data,
-                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-
-    def update_bot_chain_stats(self, type_of: str, ticker: str, amount: float):
+    async def update_cl_on_chain_stats(self, ticker: str, stat_details: dict):
         """
         Update stats when on chain activity happens.
         """
-
-
+        await self.as_on_chain_activities.update_one({"ticker": ticker},
+                                                     {f"{CONST_INC}": stat_details,
+                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
     async def update_usr_tx_stats(self, user_id: int, tx_stats_data: dict):
         await self.as_user_profiles.update_one({"userId": user_id},
