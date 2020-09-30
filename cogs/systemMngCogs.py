@@ -431,7 +431,7 @@ class BotManagementCommands(commands.Cog):
         Command entry point for hot wallet functions
         """
         if ctx.invoked_subcommand is None:
-            value = [{'name': f'***{d["command"]}hot stellar*** ',
+            value = [{'name': f'***{d["command"]}hot balance*** ',
                       'value': "Returns information from wallet RPC on stellar balance"}
                      ]
             await customMessages.embed_builder(ctx, title='Querying hot wallet details',
@@ -439,30 +439,29 @@ class BotManagementCommands(commands.Cog):
                                                data=value, destination=1)
 
     @hot.command()
-    async def stellar(self, ctx):
+    async def balance(self, ctx):
         """
         Check Stellar hot wallet details
         """
         data = stellar_wallet.get_stellar_hot_wallet_details()
-        get_usd_value = convert_to_usd(amount=float(data['balances'][0]['balance']), coin_name='stellar')
-        if data:
-            title = 'Stellar hot wallet details'
-            description = 'Bellow are provided all details on integrated Stellar Wallet'
 
-            list_of_values = [{'name': 'Address',
-                               'value': f"{data['account_id']}"},
-                              {'name': 'Balance',
-                               'value': f"{data['balances'][0]['balance']} {CONST_STELLAR_EMOJI}"},
-                              {'name': 'In USD $',
-                               'value': f"$ {get_usd_value['total']}\n"
-                                        f"Rate: {get_usd_value['usd']} $/ {CONST_STELLAR_EMOJI}"},
-                              {'name': 'Buying liabilities',
-                               'value': f"{data['balances'][0]['buying_liabilities']} {CONST_STELLAR_EMOJI}"},
-                              {'name': 'Selling liabilities',
-                               'value': f"{data['balances'][0]['selling_liabilities']} {CONST_STELLAR_EMOJI}"}
-                              ]
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1)
+        if data:
+            bal_start = Embed(title='Stellar hot wallet details',
+                              description=f'{data["account_id"]}')
+
+            await ctx.author.send(embed=bal_start)
+
+            for coin in data["balances"]:
+                if not coin.get('asset_code'):
+                    cn = 'XLM'
+                else:
+                    cn = coin["asset_code"]
+
+                coin_nfo = Embed(title=f'Details for {cn}')
+                coin_nfo.add_field(name=f'Balance',
+                                   value=f"{coin['balance']}")
+
+                await ctx.author.send(embed=coin_nfo)
         else:
             sys_msg_title = 'Stellar Wallet Query Server error'
             message = 'Status of the wallet could not be obtained at this moment'
