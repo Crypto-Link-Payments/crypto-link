@@ -33,6 +33,7 @@ bot_manager = BotManager()
 stats_manager = StatsManager()
 d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
+integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_CORP_TRANSFER_ERROR_TITLE = '__Corporate Transfer Error__'
@@ -122,7 +123,7 @@ class BotManagementCommands(commands.Cog):
             print(ticker)
             decimal = get_decimal_point(ticker)
             conversion = int(bal["balance"])
-            normal = get_normal(conversion,decimal)
+            normal = get_normal(conversion, decimal)
             values.add_field(name=ticker.upper(),
                              value=f'{normal}',
                              inline=False)
@@ -192,54 +193,60 @@ class BotManagementCommands(commands.Cog):
 
     @cl.command()
     @commands.check(is_one_of_gods)
-    async def sweep(self, ctx):
+    async def sweep(self, ctx, ticker: str):
         """
         Transfer funds from Crypto Link to develop wallet
         """
-        print(f'CL SWEEP  : {ctx.author} -> {ctx.message.content}')
-        balance = int(bot_manager.get_bot_wallet_balance_by_ticker(ticker='xlm'))
-        if balance > 0:  # Check if balance greater than -
-            # Checks if recipient exists
-            if not account_mng.check_user_existence(user_id=ctx.message.author.id):
-                account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}')
+        if ticker in list(integrated_coins.keys()):
+            balance = int(bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
+            print(balance)
+            if balance > 0:  # Check if balance greater than -
+                # Checks if recipient exists
+                if not account_mng.check_user_existence(user_id=ctx.message.author.id):
+                    account_mng.register_user(discord_id=ctx.message.author.id,
+                                              discord_username=f'{ctx.message.author}')
 
-            if stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
-                                                                    stroops=int(balance), direction=1):
-                # Deduct the balance from the community balance
-                if bot_manager.update_lpi_wallet_balance(amount=balance, wallet="xlm", direction=2):
-                    # Store in history and send notifications to owner and to channel
-                    dec_point = get_decimal_point(symbol='xlm')
-                    normal_amount = get_normal(str(balance), decimal_point=dec_point)
+                if stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
+                                                                        stroops=int(balance), direction=1):
+                    # Deduct the balance from the community balance
+                    if bot_manager.update_lpi_wallet_balance(amount=balance, wallet="xlm", direction=2):
+                        # Store in history and send notifications to owner and to channel
+                        dec_point = get_decimal_point(symbol='xlm')
+                        normal_amount = get_normal(str(balance), decimal_point=dec_point)
 
-                    # Store into the history of corporate transfers
-                    corporate_hist_mng.store_transfer_from_corp_wallet(time_utc=int(time.time()),
-                                                                       author=f'{ctx.message.author}',
-                                                                       destination=int(ctx.message.author.id),
-                                                                       amount_atomic=balance, amount=normal_amount,
-                                                                       currency='xlm')
+                        # Store into the history of corporate transfers
+                        corporate_hist_mng.store_transfer_from_corp_wallet(time_utc=int(time.time()),
+                                                                           author=f'{ctx.message.author}',
+                                                                           destination=int(ctx.message.author.id),
+                                                                           amount_atomic=balance, amount=normal_amount,
+                                                                           currency='xlm')
 
-                    # notification to corp account discord channel
-                    stellar_channel_id = auto_channels['stellar']
-                    await self.send_transfer_notification(ctx=ctx, member=ctx.message.author,
-                                                          channel_id=stellar_channel_id,
-                                                          normal_amount=normal_amount, emoji=CONST_STELLAR_EMOJI,
-                                                          chain_name='Stellar Chain')
+                        # notification to corp account discord channel
+                        stellar_channel_id = auto_channels['stellar']
+                        await self.send_transfer_notification(ctx=ctx, member=ctx.message.author,
+                                                              channel_id=stellar_channel_id,
+                                                              normal_amount=normal_amount, emoji=CONST_STELLAR_EMOJI,
+                                                              chain_name='Stellar Chain')
 
+                    else:
+                        # Revert the user balance if community balance can not be updated
+                        stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
+                                                                             stroops=int(balance), direction=2)
+
+                        message = f"Stellar funds could not be deducted from corporate account. Please try again later"
+                        await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
+                                                            sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
                 else:
-                    # Revert the user balance if community balance can not be updated
-                    stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
-                                                                         stroops=int(balance), direction=2)
-
-                    message = f"Stellar funds could not be deducted from corporate account. Please try again later"
+                    message = f"Stellar funds could not be moved from corporate account to {ctx.message.author}." \
+                              f"Please try again later "
                     await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
                                                         sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
             else:
-                message = f"Stellar funds could not be moved from corporate account to {ctx.message.author}." \
-                          f"Please try again later "
+                message = f"You can not sweep the account as its balance is 0.0000000 {CONST_STELLAR_EMOJI}"
                 await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
                                                     sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
         else:
-            message = f"You can not sweep the account as its balance is 0.0000000 {CONST_STELLAR_EMOJI}"
+            message = f"{ticker} has not been implemented yet and therefore bot wallet does not exist"
             await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
 
