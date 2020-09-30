@@ -142,7 +142,7 @@ class BotStructureCheck(object):
             print(Fore.YELLOW + "MAKING BOT OFF CHAIN WALLET")
             my_list = [
                 {"ticker": "xlm", "balance": 0},
-                {"ticker": "clToken", "balance": 0}
+                {"ticker": "clt", "balance": 0}
             ]
             bot_wallets.insert_many(my_list)
             print(Fore.GREEN + "DONE")

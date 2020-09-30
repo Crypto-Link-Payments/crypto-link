@@ -54,7 +54,7 @@ class AccountManager(object):
             "userName": discord_username,
             "depositId": deposit_id,
             "xlm": int(0),
-            "clToken": int(0)
+            "clt": int(0)
         }
 
         result = self.user_wallets.insert_one(create_multi_wallet)
