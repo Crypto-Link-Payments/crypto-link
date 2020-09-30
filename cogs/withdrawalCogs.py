@@ -1,11 +1,12 @@
 import time
-
+import re
 from discord.ext import commands
 
 from backOffice.botWallet import BotManager
 from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.statsManager import StatsManager
 from backOffice.stellarActivityManager import StellarManager
+from backOffice.userWalletManager import UserWalletManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.customCogChecks import user_has_wallet, is_public
 from cogs.utils.monetaryConversions import convert_to_currency, convert_to_usd
@@ -16,6 +17,7 @@ from utils.tools import Helpers
 helper = Helpers()
 stellar_wallet = StellarWallet()
 custom_messages = CustomMessages()
+user_wallets = UserWalletManager()
 bot_manager = BotManager()
 stats_manager = StatsManager()
 stellar = StellarManager()
@@ -25,6 +27,7 @@ hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 notify_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_WITHDRAWAL_ERROR = "__Withdrawal error___"
+integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
 
 def check(author):
@@ -43,6 +46,7 @@ def check(author):
 class WithdrawalCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.list_of_coins = list(integrated_coins.keys())
 
     @commands.group()
     @commands.check(user_has_wallet)
@@ -60,6 +64,19 @@ class WithdrawalCommands(commands.Cog):
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1)
+
+    @commands.group()
+    @commands.check(user_has_wallet)
+    async def withdraw_token(self, ctx, amount: float, ticker: str, address: str):
+        coin = ticker.lower()
+        if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins and check_stellar_address(
+                address=address):
+            coin_data = integrated_coins[ticker]
+            atomic_value = (int(amount * (10 ** int(coin_data["decimal"]))))
+
+            wallet_value = user_wallets.get_ticker_balance(ticker=ticker, user_id=ctx.message.author.id)
+            if wallet_value >= atomic_value:
+                print('initiate token withdrawal process')
 
     @withdraw.command()
     @commands.check(is_public)
