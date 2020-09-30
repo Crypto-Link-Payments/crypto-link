@@ -76,26 +76,30 @@ class GuildOwnerCommands(commands.Cog):
     async def stats(self, ctx):
         stats = await guild_manager.get_guild_stats(guild_id=ctx.guild.id)
         from pprint import pprint
-        pprint(stats)
-        # stats_info = Embed(title="__Guild Statistics__",
-        #                    timestamp=datetime.utcnow(),
-        #                    colour=Colour.magenta())
-        # stats_info.set_thumbnail(url=self.bot.user.avatar_url)
-        # stats_info.add_field(name="Transactions sent",
-        #                      value=f'{stats["txCount"]}')
-        # stats_info.add_field(name="Xlm Volume",
-        #                      value=f'{stats["xlmVolume"]}')
-        # stats_info.add_field(name="Public Tx",
-        #                      value=f'{stats["publicCount"]}')
-        # stats_info.add_field(name="Private Tx",
-        #                      value=f'{stats["xlmVolume"]}')
-        # stats_info.add_field(name="Role purchases",
-        #                      value=f'{stats["roleTxCount"]}')
-        # stats_info.add_field(name="Emoji tx",
-        #                      value=f'{stats["emojiTxCount"]}')
-        # stats_info.add_field(name="Multi tx",
-        #                      value=f'{stats["xlmVolume"]}')
-        # await ctx.author.send(embed=stats_info)
+
+        stats_info = Embed(title="__Guild Statistics__",
+                           timestamp=datetime.utcnow(),
+                           colour=Colour.magenta())
+        await ctx.author.send(embed=stats_info)
+        for k, v in stats.items():
+            stats_info = Embed(title=f"__{k.upper()} Stats__",
+                               timestamp=datetime.utcnow(),
+                               colour=Colour.magenta())
+            stats_info.add_field(name="Transactions sent",
+                                 value=f'{v["txCount"]}')
+            stats_info.add_field(name="Volume",
+                                 value=f'{v["volume"]}')
+            stats_info.add_field(name="Public Tx",
+                                 value=f'{v["publicCount"]}')
+            stats_info.add_field(name="Private Tx",
+                                 value=f'{v["privateCount"]}')
+            stats_info.add_field(name="Role purchases",
+                                 value=f'{v["roleTxCount"]}')
+            stats_info.add_field(name="Emoji tx",
+                                 value=f'{v["emojiTxCount"]}')
+            stats_info.add_field(name="Multi tx",
+                                 value=f'{v["multiTxCount"]}')
+            await ctx.author.send(embed=stats_info)
 
     @owner.command()
     @commands.check(guild_has_stats)
@@ -162,23 +166,6 @@ class GuildOwnerCommands(commands.Cog):
                                                                                ' Network Feed could not be turned OFF.'
                                                                                'Please try again later',
                                                 destination=ctx.message.channel, sys_msg_title='__System error__')
-    #
-    # @owner.group()
-    # async def fees(self, ctx):
-    #     if ctx.invoked_subcommand is None:
-    #         title = '__Crypto Link Custom Fees Manual__'
-    #         description = "All available commands to operate with guild system"
-    #         list_of_values = [
-    #             {"name": "Set XLM off chain Tx fee",
-    #              "value": f"{d['command']}owner fee set <xlm amount as float>"}
-    #         ]
-    #
-    #         await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-    #                                            destination=1)
-    #
-    # @fees.command()
-    # async def set(self, ctx, xlm: float):
-    #     pass
 
 
 def setup(bot):
