@@ -119,11 +119,12 @@ class BotManagementCommands(commands.Cog):
                        color=Colour.blurple())
         for bal in data:
             ticker = bal['ticker']
+            print(ticker)
             decimal = get_decimal_point(ticker)
             conversion = int(bal["balance"])
-            conversion = get_normal(str(conversion), decimal_point=decimal)
+            normal = get_normal(conversion,decimal)
             values.add_field(name=ticker.upper(),
-                             value=f'{conversion}',
+                             value=f'{normal}',
                              inline=False)
         await ctx.channel.send(embed=values, delete_after=100)
 
