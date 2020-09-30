@@ -92,6 +92,7 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
                 # Update balance based on incoming asset
+
                 if wallet_manager.update_coin_balance_by_memo(memo=tx['memo'], coin=tx['asset_type']["code"],
                                                               amount=int(tx['asset_type']["amount"])):
 
