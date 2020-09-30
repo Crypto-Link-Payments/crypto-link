@@ -375,33 +375,33 @@ class CustomMessages:
         await ctx.author.send(embed=tx_stats)
 
     @staticmethod
-    async def stellar_wallet_overall(ctx, utc_now, stellar_stats: dict):
-        xlm_wallet = Embed(title=f'{CONST_STELLAR_EMOJI} Stellar Account Statistics {CONST_STELLAR_EMOJI}',
-                           description=f':bar_chart: ***__Statistical Data on Stellar Lumen Discord Wallet__** '
-                                       f':bar_chart:',
-                           colour=Colour.light_grey(),
-                           timestamp=utc_now)
-        xlm_wallet.set_thumbnail(url=ctx.author.avatar_url)
-        xlm_wallet.add_field(name=f':inbox_tray: Total Deposits {CONST_STELLAR_EMOJI}',
-                             value=f'Deposited ***{stellar_stats["depositsCount"]}*** with total '
-                                   f'***{stellar_stats["totalDeposited"]}*** {CONST_STELLAR_EMOJI}')
-        xlm_wallet.add_field(name=f':outbox_tray: Total Withdrawals {CONST_STELLAR_EMOJI}',
-                             value=f'Withdrawn ***{stellar_stats["withdrawalsCount"]}*** withdrawals with '
-                                   f'total ***{stellar_stats["totalWithdrawn"]}*** {CONST_STELLAR_EMOJI}')
-        xlm_wallet.add_field(name=f':family_man_woman_boy: Public Tx',
-                             value=f':incoming_envelope:{stellar_stats["publicTxSendCount"]}\n'
-                                   f':money_with_wings:  {stellar_stats["publicSent"]}\n'
-                                   f':envelope_with_arrow:{stellar_stats["publicTxReceivedCount"]}\n'
-                                   f':money_mouth: {stellar_stats["publicReceived"]} ')
-        xlm_wallet.add_field(name=f':detective: Private Tx',
-                             value=f':incoming_envelope:{stellar_stats["privateTxSendCount"]}\n'
-                                   f':money_with_wings: {stellar_stats["privateSent"]}\n'
-                                   f':envelope_with_arrow: {stellar_stats["privateTxReceivedCount"]}\n'
-                                   f':money_mouth: {stellar_stats["privateReceived"]}')
-        xlm_wallet.add_field(name=f'Merchant Role purchases',
-                             value=f':man_juggling: {stellar_stats["roleTxCount"]}\n'
-                                   f':money_with_wings: {stellar_stats["spentOnRoles"]}{CONST_STELLAR_EMOJI}\n')
-        await ctx.author.send(embed=xlm_wallet)
+    async def stellar_wallet_overall(ctx, coin_stats: dict, utc_now):
+        for k, v in coin_stats.items():
+            coin_stats = Embed(title=f'{k.upper()} wallet statistics',
+                               description=f':bar_chart: ***__Statistical Data on Stellar Lumen Discord Wallet__** '
+                                           f':bar_chart:',
+                               colour=Colour.light_grey(),
+                               timestamp=utc_now)
+            coin_stats.add_field(name=f':inbox_tray: Total Deposits',
+                                 value=f'Deposited ***{v["depositsCount"]}*** with total '
+                                       f'***{v["totalDeposited"]}*** ')
+            coin_stats.add_field(name=f':outbox_tray: Total Withdrawals ',
+                                 value=f'Withdrawn ***{v["withdrawalsCount"]}*** withdrawals with '
+                                       f'total ***{v["totalWithdrawn"]}*** ')
+            coin_stats.add_field(name=f':family_man_woman_boy: Public Tx',
+                                 value=f':incoming_envelope:{v["publicTxSendCount"]}\n'
+                                       f':money_with_wings:  {v["publicSent"]}\n'
+                                       f':envelope_with_arrow:{v["publicTxReceivedCount"]}\n'
+                                       f':money_mouth: {v["publicReceived"]} ')
+            coin_stats.add_field(name=f':detective: Private Tx',
+                                 value=f':incoming_envelope:{v["privateTxSendCount"]}\n'
+                                       f':money_with_wings: {v["privateSent"]}\n'
+                                       f':envelope_with_arrow: {v["privateTxReceivedCount"]}\n'
+                                       f':money_mouth: {v["privateReceived"]}')
+            coin_stats.add_field(name=f'Merchant Role purchases',
+                                 value=f':man_juggling: {v["roleTxCount"]}\n'
+                                       f':money_with_wings: {v["spentOnRoles"]}\n')
+            await ctx.author.send(embed=coin_stats)
 
     async def explorer_messages(self, applied_channels: list, message: str, tx_type: str, on_chain: bool = None):
         """

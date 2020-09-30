@@ -114,10 +114,8 @@ class UserAccountCommands(commands.Cog):
     @wallet.command()
     async def stats(self, ctx):
         utc_now = datetime.utcnow()
-        account_details = account_mng.get_account_details(discord_id=ctx.message.author.id)
-        stellar_stats = account_details["xlmStats"]
-        # Send XLM Wallet stats
-        await custom_messages.stellar_wallet_overall(ctx=ctx, utc_now=utc_now, stellar_stats=stellar_stats)
+        account_details = account_mng.get_account_stats(discord_id=ctx.message.author.id)
+        await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
 
     @wallet.command()
     async def deposit(self, ctx):
