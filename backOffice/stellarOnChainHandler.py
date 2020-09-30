@@ -103,6 +103,9 @@ class StellarWallet:
         for op in operations:
             if isinstance(op, Payment):
                 asset = op.asset.to_dict()
+
+                if asset.get('native') is None:
+                    asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
                 asset["amount"] = op.to_xdr_amount(op.amount)
                 return asset
 
