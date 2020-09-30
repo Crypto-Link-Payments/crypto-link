@@ -5,7 +5,7 @@
     "emoji": "<:stelaremoji:684676687425961994>",
     "coinGeckoListing": true
   },
-  "clToken": {
+  "clt": {
     "name": "CL Token",
     "decimal": 7,
     "emoji": ":sweat_drops:",
