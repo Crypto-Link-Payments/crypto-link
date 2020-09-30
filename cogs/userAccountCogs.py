@@ -122,9 +122,8 @@ class UserAccountCommands(commands.Cog):
         user_profile = account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
-                          ' wallet(GUI, CLI) to the address and deposit ID provided below. Have in mind that there is' \
-                          ' difference bet ween Stellar and Scala deposit values. Providing wrong details for either ' \
-                          'of them will result in funds being lost to which staff of Launch Pad Investments is not ' \
+                          ' wallet(GUI, CLI) to the address and deposit ID provided below. Of them will result in ' \
+                          'funds being lost to which staff of Launch Pad Investments is not ' \
                           'responsible for. :warning:'
 
             deposit_embed = Embed(title='How to deposit',
@@ -139,9 +138,13 @@ class UserAccountCommands(commands.Cog):
                 name=f' {CONST_STELLAR_EMOJI} Stellar Lumen Deposit details {CONST_STELLAR_EMOJI}',
                 value=f'Stellar wallet Address:\n'
                       f'```{hot_wallets["xlm"]}```\n'
-                      f'\nMEMO:\n'
+                      f'\nMEMO:'
                       f'> {user_profile["stellarDepositId"]}',
                 inline=False)
+
+            deposit_embed.add_field(name="Currently available currencies on Crypto Link",
+                                    value=f'XLM, CLT')
+
             deposit_embed.set_thumbnail(url=ctx.message.author.avatar_url)
             await ctx.author.send(embed=deposit_embed)
         else:
