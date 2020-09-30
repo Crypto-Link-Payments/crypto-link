@@ -186,25 +186,22 @@ class CustomMessages:
             print('========================')
 
     @staticmethod
-    async def coin_activity_notification_message(coin, recipient: discord.User, memo, tx_hash, source_acc, amount,
-                                                 color_code: int):
-        if color_code == 0:
-            signal = 0x319f6b
-        else:
-            signal = discord.Colour.red()
+    async def deposit_notification_message(recipient: discord.User, tx_details: dict):
 
-        sys_embed = discord.Embed(title="Deposit Notification",
-                                  description=f' {coin} deposit with deposit id{memo} has been successfully processed',
-                                  colour=signal)
+        sys_embed = discord.Embed(title=":inbox_tray: __Deposit Processed__ :inbox_tray: ",
+                                  description=f'Deposit processed successfully!',
+                                  colour=Colour.dark_purple(),
+                                  timestamp=datetime.utcnow())
         sys_embed.add_field(name='From',
-                            value=source_acc, inline=False)
+                            value=f'{tx_details["source_account"]}', inline=False)
         sys_embed.add_field(name='Tx hash',
-                            value=tx_hash,
+                            value=f'{tx_details["hash"]}',
                             inline=False)
+        sys_embed.add_field(name=f'Asset',
+                            value=f'{tx_details["asset_type"]["code"]}')
         sys_embed.add_field(name="Amount",
-                            value=f"{amount / 10000000:9.7f} <:stelaremoji:684676687425961994>",
+                            value=f"{int(tx_details['asset_type']['amount']) / 10000000:9.7f}",
                             inline=False)
-
         await recipient.send(embed=sys_embed)
 
     @staticmethod
