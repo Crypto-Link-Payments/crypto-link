@@ -50,19 +50,24 @@ class CustomMessages:
         return emoji
 
     @staticmethod
-    async def send_deposit_notification_channel(channel, avatar, user, stroops):
+    async def sys_deposit_notifications(channel, user: discord.User, tx_details: dict):
         """
         Sending message to user on successful processed deposit
         """
 
         notify = discord.Embed(title='System Deposit Notification',
-                               description='Deposit has been processed')
-        notify.set_thumbnail(url=avatar)
+                               description='Deposit has been processed',
+                               timestamp=datetime.utcnow())
+        notify.set_thumbnail(url=user.avatar_url)
         notify.add_field(name='User details',
                          value=f'{user} ID; {user.id}',
                          inline=False)
-        notify.add_field(name='Deposit details',
-                         value=f'Amount: {stroops / 10000000:.7f} {CONST_STELLAR_EMOJI}',
+        notify.add_field(name='From',
+                         value=f'{tx_details["source_account"]}', inline=False)
+        notify.add_field(name='Tx hash',
+                         value=f'{tx_details["hash"]}')
+        notify.add_field(name='Deposit Value',
+                         value=f"Amount: {int(tx_details['asset_type']['amount']) / 10000000:9.7f} {tx_details['asset_type']['code']}",
                          inline=False)
         await channel.send(embed=notify)
 
