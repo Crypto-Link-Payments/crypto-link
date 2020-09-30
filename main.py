@@ -91,7 +91,7 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
         # check if processed if not process them
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
-               # Update balance based on incoming asset
+                # Update balance based on incoming asset
                 if wallet_manager.update_coin_balance_by_memo(memo=tx['memo'], coin=tx['asset_type']["code"],
                                                               amount=int(tx['asset_type']["amount"])):
 
@@ -99,28 +99,37 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
                     user_id = wallet_manager.get_discord_id_from_memo(memo=tx['memo'])  # Return usr int number
                     dest = await bot.fetch_user(user_id=int(user_id))
 
-                    await custom_messages.deposit_notification_message(recipient=dest,tx_details=tx)
+                    await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
 
                     # Channel system message on deposit
                     await custom_messages.sys_deposit_notifications(channel=msg_channel,
-                                                                    user=dest,tx_details=tx)
+                                                                    user=dest, tx_details=tx)
 
                     # Explorer messages
-                    # TODO based on asset
                     load_channels = [bot.get_channel(id=int(chn)) for chn in
                                      guild_profiles.get_all_explorer_applied_channels()]
-                    in_dollar = convert_to_usd(amount=tx_stroop / 10000000, coin_name='stellar')
-                    explorer_msg = f':inbox_tray: {tx_stroop / 10000000} {CONST_STELLAR_EMOJI} (${in_dollar["total"]})'
-                    await custom_messages.explorer_messages(applied_channels=load_channels, message=explorer_msg)
 
-                    # TODO update this to latest specs
-                    # Update user deposit stats
-                    stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
-                                                            key="xlmStats")
+                    explorer_msg = f':inbox_tray: Someone deposited {tx["asset_type"]["amount"]} ' \
+                                   f'{tx["asset_type"]["code"].upper()} to {bot.user}'
 
-                    # TODO update this to latest specs through accumulation of all transactions
-                    stats_manager.update_bot_chain_stats(type_of='deposit', ticker='xlm',
-                                                         amount=round(tx_stroop / 10000000, 7))
+                    await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                            message=explorer_msg,
+                                                            on_chain=True, tx_type='deposit')
+
+                    on_chain_stats = {
+                        f"{tx['asset_type']['code']}.depositsCount": 1,
+                        f"{tx['asset_type']['code']}.totalDeposited": round(int(tx['asset_type']["amount"]) / 10000000,
+                                                                            7)}
+
+                    await stats_manager.update_user_on_chain_stats(user_id=dest.id, stats_data=on_chain_stats)
+
+                    bot_stats = {
+                        "depositCount": 1,
+                        "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
+                    }
+                    await stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
+                                                                 stat_details=bot_stats)
+
                 else:
                     print(Fore.RED + f'TX Processing error: \n'
                                      f'{tx}')
