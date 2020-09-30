@@ -35,6 +35,12 @@ class UserWalletManager:
         self.as_user_profiles = self.as_cl_connection.userProfiles  # Connection to user profiles
         self.as_user_wallets = self.as_cl_connection.userWallets  # Connection to user profiles
 
+    def get_discord_id_from_memo(self, memo: str):
+        result = self.user_wallets.find_one({"depositId": memo},
+                                            {"_id": 0,
+                                             "userId": 1})
+        return int(result["userId"])
+
     def update_coin_balance_by_memo(self, memo: str, coin: str, amount: int):
         result = self.user_wallets.update_one({"depositId": memo},
                                               {"$inc": {f"{coin.lower()}": int(amount)}})
