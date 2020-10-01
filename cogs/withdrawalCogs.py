@@ -67,27 +67,78 @@ class WithdrawalCommands(commands.Cog):
 
     @commands.group()
     @commands.check(user_has_wallet)
-    async def withdraw_token(self, ctx, amount: float, ticker: str, address: str):
-        # coin = ticker.lower()
-        # if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins and check_stellar_address(
-        #         address=address):
-        #     coin_data = integrated_coins[ticker]
-        #
-        #     # get and convert coin withdrawal fee from major to atomic
-        #     withdrawal_fee = bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')['fee_list'][ticker]
-        #     withdrawal_fee_atomic = (int(coin_fee * (10 ** int(coin_data["decimal"]))))
-        #
-        #     # Convert withdrawal request to atomic
-        #     amount_atomic  = (int(amount * (10 ** int(coin_data["decimal"]))))
-        #
-        #     # Get wallet value in atomic
-        #     wallet_value = user_wallets.get_ticker_balance(ticker=ticker, user_id=ctx.message.author.id)
-        #
-        #     total_to_deduct = withdrawal_fee_atomic +
-        #
-        #     if wallet_value >= atomic_value:
-        #         print('initiate token withdrawal process')
-        pass
+    async def w_t(self, ctx, withdrawal_amount: float, ticker: str, address: str):
+        token = ticker.lower()
+        if not re.search("[~!#$%^&*()_+{}:;\']", token) and token in self.list_of_coins and check_stellar_address(
+                address=address):
+
+            # get and convert coin withdrawal fee from major to atomic
+            all_coin_fees = bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')['fee_list']
+
+            # Stellar details
+            stellar_details = integrated_coins['xlm']
+            stellar_fee = all_coin_fees['xlm']
+
+            # Token details
+            token_withdrawal_amount_atomic = int(withdrawal_amount * (10 ** 7))
+            token_fee = all_coin_fees[token]
+            token_fee_atomic = (int(token_fee * (10 ** 7)))
+
+            # User balances
+            user_balances = user_wallets.get_balances(user_id=ctx.message.author.id)
+            user_stellar_balance = user_balances['xlm']
+            user_token_balance = user_balances[token]
+
+            # end values
+            total_token_to_withdraw = token_fee_atomic + token_withdrawal_amount_atomic
+            total_stellar_to_withdraw = int(stellar_fee * (10 ** int(int(stellar_details["decimal"]))))
+
+            # Check if user has sufficient balance to withdraw in stellar wallet and token balance
+            if user_stellar_balance >= total_stellar_to_withdraw and user_token_balance >= total_token_to_withdraw:
+
+                # Ask for verification
+                message_content = f"{ctx.message.author.mention} fees for withdrawal request are:\n" \
+                                  f"***XLM***: {stellar_fee} {CONST_STELLAR_EMOJI}\n" \
+                                  f"***{token.upper()}***: {token_withdrawal_amount_atomic}\n" \
+                                  f"Are you still willing to withdraw and pay the fess? answer with ***yes*** " \
+                                  f"or ***no***"
+
+                verification = await ctx.channel.send(content=message_content)
+                msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
+
+                await ctx.channel.delete_messages([verification, msg_usr])
+                processing_msg = 'Processing withdrawal request, please wait few moments....'
+                await ctx.channel.send(processing_msg)
+
+                # Agreed vs not Agreed
+                if str(msg_usr.content.lower()) == 'yes':
+                    result = stellar_wallet.token_withdrawal(address=address, token=ticker.upper(),
+                                                             amount=f'{withdrawal_amount}')
+                    if result.get("hash"):
+                        await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
+                                                                fee=f'{stellar_fee} XLM and {token_fee} {ticker.upper()}')
+                    elif result.get("error"):
+                        await custom_messages.system_message(ctx, color_code=1, message=result['error'],
+                                                             destination=ctx.message.author,
+                                                             sys_msg_title=CONST_STELLAR_EMOJI)
+
+
+                else:
+                    message = f'You have cancelled withdrawal request'
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                         sys_msg_title=CONST_WITHDRAWAL_ERROR)
+
+            else:
+                # TODO integrate detailed withdrawal error
+                message = f'You have insufficient balance to withdraw {token.upper()}'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=CONST_WITHDRAWAL_ERROR)
+        else:
+            message = f'In order to be eligible to withdraw following conditions need to be met:\n' \
+                      f'> :one: Token needs to be listed on Crypto Link\n' \
+                      f'> :two: Destination address needs to be valid Stellar Public Key'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
     @withdraw.command()
     @commands.check(is_public)
@@ -101,8 +152,6 @@ class WithdrawalCommands(commands.Cog):
         :return:
         """
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
-        # TODO make multi wallet withdrawals
-
         stellar_fee = bot_manager.get_fees_by_category(all_fees=False, key='xlm')['fee']
         fee_in_xlm = convert_to_currency(amount=stellar_fee, coin_name='stellar')
         fee_in_stroops = int(fee_in_xlm['total'] * (10 ** 7))
