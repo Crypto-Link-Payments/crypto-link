@@ -202,7 +202,7 @@ class StellarWallet:
             # get operation from result_codes to be processed
             error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
             return {
-                "status": 400,
+
                 "error": f'{error} with {token.upper()} issuer'
             }
 
