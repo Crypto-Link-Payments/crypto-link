@@ -18,12 +18,14 @@ helper = Helpers()
 d = helper.read_json_file(file_name='botSetup.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_MERCHANT_LICENSE_CHANGE = '__Merchant monthly license change information__'
+integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
 
 class FeeManagementAndControl(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.list_of_coins = list(integrated_coins.keys())
 
     @staticmethod
     def filter_db_keys(fee_type: str):
@@ -121,6 +123,35 @@ class FeeManagementAndControl(commands.Cog):
                                                 thumbnail=self.bot.user.avatar_url, destination=ctx.message.author)
 
     @change.command()
+    async def coin_fee(self, ctx, value: float, ticker: str):
+        """
+        Set the coin withdrawal fee
+        """
+        if ticker in self.list_of_coins:
+            penny = (int(value * (10 ** 2)))
+            rounded = round(penny / 100, 2)
+
+            fee_data = {
+                f"fee_list.{ticker}": rounded
+            }
+            if bot_manager.manage_fees_and_limits(key='withdrawals', data_to_update=fee_data):
+                message = f'You have successfully set Stellar Lumen withdrawal fee to be {rounded}$.'
+                title = '__Stellar Lumen withdrawal fee information__'
+                await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
+                                                     sys_msg_title=title)
+            else:
+                message = f'There has been an error while trying to set Stellar Lumen withdrawal fee to {rounded}$.' \
+                          f'Please try again later or contact system administrator!'
+                title = '__Stellar Lumen withdrawal fee information__'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=title)
+        else:
+            message = f'Coin {ticker} not listed yet'
+            title = '__Stellar Lumen withdrawal fee information__'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @change.command()
     async def minimum_merchant_transfer_value(self, ctx, value: float):
         """
         Set minimum amount in merchant wallet for withdrawal from it
@@ -131,7 +162,7 @@ class FeeManagementAndControl(commands.Cog):
         # Get value in in pennies
         penny = (int(value * (10 ** 2)))
         rounded = round(penny / 100, 2)
-        if bot_manager.license_fee_handling(fee=rounded, key='merchant_min'):
+        if bot_manager.manage_fees_and_limits(fee=rounded, key='merchant_min'):
             message = f'You have successfully set merchant minimum withdrawal to be {rounded}$ per currency used.'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
                                                  sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
@@ -152,7 +183,7 @@ class FeeManagementAndControl(commands.Cog):
         # Get value in in pennies
         penny = (int(value * (10 ** 2)))
         rounded = round(penny / 100, 2)
-        if bot_manager.license_fee_handling(fee=rounded, key='license'):
+        if bot_manager.manage_fees_and_limits(fee=rounded, key='license'):
             message = f'You have successfully set merchant monthly license fee to be {rounded}$.'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
                                                  sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
@@ -173,7 +204,7 @@ class FeeManagementAndControl(commands.Cog):
         # Get value in in pennies
         penny = (int(value * (10 ** 2)))
         rounded = round(penny / 100, 2)
-        if bot_manager.license_fee_handling(fee=rounded, key='wallet_transfer'):
+        if bot_manager.manage_fees_and_limits(fee=rounded, key='wallet_transfer'):
             message = f'You have successfully set merchant wallet transfer fee to be {rounded}$.'
             title = '__Merchant wallet transfer fee information__'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
@@ -182,25 +213,6 @@ class FeeManagementAndControl(commands.Cog):
             message = f'There has been an error while trying to set merchant wallet transfer fee to {rounded}$.' \
                       f'Please try again later or contact system administrator!'
             title = '__Merchant wallet transfer fee information__'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
-
-    @change.command()
-    async def xlm_withdrawal_fee(self, ctx, value: float):
-        """
-        Setting up discord user withdrawal fee
-        """
-        penny = (int(value * (10 ** 2)))
-        rounded = round(penny / 100, 2)
-        if bot_manager.license_fee_handling(fee=rounded, key="xlm"):
-            message = f'You have successfully set Stellar Lumen withdrawal fee to be {rounded}$.'
-            title = '__Stellar Lumen withdrawal fee information__'
-            await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
-                                                 sys_msg_title=title)
-        else:
-            message = f'There has been an error while trying to set Stellar Lumen withdrawal fee to {rounded}$.' \
-                      f'Please try again later or contact system administrator!'
-            title = '__Stellar Lumen withdrawal fee information__'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
