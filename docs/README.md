@@ -238,7 +238,7 @@ Coming soon (when its officially release)...
 cryptolinkpayments@gmail.com
 
 ## Contributing 
-If you would like to contribute to the project we have prepared certain guidliness which can be accessed [here](CONTRIBUTINGGUIDLINES.md)
+If you would like to contribute to the project we have prepared certain guidelines which can be accessed [here](CONTRIBUTINGGUIDLINES.md)
 
 ## License
 Crypto Link is an open-source project managed by Launch Pad Investments.

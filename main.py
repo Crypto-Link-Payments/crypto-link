@@ -10,8 +10,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init
 from discord.ext import commands
+from pymongo import MongoClient, errors
 
 from backOffice.backendCheck import BotStructureCheck
+from backOffice.userWalletManager import UserWalletManager
 from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.merchatManager import MerchantManager
 from backOffice.statsManager import StatsManager
@@ -19,6 +21,7 @@ from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.monetaryConversions import convert_to_usd
+from backOffice.backOffice import BackOffice
 from utils.tools import Helpers
 
 init(autoreset=True)
@@ -27,13 +30,14 @@ stellar_wallet = StellarWallet()
 stellar_manager = StellarManager()
 merchant_manager = MerchantManager()
 stats_manager = StatsManager()
+wallet_manager = UserWalletManager()
 guild_profiles = GuildProfileManager()
 custom_messages = CustomMessages()
 helper = Helpers()
 notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-d = helper.read_json_file(file_name='botSetup.json')
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(d['command']))  # Test commands
+bot_settings = helper.read_json_file(file_name='botSetup.json')
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(bot_settings['command']))  # Test commands
 bot.remove_command('help')  # removing the old help command
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
@@ -76,7 +80,7 @@ async def process_tx_with_no_memo(channel, no_memo_transaction):
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                 await custom_messages.send_unidentified_deposit_msg(channel=channel, deposit_details=tx)
-
+                # TODO integrate bot global stats
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
@@ -89,42 +93,46 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
         # check if processed if not process them
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
-                tx_memo = tx['memo']
-                tx_hash = tx['hash']
-                tx_from = tx["source_account"]
-                tx_stroop = tx['stroop']
+                # Update balance based on incoming asset
 
-                # Get user_id based on transaction memo
-                user_id = stellar_manager.get_discord_id_from_deposit_id(deposit_id=tx_memo)
+                if wallet_manager.update_coin_balance_by_memo(memo=tx['memo'], coin=tx['asset_type']["code"],
+                                                              amount=int(tx['asset_type']["amount"])):
 
-                # Update balance
-                if stellar_manager.update_stellar_balance_by_memo(memo=tx_memo, stroops=tx_stroop, direction=1):
                     # If balance updated successfully send the message to user of processed deposit
-                    dest = await bot.fetch_user(user_id=int(user_id['userId']))
-                    await custom_messages.coin_activity_notification_message(coin='Stellar', recipient=dest,
-                                                                             memo=tx_memo,
-                                                                             tx_hash=tx_hash, source_acc=tx_from,
-                                                                             amount=tx_stroop, color_code=0)
+                    user_id = wallet_manager.get_discord_id_from_memo(memo=tx['memo'])  # Return usr int number
+                    dest = await bot.fetch_user(user_id=int(user_id))
+
+                    await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
 
                     # Channel system message on deposit
-                    await custom_messages.send_deposit_notification_channel(channel=msg_channel,
-                                                                            avatar=bot.user.avatar_url,
-                                                                            user=dest, stroops=tx_stroop)
+                    await custom_messages.sys_deposit_notifications(channel=msg_channel,
+                                                                    user=dest, tx_details=tx)
 
                     # Explorer messages
                     load_channels = [bot.get_channel(id=int(chn)) for chn in
                                      guild_profiles.get_all_explorer_applied_channels()]
-                    in_dollar = convert_to_usd(amount=tx_stroop / 10000000, coin_name='stellar')
-                    explorer_msg = f':inbox_tray: {tx_stroop / 10000000} {CONST_STELLAR_EMOJI} (${in_dollar["total"]})'
-                    await custom_messages.explorer_messages(applied_channels=load_channels, message=explorer_msg)
 
-                    # Update user deposit stats
-                    stats_manager.update_user_deposit_stats(user_id=dest.id, amount=round(tx_stroop / 10000000, 7),
-                                                            key="xlmStats")
+                    explorer_msg = f':inbox_tray: Someone deposited {tx["asset_type"]["amount"]} ' \
+                                   f'{tx["asset_type"]["code"].upper()} to {bot.user}'
 
-                    # Update Bot Global stats
-                    stats_manager.update_bot_chain_stats(type_of='deposit', ticker='xlm',
-                                                         amount=round(tx_stroop / 10000000, 7))
+                    await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                            message=explorer_msg,
+                                                            on_chain=True, tx_type='deposit')
+
+                    on_chain_stats = {
+                        f"{tx['asset_type']['code']}.depositsCount": 1,
+                        f"{tx['asset_type']['code']}.totalDeposited": round(int(tx['asset_type']["amount"]) / 10000000,
+                                                                            7)}
+
+                    await stats_manager.update_user_on_chain_stats(user_id=dest.id, stats_data=on_chain_stats)
+
+                    bot_stats = {
+                        "depositCount": 1,
+                        "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
+                    }
+                    await stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
+                                                                 stat_details=bot_stats)
+
                 else:
                     print(Fore.RED + f'TX Processing error: \n'
                                      f'{tx}')
@@ -140,6 +148,7 @@ async def process_tx_with_not_registered_memo(channel, no_registered_memo):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                 await custom_messages.send_unidentified_deposit_msg(channel=channel, deposit_details=tx)
                 print(Fore.GREEN + 'Processed successfully')
+                # TODO integrate stats for deposit processing
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
@@ -368,10 +377,9 @@ async def on_ready():
 
 
 if __name__ == '__main__':
-    backend_check = BotStructureCheck()
-    backend_check.check_collections()
-    backend_check.checking_stats_documents()
-    backend_check.checking_bot_wallets()
+
+    back_office = BackOffice()
+    back_office.check_backend()
 
     # Check file system
     backend_check = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
@@ -393,4 +401,4 @@ if __name__ == '__main__':
     print(notification_str)
     start_scheduler()
     # Discord Token
-    bot.run(d['token'], reconnect=True)
+    bot.run(bot_settings['token'], reconnect=True)

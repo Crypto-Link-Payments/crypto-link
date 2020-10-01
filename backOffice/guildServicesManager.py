@@ -32,7 +32,6 @@ class GuildProfileManager:
         result = list(self.guild_profiles.find({"guildId": guild_id}))
         return result
 
-    #
     async def register_guild(self, guild_data: dict):
         result = self.as_guild_profiles.insert_one(guild_data)
         return result
@@ -46,8 +45,9 @@ class GuildProfileManager:
     async def get_guild_stats(self, guild_id: int):
         stats = await self.as_guild_profiles.find_one({"guildId": guild_id},
                                                       {"_id": 0,
-                                                       "communityStats": 1})
-        return stats["communityStats"]
+                                                       "xlm": 1,
+                                                       "clt": 1})
+        return stats
 
     async def update_guild_profile(self, guild_id, data_to_update: dict):
         result = await self.as_guild_profiles.update_one({"guildId": guild_id},
