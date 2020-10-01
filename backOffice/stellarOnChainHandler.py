@@ -204,9 +204,3 @@ class StellarWallet:
 
                 "error": f'{error} with {token.upper()} issuer'
             }
-
-# from pprint import pprint
-#
-# pprint(StellarWallet().token_withdrawal(address='GDPIJA4VYJG2C275KGEBJXWLA2R5LVBCCGAELFCS62MOUPGRANOA4Z55',
-#                                         token='clt',
-#                                         amount='1'))
