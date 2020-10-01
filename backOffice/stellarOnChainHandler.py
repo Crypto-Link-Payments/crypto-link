@@ -16,6 +16,7 @@ from utils.tools import Helpers
 helpers = Helpers()
 secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
 public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
+integrated_coins = helpers.read_json_file(file_name='integratedCoins.json')
 
 
 class StellarWallet:
@@ -52,20 +53,12 @@ class StellarWallet:
         operations = te.transaction.operations
 
         for op in operations:
-            # You can check other types of operations here.
-            # You can find list of operations here: https://stellar-sdk.readthedocs.io/en/latest/api.html#operation
             if isinstance(op, Payment):
-                amount = op.amount
-                amount_stroops = op.to_xdr_amount(amount)
-                destination = op.destination
-
-                details = {
-                    "amount": amount,
-                    "stroops": amount_stroops,
-                    "destination": destination
-                }
-
-                return details
+                asset = op.asset.to_dict()
+                if asset.get('native'):
+                    asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
+                asset["amount"] = op.to_xdr_amount(op.amount)
+                return asset
 
     def get_stellar_hot_wallet_details(self):
         """
@@ -103,8 +96,7 @@ class StellarWallet:
         for op in operations:
             if isinstance(op, Payment):
                 asset = op.asset.to_dict()
-
-                if asset.get('native') is None:
+                if asset.get('native'):
                     asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
                 asset["amount"] = op.to_xdr_amount(op.amount)
                 return asset
@@ -154,7 +146,7 @@ class StellarWallet:
         tx = TransactionBuilder(
             source_account=source_account,
             network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
-            base_fee=self.__base_fee()).append_payment_op(
+            base_fee=self.server.fetch_base_fee()).append_payment_op(
             destination=address, asset_code="XLM", amount=xlm_amount).set_timeout(30).build()
         tx.sign(self.root_keypair)
         response = self.server.submit_transaction(tx)
@@ -173,38 +165,30 @@ class StellarWallet:
         else:
             return {}
 
-    def token_withdrawal(self, address, token, amount):
-        pass
-
-    async def as_withdraw(self, address, xlm_amount):
-        # TODO still to integrate async support for functions
+    def token_withdrawal(self, address, token, amount: str):
         """
-        Asynchronous support for withdrawals
+        Amount as full
         """
-        async with Server(
-                horizon_url="https://horizon-testnet.stellar.org", client=AiohttpClient()):
-            source_account = self.server.load_account(self.public_key)
-            base_fee = await self.server.fetch_base_fee()
-            tx = (TransactionBuilder(
-                source_account=source_account,
-                network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
-                base_fee=base_fee).add_text_memo('Discord withdrawal').append_payment_op(
-                destination=address, asset_code="XLM",
-                amount=xlm_amount).set_timeout(30).build()
-                  )
-            tx.sign(self.root_keypair)
-            response = await self.server.submit_transaction(tx)
-            if "status" not in response:
-                details = self.__decode_processed_withdrawal_envelope(envelope_xdr=response['envelope_xdr'])
-                end_details = {
-                    "explorer": response['_links']['transaction']['href'],
-                    "hash": response['hash'],
-                    "ledger": response['ledger'],
-                    "destination": details['destination'],
-                    "amount": details['amount'],
-                    "stroops": details['stroops']
-                }
-                return end_details
-
-            else:
-                return {}
+        source_account = self.server.load_account(self.public_key)
+        tx = TransactionBuilder(
+            source_account=source_account,
+            network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+            base_fee=self.server.fetch_base_fee()).append_payment_op(
+            asset_issuer=integrated_coins[token.lower()]["assetIssuer"],
+            destination=address, asset_code=token.upper(), amount=amount).set_timeout(30).build()
+        tx.sign(self.root_keypair)
+        resp = self.server.submit_transaction(tx)
+        if "status" not in resp:
+            details = self.__decode_processed_withdrawal_envelope(envelope_xdr=resp['envelope_xdr'])
+            pprint(details)
+            end_details = {
+                "asset": details['code'],
+                "explorer": resp['_links']['transaction']['href'],
+                "hash": resp['hash'],
+                "ledger": resp['ledger'],
+                "destination": address,
+                "amount": details['amount']
+            }
+            return end_details
+        else:
+            return {}
