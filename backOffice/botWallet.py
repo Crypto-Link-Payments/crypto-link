@@ -52,7 +52,7 @@ class BotManager:
                                           "balance": 1})
         return query['balance']
 
-    def license_fee_handling(self, fee: float, key: str):
+    def manage_fees_and_limits(self, fee: float, key: str):
         """
         Function used to update licensing fees
         :param fee: Flot number in $
