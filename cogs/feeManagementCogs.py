@@ -28,8 +28,8 @@ class FeeManagementAndControl(commands.Cog):
     @staticmethod
     def filter_db_keys(fee_type: str):
 
-        if fee_type == 'with_xlm':
-            fee_type = "XLM Withdrawal fee"
+        if fee_type == 'withdrawal_fees':
+            fee_type = "Coin withdrawal fees"
         elif fee_type == 'merch_transfer_cost':
             fee_type = "Merchant wallet withdrawal fee"
         elif fee_type == 'merch_license':
@@ -42,19 +42,27 @@ class FeeManagementAndControl(commands.Cog):
     @commands.command()
     async def fees(self, ctx):
         fees = bot_manager.get_fees_by_category(all_fees=True)
+        from pprint import pprint
+        pprint(fees)
         fee_info = discord.Embed(title='Applied fees for system',
                                  description='State of fees for each segment of the bot',
                                  colour=discord.Colour.blue())
 
         rates = get_rates(coin_name='stellar')
         for data in fees:
-            conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
-            fee_type = self.filter_db_keys(fee_type=data['type'])
+            if not data.get('fee_list'):
+                conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
+                fee_type = self.filter_db_keys(fee_type=data['type'])
 
-            fee_info.add_field(name=fee_type,
-                               value=f"XLM = {conversion['total']} {CONST_STELLAR_EMOJI}\n"
-                                     f"Dollar = {data['fee']}$",
-                               inline=False)
+                fee_info.add_field(name=fee_type,
+                                   value=f"XLM = {conversion['total']} {CONST_STELLAR_EMOJI}\n"
+                                         f"Dollar = {data['fee']}$",
+                                   inline=False)
+            else:
+                fee_type = self.filter_db_keys(fee_type=data['type'])
+                fee_info.add_field(name=fee_type,
+                                   value=f"{data['fee_list']}",
+                                   inline=False)
 
         fee_info.add_field(name='Conversion rates',
                            value=f'{rates["stellar"]["usd"]} :dollar: / {CONST_STELLAR_EMOJI}\n'
