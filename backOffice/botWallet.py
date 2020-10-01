@@ -52,20 +52,12 @@ class BotManager:
                                           "balance": 1})
         return query['balance']
 
-    def manage_fees_and_limits(self, fee: float, key: str):
-        """
-        Function used to update licensing fees
-        :param fee: Flot number in $
-        :param key: Key to search from which fee to update
-        :return:
-        """
-        try:
-            self.bot_fees.update_one({"key": key},
-                                     {"$set": {"fee": fee},
-                                      "$currentDate": {"lastModified": True}})
-            return True
-        except errors.PyMongoError:
-            return False
+    def manage_fees_and_limits(self, key: str, data_to_update: dict):
+
+        result = self.bot_fees.update_one({"key": key},
+                                          {"$set": data_to_update,
+                                           "$currentDate": {"lastModified": True}})
+        return result.modified_count > 0
 
     def get_fees_by_category(self, all_fees: bool, key: str = None):
         """
