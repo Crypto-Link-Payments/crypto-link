@@ -36,7 +36,8 @@ custom_messages = CustomMessages()
 helper = Helpers()
 notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-bot = commands.Bot(command_prefix=commands.when_mentioned_or(d['command']))  # Test commands
+bot_settings = helper.read_json_file(file_name='botSetup.json.json')
+bot = commands.Bot(command_prefix=commands.when_mentioned_or(bot_settings['command']))  # Test commands
 bot.remove_command('help')  # removing the old help command
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
@@ -400,4 +401,4 @@ if __name__ == '__main__':
     print(notification_str)
     start_scheduler()
     # Discord Token
-    bot.run(d['token'], reconnect=True)
+    bot.run(bot_settings['token'], reconnect=True)
