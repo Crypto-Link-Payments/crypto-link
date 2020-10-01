@@ -68,15 +68,26 @@ class WithdrawalCommands(commands.Cog):
     @commands.group()
     @commands.check(user_has_wallet)
     async def withdraw_token(self, ctx, amount: float, ticker: str, address: str):
-        coin = ticker.lower()
-        if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins and check_stellar_address(
-                address=address):
-            coin_data = integrated_coins[ticker]
-            atomic_value = (int(amount * (10 ** int(coin_data["decimal"]))))
-
-            wallet_value = user_wallets.get_ticker_balance(ticker=ticker, user_id=ctx.message.author.id)
-            if wallet_value >= atomic_value:
-                print('initiate token withdrawal process')
+        # coin = ticker.lower()
+        # if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins and check_stellar_address(
+        #         address=address):
+        #     coin_data = integrated_coins[ticker]
+        #
+        #     # get and convert coin withdrawal fee from major to atomic
+        #     withdrawal_fee = bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')['fee_list'][ticker]
+        #     withdrawal_fee_atomic = (int(coin_fee * (10 ** int(coin_data["decimal"]))))
+        #
+        #     # Convert withdrawal request to atomic
+        #     amount_atomic  = (int(amount * (10 ** int(coin_data["decimal"]))))
+        #
+        #     # Get wallet value in atomic
+        #     wallet_value = user_wallets.get_ticker_balance(ticker=ticker, user_id=ctx.message.author.id)
+        #
+        #     total_to_deduct = withdrawal_fee_atomic +
+        #
+        #     if wallet_value >= atomic_value:
+        #         print('initiate token withdrawal process')
+        pass
 
     @withdraw.command()
     @commands.check(is_public)
@@ -182,8 +193,8 @@ class WithdrawalCommands(commands.Cog):
                                     "withdrawalCount": 1,
                                     "withdrawnAmount": round(stroops / 10000000, 7)
                                 }
-                                await stats_manager.update_bot_chain_stats_as(ticker='xlm',
-                                                                              activity_data=bot_stats_data)
+                                await stats_manager.update_cl_on_chain_stats(ticker='xlm',
+                                                                             stat_details=bot_stats_data)
 
                                 # Message to explorer
                                 in_dollar = convert_to_usd(amount=xlm_with_amount, coin_name='stellar')
