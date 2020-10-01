@@ -8,8 +8,7 @@ import sys
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
-from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, \
-    AiohttpClient
+from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions
 
 from utils.tools import Helpers
 
@@ -39,6 +38,13 @@ class StellarWallet:
         """
         fee = self.server.fetch_base_fee()
         return fee
+
+    @staticmethod
+    def __filter_error(result_code):
+        if 'op_no_trust' in result_code:
+            return 'no trust'
+        else:
+            return result_code
 
     @staticmethod
     def __decode_processed_withdrawal_envelope(envelope_xdr):
@@ -177,18 +183,31 @@ class StellarWallet:
             asset_issuer=integrated_coins[token.lower()]["assetIssuer"],
             destination=address, asset_code=token.upper(), amount=amount).set_timeout(30).build()
         tx.sign(self.root_keypair)
-        resp = self.server.submit_transaction(tx)
-        if "status" not in resp:
-            details = self.__decode_processed_withdrawal_envelope(envelope_xdr=resp['envelope_xdr'])
-            pprint(details)
-            end_details = {
-                "asset": details['code'],
-                "explorer": resp['_links']['transaction']['href'],
-                "hash": resp['hash'],
-                "ledger": resp['ledger'],
-                "destination": address,
-                "amount": details['amount']
+        try:
+            resp = self.server.submit_transaction(tx)
+            if "status" not in resp:
+                details = self.__decode_processed_withdrawal_envelope(envelope_xdr=resp['envelope_xdr'])
+                end_details = {
+                    "asset": details['code'],
+                    "explorer": resp['_links']['transaction']['href'],
+                    "hash": resp['hash'],
+                    "ledger": resp['ledger'],
+                    "destination": address,
+                    "amount": details['amount']
+                }
+                return end_details
+            else:
+                return {}
+        except exceptions.BadRequestError as e:
+            # get operation from result_codes to be processed
+            error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
+            return {
+                "status": 400,
+                "error": f'{error} with {token.upper()} issuer'
             }
-            return end_details
-        else:
-            return {}
+
+# from pprint import pprint
+#
+# pprint(StellarWallet().token_withdrawal(address='GDPIJA4VYJG2C275KGEBJXWLA2R5LVBCCGAELFCS62MOUPGRANOA4Z55',
+#                                         token='clt',
+#                                         amount='1'))
