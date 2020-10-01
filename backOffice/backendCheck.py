@@ -14,13 +14,11 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 init(autoreset=True)
-helper = Helpers()
-d = helper.read_json_file(file_name='botSetup.json')
 
 
 class BotStructureCheck(object):
-    def __init__(self):
-        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
+    def __init__(self, connection):
+        self.connection = connection
         self.crypto_link = self.connection["CryptoLink"]  #
 
         self.required_collections = ["CLOnChainStats",

@@ -10,6 +10,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init
 from discord.ext import commands
+from pymongo import MongoClient, errors
 
 from backOffice.backendCheck import BotStructureCheck
 from backOffice.userWalletManager import UserWalletManager
@@ -20,6 +21,7 @@ from backOffice.stellarActivityManager import StellarManager
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.monetaryConversions import convert_to_usd
+from backOffice.backOffice import BackOffice
 from utils.tools import Helpers
 
 init(autoreset=True)
@@ -33,7 +35,6 @@ guild_profiles = GuildProfileManager()
 custom_messages = CustomMessages()
 helper = Helpers()
 notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-d = helper.read_json_file(file_name='botSetup.json')
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(d['command']))  # Test commands
 bot.remove_command('help')  # removing the old help command
@@ -375,10 +376,9 @@ async def on_ready():
 
 
 if __name__ == '__main__':
-    backend_check = BotStructureCheck()
-    backend_check.check_collections()
-    backend_check.checking_stats_documents()
-    backend_check.checking_bot_wallets()
+
+    back_office = BackOffice()
+    back_office.check_backend()
 
     # Check file system
     backend_check = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
