@@ -63,7 +63,7 @@ def get_decimal_point(symbol):
     """
     if symbol == 'xlm':
         return 7
-    elif symbol == "clToken":
+    elif symbol == "clt":
         return 7
 
 

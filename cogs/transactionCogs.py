@@ -101,8 +101,8 @@ class TransactionCommands(commands.Cog):
         processed_stats = self.build_stats(transaction_data=transaction_data, tx_type=tx_type)
 
         # Update stats stats
-        await stats_manager.update_cl_tx_stats(ticker=transaction_data["ticker"],
-                                               ticker_stats=processed_stats["globalBot"])
+        await stats_manager.update_cl_off_chain_stats(ticker=transaction_data["ticker"],
+                                                      ticker_stats=processed_stats["globalBot"])
 
         # Updates sender and recipient public transaction stats
         await stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,

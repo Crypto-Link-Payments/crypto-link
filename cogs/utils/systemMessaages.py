@@ -50,19 +50,24 @@ class CustomMessages:
         return emoji
 
     @staticmethod
-    async def send_deposit_notification_channel(channel, avatar, user, stroops):
+    async def sys_deposit_notifications(channel, user: discord.User, tx_details: dict):
         """
         Sending message to user on successful processed deposit
         """
 
         notify = discord.Embed(title='System Deposit Notification',
-                               description='Deposit has been processed')
-        notify.set_thumbnail(url=avatar)
+                               description='Deposit has been processed',
+                               timestamp=datetime.utcnow())
+        notify.set_thumbnail(url=user.avatar_url)
         notify.add_field(name='User details',
                          value=f'{user} ID; {user.id}',
                          inline=False)
-        notify.add_field(name='Deposit details',
-                         value=f'Amount: {stroops / 10000000:.7f} {CONST_STELLAR_EMOJI}',
+        notify.add_field(name='From',
+                         value=f'{tx_details["source_account"]}', inline=False)
+        notify.add_field(name='Tx hash',
+                         value=f'{tx_details["hash"]}')
+        notify.add_field(name='Deposit Value',
+                         value=f"Amount: {int(tx_details['asset_type']['amount']) / 10000000:9.7f} {tx_details['asset_type']['code']}",
                          inline=False)
         await channel.send(embed=notify)
 
@@ -186,25 +191,22 @@ class CustomMessages:
             print('========================')
 
     @staticmethod
-    async def coin_activity_notification_message(coin, recipient: discord.User, memo, tx_hash, source_acc, amount,
-                                                 color_code: int):
-        if color_code == 0:
-            signal = 0x319f6b
-        else:
-            signal = discord.Colour.red()
+    async def deposit_notification_message(recipient: discord.User, tx_details: dict):
 
-        sys_embed = discord.Embed(title="Deposit Notification",
-                                  description=f' {coin} deposit with deposit id{memo} has been successfully processed',
-                                  colour=signal)
+        sys_embed = discord.Embed(title=":inbox_tray: __Deposit Processed__ :inbox_tray: ",
+                                  description=f'Deposit processed successfully!',
+                                  colour=Colour.dark_purple(),
+                                  timestamp=datetime.utcnow())
         sys_embed.add_field(name='From',
-                            value=source_acc, inline=False)
+                            value=f'{tx_details["source_account"]}', inline=False)
         sys_embed.add_field(name='Tx hash',
-                            value=tx_hash,
+                            value=f'{tx_details["hash"]}',
                             inline=False)
+        sys_embed.add_field(name=f'Asset',
+                            value=f'{tx_details["asset_type"]["code"]}')
         sys_embed.add_field(name="Amount",
-                            value=f"{amount / 10000000:9.7f} <:stelaremoji:684676687425961994>",
+                            value=f"{int(tx_details['asset_type']['amount']) / 10000000:9.7f}",
                             inline=False)
-
         await recipient.send(embed=sys_embed)
 
     @staticmethod
@@ -373,33 +375,33 @@ class CustomMessages:
         await ctx.author.send(embed=tx_stats)
 
     @staticmethod
-    async def stellar_wallet_overall(ctx, utc_now, stellar_stats: dict):
-        xlm_wallet = Embed(title=f'{CONST_STELLAR_EMOJI} Stellar Account Statistics {CONST_STELLAR_EMOJI}',
-                           description=f':bar_chart: ***__Statistical Data on Stellar Lumen Discord Wallet__** '
-                                       f':bar_chart:',
-                           colour=Colour.light_grey(),
-                           timestamp=utc_now)
-        xlm_wallet.set_thumbnail(url=ctx.author.avatar_url)
-        xlm_wallet.add_field(name=f':inbox_tray: Total Deposits {CONST_STELLAR_EMOJI}',
-                             value=f'Deposited ***{stellar_stats["depositsCount"]}*** with total '
-                                   f'***{stellar_stats["totalDeposited"]}*** {CONST_STELLAR_EMOJI}')
-        xlm_wallet.add_field(name=f':outbox_tray: Total Withdrawals {CONST_STELLAR_EMOJI}',
-                             value=f'Withdrawn ***{stellar_stats["withdrawalsCount"]}*** withdrawals with '
-                                   f'total ***{stellar_stats["totalWithdrawn"]}*** {CONST_STELLAR_EMOJI}')
-        xlm_wallet.add_field(name=f':family_man_woman_boy: Public Tx',
-                             value=f':incoming_envelope:{stellar_stats["publicTxSendCount"]}\n'
-                                   f':money_with_wings:  {stellar_stats["publicSent"]}\n'
-                                   f':envelope_with_arrow:{stellar_stats["publicTxReceivedCount"]}\n'
-                                   f':money_mouth: {stellar_stats["publicReceived"]} ')
-        xlm_wallet.add_field(name=f':detective: Private Tx',
-                             value=f':incoming_envelope:{stellar_stats["privateTxSendCount"]}\n'
-                                   f':money_with_wings: {stellar_stats["privateSent"]}\n'
-                                   f':envelope_with_arrow: {stellar_stats["privateTxReceivedCount"]}\n'
-                                   f':money_mouth: {stellar_stats["privateReceived"]}')
-        xlm_wallet.add_field(name=f'Merchant Role purchases',
-                             value=f':man_juggling: {stellar_stats["roleTxCount"]}\n'
-                                   f':money_with_wings: {stellar_stats["spentOnRoles"]}{CONST_STELLAR_EMOJI}\n')
-        await ctx.author.send(embed=xlm_wallet)
+    async def stellar_wallet_overall(ctx, coin_stats: dict, utc_now):
+        for k, v in coin_stats.items():
+            coin_stats = Embed(title=f'{k.upper()} wallet statistics',
+                               description=f':bar_chart: ***__Statistical Data on Stellar Lumen Discord Wallet__** '
+                                           f':bar_chart:',
+                               colour=Colour.light_grey(),
+                               timestamp=utc_now)
+            coin_stats.add_field(name=f':inbox_tray: Total Deposits',
+                                 value=f'Deposited ***{v["depositsCount"]}*** with total '
+                                       f'***{v["totalDeposited"]}*** ')
+            coin_stats.add_field(name=f':outbox_tray: Total Withdrawals ',
+                                 value=f'Withdrawn ***{v["withdrawalsCount"]}*** withdrawals with '
+                                       f'total ***{v["totalWithdrawn"]}*** ')
+            coin_stats.add_field(name=f':family_man_woman_boy: Public Tx',
+                                 value=f':incoming_envelope:{v["publicTxSendCount"]}\n'
+                                       f':money_with_wings:  {v["publicSent"]}\n'
+                                       f':envelope_with_arrow:{v["publicTxReceivedCount"]}\n'
+                                       f':money_mouth: {v["publicReceived"]} ')
+            coin_stats.add_field(name=f':detective: Private Tx',
+                                 value=f':incoming_envelope:{v["privateTxSendCount"]}\n'
+                                       f':money_with_wings: {v["privateSent"]}\n'
+                                       f':envelope_with_arrow: {v["privateTxReceivedCount"]}\n'
+                                       f':money_mouth: {v["privateReceived"]}')
+            coin_stats.add_field(name=f'Merchant Role purchases',
+                                 value=f':man_juggling: {v["roleTxCount"]}\n'
+                                       f':money_with_wings: {v["spentOnRoles"]}\n')
+            await ctx.author.send(embed=coin_stats)
 
     async def explorer_messages(self, applied_channels: list, message: str, tx_type: str, on_chain: bool = None):
         """

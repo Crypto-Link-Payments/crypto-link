@@ -59,6 +59,7 @@ class BotManager:
                                            "$currentDate": {"lastModified": True}})
         return result.modified_count > 0
 
+
     def get_fees_by_category(self, all_fees: bool, key: str = None):
         """
         Return details on the fees from database

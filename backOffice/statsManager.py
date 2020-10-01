@@ -51,7 +51,7 @@ class StatsManager(object):
                                                     {f"{CONST_INC}": merchant_stats,
                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
-    async def update_cl_tx_stats(self, ticker: str, ticker_stats: dict):
+    async def update_cl_off_chain_stats(self, ticker: str, ticker_stats: dict):
         """
         Updating crypto link transaction stats
         """
@@ -59,70 +59,21 @@ class StatsManager(object):
                                                     {f"{CONST_INC}": ticker_stats,
                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
-    def update_bot_off_chain_stats(self, ticker: str, tx_amount: int, xlm_amount: float, tx_type: str):
-        """
-        update bot stats based on transaction type in the system
-        """
-        if tx_type == 'public':
-            self.off_chain_activities.update_one({"ticker": f"{ticker}"},
-                                                 {f"{CONST_INC}": {"totalTx": int(tx_amount),
-                                                                   "totalMoved": xlm_amount,
-                                                                   "totalPublicCount": 1,
-                                                                   "totalPublicMoved": xlm_amount},
-                                                  f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-
-        elif tx_type == 'private':
-            self.off_chain_activities.update_one({"ticker": f"{ticker}"},
-                                                 {f"{CONST_INC}": {"totalTx": int(tx_amount),
-                                                                   "totalMoved": xlm_amount,
-                                                                   "totalPrivateCount": 1,
-                                                                   "totalPrivateMoved": xlm_amount},
-                                                  f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-
-        elif tx_type == 'emoji':
-            self.off_chain_activities.update_one({"ticker": f"{ticker}"},
-                                                 {f"{CONST_INC}": {"totalTx": int(tx_amount),
-                                                                   "totalMoved": xlm_amount,
-                                                                   "totalEmojiTx": 1,
-                                                                   "totalEmojiMoved": xlm_amount},
-                                                  f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-        elif tx_type == 'multiTx':
-            self.off_chain_activities.update_one({"ticker": f"{ticker}"},
-                                                 {f"{CONST_INC}": {"totalTx": int(tx_amount),
-                                                                   "totalMoved": xlm_amount,
-                                                                   "multiTxCount": 1,
-                                                                   "multiTxMoved": xlm_amount},
-                                                  f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-
-    def update_user_deposit_stats(self, user_id: int, amount: float, key: str):
-        """
-        Updates users deposit stats.
-        """
-
-        self.user_profiles.find_one_and_update({"userId": user_id},
-                                               {"$inc": {f"{key}.depositsCount": 1,
-                                                         f"{key}.totalDeposited": amount}})
-
-    async def update_bot_chain_stats_as(self, ticker, activity_data: dict):
-        await self.as_on_chain_activities.update_one({"ticker": ticker},
-                                                     {f"{CONST_INC}": activity_data,
-                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-
-    def update_bot_chain_stats(self, type_of: str, ticker: str, amount: float):
+    async def update_cl_on_chain_stats(self, ticker: str, stat_details: dict):
         """
         Update stats when on chain activity happens.
         """
+        await self.as_on_chain_activities.update_one({"ticker": ticker},
+                                                     {f"{CONST_INC}": stat_details,
+                                                      f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
-        if type_of == "deposit":
-            self.chain_activities.update_one({"ticker": f"{ticker}"},
-                                             {f"{CONST_INC}": {"depositCount": 1,
-                                                               "depositAmount": round(float(amount), 7)},
-                                              f"{CONST_CURRENT_DATE}": {"lastModified": True}})
-        elif type_of == "withdrawal":
-            self.chain_activities.update_one({"ticker": f"{ticker}"},
-                                             {f"{CONST_INC}": {"withdrawalCount": 1,
-                                                               "withdrawnAmount": round(float(amount), 7)},
-                                              f"{CONST_CURRENT_DATE}": {"lastModified": True}})
+    async def update_user_on_chain_stats(self, user_id: int, stats_data: dict):
+        """
+        Updates users deposit stats.
+        """
+        await self.as_user_profiles.find_one_and_update({"userId": user_id},
+                                                        {"$inc": stats_data,
+                                                         f"{CONST_CURRENT_DATE}": {"lastModified": True}})
 
     async def update_usr_tx_stats(self, user_id: int, tx_stats_data: dict):
         await self.as_user_profiles.update_one({"userId": user_id},

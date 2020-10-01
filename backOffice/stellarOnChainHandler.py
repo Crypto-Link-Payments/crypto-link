@@ -101,12 +101,13 @@ class StellarWallet:
         operations = te.transaction.operations
 
         for op in operations:
-            # You can check other types of operations here.
-            # You can find list of operations here: https://stellar-sdk.readthedocs.io/en/latest/api.html#operation
             if isinstance(op, Payment):
-                amount = op.amount
-                amount_stroops = op.to_xdr_amount(amount)
-                return amount_stroops
+                asset = op.asset.to_dict()
+
+                if asset.get('native') is None:
+                    asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
+                asset["amount"] = op.to_xdr_amount(op.amount)
+                return asset
 
     def get_incoming_transactions(self, pag=None):
         """
@@ -121,6 +122,8 @@ class StellarWallet:
             if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
                 tx.pop('_links')
                 tx.pop('fee_charged')
+                tx.pop('id')
+                tx.pop('fee_account')
                 tx.pop('fee_meta_xdr')
                 tx.pop('ledger')
                 tx.pop('max_fee')
@@ -128,7 +131,9 @@ class StellarWallet:
                 tx.pop('result_meta_xdr')
                 tx.pop('result_xdr')
                 tx.pop('signatures')
-                tx['stroop'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
+                tx['asset_type'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
+                tx.pop('envelope_xdr')
+                tx.pop('valid_after')
                 to_process.append(tx)
         return to_process
 
@@ -167,6 +172,9 @@ class StellarWallet:
 
         else:
             return {}
+
+    def token_withdrawal(self, address, token, amount):
+        pass
 
     async def as_withdraw(self, address, xlm_amount):
         # TODO still to integrate async support for functions
