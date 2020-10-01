@@ -210,10 +210,9 @@ class CustomMessages:
         await recipient.send(embed=sys_embed)
 
     @staticmethod
-    async def withdrawal_notify(ctx, withdrawal_data: dict, coin, fee, thumbnail,
-                                link):
+    async def withdrawal_notify(ctx, withdrawal_data: dict, fee):
         notify = discord.Embed(title="Withdrawal Notification",
-                               description=f' {coin} withdrawal Successfully processed',
+                               description=f'Withdrawal Successfully processed',
                                colour=discord.Colour.green())
 
         notify.add_field(name="Time of withdrawal",
@@ -225,16 +224,16 @@ class CustomMessages:
         notify.add_field(name='Transaction hash',
                          value=withdrawal_data["hash"],
                          inline=False)
-        notify.add_field(name='Withdrawal amount',
-                         value=f'{withdrawal_data["amount"]} {CONST_STELLAR_EMOJI}',
+        notify.add_field(name='Withdrawal asset details',
+                         value=f'{round(withdrawal_data["amount"]/10000000,2)} {withdrawal_data["asset"]}',
                          inline=False)
         notify.add_field(name='Crypto Link Fee',
                          value=fee,
                          inline=False)
         notify.add_field(name='Explorer Link',
-                         value=link,
+                         value=withdrawal_data['explorer'],
                          inline=False)
-        notify.set_thumbnail(url=thumbnail)
+        notify.set_thumbnail(url=ctx.message.author.avatar_url)
 
         try:
             await ctx.author.send(embed=notify)
@@ -247,7 +246,7 @@ class CustomMessages:
                                                   f' you messages',
                                       colour=discord.Colour.green())
             error_msg.add_field(name='Explorer Link',
-                                value=link)
+                                value=withdrawal_data['explorer'])
             error_msg.set_footer(text='This message will self-destruct in 360 seconds')
             await ctx.channel.send(embed=error_msg, content=f'{ctx.message.author.mention}',
                                    delete_after=360)
