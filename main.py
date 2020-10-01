@@ -36,7 +36,7 @@ custom_messages = CustomMessages()
 helper = Helpers()
 notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-bot_settings = helper.read_json_file(file_name='botSetup.json.json')
+bot_settings = helper.read_json_file(file_name='botSetup.json')
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(bot_settings['command']))  # Test commands
 bot.remove_command('help')  # removing the old help command
 
