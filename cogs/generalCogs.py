@@ -4,7 +4,7 @@ COGS: Help commands for the payment services
 import discord
 from discord.ext import commands
 
-from cogs.utils.customCogChecks import is_owner
+from cogs.utils.customCogChecks import is_owner, is_public
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
@@ -141,6 +141,7 @@ class HelpCommands(commands.Cog):
                                            destination=1)
 
     @help.group()
+    @commands.check(is_public)
     @commands.check(is_owner)
     async def owner(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -186,13 +187,13 @@ class HelpCommands(commands.Cog):
                                      f":white_check_mark: familiarize yourself with ***{d['command']}merchant***",
                                inline=False)
         merchant_nfo.set_thumbnail(url=self.bot.user.avatar_url)
-        await ctx.channel.send(embed=merchant_nfo, delete_after=500)
+        await ctx.author.send(embed=merchant_nfo, delete_after=500)
 
     @owner.error
     async def owner_error_assistance(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            message = f'You can not access commands tended to be used only by owners of the community. ' \
-                      f'Thank you for understanding!'
+            message = f'You can access this are only if you are the owner of the guild and command is executed on ' \
+                      f'public channel'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
 
 
