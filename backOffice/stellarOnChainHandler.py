@@ -43,6 +43,8 @@ class StellarWallet:
     def __filter_error(result_code):
         if 'op_no_trust' in result_code:
             return 'no trust'
+        elif 'op_no_source_account' in result_code:
+            return 'No source account provided'
         else:
             return result_code
 
@@ -185,19 +187,16 @@ class StellarWallet:
         tx.sign(self.root_keypair)
         try:
             resp = self.server.submit_transaction(tx)
-            if "status" not in resp:
-                details = self.__decode_processed_withdrawal_envelope(envelope_xdr=resp['envelope_xdr'])
-                end_details = {
-                    "asset": details['code'],
-                    "explorer": resp['_links']['transaction']['href'],
-                    "hash": resp['hash'],
-                    "ledger": resp['ledger'],
-                    "destination": address,
-                    "amount": details['amount']
-                }
-                return end_details
-            else:
-                return {}
+            details = self.__decode_processed_withdrawal_envelope(envelope_xdr=resp['envelope_xdr'])
+            end_details = {
+                "asset": details['code'],
+                "explorer": resp['_links']['transaction']['href'],
+                "hash": resp['hash'],
+                "ledger": resp['ledger'],
+                "destination": address,
+                "amount": details['amount']
+            }
+            return end_details
         except exceptions.BadRequestError as e:
             # get operation from result_codes to be processed
             error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
