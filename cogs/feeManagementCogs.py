@@ -162,7 +162,10 @@ class FeeManagementAndControl(commands.Cog):
         # Get value in in pennies
         penny = (int(value * (10 ** 2)))
         rounded = round(penny / 100, 2)
-        if bot_manager.manage_fees_and_limits(fee=rounded, key='merchant_min'):
+        merch_data = {
+            f"fee": rounded
+        }
+        if bot_manager.manage_fees_and_limits(key='merchant_min', data_to_update=merch_data):
             message = f'You have successfully set merchant minimum withdrawal to be {rounded}$ per currency used.'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
                                                  sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
@@ -183,7 +186,10 @@ class FeeManagementAndControl(commands.Cog):
         # Get value in in pennies
         penny = (int(value * (10 ** 2)))
         rounded = round(penny / 100, 2)
-        if bot_manager.manage_fees_and_limits(fee=rounded, key='license'):
+        merch_data = {
+            f"fee": rounded
+        }
+        if bot_manager.manage_fees_and_limits(key='license', data_to_update=merch_data):
             message = f'You have successfully set merchant monthly license fee to be {rounded}$.'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
                                                  sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
@@ -204,7 +210,10 @@ class FeeManagementAndControl(commands.Cog):
         # Get value in in pennies
         penny = (int(value * (10 ** 2)))
         rounded = round(penny / 100, 2)
-        if bot_manager.manage_fees_and_limits(fee=rounded, key='wallet_transfer'):
+        merch_data = {
+            f"fee": rounded
+        }
+        if bot_manager.manage_fees_and_limits(key='wallet_transfer', data_to_update=merch_data):
             message = f'You have successfully set merchant wallet transfer fee to be {rounded}$.'
             title = '__Merchant wallet transfer fee information__'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
