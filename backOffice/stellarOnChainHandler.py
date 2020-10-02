@@ -63,7 +63,7 @@ class StellarWallet:
         for op in operations:
             if isinstance(op, Payment):
                 asset = op.asset.to_dict()
-                if asset.get('native'):
+                if asset.get('type') == 'native':
                     asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
                 asset["amount"] = op.to_xdr_amount(op.amount)
                 return asset
@@ -104,7 +104,7 @@ class StellarWallet:
         for op in operations:
             if isinstance(op, Payment):
                 asset = op.asset.to_dict()
-                if asset.get('native'):
+                if asset.get('type') == 'native':
                     asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
                 asset["amount"] = op.to_xdr_amount(op.amount)
                 return asset
@@ -158,20 +158,24 @@ class StellarWallet:
             destination=address, asset_code="XLM", amount=xlm_amount).set_timeout(30).build()
         tx.sign(self.root_keypair)
         response = self.server.submit_transaction(tx)
-        if "status" not in response:
-            details = self.__decode_processed_withdrawal_envelope(envelope_xdr=response['envelope_xdr'])
-            end_details = {
-                "explorer": response['_links']['transaction']['href'],
-                "hash": response['hash'],
-                "ledger": response['ledger'],
-                "destination": details['destination'],
-                "amount": details['amount'],
-                "stroops": details['stroops']
+        try:
+            if "status" not in response:
+                details = self.__decode_processed_withdrawal_envelope(envelope_xdr=response['envelope_xdr'])
+                end_details = {
+                    "asset": details['code'],
+                    "explorer": response['_links']['transaction']['href'],
+                    "hash": response['hash'],
+                    "ledger": response['ledger'],
+                    "destination": address,
+                    "amount": details['amount']
+                }
+                return end_details
+        except exceptions.BadRequestError as e:
+            # get operation from result_codes to be processed
+            error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
+            return {
+                "error": f'{error}'
             }
-            return end_details
-
-        else:
-            return {}
 
     def token_withdrawal(self, address, token, amount: str):
         """
