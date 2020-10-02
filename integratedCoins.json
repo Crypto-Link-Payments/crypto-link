@@ -12,6 +12,8 @@
     "emoji": ":sweat_drops:",
     "coinGeckoListing": false,
     "assetIssuer": "GAFYI3RFYQHCEUI73OOY5AO7CIODZ4ZEXON72THANN5M3L5CUNK24E3G",
-    "minimumWithdrawal": 100000000
+    "minimumWithdrawal": 100000000,
+    "expert": "https://stellar.expert/explorer/testnet/asset/CLT-GAFYI3RFYQHCEUI73OOY5AO7CIODZ4ZEXON72THANN5M3L5CUNK24E3G-1?order=desc",
+    "homepage": "https://cryptolink.carrd.co/"
   }
 }
