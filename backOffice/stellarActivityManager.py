@@ -7,7 +7,6 @@ import os
 import sys
 
 from pymongo import MongoClient, errors
-
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
@@ -55,7 +54,7 @@ class StellarManager:
         else:
             return False
 
-    def stellar_withdrawal_history(self, tx_type: int, tx_data: dict):
+    def insert_to_withdrawal_hist(self, tx_type: int, tx_data: dict):
         """
         Managing history off withdrawals
 
