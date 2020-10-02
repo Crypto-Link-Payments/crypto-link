@@ -12,13 +12,8 @@ from colorama import Fore, init
 from discord.ext import commands
 from pymongo import MongoClient, errors
 
-from backOffice.backendCheck import BotStructureCheck
 from backOffice.userWalletManager import UserWalletManager
 from backOffice.guildServicesManager import GuildProfileManager
-from backOffice.merchatManager import MerchantManager
-from backOffice.statsManager import StatsManager
-from backOffice.stellarActivityManager import StellarManager
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.monetaryConversions import convert_to_usd
 from backOffice.backOffice import BackOffice
@@ -26,10 +21,6 @@ from utils.tools import Helpers
 
 init(autoreset=True)
 scheduler = AsyncIOScheduler()
-stellar_wallet = StellarWallet()
-stellar_manager = StellarManager()
-merchant_manager = MerchantManager()
-stats_manager = StatsManager()
 wallet_manager = UserWalletManager()
 guild_profiles = GuildProfileManager()
 custom_messages = CustomMessages()
@@ -56,7 +47,7 @@ def get_time():
     return current_time
 
 
-def filter_transaction(new_transactions: list):
+def filter_transaction(new_transactions: list, stellar_manager):
     """
     Filtering transactions
     """
@@ -75,7 +66,7 @@ def filter_transaction(new_transactions: list):
     return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo
 
 
-async def process_tx_with_no_memo(channel, no_memo_transaction):
+async def process_tx_with_no_memo(channel, no_memo_transaction, stellar_manager):
     for tx in no_memo_transaction:
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
@@ -88,7 +79,7 @@ async def process_tx_with_no_memo(channel, no_memo_transaction):
             print(Fore.YELLOW + 'Unknown processed already')
 
 
-async def process_tx_with_memo(msg_channel, memo_transactions):
+async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, stats_manager):
     for tx in memo_transactions:
         # check if processed if not process them
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
@@ -142,7 +133,7 @@ async def process_tx_with_memo(msg_channel, memo_transactions):
             print(Fore.LIGHTCYAN_EX + 'No new legit tx')
 
 
-async def process_tx_with_not_registered_memo(channel, no_registered_memo):
+async def process_tx_with_not_registered_memo(channel, no_registered_memo, stellar_manager):
     for tx in no_registered_memo:
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
@@ -156,209 +147,223 @@ async def process_tx_with_not_registered_memo(channel, no_registered_memo):
             print(Fore.YELLOW + 'Unknown processed already')
 
 
-async def check_stellar_hot_wallet():
-    """
-    Functions initiates the check for stellar incoming deposits and processes them
-    """
-    print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
-    pag = helper.read_json_file('stellarPag.json')
-    new_transactions = stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-    channel_id = notification_channels["stellar"]  # Sys channel where details are sent
+class TimedUpdater:
+    def __init__(self, backoffice):
+        self.backoffice = backoffice
 
-    if new_transactions:
-        # Filter transactions
-        tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions)
-        channel = bot.get_channel(id=int(channel_id))
-        if tx_with_registered_memo:
-            await process_tx_with_memo(msg_channel=channel, memo_transactions=tx_with_registered_memo)
-        if tx_with_not_registered_memo:
-            await process_tx_with_not_registered_memo(channel=channel, no_registered_memo=tx_with_not_registered_memo)
-        if tx_with_no_memo:
-            await process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
+    async def check_stellar_hot_wallet(self):
+        """
+        Functions initiates the check for stellar incoming deposits and processes them
+        """
+        print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
+        pag = helper.read_json_file('stellarPag.json')
+        new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
+        channel_id = notification_channels["stellar"]  # Sys channel where details are sent
 
-        last_checked_pag = new_transactions[-1]["paging_token"]
-        if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
-            print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
+        if new_transactions:
+            # Filter transactions
+            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions, stellar_manager = self.backoffice.stellar_manager)
+            channel = bot.get_channel(id=int(channel_id))
+            if tx_with_registered_memo:
+                await process_tx_with_memo(msg_channel=channel,
+                                           memo_transactions=tx_with_registered_memo,
+                                           stellar_manager = self.backoffice.stellar_manager,
+                                           stats_manager=self.backoffice.stats_manager)
+            if tx_with_not_registered_memo:
+                await process_tx_with_not_registered_memo(channel=channel,
+                                                          no_registered_memo=tx_with_not_registered_memo,
+                                                          stellar_manager = self.backoffice.stellar_manager)
+            if tx_with_no_memo:
+                await process_tx_with_no_memo(channel=channel,
+                                              no_memo_transaction=tx_with_no_memo,
+                                              stellar_manager = self.backoffice.stellar_manager)
+
+            last_checked_pag = new_transactions[-1]["paging_token"]
+            if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
+                print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
+            else:
+                print(Fore.RED + 'There was an issue with updating pag')
+
+            print(Fore.GREEN + '==============DONE=================\n'
+                               '==========GOING TO SLEEP FOR 1 MINUTE=====')
         else:
-            print(Fore.RED + 'There was an issue with updating pag')
-
-        print(Fore.GREEN + '==============DONE=================\n'
-                           '==========GOING TO SLEEP FOR 1 MINUTE=====')
-    else:
-        print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
-        print('==============================================')
+            print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
+            print('==============================================')
 
 
-async def check_expired_roles():
-    """
-    Function checks for expired users on community nad removes them if necessary
-    """
-    print(Fore.GREEN + f"{get_time()} --> CHECKING FOR USERS WITH EXPIRED ROLES ")
-    now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
-    overdue_members = merchant_manager.get_over_due_users(timestamp=int(now))  # Gets all overdue members from database
-    if overdue_members:
-        bot_guilds = [guild for guild in bot.guilds]  # get all guilds bot has access to
-        for mem in overdue_members:
-            mem_id = mem['userId']
-            mem_role_id = mem['roleId']
-            mem_role_community_id = mem['communityId']
+    async def check_expired_roles(self):
+        """
+        Function checks for expired users on community nad removes them if necessary
+        """
+        print(Fore.GREEN + f"{get_time()} --> CHECKING FOR USERS WITH EXPIRED ROLES ")
+        now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
+        merchant_manager = self.backoffice.merchant_manager
+        overdue_members = merchant_manager.get_over_due_users(timestamp=int(now))  # Gets all overdue members from database
+        if overdue_members:
+            bot_guilds = [guild for guild in bot.guilds]  # get all guilds bot has access to
+            for mem in overdue_members:
+                mem_id = mem['userId']
+                mem_role_id = mem['roleId']
+                mem_role_community_id = mem['communityId']
 
-            # Check if community where role was created still has bot
-            if [guild.id for guild in bot_guilds if mem_role_community_id == guild.id]:
-                # get guild and member
-                guild = bot.get_guild(id=mem_role_community_id)
-                member = guild.get_member(mem_id)
-                # Check if member still exists
-                if member in guild.members:
-                    role = guild.get_role(role_id=mem_role_id)  # Get the role
-                    if role:
-                        if role in member.roles:
-                            await member.remove_roles(role, reason='Merchant notification -> Role expired')
-                            if merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
-                                                                         role_id=mem_role_id, user_id=mem_id):
-                                expired = discord.Embed(name='Expired Role',
-                                                        title='__Role Expiration Notification__',
-                                                        description=' You have received this notification, '
-                                                                    'because the role you have purchased has expired'
-                                                                    ' and has been therefore removed. More details '
-                                                                    'bellow.')
+                # Check if community where role was created still has bot
+                if [guild.id for guild in bot_guilds if mem_role_community_id == guild.id]:
+                    # get guild and member
+                    guild = bot.get_guild(id=mem_role_community_id)
+                    member = guild.get_member(mem_id)
+                    # Check if member still exists
+                    if member in guild.members:
+                        role = guild.get_role(role_id=mem_role_id)  # Get the role
+                        if role:
+                            if role in member.roles:
+                                await member.remove_roles(role, reason='Merchant notification -> Role expired')
+                                if merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
+                                                                             role_id=mem_role_id, user_id=mem_id):
+                                    expired = discord.Embed(name='Expired Role',
+                                                            title='__Role Expiration Notification__',
+                                                            description=' You have received this notification, '
+                                                                        'because the role you have purchased has expired'
+                                                                        ' and has been therefore removed. More details '
+                                                                        'bellow.')
 
-                                expired.set_thumbnail(url=bot.user.avatar_url)
-                                expired.add_field(name='Community',
-                                                  value=guild.name,
-                                                  inline=False)
-                                expired.add_field(name="Expired Role",
-                                                  value=role.name)
-
-                                await member.send(embed=expired)
-                            else:
-                                channel_sys = channels["merchant"]
-                                # send notification to merchant for system if user could not be removed from database
-                                expired_sys = discord.Embed(title='__Expired user could not be removed from system__',
-                                                            colour=discord.Color.red())
-                                expired_sys.set_thumbnail(url=bot.user.avatar_url)
-                                expired_sys.add_field(name='Community',
+                                    expired.set_thumbnail(url=bot.user.avatar_url)
+                                    expired.add_field(name='Community',
                                                       value=guild.name,
                                                       inline=False)
-                                expired_sys.add_field(name="Expired Role",
+                                    expired.add_field(name="Expired Role",
                                                       value=role.name)
-                                expired_sys.add_field(name="User details",
-                                                      value=f'Role ID: {mem_role_id}\n'
-                                                            f'Community ID: {mem_role_community_id}\n'
-                                                            f'Member ID: {mem_id}')
-                                merch_channel = bot.get_channel(id=int(channel_sys))
-                                await merch_channel.send(embed=expired_sys)
+
+                                    await member.send(embed=expired)
+                                else:
+                                    channel_sys = channels["merchant"]
+                                    # send notification to merchant for system if user could not be removed from database
+                                    expired_sys = discord.Embed(title='__Expired user could not be removed from system__',
+                                                                colour=discord.Color.red())
+                                    expired_sys.set_thumbnail(url=bot.user.avatar_url)
+                                    expired_sys.add_field(name='Community',
+                                                          value=guild.name,
+                                                          inline=False)
+                                    expired_sys.add_field(name="Expired Role",
+                                                          value=role.name)
+                                    expired_sys.add_field(name="User details",
+                                                          value=f'Role ID: {mem_role_id}\n'
+                                                                f'Community ID: {mem_role_community_id}\n'
+                                                                f'Member ID: {mem_id}')
+                                    merch_channel = bot.get_channel(id=int(channel_sys))
+                                    await merch_channel.send(embed=expired_sys)
+                            else:
+                                merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
+                                                                          user_id=mem_id, role_id=mem_role_id)
                         else:
-                            merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
-                                                                      user_id=mem_id, role_id=mem_role_id)
+                            merchant_manager.remove_monetized_role_from_system(role_id=mem_role_id,
+                                                                               community_id=mem_role_community_id)
+                            merchant_manager.bulk_user_clear(community_id=mem_role_community_id, role_id=mem_role_id)
                     else:
-                        merchant_manager.remove_monetized_role_from_system(role_id=mem_role_id,
-                                                                           community_id=mem_role_community_id)
-                        merchant_manager.bulk_user_clear(community_id=mem_role_community_id, role_id=mem_role_id)
+                        merchant_manager.delete_user_from_applied(community_id=mem_role_community_id, user_id=mem_id)
                 else:
-                    merchant_manager.delete_user_from_applied(community_id=mem_role_community_id, user_id=mem_id)
-            else:
-                merchant_manager.bulk_user_clear(community_id=mem_role_community_id, role_id=mem_role_id)
-                merchant_manager.remove_all_monetized_roles(guild_id=mem_role_community_id)
+                    merchant_manager.bulk_user_clear(community_id=mem_role_community_id, role_id=mem_role_id)
+                    merchant_manager.remove_all_monetized_roles(guild_id=mem_role_community_id)
 
-    else:
-        print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
-        print('===========================================================')
+        else:
+            print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
+            print('===========================================================')
 
 
-async def check_merchant_licences():
-    """
-    Script which checks merchant license situation
-    """
-    print(Fore.GREEN + f"{get_time()} --> CHECKING FOR COMMUNITIES WITH EXPIRED MERCHANT LICENSE")
+    async def check_merchant_licences(self):
+        """
+        Script which checks merchant license situation
+        """
+        print(Fore.GREEN + f"{get_time()} --> CHECKING FOR COMMUNITIES WITH EXPIRED MERCHANT LICENSE")
 
-    now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
+        now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
 
-    overdue_communities = merchant_manager.get_over_due_communities(timestamp=int(now))
-    if overdue_communities:
-        for community in overdue_communities:
-            community_id = community['communityId']
-            community_name = community['communityName']
-            owner_id = community['ownerId']
-            start = community['start']
-            end = community['end']
-            start_date = datetime.fromtimestamp(int(start))
-            end_date = datetime.fromtimestamp(int(end))
+        merchant_manager = self.backoffice.merchant_manager
+        overdue_communities = merchant_manager.get_over_due_communities(timestamp=int(now))
+        if overdue_communities:
+            for community in overdue_communities:
+                community_id = community['communityId']
+                community_name = community['communityName']
+                owner_id = community['ownerId']
+                start = community['start']
+                end = community['end']
+                start_date = datetime.fromtimestamp(int(start))
+                end_date = datetime.fromtimestamp(int(end))
 
-            if merchant_manager.remove_over_due_community(discord_id=int(community_id)):
+                if merchant_manager.remove_over_due_community(discord_id=int(community_id)):
 
-                # Send notification to owner ,
-                expired = discord.Embed(title='__Merchant License Expiration Notification!__',
-                                        colour=discord.Colour.dark_red(),
-                                        description='You have received this notification because '
-                                                    '31 day Merchant License for Crypto Link has expired. Thank you '
-                                                    ' for using Crypto Link Merchant.')
-                expired.set_thumbnail(url=bot.user.avatar_url)
-                expired.add_field(name='Community Name of purchase',
-                                  value=f'{community_name} (ID:{community_id})')
-                expired.add_field(name='Start of the license',
-                                  value=f'{start_date}',
-                                  inline=False)
-                expired.add_field(name='End of the license',
-                                  value=f'{end_date}',
-                                  inline=False)
-                dest = await bot.fetch_user(user_id=int(owner_id))
-                await dest.send(embed=expired)
-
-                channel_sys = channels["merchant"]
-                # send notification to merchant channel of LPI community
-                expired_sys = discord.Embed(title='Merchant license expired and removed successfully!',
-                                            colour=discord.Color.red())
-                expired_sys.set_thumbnail(url=bot.user.avatar_url)
-                expired_sys.add_field(name='Community Name of purchase',
+                    # Send notification to owner ,
+                    expired = discord.Embed(title='__Merchant License Expiration Notification!__',
+                                            colour=discord.Colour.dark_red(),
+                                            description='You have received this notification because '
+                                                        '31 day Merchant License for Crypto Link has expired. Thank you '
+                                                        ' for using Crypto Link Merchant.')
+                    expired.set_thumbnail(url=bot.user.avatar_url)
+                    expired.add_field(name='Community Name of purchase',
                                       value=f'{community_name} (ID:{community_id})')
-                expired_sys.add_field(name='Start of the license',
+                    expired.add_field(name='Start of the license',
                                       value=f'{start_date}',
                                       inline=False)
-                expired_sys.add_field(name='End of the license',
+                    expired.add_field(name='End of the license',
                                       value=f'{end_date}',
                                       inline=False)
+                    dest = await bot.fetch_user(user_id=int(owner_id))
+                    await dest.send(embed=expired)
 
-                merch_channel = bot.get_channel(id=int(channel_sys))
-                await merch_channel.send(embed=expired_sys)
-            else:
-                sys_error = discord.Embed(title='__Merchant License System error__!',
-                                          description='This error has been triggered because merchant community license'
-                                                      ' could not be removed from database. Community details '
-                                                      'are presented below',
-                                          colour=discord.Color.red())
-                sys_error.add_field(name='Community details',
-                                    value=f'{community_name} (ID: {community_id})',
-                                    inline=False)
-                sys_error.add_field(name='Owner ID',
-                                    value=f'{owner_id}',
-                                    inline=False)
-                sys_error.add_field(name='Started @',
-                                    value=f'{start_date} (UNIX {start})',
-                                    inline=False)
-                sys_error.add_field(name='Finished @',
-                                    value=f'{end_date} (UNIX {end})',
-                                    inline=False)
+                    channel_sys = channels["merchant"]
+                    # send notification to merchant channel of LPI community
+                    expired_sys = discord.Embed(title='Merchant license expired and removed successfully!',
+                                                colour=discord.Color.red())
+                    expired_sys.set_thumbnail(url=bot.user.avatar_url)
+                    expired_sys.add_field(name='Community Name of purchase',
+                                          value=f'{community_name} (ID:{community_id})')
+                    expired_sys.add_field(name='Start of the license',
+                                          value=f'{start_date}',
+                                          inline=False)
+                    expired_sys.add_field(name='End of the license',
+                                          value=f'{end_date}',
+                                          inline=False)
 
-                channel_id_details = notification_channels['merchant']
-                channel_to_send = bot.get_channel(id=int(channel_id_details))
-                await channel_to_send.send(embed=sys_error)
+                    merch_channel = bot.get_channel(id=int(channel_sys))
+                    await merch_channel.send(embed=expired_sys)
+                else:
+                    sys_error = discord.Embed(title='__Merchant License System error__!',
+                                              description='This error has been triggered because merchant community license'
+                                                          ' could not be removed from database. Community details '
+                                                          'are presented below',
+                                              colour=discord.Color.red())
+                    sys_error.add_field(name='Community details',
+                                        value=f'{community_name} (ID: {community_id})',
+                                        inline=False)
+                    sys_error.add_field(name='Owner ID',
+                                        value=f'{owner_id}',
+                                        inline=False)
+                    sys_error.add_field(name='Started @',
+                                        value=f'{start_date} (UNIX {start})',
+                                        inline=False)
+                    sys_error.add_field(name='Finished @',
+                                        value=f'{end_date} (UNIX {end})',
+                                        inline=False)
 
-    else:
-        print(Fore.CYAN + 'No communities with overdue license\n'
-                          ' ===================================')
+                    channel_id_details = notification_channels['merchant']
+                    channel_to_send = bot.get_channel(id=int(channel_id_details))
+                    await channel_to_send.send(embed=sys_error)
+
+        else:
+            print(Fore.CYAN + 'No communities with overdue license\n'
+                              ' ===================================')
 
 
-def start_scheduler():
+def start_scheduler(timed_updater):
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
 
-    scheduler.add_job(check_stellar_hot_wallet,
+    scheduler.add_job(timed_updater.check_stellar_hot_wallet,
                       CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
-    scheduler.add_job(check_expired_roles, CronTrigger(
+    scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
         second='00'), misfire_grace_time=10, max_instances=20)
-    scheduler.add_job(check_merchant_licences,
+    scheduler.add_job(timed_updater.check_merchant_licences,
                       CronTrigger(minute='00', second='10'), misfire_grace_time=10, max_instances=20)
     scheduler.start()
+    print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
 
 
 @bot.event
@@ -378,8 +383,10 @@ async def on_ready():
 
 if __name__ == '__main__':
 
-    back_office = BackOffice()
-    back_office.check_backend()
+    backoffice = BackOffice()
+    backoffice.check_backend()
+
+    timed_updater = TimedUpdater( backoffice )
 
     # Check file system
     backend_check = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
@@ -399,6 +406,6 @@ if __name__ == '__main__':
 
     notification_str += '+++++++++++++++++++++++++++++++++++++++'
     print(notification_str)
-    start_scheduler()
+    start_scheduler(timed_updater)
     # Discord Token
     bot.run(bot_settings['token'], reconnect=True)
