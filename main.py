@@ -12,7 +12,6 @@ from colorama import Fore, init
 from discord.ext import commands
 from pymongo import MongoClient, errors
 
-from backOffice.userWalletManager import UserWalletManager
 from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.monetaryConversions import convert_to_usd
@@ -21,7 +20,6 @@ from utils.tools import Helpers
 
 init(autoreset=True)
 scheduler = AsyncIOScheduler()
-wallet_manager = UserWalletManager()
 guild_profiles = GuildProfileManager()
 custom_messages = CustomMessages()
 helper = Helpers()
@@ -79,7 +77,10 @@ async def process_tx_with_no_memo(channel, no_memo_transaction, stellar_manager)
             print(Fore.YELLOW + 'Unknown processed already')
 
 
-async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, stats_manager):
+async def process_tx_with_memo(msg_channel, memo_transactions, backoffice):
+    stellar_manager = backoffice.stellar_manager
+    stats_manager = backoffice.stats_manager
+    wallet_manager = backoffice.wallet_manager
     for tx in memo_transactions:
         # check if processed if not process them
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
@@ -168,8 +169,7 @@ class TimedUpdater:
             if tx_with_registered_memo:
                 await process_tx_with_memo(msg_channel=channel,
                                            memo_transactions=tx_with_registered_memo,
-                                           stellar_manager=self.backoffice.stellar_manager,
-                                           stats_manager=self.backoffice.stats_manager)
+                                           backoffice=backoffice)
             if tx_with_not_registered_memo:
                 await process_tx_with_not_registered_memo(channel=channel,
                                                           no_registered_memo=tx_with_not_registered_memo,

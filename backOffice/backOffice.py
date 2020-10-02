@@ -7,6 +7,7 @@ from backOffice.stellarOnChainHandler import StellarWallet
 from backOffice.merchatManager import MerchantManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.statsManager import StatsManager
+from backOffice.userWalletManager import UserWalletManager
 
 class BackOffice:
     def __init__(self):
@@ -18,6 +19,8 @@ class BackOffice:
         self.merchant_manager = MerchantManager()
         self.stellar_manager = StellarManager()
         self.stats_manager = StatsManager()
+        self.wallet_manager = UserWalletManager()
+
 
     def check_backend(self):
         self.backend_check.check_collections()
