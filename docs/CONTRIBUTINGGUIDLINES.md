@@ -1,5 +1,16 @@
 #How to contribute
 
+## Install project dependencies
+### Install mongoDB
+```text
+https://docs.mongodb.com/manual/installation/
+```
+
+### Install requirements
+```text
+pip3 install -r requirements.tx
+```
+
 ## Setup required files
 In main directory of the project create following json files and populate key with required values
 
@@ -85,7 +96,7 @@ stellarPag.json
 ```
 ```json
 {
-  "stellar":"4232625845706753"
+  "pag":"4232625845706753"
 }
 ```
 
