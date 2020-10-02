@@ -277,13 +277,13 @@ class CustomMessages:
         await channel.send(embed=notify)
 
     @staticmethod
-    async def cl_staff_incoming_funds_notification(sys_channel: discord.TextChannel, amount):
+    async def cl_staff_incoming_funds_notification(sys_channel: discord.TextChannel, incoming_fees:str):
         notify = discord.Embed(title='Bot Stellar Wallet Activity',
                                description='Bot Wallet has been credited because user '
                                            'has initiated on-chain withdrawal',
                                color=discord.Colour.blurple())
         notify.add_field(name='Value',
-                         value=f'{amount / 10000000}{CONST_STELLAR_EMOJI}')
+                         value=f'{incoming_fees}')
         await sys_channel.send(embed=notify)
 
     @staticmethod
