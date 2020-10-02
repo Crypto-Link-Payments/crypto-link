@@ -34,21 +34,15 @@ class BotManager:
         count_modifications = (int(xlm_result.modified_count) + int(token_result.modified_count))
         return count_modifications == 2
 
-    def update_lpi_wallet_balance(self, amount: int, wallet: str, direction: int):
+    def update_lpi_wallet_balance(self, ticker: str, to_update: dict):
         """
         manipulating wallet balance when transactions happens
         """
-        if direction != 1:
-            amount *= (-1)
 
-        try:
-            result = self.bot_wallet.update_one({"ticker": f"{wallet}"},
-                                                {"$inc": {"balance": int(amount)},
-                                                 "$currentDate": {"lastModified": True}})
-            return result.matched_count > 0
-        except errors.PyMongoError as e:
-            print(e)
-            return False
+        result = self.bot_wallet.update_one({"ticker": f"{ticker}"},
+                                            {"$inc": to_update,
+                                             "$currentDate": {"lastModified": True}})
+        return result.modified_count > 0
 
     def get_bot_wallets_balance(self):
         """
