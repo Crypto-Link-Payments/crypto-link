@@ -112,8 +112,13 @@ class WithdrawalCommands(commands.Cog):
 
                 # Agreed vs not Agreed
                 if str(msg_usr.content.lower()) == 'yes':
+
                     result = stellar_wallet.token_withdrawal(address=address, token=ticker.upper(),
                                                              amount=f'{withdrawal_amount}')
+                    #TODO finish responses to user on transaction withdrawa
+                    #TODO integrate fees transfer to bot wallet
+                    #TODO store withdrawal into history of withdrawals
+                    #TODO update stats of user bot and guild
                     if result.get("hash"):
                         await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
                                                                 fee=f'{stellar_fee} XLM and {token_fee} {ticker.upper()}')
