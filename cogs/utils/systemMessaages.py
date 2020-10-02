@@ -225,7 +225,7 @@ class CustomMessages:
                          value=withdrawal_data["hash"],
                          inline=False)
         notify.add_field(name='Withdrawal asset details',
-                         value=f'{round(withdrawal_data["amount"]/10000000,2)} {withdrawal_data["asset"]}',
+                         value=f'{round(withdrawal_data["amount"]/10000000,7)} {withdrawal_data["asset"]}',
                          inline=False)
         notify.add_field(name='Crypto Link Fee',
                          value=fee,
