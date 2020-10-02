@@ -9,8 +9,8 @@ from backOffice.statsManager import StatsManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.userWalletManager import UserWalletManager
 from backOffice.stellarOnChainHandler import StellarWallet
-from cogs.utils.customCogChecks import user_has_wallet, is_public
-from cogs.utils.monetaryConversions import convert_to_currency, convert_to_usd
+from cogs.utils.customCogChecks import user_has_wallet
+from cogs.utils.monetaryConversions import convert_to_usd
 from cogs.utils.securityChecks import check_stellar_address
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -66,9 +66,9 @@ class WithdrawalCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1)
 
-    @commands.group()
+    @withdraw.command()
     @commands.check(user_has_wallet)
-    async def w_t(self, ctx, withdrawal_amount: float, ticker: str, address: str):
+    async def token(self, ctx, ticker: str, withdrawal_amount: float, address: str):
         token = ticker.lower()
         # check strings, stellar address and token integration status
         if not re.search("[~!#$%^&*()_+{}:;\']", token) and token in self.list_of_coins and check_stellar_address(
@@ -185,6 +185,23 @@ class WithdrawalCommands(commands.Cog):
                                     await custom_messages.explorer_messages(applied_channels=load_channels,
                                                                             message=explorer_msg, tx_type='withdrawal',
                                                                             on_chain=True)
+
+                                    # System channel notification on withdrawal
+                                    channel_id = notify_channel["stellar"]
+                                    channel_sys = self.bot.get_channel(
+                                        id=int(
+                                            channel_id))  # Get the channel wer notification on withdrawal will be sent
+
+                                    # Send withdrawal notification to CL system
+                                    await custom_messages.withdrawal_notification_channel(ctx=ctx,
+                                                                                          channel=channel_sys,
+                                                                                          withdrawal_data=result)
+
+                                    # Sys notification of incoming funds to wallet
+                                    await custom_messages.cl_staff_incoming_funds_notification(sys_channel=channel_sys,
+                                                                                               incoming_fees=f'{stellar_fee} {CONST_STELLAR_EMOJI}\n'
+                                                                                                             f'{token_fee} {token_emoji} ({token.upper()})')
+
                                 elif result.get("error"):
                                     # revert user balance
                                     to_return = {
@@ -249,7 +266,6 @@ class WithdrawalCommands(commands.Cog):
                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
     @withdraw.command()
-    @commands.check(is_public)
     @commands.check(user_has_wallet)
     async def xlm(self, ctx, amount: float, address: str):
         """
@@ -260,112 +276,116 @@ class WithdrawalCommands(commands.Cog):
         :return:
         """
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
-        stellar_fee = bot_manager.get_fees_by_category(all_fees=False, key='xlm')['fee']
-        fee_in_xlm = convert_to_currency(amount=stellar_fee, coin_name='stellar')
-        fee_in_stroops = int(fee_in_xlm['total'] * (10 ** 7))
-        channel_id = notify_channel["stellar"]
-        channel = self.bot.get_channel(
-            id=int(channel_id))  # Get the channel wer notification on withdrawal will be sent
+        stellar_fee = bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')['fee_list']['xlm']
+        fee_in_stroops = int(stellar_fee * (10 ** 7))
+
+        # Get stellar details from json
+        xlm_decimal = integrated_coins['xlm']['decimal']
+        xlm_minimum = integrated_coins['xlm']['minimumWithdrawal']
 
         if check_stellar_address(address=address):
-            stroops = (int(amount * (10 ** 7)))
-            if stroops >= 300000000:
+            stroops = (int(amount * (10 ** xlm_decimal)))
+            if stroops >= xlm_minimum:
                 final_stroop = stroops + fee_in_stroops
                 # Check user balance
-                wallet_details = stellar.get_stellar_wallet_data_by_discord_id(discord_id=ctx.message.author.id)
 
-                if wallet_details['balance'] >= final_stroop:
+                wallet_details = user_wallets.get_ticker_balance(ticker='xlm', user_id=ctx.message.author.id)
+
+                if wallet_details >= final_stroop:
                     xlm_with_amount = stroops / 10000000
 
                     # Confirmation message
                     message_content = f"{ctx.message.author.mention} Current withdrawal fee which will be appended " \
                                       f"to your withdrawal amount is " \
-                                      f"{round(fee_in_xlm['total'], 7)} {CONST_STELLAR_EMOJI} (${stellar_fee}, " \
-                                      f"Rate:{round(fee_in_xlm['usd'], 4)})." \
+                                      f"{stellar_fee} {CONST_STELLAR_EMOJI}\n" \
                                       f"Are you still willing to withdraw? answer with ***yes*** or ***no***"
 
                     verification = await ctx.channel.send(content=message_content)
                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
 
-                    await ctx.channel.delete_messages([verification, msg_usr])
+                    if isinstance(ctx.message.channel, TextChannel):
+                        await ctx.channel.delete_messages([verification, msg_usr])
 
                     if str(msg_usr.content.lower()) == 'yes':
                         processing_msg = 'Processing withdrawal request, please wait few moments....'
                         processing_msg = await ctx.channel.send(content=processing_msg)
 
-                        # Update stellar balance discord id
-                        if stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
-                                                                        stroops=final_stroop,
-                                                                        direction=2):
+                        to_deduct = {
+                            "xlm": int(final_stroop) * (-1)
+                        }
+
+                        # Withdraw balance from user wallet
+                        if user_wallets.update_user_balance_off_chain(user_id=ctx.message.author.id,
+                                                                      coin_details=to_deduct):
+
                             # Initiate on chain withdrawal
-                            data = stellar_wallet.withdraw(address=address,
-                                                           xlm_amount=str(xlm_with_amount))
+                            result = stellar_wallet.withdraw(address=address,
+                                                             xlm_amount=str(xlm_with_amount))
 
-                            if data:
-                                data_new = {
-                                    "time": time.time(),
-                                    "destination": address,
-                                    "userId": int(ctx.message.author.id),
-                                    "amount": f'{xlm_with_amount:.7f}',
-                                    "fee": fee_in_stroops,
-                                    "stroops": stroops,
-                                    "serverId": int(ctx.message.guild.id),
-                                    "serverName": f'{ctx.message.guild}',
-                                    "paymentId": wallet_details['depositId'],
-                                    "explorer": data['explorer'],
-                                    "hash": data["hash"]
-                                }
+                            if result.get("hash"):
+                                # Store withdrawal details to database
+                                result['userId'] = int(ctx.message.author.id)
+                                result["time"] = int(time.time())
+                                result['offChainData'] = {"xlmFee": stellar_fee}
 
-                                stellar.insert_to_withdrawal_hist(tx_type=1, tx_data=data_new)
+                                # Insert in the history of withdrawals
+                                stellar.insert_to_withdrawal_hist(tx_type=1, tx_data=result)
 
+                                # Send message to user on withdrawal
                                 await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
-                                                                        fee=f'{stellar_fee} XLM and {token_fee}'
-                                                                            f' {ticker.upper()}')
+                                                                        fee=f'{stellar_fee} XLM and')
+
+                                # System channel notification on withdrawal
+                                channel_id = notify_channel["stellar"]
+                                channel_sys = self.bot.get_channel(
+                                    id=int(channel_id))  # Get the channel wer notification on withdrawal will be sent
 
                                 # Send withdrawal notification to CL system
                                 await custom_messages.withdrawal_notification_channel(ctx=ctx,
-                                                                                      channel=channel,
-                                                                                      withdrawal_data=data_new)
+                                                                                      channel=channel_sys,
+                                                                                      withdrawal_data=result)
 
-                                if bot_manager.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm',
-                                                                         direction=1):
-                                    sys_channel = self.bot.get_channel(id=int(channel_id))
+                                if bot_manager.update_lpi_wallet_balance(ticker='xlm',
+                                                                         to_update={'balance': int(fee_in_stroops)}):
+                                    await custom_messages.cl_staff_incoming_funds_notification(sys_channel=channel_sys,
+                                                                                               incoming_fees=f'{stellar_fee} {CONST_STELLAR_EMOJI}')
 
-                                    await custom_messages.cl_staff_incoming_funds_notification(sys_channel=sys_channel,
-                                                                                               amount=fee_in_stroops)
+                                    # Update user withdrawal stats
+                                    withdrawal_data = {
+                                        "xlmStats.withdrawalsCount": 1,
+                                        "xlmStats.totalWithdrawn": round(stroops / 10000000, 7),
+                                    }
+                                    await stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
+                                                                            tx_stats_data=withdrawal_data)
 
-                                withdrawal_data = {
-                                    "xlmStats.withdrawalsCount": 1,
-                                    "xlmStats.totalWithdrawn": round(stroops / 10000000, 7),
-                                }
-                                await stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
-                                                                        tx_stats_data=withdrawal_data)
-
-                                bot_stats_data = {
-                                    "withdrawalCount": 1,
-                                    "withdrawnAmount": round(stroops / 10000000, 7)
-                                }
-                                await stats_manager.update_cl_on_chain_stats(ticker='xlm',
-                                                                             stat_details=bot_stats_data)
-
-                                # Message to explorer
-                                in_dollar = convert_to_usd(amount=xlm_with_amount, coin_name='stellar')
-                                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                 guild_profiles.get_all_explorer_applied_channels()]
-                                explorer_msg = f':outbox_tray: {xlm_with_amount} {CONST_STELLAR_EMOJI} ' \
-                                               f'(${in_dollar["total"]}) on {ctx.message.guild}'
-                                await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                        message=explorer_msg, tx_type='withdrawal',
-                                                                        on_chain=True)
+                                    # Update bot stats
+                                    bot_stats_data = {
+                                        "withdrawalCount": 1,
+                                        "withdrawnAmount": round(stroops / 10000000, 7)
+                                    }
+                                    await stats_manager.update_cl_on_chain_stats(ticker='xlm',
+                                                                                 stat_details=bot_stats_data)
+                                    # Message to explorer
+                                    in_dollar = convert_to_usd(amount=xlm_with_amount, coin_name='stellar')
+                                    load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                     guild_profiles.get_all_explorer_applied_channels()]
+                                    explorer_msg = f':outbox_tray: {xlm_with_amount} {CONST_STELLAR_EMOJI} ' \
+                                                   f'(${in_dollar["total"]}) on {ctx.message.guild}'
+                                    await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                                            message=explorer_msg, tx_type='withdrawal',
+                                                                            on_chain=True)
 
                             else:
                                 message = 'Funds could not be withdrawn at this point. Please try again later.'
+                                # return user funds to off-chain wallet
+                                to_append = {
+                                    "xlm": int(final_stroop)
+                                }
+                                user_wallets.update_user_balance_off_chain(user_id=ctx.message.author.id,
+                                                                           coin_details=to_append)
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                      destination=0,
                                                                      sys_msg_title=CONST_WITHDRAWAL_ERROR)
-                                stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
-                                                                             stroops=final_stroop,
-                                                                             direction=1)
                         else:
                             message = 'Funds could not be withdrawn at this point. Please try again later.'
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -378,13 +398,12 @@ class WithdrawalCommands(commands.Cog):
 
                 else:
                     message = f'Amount you are willing to withdraw is greater than your current wallet balance.\n' \
-                              f'Wallet balance: {wallet_details["balance"] / 10000000} Stellar ' \
-                              f'Balance {CONST_STELLAR_EMOJI}'
+                              f'Wallet balance: {wallet_details["balance"] / 10000000} {CONST_STELLAR_EMOJI}'
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                          sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
             else:
-                message = f'Wrong amount for withdrawal provided. Amount needs to be greater than 30 XLM'
+                message = f'Minimum amount to withdraw is set currently to {xlm_minimum} {CONST_STELLAR_EMOJI}'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title=CONST_WITHDRAWAL_ERROR)
         else:
