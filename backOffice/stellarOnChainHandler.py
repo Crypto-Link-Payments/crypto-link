@@ -149,44 +149,22 @@ class StellarWallet:
         else:
             return False
 
-    def withdraw(self, address: str, xlm_amount: str):
-        source_account = self.server.load_account(self.public_key)
-        tx = TransactionBuilder(
-            source_account=source_account,
-            network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
-            base_fee=self.server.fetch_base_fee()).append_payment_op(
-            destination=address, asset_code="XLM", amount=xlm_amount).set_timeout(30).build()
-        tx.sign(self.root_keypair)
-        response = self.server.submit_transaction(tx)
-        try:
-            if "status" not in response:
-                details = self.__decode_processed_withdrawal_envelope(envelope_xdr=response['envelope_xdr'])
-                end_details = {
-                    "asset": details['code'],
-                    "explorer": response['_links']['transaction']['href'],
-                    "hash": response['hash'],
-                    "ledger": response['ledger'],
-                    "destination": address,
-                    "amount": details['amount']
-                }
-                return end_details
-        except exceptions.BadRequestError as e:
-            # get operation from result_codes to be processed
-            error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
-            return {
-                "error": f'{error}'
-            }
-
     def token_withdrawal(self, address, token, amount: str):
         """
         Amount as full
         """
+
+        if token != 'xlm':
+            asset_issuer = integrated_coins[token.lower()]["assetIssuer"]
+        else:
+            asset_issuer = None
+
         source_account = self.server.load_account(self.public_key)
         tx = TransactionBuilder(
             source_account=source_account,
             network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
             base_fee=self.server.fetch_base_fee()).append_payment_op(
-            asset_issuer=integrated_coins[token.lower()]["assetIssuer"],
+            asset_issuer=asset_issuer,
             destination=address, asset_code=token.upper(), amount=amount).set_timeout(30).build()
         tx.sign(self.root_keypair)
         try:
