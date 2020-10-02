@@ -162,21 +162,22 @@ class TimedUpdater:
 
         if new_transactions:
             # Filter transactions
-            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions, stellar_manager = self.backoffice.stellar_manager)
+            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions,
+                                                                                                       stellar_manager=self.backoffice.stellar_manager)
             channel = bot.get_channel(id=int(channel_id))
             if tx_with_registered_memo:
                 await process_tx_with_memo(msg_channel=channel,
                                            memo_transactions=tx_with_registered_memo,
-                                           stellar_manager = self.backoffice.stellar_manager,
+                                           stellar_manager=self.backoffice.stellar_manager,
                                            stats_manager=self.backoffice.stats_manager)
             if tx_with_not_registered_memo:
                 await process_tx_with_not_registered_memo(channel=channel,
                                                           no_registered_memo=tx_with_not_registered_memo,
-                                                          stellar_manager = self.backoffice.stellar_manager)
+                                                          stellar_manager=self.backoffice.stellar_manager)
             if tx_with_no_memo:
                 await process_tx_with_no_memo(channel=channel,
                                               no_memo_transaction=tx_with_no_memo,
-                                              stellar_manager = self.backoffice.stellar_manager)
+                                              stellar_manager=self.backoffice.stellar_manager)
 
             last_checked_pag = new_transactions[-1]["paging_token"]
             if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
@@ -190,7 +191,6 @@ class TimedUpdater:
             print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
             print('==============================================')
 
-
     async def check_expired_roles(self):
         """
         Function checks for expired users on community nad removes them if necessary
@@ -198,7 +198,8 @@ class TimedUpdater:
         print(Fore.GREEN + f"{get_time()} --> CHECKING FOR USERS WITH EXPIRED ROLES ")
         now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
         merchant_manager = self.backoffice.merchant_manager
-        overdue_members = merchant_manager.get_over_due_users(timestamp=int(now))  # Gets all overdue members from database
+        overdue_members = merchant_manager.get_over_due_users(
+            timestamp=int(now))  # Gets all overdue members from database
         if overdue_members:
             bot_guilds = [guild for guild in bot.guilds]  # get all guilds bot has access to
             for mem in overdue_members:
@@ -237,8 +238,9 @@ class TimedUpdater:
                                 else:
                                     channel_sys = channels["merchant"]
                                     # send notification to merchant for system if user could not be removed from database
-                                    expired_sys = discord.Embed(title='__Expired user could not be removed from system__',
-                                                                colour=discord.Color.red())
+                                    expired_sys = discord.Embed(
+                                        title='__Expired user could not be removed from system__',
+                                        colour=discord.Color.red())
                                     expired_sys.set_thumbnail(url=bot.user.avatar_url)
                                     expired_sys.add_field(name='Community',
                                                           value=guild.name,
@@ -267,7 +269,6 @@ class TimedUpdater:
         else:
             print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
             print('===========================================================')
-
 
     async def check_merchant_licences(self):
         """
@@ -386,7 +387,7 @@ if __name__ == '__main__':
     backoffice = BackOffice()
     backoffice.check_backend()
 
-    timed_updater = TimedUpdater( backoffice )
+    timed_updater = TimedUpdater(backoffice)
 
     # Check file system
     backend_check = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
