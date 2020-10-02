@@ -319,8 +319,8 @@ class WithdrawalCommands(commands.Cog):
                                                                       coin_details=to_deduct):
 
                             # Initiate on chain withdrawal
-                            result = stellar_wallet.withdraw(address=address,
-                                                             xlm_amount=str(xlm_with_amount))
+                            result = stellar_wallet.token_withdrawal(address=address,token='xlm',
+                                                                     amount=str(xlm_with_amount))
 
                             if result.get("hash"):
                                 # Store withdrawal details to database
