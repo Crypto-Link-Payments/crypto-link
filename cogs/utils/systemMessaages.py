@@ -2,7 +2,7 @@ from datetime import datetime
 
 import discord
 from discord import errors
-from discord import Role, Embed, Colour
+from discord import Role, Embed, Colour, TextChannel
 from backOffice.guildServicesManager import GuildProfileManager
 from utils.tools import Helpers
 
@@ -213,6 +213,7 @@ class CustomMessages:
     async def withdrawal_notify(ctx, withdrawal_data: dict, fee):
         notify = discord.Embed(title="Withdrawal Notification",
                                description=f'Withdrawal Successfully processed',
+                               timestamp=datetime.utcnow(),
                                colour=discord.Colour.green())
 
         notify.add_field(name="Time of withdrawal",
@@ -257,16 +258,21 @@ class CustomMessages:
         notify = discord.Embed(title='Stellar Withdrawal Notification',
                                description='Withdrawal has been processed',
                                colour=discord.Colour.gold())
-        notify.add_field(name='Guild',
-                         value=f'{ctx.message.guild} ID; {ctx.message.guild.id}',
-                         inline=False)
+        if isinstance(ctx.channel, TextChannel):
+            notify.add_field(name='Origin',
+                             value=f'{ctx.message.guild} ID; {ctx.message.guild.id}',
+                             inline=False)
+        else:
+            notify.add_field(name='Origin',
+                             value=f'DM with bot',
+                             inline=False)
         notify.add_field(name='User details',
                          value=f'{ctx.message.author} \nID; {ctx.message.author.id}',
                          inline=False)
         notify.add_field(name='Withdrawal details',
                          value=f'Time: {withdrawal_data["time"]}\n'
                                f'Destination: {withdrawal_data["destination"]}\n'
-                               f'Amount: {withdrawal_data["amount"]} {CONST_STELLAR_EMOJI}',
+                               f'Amount: {round(withdrawal_data["amount"]/10000000,7)} {withdrawal_data["asset"]}',
                          inline=False)
         await channel.send(embed=notify)
 
