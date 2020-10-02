@@ -22,6 +22,18 @@ class BotManager:
         self.bot_wallet = self.bot_stuff.CLWallets
         self.bot_fees = self.bot_stuff.CLFees
 
+    def update_lpi_wallet_balance_multi(self, fees_data: dict, token: str = None):
+        xlm_data = fees_data["xlm"]
+        token_data = fees_data[f'{token}']
+        xlm_result = self.bot_wallet.update_one({"ticker": f"xlm"},
+                                                {"$inc": {"balance": xlm_data["balance"]},
+                                                 "$currentDate": {"lastModified": True}})
+        token_result = self.bot_wallet.update_one({"ticker": f"{token}"},
+                                                  {"$inc": {"balance": token_data["balance"]},
+                                                   "$currentDate": {"lastModified": True}})
+        count_modifications = (int(xlm_result.modified_count) + int(token_result.modified_count))
+        return count_modifications == 2
+
     def update_lpi_wallet_balance(self, amount: int, wallet: str, direction: int):
         """
         manipulating wallet balance when transactions happens
@@ -58,7 +70,6 @@ class BotManager:
                                           {"$set": data_to_update,
                                            "$currentDate": {"lastModified": True}})
         return result.modified_count > 0
-
 
     def get_fees_by_category(self, all_fees: bool, key: str = None):
         """
