@@ -2,7 +2,7 @@ from datetime import datetime
 
 import discord
 from discord import errors
-from discord import Role, Embed, Colour
+from discord import Role, Embed, Colour, TextChannel
 from backOffice.guildServicesManager import GuildProfileManager
 from utils.tools import Helpers
 
@@ -210,10 +210,10 @@ class CustomMessages:
         await recipient.send(embed=sys_embed)
 
     @staticmethod
-    async def withdrawal_notify(ctx, withdrawal_data: dict, coin, fee, thumbnail,
-                                link):
+    async def withdrawal_notify(ctx, withdrawal_data: dict, fee):
         notify = discord.Embed(title="Withdrawal Notification",
-                               description=f' {coin} withdrawal Successfully processed',
+                               description=f'Withdrawal Successfully processed',
+                               timestamp=datetime.utcnow(),
                                colour=discord.Colour.green())
 
         notify.add_field(name="Time of withdrawal",
@@ -225,16 +225,16 @@ class CustomMessages:
         notify.add_field(name='Transaction hash',
                          value=withdrawal_data["hash"],
                          inline=False)
-        notify.add_field(name='Withdrawal amount',
-                         value=f'{withdrawal_data["amount"]} {CONST_STELLAR_EMOJI}',
+        notify.add_field(name='Withdrawal asset details',
+                         value=f'{round(withdrawal_data["amount"]/10000000,7)} {withdrawal_data["asset"]}',
                          inline=False)
         notify.add_field(name='Crypto Link Fee',
                          value=fee,
                          inline=False)
         notify.add_field(name='Explorer Link',
-                         value=link,
+                         value=withdrawal_data['explorer'],
                          inline=False)
-        notify.set_thumbnail(url=thumbnail)
+        notify.set_thumbnail(url=ctx.message.author.avatar_url)
 
         try:
             await ctx.author.send(embed=notify)
@@ -247,7 +247,7 @@ class CustomMessages:
                                                   f' you messages',
                                       colour=discord.Colour.green())
             error_msg.add_field(name='Explorer Link',
-                                value=link)
+                                value=withdrawal_data['explorer'])
             error_msg.set_footer(text='This message will self-destruct in 360 seconds')
             await ctx.channel.send(embed=error_msg, content=f'{ctx.message.author.mention}',
                                    delete_after=360)
@@ -258,27 +258,32 @@ class CustomMessages:
         notify = discord.Embed(title='Stellar Withdrawal Notification',
                                description='Withdrawal has been processed',
                                colour=discord.Colour.gold())
-        notify.add_field(name='Guild',
-                         value=f'{ctx.message.guild} ID; {ctx.message.guild.id}',
-                         inline=False)
+        if isinstance(ctx.channel, TextChannel):
+            notify.add_field(name='Origin',
+                             value=f'{ctx.message.guild} ID; {ctx.message.guild.id}',
+                             inline=False)
+        else:
+            notify.add_field(name='Origin',
+                             value=f'DM with bot',
+                             inline=False)
         notify.add_field(name='User details',
                          value=f'{ctx.message.author} \nID; {ctx.message.author.id}',
                          inline=False)
         notify.add_field(name='Withdrawal details',
                          value=f'Time: {withdrawal_data["time"]}\n'
                                f'Destination: {withdrawal_data["destination"]}\n'
-                               f'Amount: {withdrawal_data["amount"]} {CONST_STELLAR_EMOJI}',
+                               f'Amount: {round(withdrawal_data["amount"]/10000000,7)} {withdrawal_data["asset"]}',
                          inline=False)
         await channel.send(embed=notify)
 
     @staticmethod
-    async def cl_staff_incoming_funds_notification(sys_channel: discord.TextChannel, amount):
+    async def cl_staff_incoming_funds_notification(sys_channel: discord.TextChannel, incoming_fees:str):
         notify = discord.Embed(title='Bot Stellar Wallet Activity',
                                description='Bot Wallet has been credited because user '
                                            'has initiated on-chain withdrawal',
                                color=discord.Colour.blurple())
         notify.add_field(name='Value',
-                         value=f'{amount / 10000000}{CONST_STELLAR_EMOJI}')
+                         value=f'{incoming_fees}')
         await sys_channel.send(embed=notify)
 
     @staticmethod

@@ -46,6 +46,11 @@ class UserWalletManager:
                                               {"$inc": {f"{coin.lower()}": int(amount)}})
         return result.modified_count > 0
 
+    def update_user_balance_off_chain(self, user_id, coin_details: dict):
+        result = self.user_wallets.update_one({"userId": user_id},
+                                              {"$inc": coin_details})
+        return result.modified_count > 0
+
     def update_coin_balance(self, coin, user_id: int, amount: int, direction: int):
         if direction == 1:  # Append
             pass
