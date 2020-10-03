@@ -167,6 +167,7 @@ class TimedUpdater:
                 await process_tx_with_not_registered_memo(channel=channel,
                                                           no_registered_memo=tx_with_not_registered_memo,
                                                           stellar_manager=self.backoffice.stellar_manager,
+
                                                           stats_manager=self.backoffice.stats_manager)
             if tx_with_no_memo:
                 await process_tx_with_no_memo(channel=channel,
