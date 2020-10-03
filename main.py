@@ -47,6 +47,15 @@ def get_time():
     return current_time
 
 
+async def global_bot_stats_update(tx, stats_manager):
+    bot_stats = {
+        "depositCount": 1,
+        "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
+    }
+    await stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
+                                                 stat_details=bot_stats)
+
+
 def filter_transaction(new_transactions: list, stellar_manager):
     # Building list of deposits if memo included
 
@@ -64,12 +73,7 @@ async def process_tx_with_no_memo(channel, no_memo_transaction, stellar_manager,
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                 await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
-                bot_stats = {
-                    "depositCount": 1,
-                    "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
-                }
-                await stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
-                                                             stat_details=bot_stats)
+                await global_bot_stats_update(tx=tx, stats_manager=stats_manager)
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
@@ -113,12 +117,7 @@ async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, 
 
                     await stats_manager.update_user_on_chain_stats(user_id=dest.id, stats_data=on_chain_stats)
 
-                    bot_stats = {
-                        "depositCount": 1,
-                        "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
-                    }
-                    await stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
-                                                                 stat_details=bot_stats)
+                    await global_bot_stats_update(tx=tx, stats_manager=stats_manager)
 
                 else:
                     print(Fore.RED + f'TX Processing error: \n'
@@ -134,13 +133,7 @@ async def process_tx_with_not_registered_memo(channel, no_registered_memo, stell
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                 await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
-                bot_stats = {
-                    "depositCount": 1,
-                    "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
-                }
-                await stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
-                                                             stat_details=bot_stats)
-
+                await global_bot_stats_update(tx=tx, stats_manager=stats_manager)
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
