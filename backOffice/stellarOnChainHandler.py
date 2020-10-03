@@ -196,7 +196,7 @@ class StellarWallet:
         user_key_pair = Keypair.from_secret(private_key)
         root_account = Account(account_id=user_key_pair.public_key, sequence=1)
         public_key = root_account.account_id
-        asset_issuer = integrated_coins[token.lower()]["assetIssuer"]
+        asset_issuer = self.integrated_coins[token.lower()]["assetIssuer"]
         print(root_account)
         try:
             source_account = self.server.load_account(public_key)
@@ -210,7 +210,6 @@ class StellarWallet:
 
             resp = self.server.submit_transaction(tx)
             return resp
-
         except exceptions.NotFoundError:
             # Returned if accout not found
             err = {"status": 404}
