@@ -47,31 +47,33 @@ def get_time():
     return current_time
 
 
+async def global_bot_stats_update(tx, stats_manager):
+    bot_stats = {
+        "depositCount": 1,
+        "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
+    }
+    await stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
+                                                 stat_details=bot_stats)
+
+
 def filter_transaction(new_transactions: list, stellar_manager):
-    """
-    Filtering transactions
-    """
-
     # Building list of deposits if memo included
+
     tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys()]  # GET Transactions who have memo
-
     tx_with_no_memo = [tx for tx in new_transactions if tx not in tx_with_memo]  # GET transactions without memo
-
     tx_with_registered_memo = [tx for tx in tx_with_memo if stellar_manager.check_if_stellar_memo_exists(
         tx_memo=tx['memo'])]  # GET tx with registered memo
-
     tx_with_not_registered_memo = [tx for tx in tx_with_memo if
                                    tx not in tx_with_registered_memo]  # GET tx with not registered memo
-
     return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo
 
 
-async def process_tx_with_no_memo(channel, no_memo_transaction, stellar_manager):
+async def process_tx_with_no_memo(channel, no_memo_transaction, stellar_manager, stats_manager):
     for tx in no_memo_transaction:
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
-                await custom_messages.send_unidentified_deposit_msg(channel=channel, deposit_details=tx)
-                # TODO integrate bot global stats
+                await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
+                await global_bot_stats_update(tx=tx, stats_manager=stats_manager)
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
@@ -85,10 +87,8 @@ async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, 
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
                 # Update balance based on incoming asset
-
                 if wallet_manager.update_coin_balance_by_memo(memo=tx['memo'], coin=tx['asset_type']["code"],
                                                               amount=int(tx['asset_type']["amount"])):
-
                     # If balance updated successfully send the message to user of processed deposit
                     user_id = wallet_manager.get_discord_id_from_memo(memo=tx['memo'])  # Return usr int number
                     dest = await bot.fetch_user(user_id=int(user_id))
@@ -103,7 +103,7 @@ async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, 
                     load_channels = [bot.get_channel(id=int(chn)) for chn in
                                      guild_profiles.get_all_explorer_applied_channels()]
 
-                    explorer_msg = f':inbox_tray: Someone deposited {tx["asset_type"]["amount"]} ' \
+                    explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"] / 10000000, 7)} ' \
                                    f'{tx["asset_type"]["code"].upper()} to {bot.user}'
 
                     await custom_messages.explorer_messages(applied_channels=load_channels,
@@ -117,12 +117,7 @@ async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, 
 
                     await stats_manager.update_user_on_chain_stats(user_id=dest.id, stats_data=on_chain_stats)
 
-                    bot_stats = {
-                        "depositCount": 1,
-                        "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
-                    }
-                    await stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
-                                                                 stat_details=bot_stats)
+                    await global_bot_stats_update(tx=tx, stats_manager=stats_manager)
 
                 else:
                     print(Fore.RED + f'TX Processing error: \n'
@@ -133,13 +128,12 @@ async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, 
             print(Fore.LIGHTCYAN_EX + 'No new legit tx')
 
 
-async def process_tx_with_not_registered_memo(channel, no_registered_memo, stellar_manager):
+async def process_tx_with_not_registered_memo(channel, no_registered_memo, stellar_manager, stats_manager):
     for tx in no_registered_memo:
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
-                await custom_messages.send_unidentified_deposit_msg(channel=channel, deposit_details=tx)
-                print(Fore.GREEN + 'Processed successfully')
-                # TODO integrate stats for deposit processing
+                await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
+                await global_bot_stats_update(tx=tx, stats_manager=stats_manager)
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
@@ -159,7 +153,6 @@ class TimedUpdater:
         pag = helper.read_json_file('stellarPag.json')
         new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
         channel_id = notification_channels["stellar"]  # Sys channel where details are sent
-
         if new_transactions:
             # Filter transactions
             tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions,
@@ -173,11 +166,13 @@ class TimedUpdater:
             if tx_with_not_registered_memo:
                 await process_tx_with_not_registered_memo(channel=channel,
                                                           no_registered_memo=tx_with_not_registered_memo,
-                                                          stellar_manager=self.backoffice.stellar_manager)
+                                                          stellar_manager=self.backoffice.stellar_managerm,
+                                                          stats_manager=self.backoffice.stats_manager)
             if tx_with_no_memo:
                 await process_tx_with_no_memo(channel=channel,
                                               no_memo_transaction=tx_with_no_memo,
-                                              stellar_manager=self.backoffice.stellar_manager)
+                                              stellar_manager=self.backoffice.stellar_manager,
+                                              stats_manager=self.backoffice.stats_manager)
 
             last_checked_pag = new_transactions[-1]["paging_token"]
             if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
