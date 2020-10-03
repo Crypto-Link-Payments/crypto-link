@@ -94,7 +94,7 @@ async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, 
                     load_channels = [bot.get_channel(id=int(chn)) for chn in
                                      guild_profiles.get_all_explorer_applied_channels()]
 
-                    explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"]/10000000,7)} ' \
+                    explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"] / 10000000, 7)} ' \
                                    f'{tx["asset_type"]["code"].upper()} to {bot.user}'
 
                     await custom_messages.explorer_messages(applied_channels=load_channels,
@@ -128,7 +128,7 @@ async def process_tx_with_not_registered_memo(channel, no_registered_memo, stell
     for tx in no_registered_memo:
         if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
             if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
-                await custom_messages.send_unidentified_deposit_msg(channel=channel, deposit_details=tx)
+                await custom_messages.send_unidentified_deposit_msg(channel=channel,tx_details=tx)
             else:
                 print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                  f'HASH{tx["hash"]}')
