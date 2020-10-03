@@ -10,6 +10,7 @@ from cogs.utils.customCogChecks import is_public, user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal, scientific_conversion
 from cogs.utils.systemMessaages import CustomMessages
+from cogs.utils.securityChecks import check_stellar_private
 from utils.tools import Helpers
 
 helper = Helpers()
@@ -197,12 +198,18 @@ class UserAccountCommands(commands.Cog):
     async def trust(self, ctx, private_key, token: str):
         token = token.lower()
         # check strings, stellar address and token integration status
-        if not re.search("[~!#$%^&*()_+{}:;\']", token) and token in self.list_of_coins and token != 'xlm':
-            stellar_wallet.establish_trust(private_key=private_key, token=f'{token.upper()}')
+        if check_stellar_private(private_key=private_key)
+            if not re.search("[~!#$%^&*()_+{}:;\']", token) and token in self.list_of_coins and token != 'xlm':
+                if stellar_wallet.establish_trust(private_key=private_key, token=f'{token.upper()}')
 
+            else:
+                title = '__Trustline error__'
+                message = f'Trustline creation for failed, as token {token} is not implemented in Crypto Link'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                     sys_msg_title=title)
         else:
             title = '__Trustline error__'
-            message = f'Trustline creation for failed, as token {token} is not implemented in Crypto Link'
+            message = f'You have provided wrong Ed25519 Secret Seed.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 

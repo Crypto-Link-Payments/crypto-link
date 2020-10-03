@@ -14,7 +14,6 @@ from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, 
 from utils.tools import Helpers
 
 
-
 class StellarWallet:
     """
     Stellar Hot Wallet Handler on chain
@@ -193,11 +192,12 @@ class StellarWallet:
         Amount as full
         """
         # Load user secret and get account
+
         user_key_pair = Keypair.from_secret(private_key)
         root_account = Account(account_id=user_key_pair.public_key, sequence=1)
         public_key = root_account.account_id
         asset_issuer = self.integrated_coins[token.lower()]["assetIssuer"]
-        print(root_account)
+
         try:
             source_account = self.server.load_account(public_key)
             tx = TransactionBuilder(
@@ -208,9 +208,7 @@ class StellarWallet:
                 30).build()
             tx.sign(private_key)
 
-            resp = self.server.submit_transaction(tx)
-            return resp
+            self.server.submit_transaction(tx)
+            return True
         except exceptions.NotFoundError:
-            # Returned if accout not found
-            err = {"status": 404}
-            return err
+            return False
