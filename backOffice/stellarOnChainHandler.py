@@ -12,10 +12,6 @@ from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, 
 
 from utils.tools import Helpers
 
-helpers = Helpers()
-secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
-public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
-integrated_coins = helpers.read_json_file(file_name='integratedCoins.json')
 
 
 class StellarWallet:
@@ -26,6 +22,10 @@ class StellarWallet:
     """
 
     def __init__(self):
+        helpers = Helpers()
+        secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
+        public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
+        self.integrated_coins = helpers.read_json_file(file_name='integratedCoins.json')
         self.public_key = public_details["xlm"]
         self.private_key = secret_details['stellar']
         self.root_keypair = Keypair.from_secret(self.private_key)
@@ -155,7 +155,7 @@ class StellarWallet:
         """
 
         if token != 'xlm':
-            asset_issuer = integrated_coins[token.lower()]["assetIssuer"]
+            asset_issuer = self.integrated_coins[token.lower()]["assetIssuer"]
         else:
             asset_issuer = None
 
