@@ -72,14 +72,23 @@ class CustomMessages:
         await channel.send(embed=notify)
 
     @staticmethod
-    async def send_unidentified_deposit_msg(channel, deposit_details):
+    async def send_unidentified_deposit_msg(channel, tx_details: dict):
         """
         deposit or memo could not be identifies
         """
 
-        deposit_unidentified = f"```json\n{deposit_details}```"
-
-        await channel.send(content=deposit_unidentified)
+        notify = discord.Embed(title=':warning: System Deposit Notification :warning:',
+                               description='Unidentified Deposit',
+                               timestamp=datetime.utcnow(),
+                               colour=Colour.red())
+        notify.add_field(name='From',
+                         value=f'{tx_details["source_account"]}', inline=False)
+        notify.add_field(name='Tx hash',
+                         value=f'{tx_details["hash"]}')
+        notify.add_field(name='Deposit Value',
+                         value=f"Amount: {int(tx_details['asset_type']['amount']) / 10000000:9.7f} {tx_details['asset_type']['code']}",
+                         inline=False)
+        await channel.send(embed=notify)
 
     @staticmethod
     async def embed_builder(ctx, title, description, data: list, destination=None, thumbnail=None):
@@ -226,7 +235,7 @@ class CustomMessages:
                          value=withdrawal_data["hash"],
                          inline=False)
         notify.add_field(name='Withdrawal asset details',
-                         value=f'{round(withdrawal_data["amount"]/10000000,7)} {withdrawal_data["asset"]}',
+                         value=f'{round(withdrawal_data["amount"] / 10000000, 7)} {withdrawal_data["asset"]}',
                          inline=False)
         notify.add_field(name='Crypto Link Fee',
                          value=fee,
@@ -272,12 +281,12 @@ class CustomMessages:
         notify.add_field(name='Withdrawal details',
                          value=f'Time: {withdrawal_data["time"]}\n'
                                f'Destination: {withdrawal_data["destination"]}\n'
-                               f'Amount: {round(withdrawal_data["amount"]/10000000,7)} {withdrawal_data["asset"]}',
+                               f'Amount: {round(withdrawal_data["amount"] / 10000000, 7)} {withdrawal_data["asset"]}',
                          inline=False)
         await channel.send(embed=notify)
 
     @staticmethod
-    async def cl_staff_incoming_funds_notification(sys_channel: discord.TextChannel, incoming_fees:str):
+    async def cl_staff_incoming_funds_notification(sys_channel: discord.TextChannel, incoming_fees: str):
         notify = discord.Embed(title='Bot Stellar Wallet Activity',
                                description='Bot Wallet has been credited because user '
                                            'has initiated on-chain withdrawal',

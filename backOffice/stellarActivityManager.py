@@ -28,7 +28,7 @@ class StellarManager:
         self.stellar_coin = self.connection['CryptoLink']
 
         # Collections connections
-        self.xlm_wallets = self.stellar_coin.StellarWallets  # Access to all stellar wallets
+        self.xlm_wallets = self.stellar_coin.userWallets  # Access to all stellar wallets
         self.xlm_deposits = self.stellar_coin.StellarDeposits  # Access to history of successful deposits
         self.xlm_withdrawals = self.stellar_coin.StellarWithdrawals  # Access to history of successful withdrawals
         self.xlm_unprocessed = self.stellar_coin.StellarUnprocessedDeposits  # history of successful deposits
@@ -81,6 +81,7 @@ class StellarManager:
 
         result = self.xlm_wallets.find_one({"depositId": tx_memo})
 
+        #todo bug fix wrong wallets
         if result:
             return True
         else:
