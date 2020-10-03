@@ -10,22 +10,14 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init
 from discord.ext import commands
-from pymongo import MongoClient, errors
 
-from backOffice.userWalletManager import UserWalletManager
-from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.monetaryConversions import convert_to_usd
 from backOffice.backOffice import BackOffice
 from utils.tools import Helpers
 
 init(autoreset=True)
-scheduler = AsyncIOScheduler()
-wallet_manager = UserWalletManager()
-guild_profiles = GuildProfileManager()
 custom_messages = CustomMessages()
 helper = Helpers()
-notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 bot_settings = helper.read_json_file(file_name='botSetup.json')
 bot = commands.Bot(command_prefix=commands.when_mentioned_or(bot_settings['command']))  # Test commands
@@ -81,7 +73,11 @@ async def process_tx_with_no_memo(channel, no_memo_transaction, stellar_manager,
             print(Fore.YELLOW + 'Unknown processed already')
 
 
-async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, stats_manager):
+async def process_tx_with_memo(msg_channel, memo_transactions, backoffice):
+    stellar_manager = backoffice.stellar_manager
+    stats_manager = backoffice.stats_manager
+    wallet_manager = backoffice.wallet_manager
+    guild_profiles = backoffice.guild_profiles
     for tx in memo_transactions:
         # check if processed if not process them
         if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
@@ -144,6 +140,7 @@ async def process_tx_with_not_registered_memo(channel, no_registered_memo, stell
 class TimedUpdater:
     def __init__(self, backoffice):
         self.backoffice = backoffice
+        self.notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
     async def check_stellar_hot_wallet(self):
         """
@@ -152,7 +149,7 @@ class TimedUpdater:
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
         pag = helper.read_json_file('stellarPag.json')
         new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-        channel_id = notification_channels["stellar"]  # Sys channel where details are sent
+        channel_id = self.notification_channels["stellar"]  # Sys channel where details are sent
         if new_transactions:
             # Filter transactions
             tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = filter_transaction(new_transactions,
@@ -161,8 +158,7 @@ class TimedUpdater:
             if tx_with_registered_memo:
                 await process_tx_with_memo(msg_channel=channel,
                                            memo_transactions=tx_with_registered_memo,
-                                           stellar_manager=self.backoffice.stellar_manager,
-                                           stats_manager=self.backoffice.stats_manager)
+                                           backoffice=backoffice)
             if tx_with_not_registered_memo:
                 await process_tx_with_not_registered_memo(channel=channel,
                                                           no_registered_memo=tx_with_not_registered_memo,
@@ -341,7 +337,7 @@ class TimedUpdater:
                                         value=f'{end_date} (UNIX {end})',
                                         inline=False)
 
-                    channel_id_details = notification_channels['merchant']
+                    channel_id_details = self.notification_channels['merchant']
                     channel_to_send = bot.get_channel(id=int(channel_id_details))
                     await channel_to_send.send(embed=sys_error)
 
@@ -350,7 +346,7 @@ class TimedUpdater:
                               ' ===================================')
 
 
-def start_scheduler(timed_updater):
+def start_scheduler(scheduler, timed_updater):
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
 
     scheduler.add_job(timed_updater.check_stellar_hot_wallet,
@@ -403,6 +399,7 @@ if __name__ == '__main__':
 
     notification_str += '+++++++++++++++++++++++++++++++++++++++'
     print(notification_str)
-    start_scheduler(timed_updater)
+    scheduler = AsyncIOScheduler()
+    start_scheduler(scheduler, timed_updater)
     # Discord Token
     bot.run(bot_settings['token'], reconnect=True)
