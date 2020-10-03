@@ -8,7 +8,8 @@ import sys
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
-from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions
+from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions, \
+    ChangeTrust
 
 from utils.tools import Helpers
 
@@ -186,3 +187,31 @@ class StellarWallet:
 
                 "error": f'{error} with {token.upper()} issuer'
             }
+
+    def establish_trust(self, private_key, token):
+        """
+        Amount as full
+        """
+        # Load user secret and get account
+        user_key_pair = Keypair.from_secret(private_key)
+        root_account = Account(account_id=user_key_pair.public_key, sequence=1)
+        public_key = root_account.account_id
+        asset_issuer = integrated_coins[token.lower()]["assetIssuer"]
+        print(root_account)
+        try:
+            source_account = self.server.load_account(public_key)
+            tx = TransactionBuilder(
+                source_account=source_account,
+                network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+                base_fee=self.server.fetch_base_fee()).append_change_trust_op(asset_code=f'{token.upper()}',
+                                                                              asset_issuer=asset_issuer).set_timeout(
+                30).build()
+            tx.sign(private_key)
+
+            resp = self.server.submit_transaction(tx)
+            return resp
+
+        except exceptions.NotFoundError:
+            # Returned if accout not found
+            err = {"status": 404}
+            return err
