@@ -15,7 +15,6 @@ helper = Helpers()
 account_mng = AccountManager()
 custom_messages = CustomMessages()
 user_wallets = UserWalletManager()
-
 d = helper.read_json_file(file_name='botSetup.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 
