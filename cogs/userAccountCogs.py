@@ -110,7 +110,9 @@ class UserAccountCommands(commands.Cog):
             list_of_values = [{"name": "Quick balance check", "value": f"{d['command']}acc"},
                               {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet deposit"},
                               {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet stats"},
-                              {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet balance"}]
+                              {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet balance"},
+                              {"name": "Create trustline for tokens",
+                               "value": f"{d['command']}trust <private key> <token>"}]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1)
