@@ -94,7 +94,7 @@ async def process_tx_with_memo(msg_channel, memo_transactions, stellar_manager, 
                     load_channels = [bot.get_channel(id=int(chn)) for chn in
                                      guild_profiles.get_all_explorer_applied_channels()]
 
-                    explorer_msg = f':inbox_tray: Someone deposited {tx["asset_type"]["amount"]} ' \
+                    explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"]/10000000,7)} ' \
                                    f'{tx["asset_type"]["code"].upper()} to {bot.user}'
 
                     await custom_messages.explorer_messages(applied_channels=load_channels,
