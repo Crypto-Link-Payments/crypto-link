@@ -27,5 +27,5 @@ to test it out please join Discord community through invitation link provided in
 a request by opening issue
 
 ### Guild owner commands
-The list of all available commands can be viewed [here](GUILDOWNERS.md)
+The list of all available commands on how to monetize guild can be viewed [here](GUILDOWNERS.md)
 
