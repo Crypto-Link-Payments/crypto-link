@@ -46,6 +46,7 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 - 
 
 
+## Running ICO or Promotion with Crypto Link
 
 ## :money_with_wings: Fees for using the crypto link system :money_with_wings:
 We have integrated as well operational fees to gather funding for further development. Fees are currently applied
