@@ -1,5 +1,4 @@
 ![banner](../img/twitterUpdate.png)
-
 ![License](https://img.shields.io/github/license/launch-pad-investments/crypto-link?style=plastic)
 ![stellar](https://img.shields.io/badge/Powered%20by-Stellar&%20Lumen-brightgreen?style=plastic) 
 ![discord](https://img.shields.io/badge/Platform-Discord-blue?style=plastic&?style=plastic)
@@ -42,7 +41,8 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 
 ## Documentation
 - [Quick Start as Discord User](USERCOMMANDS.md)
-- [Contributing](CONTRIBUTING.md)
+- [Discord Guild Owner commands](GUILDOWNERS.md)
+- [Contribution guidelines and bot setup](CONTRIBUTING.md)
 - 
 
 ## :hammer: Integration of Crypto Link to Discord :hammer: 
@@ -86,15 +86,6 @@ For explanation on all the fees and limits read [here](FEESANDLIMITS.md)
 !fees
 ```
 
-## Bot management commands
-Crypto Link has as well integrated command for management which are locked for Crypto Link Staff.
-Commands are broken down into three specific areas:
-
-- Bot basic administration commands
-- Hot wallet queries
-- Management of fees and limits for Crypto Link
-
-More on commands and their showcase can be viewed [here](CRYPTOLINKSTAFF.md)
 
 ## Additional and Specific Material
 - [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
@@ -134,6 +125,10 @@ at cryptolinkpayments@gmail.com.
   <img src="https://contributors-img.web.app/image?repo=Launch-pad-investments/crypto-link" />
 </a>
 
+## Social gateway
+[Crypto Link Homepage](https://cryptolink.carrd.co/)
+[Twitter](https://twitter.com/CryptoLink8)
+[Patreon](https://www.patreon.com/CryptoLink)
 
 ## :pig2:  Support jar :pig2: 
 ### Cryptocurrencies
