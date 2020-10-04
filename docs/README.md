@@ -17,9 +17,11 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/launch-pad-investments/crypto-link/badge)](https://www.codefactor.io/repository/github/launch-pad-investments/crypto-link)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
-Crypto Link, Discord bot which allows for instant peer to peer (P2P) transactions, payments and Discord community 
-monetization with the help of integrated Merchant System built on top of Stellar Lumen cryptocurrency.
-Discord users can access their wallet through any community which has integrated Crypto Link in their daily operations.
+# About
+Crypto Link is a Discord multi functional bot. Built on top of Stellar utilizing its native Stellar Lumen 
+(XLM) crypto currency and tokens issued on Stellar chain, allows for execution of peer-to-peer crypto transactions, 
+ token ICOs/project promotions, and Discord community monetization opportunities.
+
 
 ## Code of Conduct
 The project is governed by the Launch Pad Investments. By participating, 
