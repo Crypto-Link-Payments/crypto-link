@@ -1,6 +1,7 @@
-#How to contribute
+#How to setup-project locally
 
 ## Install project dependencies
+
 ### Install mongoDB
 ```text
 https://docs.mongodb.com/manual/installation/
@@ -99,3 +100,4 @@ stellarPag.json
   "pag":"4232625845706753"
 }
 ```
+
