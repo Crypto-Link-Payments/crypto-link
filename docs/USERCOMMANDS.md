@@ -5,7 +5,6 @@
 - [ ] Guild owners
 - [X] Discord Members
 
-
 ## Prefix
 ```text
 !<command> <subcommands>
