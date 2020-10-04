@@ -4,15 +4,15 @@ File includes custom security checks for the Discord GUI part
 
 from discord import ChannelType
 
-from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
 from utils.tools import Helpers
 from backOffice.guildServicesManager import GuildProfileManager
+from backOffice.merchatManager import MerchantManager
 
 helper = Helpers()
 d = helper.read_json_file(file_name='botSetup.json')
-merchant_manager = MerchantManager()
 account_mng = AccountManager()
+merchant_manager = MerchantManager()
 guild_manager = GuildProfileManager()
 
 

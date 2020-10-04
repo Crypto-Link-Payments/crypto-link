@@ -5,7 +5,6 @@ from discord import Role, Embed, Color, utils
 from discord.ext import commands
 
 from backOffice.botWallet import BotManager
-from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
 from cogs.utils.customCogChecks import is_owner, has_wallet, is_public, merchant_com_reg_stats
 from cogs.utils.monetaryConversions import convert_to_currency, get_decimal_point
@@ -15,7 +14,6 @@ from utils.tools import Helpers
 
 helper = Helpers()
 lpi_wallet = BotManager()
-merchant_manager = MerchantManager()
 customMessages = CustomMessages()
 account_mng = AccountManager()
 d = helper.read_json_file(file_name='botSetup.json')
@@ -34,6 +32,7 @@ class MerchantCommunityOwner(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.backoffice = bot.backoffice
 
     @commands.command()
     @commands.check(is_owner)
@@ -46,6 +45,7 @@ class MerchantCommunityOwner(commands.Cog):
         :param ctx:
         :return:
         """
+        merchant_manager = self.backoffice.merchant_manager
         if not merchant_manager.check_if_community_exist(community_id=ctx.message.guild.id):
             if merchant_manager.register_community_wallet(community_id=ctx.message.guild.id,
                                                           community_owner_id=ctx.message.author.id,
@@ -134,7 +134,7 @@ class MerchantCommunityOwner(commands.Cog):
         :param minutes_count: length in minutes
         :return:
         """
-
+        merchant_manager = self.backoffice.merchant_manager
         in_penny = (int(dollar_value * (10 ** 2)))  # Convert to pennies
         total = weeks_count + days_count + hours_count + minutes_count
 
@@ -243,6 +243,7 @@ class MerchantCommunityOwner(commands.Cog):
         :param discord_role:
         :return:
         """
+        merchant_manager = self.backoffice.merchant_manager
         if merchant_manager.find_role_details(role_id=discord_role.id):
             if merchant_manager.remove_monetized_role_from_system(role_id=discord_role.id,
                                                                   community_id=ctx.message.guild.id):
@@ -272,6 +273,7 @@ class MerchantCommunityOwner(commands.Cog):
         :param ctx:
         :return:
         """
+        merchant_manager = self.backoffice.merchant_manager
         roles = merchant_manager.get_all_roles_community(community_id=ctx.message.guild.id)
         title = f'__Available Roles on Community {ctx.message.guild}__'
         description = 'Details on monetized role.'
@@ -299,6 +301,7 @@ class MerchantCommunityOwner(commands.Cog):
         """
         Command used to change activity status of the role
         """
+        merchant_manager = self.backoffice.merchant_manager
         role_details = merchant_manager.find_role_details(role_id=role.id)
         if role_details:
             if role_details['status'] == 'active':
@@ -338,7 +341,7 @@ class MerchantCommunityOwner(commands.Cog):
         :param role:
         :return:
         """
-
+        merchant_manager = self.backoffice.merchant_manager
         role_details = merchant_manager.find_role_details(role_id=role.id)
         if role_details:
             if role_details['status'] == 'inactive':
@@ -374,6 +377,7 @@ class MerchantCommunityOwner(commands.Cog):
         :param ctx:
         :return:
         """
+        merchant_manager = self.backoffice.merchant_manager
         data = merchant_manager.get_wallet_balance(community_id=ctx.message.guild.id)
 
         if data:
@@ -411,7 +415,7 @@ class MerchantCommunityOwner(commands.Cog):
         current_time = datetime.utcnow()
 
         fee_in_stroops = 0
-
+        merchant_manager = self.backoffice.merchant_manager
         # Check merchant situation and modify fee accordingly
         if not merchant_manager.check_community_license_status(community_id=ctx.message.author.id):
             fee_dollar_details = lpi_wallet.get_fees_by_category(all_fees=False, key='wallet_transfer')

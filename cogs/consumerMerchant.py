@@ -8,7 +8,6 @@ import discord
 from discord.ext import commands
 from pycoingecko import CoinGeckoAPI
 
-from backOffice.merchatManager import MerchantManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_wallet
@@ -23,7 +22,6 @@ helper = Helpers()
 account_mng = AccountManager()
 customMessages = CustomMessages()
 gecko = CoinGeckoAPI()
-merchant_manager = MerchantManager()
 guild_profiles = GuildProfileManager()
 stats_manager = StatsManager()
 d = helper.read_json_file(file_name='botSetup.json')
@@ -37,6 +35,7 @@ CONST_MERCHANT_PURCHASE_ERROR = ":warning: __Merchant System Purchase Error__:wa
 class ConsumerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.backoffice = bot.backoffice
 
     @staticmethod
     def get_coin_usd_value(coin_name):
@@ -92,6 +91,8 @@ class ConsumerCommands(commands.Cog):
         author = ctx.message.author.id
         community = ctx.message.guild.id
 
+        merchant_manager = self.backoffice.merchant_manager
+
         roles = merchant_manager.check_user_roles(user_id=author, discord_id=community)
         if roles:
             for data in roles:
@@ -139,6 +140,7 @@ class ConsumerCommands(commands.Cog):
         Gets all available monetized roles on the community
         :return:
         """
+        merchant_manager = self.backoffice.merchant_manager
         roles = merchant_manager.get_all_roles_community(community_id=ctx.message.guild.id)
         title = f'__Available Roles on Community {ctx.message.guild}__'
         dollar_xlm = gecko.get_price(ids='stellar', vs_currencies='usd')
@@ -171,6 +173,7 @@ class ConsumerCommands(commands.Cog):
         :param role:
         :return:
         """
+        merchant_manager = self.backoffice.merchant_manager
         ticker = 'xlm'
         tickers = ['xlm']
         if not re.search("[~!#$%^&*()_+{}:;\']", ticker) and ticker in tickers:
