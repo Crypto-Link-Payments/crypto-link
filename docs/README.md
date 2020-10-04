@@ -66,32 +66,6 @@ Assign newly created role Crypto Link to the channels of your community where yo
 listens for commands, and everything will be set and ready to go.
 
 
-### :crown: As Discord Guild Owner :crown:
-
-#### :currency_exchange: Merchant System registration :currency_exchange:
-
-In order to register corporate wallet and merchant system for community execute command:
-```text
-!merchant_initiate
-```
-once successfully registered you can check all available commands under:
-
-#### :page_with_curl: Access merchant manual :page_with_curl:
-
-Merchant manual can be access through
-```text
-!merchant manual
-```
-
-#### :moneybag: Check community balance :moneybag:
-```text
-!merchant balance
-```
-
-More on merchant system, its use cases, and set up procedure can be found [here](MERCHANTCOMMANDS.md).
-
-Instructions to operate with corporate account can be found [here](CORPORATEACCOUNTMANAGEMENT.md)
-
 ## :money_with_wings: Fees for using the crypto link system :money_with_wings:
 We have integrated as well operational fees to gather funding for further development. Fees are currently applied
  for following crypto link activities:
