@@ -17,18 +17,19 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/launch-pad-investments/crypto-link/badge)](https://www.codefactor.io/repository/github/launch-pad-investments/crypto-link)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
-# About
-Crypto Link is a Discord multi functional bot. Built on top of Stellar utilizing its native Stellar Lumen 
+# About Crypto Link
+Crypto Link is a Discord multi functional bot. Built on top of Stellar, utilizing its native Stellar Lumen 
 (XLM) crypto currency and tokens issued on Stellar chain, allows for execution of peer-to-peer crypto transactions, 
  token ICOs/project promotions, and Discord community monetization opportunities.
 
+## License
+Crypto Link is an open-source project operating under the [GNU GENERAL PUBLIC LICENSE](https://github.com/launch-pad-investments/crypto-link/blob/master/LICENSE).
 
-## Code of Conduct
-The project is governed by the Launch Pad Investments. By participating, 
-you are expected to uphold this code. You can access Code of Conduct details [here](CODE_OF_CONDUCT.md).
-Please report unacceptable behavior to the project team at cryptolinkpayments@gmail.com.
 
-## ![banner](../img/emojiLumen.png) What is Stellar and Lumen (XLM) ![banner](../img/emojiLumen.png)
+## Project governance 
+Project is governed by the Launch Pad Investments.
+
+## ![banner](../img/emojiLumen.png) About Stellar Lumen ![banner](../img/emojiLumen.png) 
 
 Stellar is an open source, decentralized protocol for digital currency to fiat money transfers which allows 
 cross-border transactions between any pair of currencies. The Stellar protocol is supported by a 501(c)3 nonprofit, 
@@ -39,24 +40,10 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 [Stellar Foundation](https://www.stellar.org/foundation) <br />
 [Stellar Lumnes](https://www.stellar.org/lumens) <br />
 
-## :construction: Crypto Link Use case:construction:
-Crypto Link user experience is designed with peer-to-peer and merchant-consumer perspective in mind.
-
-### Peer to Peer perspective
-Crypto Link allows users to execute instant peer to peer transactions with the help of XLM. Once transaction is
-successfully processed, user experience is further expanded, with transactions reports and conversion rates provided
-by [CoinGecko](https://www.coingecko.com/en). 
-
-### Merchant-Consumer perspective
-With integration of the Merchant System, Discord guild owners can now monetize their Discord Communities and their roles.
-There has been significant rise in communities which offer their members Payed services for limited amount of time. 
-To Our knowledge none of the payment solutions on Discord currently provides this opportunity. With Crypto Link Merchant
-system owner can deploy timed monetized roles and offer them to their community members. User than uses XLM and personal
-wallet to purchase the role, and obtain access to special areas. Merchant System than automatically monitors for role
-expiration. With integration guild owners can save a lot of time and resources devoted to purchase handling and monitoring
-for expirations. Crypto Link will take care on its own. 
-
-Additional basic information on how Crypto Link is designed can be obtained [here](DESIGN.md).
+## Documentation
+- [Quick Start as Discord User](USERCOMMANDS.md)
+- [Contributing](CONTRIBUTING.md)
+- 
 
 ## :hammer: Integration of Crypto Link to Discord :hammer: 
 Monetizing guild community is instant and straight-forward. No programming skills required, just basic knowledge on how
@@ -78,85 +65,6 @@ Discord operate from user and owner perspective.
 Assign newly created role Crypto Link to the channels of your community where you would like that it operates and 
 listens for commands, and everything will be set and ready to go.
 
-## :joystick: Commands to operate with Crypto Link :joystick:
-
-Crypto link listens to following prefixes:
-```text
-!<command> <subcommands>
-or
-@CryptoLink <command> <subcommands>
-```
-### :sos: Access Help menu :sos:
-In order to ease access to Discord users we have provided general command where all functions are explained.
-By executing command bellow either on the public channel of the community or direct messaging the bot system
-will guide you through all available areas
-
-```text
-!help
-```
-
-All available commands for ***help*** category are available [here](HELPCMDS.md)
-
-
-## :runner: Quick start guide :runner:
-
-### :boy: As Discord User :boy:
-
-Head to one of the Communities where Crypto-Link is present and execute 
-```text
-!register
-```
-Once you receive successful report to DM on registration you can proceed with:
-```text
-!wallet      --> Instructions on all available commands to operate with your personal wallet
-```
-#### Fast balance check and address
-```text
-!acc
-```
-
-#### :dollar: Making P2P (Peer To Peer) public transaction :dollar:
-
-Function Structure
-
-```text
-!send <amount> <currency symbol> <@discord.User> <message=Optional>
-
-Note: if transactions successful both sender and recipient will receive transaction slip with included message. 
-```
-
-example for Stellar Lumen:
-```text
-!send 100 xlm @Animus#4608 have a coffee # Sends N amount of XLM to targeted user
-```
-
-#### :moneybag: Making Discord Withdrawals and Deposits :moneybag:
-
-##### :incoming_envelope: Deposits :incoming_envelope:
-```text
-!wallet deposit  # Returns instructions on how to deposit currency to Discord
-```
-
-##### :outbox_tray: Withdraw XLM from Discord:outbox_tray:
-```text
-!withdraw xlm <amount> <destination address>  
-```
-
-Example:
-```text
-!withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7
-```
-
-#### :credit_card: Purchasing membership  :credit_card:
-
-If user wants to purchase available monetized role on community, he/she can do so with command:
-```text
-!membership subscribe <@discord.Role>
-```
-
-#### :page_with_curl: All available commands for user :page_with_curl:
-
-Complete command list can be access [here](USERCOMMANDS.md)
 
 ### :crown: As Discord Guild Owner :crown:
 
@@ -204,7 +112,6 @@ For explanation on all the fees and limits read [here](FEESANDLIMITS.md)
 !fees
 ```
 
-
 ## Bot management commands
 Crypto Link has as well integrated command for management which are locked for Crypto Link Staff.
 Commands are broken down into three specific areas:
@@ -241,13 +148,18 @@ cryptolinkpayments@gmail.com
 
 ## Contributing 
 
+By participating in contribution, you are expected to uphold this code. You can access Code of Conduct 
+details [here](CODE_OF_CONDUCT.md). Please report unacceptable behavior to the project team 
+at cryptolinkpayments@gmail.com. 
+
 [Contributing guidlines](CONTRIBUTING.md)
 [How to setup project](PROJECTSETUP.md)
 
+### Contributors List
+<a href="https://github.com/Launch-pad-investments/crypto-link/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=Launch-pad-investments/crypto-link" />
+</a>
 
-## License
-Crypto Link is an open-source project managed by Launch Pad Investments.
-We are operating under the [GNU GENERAL PUBLIC LICENSE](https://github.com/launch-pad-investments/crypto-link/blob/master/LICENSE).
 
 ## :pig2:  Support jar :pig2: 
 ### Cryptocurrencies
