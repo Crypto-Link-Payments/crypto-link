@@ -12,7 +12,6 @@ from discord import Embed, Color, Colour
 from discord.ext import commands
 
 from backOffice.botWallet import BotManager
-from backOffice.merchatManager import MerchantManager
 from backOffice.stellarActivityManager import StellarManager
 from cogs.utils.customCogChecks import is_owner, has_wallet, merchant_com_reg_stats, is_public
 from cogs.utils.monetaryConversions import convert_to_currency
@@ -22,7 +21,6 @@ from utils.tools import Helpers
 bot_manager = BotManager()
 stellar = StellarManager()
 custom_messages = CustomMessages()
-merchant_manager = MerchantManager()
 helper = Helpers()
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 d = helper.read_json_file(file_name='botSetup.json')
@@ -38,6 +36,7 @@ class MerchantLicensingCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.backoffice = bot.backoffice
 
     @commands.group()
     @commands.check(is_owner)
@@ -115,7 +114,7 @@ class MerchantLicensingCommands(commands.Cog):
         Checks the validity of the license
         :return:
         """
-
+        merchant_manager = self.backoffice.merchant_manager
         if merchant_manager.check_community_license_status(community_id=ctx.message.guild.id):
             data = merchant_manager.get_community_license_details(community_id=ctx.message.guild.id)
 
@@ -163,7 +162,7 @@ class MerchantLicensingCommands(commands.Cog):
         """
 
         channel_id = auto_channels["merchant"]
-
+        merchant_manager = self.backoffice.merchant_manager
         # Check if community does not have license yet
         if not merchant_manager.check_community_license_status(community_id=ctx.message.guild.id):
             data = bot_manager.get_fees_by_category(all_fees=False, key='license')  # Get the fee value for the license
