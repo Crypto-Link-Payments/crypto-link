@@ -59,7 +59,6 @@ To check the fees implemented and their values use command:
 !withdraw --> Representation of available withdrawal sub-commands
 !withdraw token <ticker> <amount:float> <destination address: Valid Stellar Lumen Address> --> Stellar chain token withdrawals
 !withdraw xlm <amount:float> <destination address: Valid Stellar Lumen Address>  --> Withdrawal of Stellar Lumen (XLM)
-
 ```
 
 ### Participating in merchant system
@@ -70,39 +69,38 @@ To check the fees implemented and their values use command:
 !membership subscribe --> Subscribe to role which is available on community to be purchased 
 ```
 
-# Community Owners and merchant system setup
+## Community Owners and merchant system setup
+
+### Merchant setup and general commands
 
 ```text
-
-# Merchant set-up and usage 
-
 !merchant_initiate --> Registers community for the merchant service
 !merchant --> Representation of available sub-commands
 !merchant manual --> HOW-TO monetize community
-!merchant  --> Representation of available sub-commands 
 !merchant  create_role <role name> <dolar_value> <weeks:int> <days:int> <hours:int> <minutes:int>
 !merchant  delete_role <@discord.Role> --> Deletes role from merchant system 
 !merchant  community_roles --> Queries all monetized roles and provides details
 !merchant  stop_role <@discord.Role> --> Prevents the monetized role to be purchased 
-!merchant  start_role <@discord.Role> -- Re-starts the montezied role
+!merchant  start_role <@discord.Role> --> Re-starts the monetized role
+```
 
-# Commands to operate with community wallet (Owner rights required)
-
+### Merchant wallet withdrawals
+```text
 !merchant balance --> Get the balance of the community wallet 
 !merchant transfer_xlm --> Withdraws the XLM from corporate account to owners personal wallet
+```
+### Merchant Licensing details
 
-# Licensing options 
-
+```text
 !license --> Representation of available sub-commands
 !license about --> Information about the license 
 !license price --> Information about current license price 
 !license status --> Check the license status of the community for merchant system
 !license buy --> Representation of available sub commands
 !license buy with_xlm --> Use Stellar Lumen to purchase license
-
 ```
 
-# System management commands (Available for Kavic and Animus)
+# System management commands
 
 ```text
 
