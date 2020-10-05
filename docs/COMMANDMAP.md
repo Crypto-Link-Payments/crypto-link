@@ -1,7 +1,24 @@
 
-# General (Each Discord User)
+# Command map for Crypto Link System 
+## Prefix
+Bot listens to prefix 
+```text
+!
+
+or 
+
+@CryptoLink tag
+```
+
+## About the system and fees 
 ```text
 !about --> Returns information about the system
+```
+
+To check the fees implemented and their values use command:
+
+```text
+!fees
 ```
 
 ## Help Commands
@@ -15,28 +32,74 @@
 !help owner merchant --> get information about merchant system
 ```
 
-## User account commands
+## User account commands and operations
+
+### Wallet queries and management
 
 ```text
-!balance --> Fast personal account balance check 
 !register --> Registers user into Crypto Link System
+!acc --> Returns general report about personal account
+!balance --> Fast personal account balance check 
 !wallet --> Information on available sub commands for personal wallet
+!wallet stats --> Statistical details for off-chain and on-chain activities 
 !wallet deposit --> Instructions on how to deposit available cryptocurrencies
-!wallet xlm --> Get details on Stellar Lumen personal wallet 
+!wallet balance --> Additional expansion of the wallets balance
+!wallet trust --> Used to create a trust line between personal account and token issuer for token withdrawal
 ```
 
-## Transaction and withdrawals
+### Making off-chain peer to peer transactions
 
 ```text
-# wtihdrawals
+!send <amount:float> <ticker> <@discord.User> <message optional> --> Creating public transaction
+!private <amount:float> <ticker> <@discord.User> <message optional> --> Creating private transaction
+```
+
+### Making on-chain withdrawals
+```text
 !withdraw --> Representation of available withdrawal sub-commands
-!withdraw stellar <amount:float> <destination address: Valid Stellar Lumen Address>
-!withdraw monero <amount:float> <destination address: Valid Monero Address>
+!withdraw token <ticker> <amount:float> <destination address: Valid Stellar Lumen Address> --> Stellar chain token withdrawals
+!withdraw xlm <amount:float> <destination address: Valid Stellar Lumen Address>  --> Withdrawal of Stellar Lumen (XLM)
 
-#P2P Transactions
+```
 
-!send --> Representation of available sub-commands 
-!send xlm <amount:float> <@recipient:discord.User>
+### Participating in merchant system
+```text
+!membership --> Returs description on all available sub-commands
+!membership current --> Returns on-going purchased memberships for the community user has obtained
+!membership roles --> Get all available roles/memberships listed for purchase on community
+!membership subscribe --> Subscribe to role which is available on community to be purchased 
+```
+
+# Community Owners and merchant system setup
+
+```text
+
+# Merchant set-up and usage 
+
+!merchant_initiate --> Registers community for the merchant service
+!merchant --> Representation of available sub-commands
+!merchant manual --> HOW-TO monetize community
+!merchant  --> Representation of available sub-commands 
+!merchant  create_role <role name> <dolar_value> <weeks:int> <days:int> <hours:int> <minutes:int>
+!merchant  delete_role <@discord.Role> --> Deletes role from merchant system 
+!merchant  community_roles --> Queries all monetized roles and provides details
+!merchant  stop_role <@discord.Role> --> Prevents the monetized role to be purchased 
+!merchant  start_role <@discord.Role> -- Re-starts the montezied role
+
+# Commands to operate with community wallet (Owner rights required)
+
+!merchant balance --> Get the balance of the community wallet 
+!merchant transfer_xlm --> Withdraws the XLM from corporate account to owners personal wallet
+
+# Licensing options 
+
+!license --> Representation of available sub-commands
+!license about --> Information about the license 
+!license price --> Information about current license price 
+!license status --> Check the license status of the community for merchant system
+!license buy --> Representation of available sub commands
+!license buy with_xlm --> Use Stellar Lumen to purchase license
+
 ```
 
 # System management commands (Available for Kavic and Animus)
@@ -74,45 +137,4 @@
 !fee change merchant_license_fee <dollar amount:float> -> Set Monthly merchant license fee
 !fee change merchant_wallet_transfer_fee <dollar amount:float> --> Set withdrawal fee from merchant wallet to owner wallet if no license
 !fee change xlm_withdrawal_fee <dollar amount:float> --> Set on chain withdrawal fee from user wallet 
-```
-
-# Merchant System Community Owners (Owners only)
-
-```text
-
-# Merchant set-up and usage 
-
-!merchant_initiate --> Registers community for the merchant service
-!merchant --> Representation of available sub-commands
-!merchant manual --> HOW-TO monetize community
-!merchant  --> Representation of available sub-commands 
-!merchant  create_role <role name> <dolar_value> <weeks:int> <days:int> <hours:int> <minutes:int>
-!merchant  delete_role <@discord.Role> --> Deletes role from merchant system 
-!merchant  community_roles --> Queries all monetized roles and provides details
-!merchant  stop_role <@discord.Role> --> Prevents the monetized role to be purchased 
-!merchant  start_role <@discord.Role> -- Re-starts the montezied role
-
-# Commands to operate with community wallet (Owner rights required)
-
-!merchant balance --> Get the balance of the community wallet 
-!merchant transfer_xlm --> Withdraws the XLM from corporate account to owners personal wallet
-
-# Licensing options 
-
-!license --> Representation of available sub-commands
-!license about --> Information about the license 
-!license price --> Information about current license price 
-!license status --> Check the license status of the community for merchant system
-!license buy --> Representation of available sub commands
-!license buy with_xlm --> Use Stellar Lumen to purchase license
-
-```
-
-# Merchant System Consumer commands (everybody with registered wallet)
-
-```text
-!membership --> Representation of available sub-commands
-!membership current --> Obtain information on active purchased roles
-!membership roles --> Return availabale monetized roles on community
-!membership subscribe <@discord.Role> <currency ticker xlm>
 ```
