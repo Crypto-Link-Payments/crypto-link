@@ -40,14 +40,16 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 [Stellar Lumnes](https://www.stellar.org/lumens) <br />
 
 ## Documentation
-- [Quick Start as Discord User](USERCOMMANDS.md)
+- [Discord User Commands](USERCOMMANDS.md)
 - [Discord Guild Owner commands](GUILDOWNERS.md)
 - [Contribution guidelines, bot setup & system commands](CONTRIBUTING.md)
-- 
-
+- [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
+- [Help Commands](HELPCMDS.md)
+- [Full command list](COMMANDMAP.md)]
 
 ## Running ICO or Promotion with Crypto Link
 
+## Crypto Link fees and Limits
 ## :money_with_wings: Fees for using the crypto link system :money_with_wings:
 We have integrated as well operational fees to gather funding for further development. Fees are currently applied
  for following crypto link activities:
@@ -68,14 +70,10 @@ To check current fees and their conversion please use command:
 !fees
 ```
 
-
-## Additional and Specific Material
-- [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
-- [Bot Set up functions only Crypto Link Staff](SYSADMINCOMMANDS.md)
-- [Help Commands](HELPCMDS.md)
-- [Dealing with user accounts and making P2P payments](USERCOMMANDS.md)
-- [Merchant System Only for Community owners](MERCHANTCOMMANDS.md)
-- [Command map and help categories](COMMANDMAP.md)]
+## Issues, bugs, etc. 
+Majority of the requests can be done through github by opening issue and assigning appropriate label to it. 
+Currently implemented tags are: bug, Discord Community Invite request, documentation updates requests, enhancement 
+proposal, help, ivalid if something does not seem right, general question, or listing request. 
 
 
 ##Roadmap
@@ -83,9 +81,6 @@ To check current fees and their conversion please use command:
 [Development road-map](ROADMAP.md)
 
 ## Get in touch
-
-### Crypto Link invite 
-Coming soon (when its officially release)...
 
 ### Join us on Discord
 [Discord Invite Link](https://discord.gg/ddvGTsb)
@@ -98,7 +93,7 @@ cryptolinkpayments@gmail.com
 By participating in contribution, you are expected to uphold this code. You can access Code of Conduct 
 details [here](CODE_OF_CONDUCT.md). Please report unacceptable behavior to the project team 
 at cryptolinkpayments@gmail.com. 
-
+[Contribution guidelines, bot setup & system commands](CONTRIBUTING.md)
 [Contributing guidlines](CONTRIBUTING.md)
 [How to setup project](PROJECTSETUP.md)
 
