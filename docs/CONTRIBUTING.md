@@ -1,4 +1,4 @@
-# System commands
+# Contributing to Crypto Link
 
 ## Code of Conduct 
 By participating in contribution, you are expected to uphold this 
