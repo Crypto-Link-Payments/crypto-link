@@ -21,9 +21,7 @@ if __name__ == '__main__':
     print(backend_check)
 
     bot = DiscordBot(backoffice)
-
     periodic_tasks = PeriodicTasks(backoffice, bot)
-
     scheduler = start_scheduler(periodic_tasks)
     # Discord Token
     bot.run()
