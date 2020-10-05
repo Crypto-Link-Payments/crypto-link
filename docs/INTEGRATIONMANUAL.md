@@ -24,7 +24,7 @@ listens for commands, and everything will be set and ready to go.
 Currently Crypto Link is available to be access only through the Discord Community to where it originates. It will
 be available for public once we migrate to live Stellar chain. Currently is operated on testnet. If you would like
 to test it out please join Discord community through invitation link provided in [README.md](README.md) os send us
-a request by opening issue
+a request by opening issue on github with tag ***Discord Community Invite Request***. 
 
 ### Guild owner commands
 The list of all available commands on how to monetize guild can be viewed [here](GUILDOWNERS.md)
