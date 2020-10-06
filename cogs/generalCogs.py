@@ -96,6 +96,8 @@ class HelpCommands(commands.Cog):
                                     f' to move or deposit funds. To further familiarize yourself with other'
                                     f' commands use __{d["command"]}help__ ',
                               inline=False)
+        start_embed.add_field(name=f'Github version',
+                              value=f'[Get started]()https://github.com/launch-pad-investments/crypto-link/blob/master/docs/USERCOMMANDS.md')
         await ctx.author.send(embed=start_embed)
 
     @help.command()
