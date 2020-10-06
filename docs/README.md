@@ -83,9 +83,9 @@ proposal, help, invalid if something does not seem right, general question
 
 ## Contributing 
 All details on how to contribute to Crypto Link cann be accessed:
-[How to setup project locally](PROJECTSETUP.md)
-[System Commands for Bot Owners](SYSTEMCOMMANDS.md)
-[Contribution guidelines & bot setup](CONTRIBUTING.md)
+- [How to setup project locally](PROJECTSETUP.md)
+- [System Commands for Bot Owners](SYSTEMCOMMANDS.md)
+- [Contribution guidelines & bot setup](CONTRIBUTING.md)
 
 ### Contributors List
 <a href="https://github.com/Launch-pad-investments/crypto-link/graphs/contributors">
@@ -107,7 +107,6 @@ All details on how to contribute to Crypto Link cann be accessed:
 cryptolinkpayments@gmail.com
 
 ## :pig2:  Support jar :pig2: 
-### Cryptocurrencies
 ```text
 BTC: 36vWbdegL57pHK3sVghrpwfp3V1tMqvHfc
 ETH: 0x03AE3AD4b8d19091363Beb6f97AA10f8ae9c3284
