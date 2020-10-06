@@ -45,7 +45,7 @@ experience.
 
 ## Crypto Link Documentation
 - [Discord User Commands](USERCOMMANDS.md)
-- [Discord Guild Owner commands](GUILDOWNERS.md)
+- [Initiate Merchant as Guild owner](MERCHANTCOMMANDS.md)
 - [Contribution guidelines, bot setup & system commands](CONTRIBUTING.md)
 - [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
 - [Help Commands](HELPCMDS.md)
