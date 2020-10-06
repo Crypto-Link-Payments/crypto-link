@@ -21,7 +21,7 @@ Crypto Link is a Discord multi functional bot. Built on top of Stellar, utilizin
 (XLM) crypto currency and tokens issued on Stellar chain, allows for execution of peer-to-peer crypto transactions, 
  token ICOs/project promotions, and Discord community monetization opportunities. 
 
-## License
+## :scroll: License :scroll: 
 Crypto Link is an open-source project operating under the [GNU GENERAL PUBLIC LICENSE](https://github.com/launch-pad-investments/crypto-link/blob/master/LICENSE).
 
 
@@ -39,18 +39,18 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 [Stellar Foundation](https://www.stellar.org/foundation) <br />
 [Stellar Lumnes](https://www.stellar.org/lumens) <br />
 
-## Quick Start as Discord User
+## :runner: Quick Start as Discord User :runner:
 We have produced a [quick start guide](USRQUICKSTARTGUIDE.md) if you would like to jump straight into Crytpo Link 
 experience. 
 
-## Crypto Link Documentation
+##  :books: Crypto Link Documentation :books:
 - [Integrated Currencies and Tokens](COINLIMITS.md)
 - [Discord User Commands](USERCOMMANDS.md)
 - [Initiate Merchant as Guild owner](MERCHANTCOMMANDS.md)
 - [Help Commands](HELPCMDS.md)
 - [Full command list](COMMANDMAP.md)
 
-## Running ICO or Promotion with Crypto Link
+## :loudspeaker: Running ICO or Promotion with Crypto Link :loudspeaker:
 Crypto Link Currently Supports all tokens issued on Stellar. If you would like to run ICO with the help of the 
 Crypto Link, and utilize additional media channel to get a hold of potential customers, you can contact us over Discord,
 send us an email to cryptolinkpayments@gmail.com, open up an issue with the label ***listing*** and we will be in touch
@@ -76,23 +76,23 @@ To check values applied for fees and limits please use command bellow over Disco
 !fees
 ```
 
-## Issues, bugs, etc. 
+## :mega: Issues, bugs, etc. :mega:
 Majority of the requests can be done through github by opening issue and assigning appropriate label to it. 
 Currently implemented tags are: bug, Discord Community, documentation updates requests, enhancement 
 proposal, help, invalid if something does not seem right, general question
 
-## Contributing 
+## :wrench: Contributing :wrench:
 All details on how to contribute to Crypto Link cann be accessed:
 - [How to setup project locally](PROJECTSETUP.md)
 - [System Commands for Bot Owners](SYSTEMCOMMANDS.md)
 - [Contribution guidelines & bot setup](CONTRIBUTING.md)
 
-### Contributors List
+###  :construction_worker: Contributors List :construction_worker:
 <a href="https://github.com/Launch-pad-investments/crypto-link/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=Launch-pad-investments/crypto-link" />
 </a>
 
-## Get in touch
+## :phone: Get in touch :phone:
 ### Social gateway
 [Crypto Link Homepage](https://cryptolink.carrd.co/)
 [Twitter](https://twitter.com/CryptoLink8)
