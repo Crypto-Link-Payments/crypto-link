@@ -44,10 +44,9 @@ We have produced a [quick start guide](USRQUICKSTARTGUIDE.md) if you would like 
 experience. 
 
 ## Crypto Link Documentation
+- [Integrated Currencies and Tokens](COINLIMITS.md)
 - [Discord User Commands](USERCOMMANDS.md)
 - [Initiate Merchant as Guild owner](MERCHANTCOMMANDS.md)
-- [Contribution guidelines, bot setup & system commands](CONTRIBUTING.md)
-- [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
 - [Help Commands](HELPCMDS.md)
 - [Full command list](COMMANDMAP.md)
 
@@ -84,9 +83,9 @@ proposal, help, invalid if something does not seem right, general question
 
 ## Contributing 
 All details on how to contribute to Crypto Link cann be accessed:
-
 [How to setup project locally](PROJECTSETUP.md)
-[Contribution guidelines, bot setup & system commands](CONTRIBUTING.md)
+[System Commands for Bot Owners](SYSTEMCOMMANDS.md)
+[Contribution guidelines & bot setup](CONTRIBUTING.md)
 
 ### Contributors List
 <a href="https://github.com/Launch-pad-investments/crypto-link/graphs/contributors">
