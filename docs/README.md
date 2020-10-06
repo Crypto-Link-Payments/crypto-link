@@ -49,7 +49,7 @@ experience.
 - [Contribution guidelines, bot setup & system commands](CONTRIBUTING.md)
 - [Available Cryptocurrencies and fees on Crypto Link System](COINLIMITS.md)
 - [Help Commands](HELPCMDS.md)
-- [Full command list](COMMANDMAP.md)]
+- [Full command list](COMMANDMAP.md)
 
 ## Running ICO or Promotion with Crypto Link
 Crypto Link Currently Supports all tokens issued on Stellar. If you would like to run ICO with the help of the 
