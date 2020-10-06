@@ -39,8 +39,9 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 [Stellar Foundation](https://www.stellar.org/foundation) <br />
 [Stellar Lumnes](https://www.stellar.org/lumens) <br />
 
-
 ## Quick Start as Discord User
+We have produced a [quick start guide](USRQUICKSTARTGUIDE.md) if you would like to jump straight into Crytpo Link 
+experience. 
 
 ## Crypto Link Documentation
 - [Discord User Commands](USERCOMMANDS.md)
