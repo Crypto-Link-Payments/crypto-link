@@ -144,7 +144,7 @@ class UserAccountCommands(commands.Cog):
                 name=f' {CONST_STELLAR_EMOJI} Stellar Lumen Deposit details {CONST_STELLAR_EMOJI}',
                 value=f'Stellar wallet Address:\n'
                       f'```{hot_wallets["xlm"]}```\n'
-                      f'\nMEMO:'
+                      f'MEMO:\n'
                       f'> {user_profile["stellarDepositId"]}',
                 inline=False)
 
