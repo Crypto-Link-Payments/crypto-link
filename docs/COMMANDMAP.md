@@ -1,7 +1,24 @@
 
-# General (Each Discord User)
+# Command map for Crypto Link System 
+## Prefix
+Bot listens to prefix 
+```text
+!
+
+or 
+
+@CryptoLink tag
+```
+
+## About the system and fees 
 ```text
 !about --> Returns information about the system
+```
+
+To check the fees implemented and their values use command:
+
+```text
+!fees
 ```
 
 ## Help Commands
@@ -15,104 +32,107 @@
 !help owner merchant --> get information about merchant system
 ```
 
-## User account commands
+## User account commands and operations
+
+### Wallet queries and management
 
 ```text
-!balance --> Fast personal account balance check 
 !register --> Registers user into Crypto Link System
+!acc --> Returns general report about personal account
+!balance --> Fast personal account balance check 
 !wallet --> Information on available sub commands for personal wallet
+!wallet stats --> Statistical details for off-chain and on-chain activities 
 !wallet deposit --> Instructions on how to deposit available cryptocurrencies
-!wallet xlm --> Get details on Stellar Lumen personal wallet 
+!wallet balance --> Additional expansion of the wallets balance
+!wallet trust --> Used to create a trust line between personal account and token issuer for token withdrawal
 ```
 
-## Transaction and withdrawals
+### Making off-chain peer to peer transactions
 
 ```text
-# wtihdrawals
+!send <amount:float> <ticker> <@discord.User> <message optional> --> Creates a public P2P transaction
+!private <amount:float> <ticker> <@discord.User> <message optional> --> Initiates a private P2P transaction
+```
+
+### Making on-chain withdrawals
+```text
 !withdraw --> Representation of available withdrawal sub-commands
-!withdraw stellar <amount:float> <destination address: Valid Stellar Lumen Address>
-!withdraw monero <amount:float> <destination address: Valid Monero Address>
-
-#P2P Transactions
-
-!send --> Representation of available sub-commands 
-!send xlm <amount:float> <@recipient:discord.User>
+!withdraw token <ticker> <amount:float> <destination address: Valid Stellar Lumen Address> --> Stellar chain token withdrawals
+!withdraw xlm <amount:float> <destination address: Valid Stellar Lumen Address>  --> Withdrawal of Stellar Lumen (XLM)
 ```
 
-# System management commands (Available for Kavic and Animus)
-
+### Participating in merchant system
 ```text
-
-# Stats of the system 
-!stats --> Returns indepth live statistical data on the system
-
-# System management commands
-!god --> Available sub commands in god system
-!god system --> Available sub commands 
-!god system off --> Turning off Crypto Link
-!god system update --> Updating the Crypto Link through Github
-!god system load_cog <cog.name> --> Loads the cog back and its respective commands
-!god system unload_cog <cog.name> --> Unloads cog and its respective commands
-!god system list_cogs --> Provides information on all cog names
-!god system reload --> Reloads all cogs 
-
-# Corporate account balances
-!check_corp_balance --> Returns the balance of the off-chain corporate LPI account 
-!transfer --> Representation of all available sub-commands
-!transfer sweep_xlm --> Transfers from corporate account to one of god users
-!transfer sweep_xmr --> Transfers from corporate account to one of god users
-
-# Hot wallet commands
-!hot_wallet --> Representation of all available commands
-!hot_wallet stellar_balance --> Return the hot wallet state on Stellar Chain
-
-# Managing fees
-!fee --> representation of all available sub-commands
-!fee current --> Information on current set fee values for each category
-!fee change --> representation of all available sub-commands
-!fee change minimum_merchant_transfer_value <dollar amount:float> -> Set minimum withdrawal amount from merchant to owner wallet
-!fee change merchant_license_fee <dollar amount:float> -> Set Monthly merchant license fee
-!fee change merchant_wallet_transfer_fee <dollar amount:float> --> Set withdrawal fee from merchant wallet to owner wallet if no license
-!fee change xlm_withdrawal_fee <dollar amount:float> --> Set on chain withdrawal fee from user wallet 
+!membership --> Returns description on all available sub-commands
+!membership current --> Returns on-going purchased memberships for the community user has obtained
+!membership roles --> Get all available roles/memberships listed for purchase on community
+!membership subscribe --> Subscribe to role which is available on community to be purchased 
 ```
 
-# Merchant System Community Owners (Owners only)
+## Community Owners and merchant system setup
+
+### Merchant setup and general commands
 
 ```text
-
-# Merchant set-up and usage 
-
 !merchant_initiate --> Registers community for the merchant service
 !merchant --> Representation of available sub-commands
 !merchant manual --> HOW-TO monetize community
-!merchant  --> Representation of available sub-commands 
-!merchant  create_role <role name> <dolar_value> <weeks:int> <days:int> <hours:int> <minutes:int>
+!merchant  create_role <role name> <dollar_value> <weeks:int> <days:int> <hours:int> <minutes:int>
 !merchant  delete_role <@discord.Role> --> Deletes role from merchant system 
 !merchant  community_roles --> Queries all monetized roles and provides details
 !merchant  stop_role <@discord.Role> --> Prevents the monetized role to be purchased 
-!merchant  start_role <@discord.Role> -- Re-starts the montezied role
+!merchant  start_role <@discord.Role> --> Re-starts the monetized role
+```
 
-# Commands to operate with community wallet (Owner rights required)
-
+### Merchant wallet withdrawals
+```text
 !merchant balance --> Get the balance of the community wallet 
 !merchant transfer_xlm --> Withdraws the XLM from corporate account to owners personal wallet
+```
+### Merchant Licensing details
 
-# Licensing options 
-
+```text
 !license --> Representation of available sub-commands
 !license about --> Information about the license 
 !license price --> Information about current license price 
 !license status --> Check the license status of the community for merchant system
 !license buy --> Representation of available sub commands
 !license buy with_xlm --> Use Stellar Lumen to purchase license
-
 ```
 
-# Merchant System Consumer commands (everybody with registered wallet)
+## System management commands
+Locked for bot owner
+
+### Crypto Link Hot Wallet commands
+```text
+!hot --> Information on available sub-commands
+!hot balance --> Check hot wallet balance details
+```
+
+### Crypto Link off chain information
 
 ```text
-!membership --> Representation of available sub-commands
-!membership current --> Obtain information on active purchased roles
-!membership roles --> Return availabale monetized roles on community
-!membership subscribe <@discord.Role> <currency ticker xlm>
+!cl --> Information on available sub-commands
+!cl balance --> Crypto Link own wallet balance information 
+!cl stats --> Statistical details about the system
+!cl sweep <ticker> --> Transferring balance from Crypto Link wallet to developer 
 ```
+
+### Crypto Link SYS commands
+```text
+!system --> Information on available sub-comands
+!system off --> Turning the System completely OFF
+!system update --> Pull neew updates from github and reload COGS
+```
+
+### Crypto Link management from Discord
+```text
+!manage --> Information on available sub-commands
+!manage scripts --> Information on available sub-commands
+!manage scripts list_cogs --> Returns names of all implemented COGS
+!manage scripts unload <cog name> --> Turns off COG and its relevant commands
+!manage script load <cog name> --> Turns on COG and its relevant commands
+!manage script reload --> Reloads all the cogs in the system 
+```
+
+[Back to main page](README.md)
