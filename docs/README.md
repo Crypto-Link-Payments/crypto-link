@@ -47,7 +47,7 @@ experience.
 - [Discord User Commands](USERCOMMANDS.md)
 - [Initiate Merchant as Guild owner](MERCHANTCOMMANDS.md)
 - [Help Commands](HELPCMDS.md)
-- [Full command list](COMMANDMAP.md)
+- [Complete System Command list](COMMANDMAP.md)
 
 ## :loudspeaker: Running ICO or Promotion with Crypto Link :loudspeaker:
 Crypto Link Currently Supports all tokens issued on Stellar. If you would like to run ICO with the help of the 
