@@ -87,4 +87,4 @@ Inform your members on monetized role which is up for grabs.
 !merchant transfer_xlm
 ```
 
-[Back to Guild Owner Commands](GUILDOWNERS.md)  |   [Back to main page](README.md)
+[Back to main page](README.md)
