@@ -28,7 +28,7 @@ class HelpCommands(commands.Cog):
                           "services available."
             list_of_values = [
                 {"name": "How to get started", "value": f"{d['command']}help get_started"},
-                {"name": "About the payment solution", "value": f"{d['command']} about"},
+                {"name": "About the payment solution", "value": f"{d['command']}about"},
                 {"name": "Account commands", "value": f"{d['command']}help account"},
                 {"name": "How to make peer to peer transactions", "value": f"{d['command']}help transactions"},
                 {"name": "List of available currencies", "value": f"{d['command']}help currencies"},
@@ -50,20 +50,31 @@ class HelpCommands(commands.Cog):
                               description='Description about the system',
                               colour=discord.Colour.purple())
         about.add_field(name='About',
-                        value='System is a property of the Launch Pad Investments Group and is designed to provide '
-                              'payment solution for discord and means of magnetization of community activities',
+                        value='Crypto Link is a Discord multi functional bot. Built on top of Stellar, utilizing '
+                              'its native Stellar Lumen (XLM) crypto currency and tokens issued on Stellar chain,'
+                              ' allows for execution of peer-to-peer crypto transactions, token ICOs/project'
+                              ' promotions, and Discord community monetization opportunities.',
                         inline=False)
         about.add_field(name="Peer to Peer transactions",
-                        value="With the system present on community, members can execute instant peer to peer "
-                              "transactions with onboarded available cryptocurrencies",
+                        value=f"Users are able to execute instant peer-2-peer transactions either with the Stellar"
+                              f" native currency or its tokens which have been integrated onto Crypto Link. For full"
+                              f" list of supported currencies please use command {d['command']}currencies",
                         inline=False)
         about.add_field(name="Merchant system",
-                        value="Merchant system allows owners of the community to monetize the community roles"
-                              " which are timely oriented.",
+                        value=f"If you are a Discord Guild owner you can monetize your roles with various lengths and "
+                              f"values. So far system support only XLM as a currency to be used in merchant system. "
+                              f"For more information execute command {d['command']}help owner ",
                         inline=False)
-        about.add_field(name='Terms of service',
-                        value='blablabla',
+        about.add_field(name="ICO's and Project promotions",
+                        value=f"Would you like to have another project sourcing stream? Crypto Link supports all"
+                              f" tokens issued on Stellar. This as well provides perfect opportunity to run ICO"
+                              f" minimized costs, or utilize additional channel to get a hold of potential customers. "
+                              f"Contact us by sending an email to cryptolinkpayments@gmail.com or one of the members"
+                              f" with the role Crypto Link Staff on Discord Community. ",
                         inline=False)
+        about.add_field(name=f'Futrher information',
+                        value=f'[Homepage](https://cryptolink.carrd.co/) \n'
+                              f'[Github](https://github.com/launch-pad-investments/crypto-link)')
         await ctx.author.send(embed=about)
 
     @help.command()
