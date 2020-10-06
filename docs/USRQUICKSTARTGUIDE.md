@@ -1,5 +1,4 @@
-# Crypto Link Quick Start manual for Discord Users
-
+# :runner: Crypto Link Quick Start manual for Discord Users :runner: 
 
 ## Crypto Link Prefixes
 
@@ -10,8 +9,8 @@ or
 @CryptoLink <command> <subcommands>
 ```
 
-## :runner: Quick start guide :runner:
-
+## Get Started
+### Register
 Head to one of the Communities where Crypto-Link is present and execute 
 ```text
 !register
@@ -22,11 +21,11 @@ Once you receive successful report to DM on registration you can proceed with:
 !wallet   --> Instructions on all available commands to operate with your personal wallet
 ```
 
-### Check Available Currencies 
+### Familiarize yourself with listed tokens
 ```text
 !help currencies
 ```
-### Fast balance check and personal address details
+### Check personal address details 
 ```text
 !acc
 ```
