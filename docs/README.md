@@ -24,8 +24,7 @@ Crypto Link is a Discord multi functional bot. Built on top of Stellar, utilizin
 ## :scroll: License :scroll: 
 Crypto Link is an open-source project operating under the [GNU GENERAL PUBLIC LICENSE](https://github.com/launch-pad-investments/crypto-link/blob/master/LICENSE).
 
-
-## Project governance 
+## :office: Project governance :office:
 Project is governed by the Crypto Link Team Staff.
 
 ## ![banner](../img/emojiLumen.png) About Stellar Lumen ![banner](../img/emojiLumen.png) 
