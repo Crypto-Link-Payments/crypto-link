@@ -52,14 +52,13 @@ experience.
 ## :loudspeaker: Running ICO or Promotion with Crypto Link :loudspeaker:
 Crypto Link Currently Supports all tokens issued on Stellar. If you would like to run ICO with the help of the 
 Crypto Link, and utilize additional media channel to get a hold of potential customers, you can contact us over Discord,
-send us an email to cryptolinkpayments@gmail.com, open up an issue with the label ***listing*** and we will be in touch
-as soon as possible, or fill out the [form](https://forms.gle/fAgBEarjMSvCvDgY6)
+send us an email to cryptolinkpayments@gmail.com, open up an issue with the label ***listing***, or fill out the [form](https://forms.gle/fAgBEarjMSvCvDgY6).
+We will be in touch as soon as possible.
 
 For further information on requirements for listing please check [listing details](LISTING.md)
 
-## :money_with_wings: Integrated Crypto Link Operational Fees :money_with_wings:
-We have integrated as well operational fees to gather funding for further development. Fees are currently applied
- for following crypto link activities:
+## :money_with_wings: Crypto Link Fees :money_with_wings:
+In order to keep the Crypto Link Operational we have integrated various fees and limits. 
 
 - [X] Merchant license fee 
 - [X] Merchant wallet withdrawal
@@ -78,10 +77,10 @@ To check values applied for fees and limits please use command bellow over Disco
 ## :mega: Issues, bugs, etc. :mega:
 Majority of the requests can be done through github by opening issue and assigning appropriate label to it. 
 Currently implemented tags are: bug, Discord Community, documentation updates requests, enhancement 
-proposal, help, invalid if something does not seem right, general question
+proposal, help, and general question. Open up issue and we will do our best to respond to best of our current abilities.
 
 ## :wrench: Contributing :wrench:
-All details on how to contribute to Crypto Link cann be accessed:
+
 - [How to setup project locally](PROJECTSETUP.md)
 - [System Commands for Bot Owners](SYSTEMCOMMANDS.md)
 - [Contribution guidelines & bot setup](CONTRIBUTING.md)
@@ -92,6 +91,7 @@ All details on how to contribute to Crypto Link cann be accessed:
 </a>
 
 ## :phone: Get in touch :phone:
+
 ### Social gateway
 [Crypto Link Homepage](https://cryptolink.carrd.co/)
 [Twitter](https://twitter.com/CryptoLink8)
