@@ -5,15 +5,9 @@ Script to handle statistics of the bot
 import os
 import sys
 
-from pymongo import MongoClient, errors
-import motor.motor_asyncio
-
-from utils.tools import Helpers
-
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
-helper = Helpers()
 CONST_CURRENT_DATE = '$currentDate'
 CONST_INC = '$inc'
 

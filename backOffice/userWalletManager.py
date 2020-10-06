@@ -5,7 +5,6 @@ into history
 
 import os
 import sys
-import motor.motor_asyncio
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
