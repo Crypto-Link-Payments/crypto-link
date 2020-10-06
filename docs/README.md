@@ -26,7 +26,7 @@ Crypto Link is an open-source project operating under the [GNU GENERAL PUBLIC LI
 
 
 ## Project governance 
-Project is governed by the Launch Pad Investments.
+Project is governed by the Crypto Link Team Staff.
 
 ## ![banner](../img/emojiLumen.png) About Stellar Lumen ![banner](../img/emojiLumen.png) 
 
@@ -39,7 +39,10 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 [Stellar Foundation](https://www.stellar.org/foundation) <br />
 [Stellar Lumnes](https://www.stellar.org/lumens) <br />
 
-## Documentation
+
+## Quick Start as Discord User
+
+## Crypto Link Documentation
 - [Discord User Commands](USERCOMMANDS.md)
 - [Discord Guild Owner commands](GUILDOWNERS.md)
 - [Contribution guidelines, bot setup & system commands](CONTRIBUTING.md)
@@ -48,9 +51,14 @@ __More on Stellar, Foundation and its native cryptocurrency__:<br />
 - [Full command list](COMMANDMAP.md)]
 
 ## Running ICO or Promotion with Crypto Link
+Crypto Link Currently Supports all tokens issued on Stellar. If you would like to run ICO with the help of the 
+Crypto Link, and utilize additional media channel to get a hold of potential customers, you can contact us over Discord,
+send us an email to cryptolinkpayments@gmail.com, open up an issue with the label ***listing*** and we will be in touch
+as soon as possible, or fill out the [form](https://forms.gle/fAgBEarjMSvCvDgY6)
 
-## Crypto Link fees and Limits
-## :money_with_wings: Fees for using the crypto link system :money_with_wings:
+For further information on requirements for listing please check [listing details](LISTING.md)
+
+## :money_with_wings: Integrated Crypto Link Operational Fees :money_with_wings:
 We have integrated as well operational fees to gather funding for further development. Fees are currently applied
  for following crypto link activities:
 
@@ -62,9 +70,7 @@ Additional limits:
 - [X] Minimum merchant transfer amount
 - [X] Minimum stellar withdrawal amount 
 
-For explanation on all the fees and limits read [here](FEESANDLIMITS.md) 
- 
-To check current fees and their conversion please use command:
+To check values applied for fees and limits please use command bellow over Discord
 
 ```text
 !fees
@@ -72,39 +78,33 @@ To check current fees and their conversion please use command:
 
 ## Issues, bugs, etc. 
 Majority of the requests can be done through github by opening issue and assigning appropriate label to it. 
-Currently implemented tags are: bug, Discord Community Invite request, documentation updates requests, enhancement 
-proposal, help, ivalid if something does not seem right, general question, or listing request. 
-
-##Roadmap
-
-[Development road-map](ROADMAP.md)
-
-## Get in touch
-
-### Join us on Discord
-[Discord Invite Link](https://discord.gg/ddvGTsb)
-
-### Send us email
-cryptolinkpayments@gmail.com
+Currently implemented tags are: bug, Discord Community, documentation updates requests, enhancement 
+proposal, help, invalid if something does not seem right, general question
 
 ## Contributing 
+All details on how to contribute to Crypto Link cann be accessed:
 
-By participating in contribution, you are expected to uphold this code. You can access Code of Conduct 
-details [here](CODE_OF_CONDUCT.md). Please report unacceptable behavior to the project team 
-at cryptolinkpayments@gmail.com. 
+[How to setup project locally](PROJECTSETUP.md)
 [Contribution guidelines, bot setup & system commands](CONTRIBUTING.md)
-[Contributing guidlines](CONTRIBUTING.md)
-[How to setup project](PROJECTSETUP.md)
 
 ### Contributors List
 <a href="https://github.com/Launch-pad-investments/crypto-link/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=Launch-pad-investments/crypto-link" />
 </a>
 
-## Social gateway
+## Get in touch
+### Social gateway
 [Crypto Link Homepage](https://cryptolink.carrd.co/)
 [Twitter](https://twitter.com/CryptoLink8)
 [Patreon](https://www.patreon.com/CryptoLink)
+
+### Join us on Discord
+[Discord Invite Link](https://discord.gg/ddvGTsb)
+
+***__Note__*** If the link has expired please open issue on github and assign label ***Invite request***
+
+### Send us email
+cryptolinkpayments@gmail.com
 
 ## :pig2:  Support jar :pig2: 
 ### Cryptocurrencies
