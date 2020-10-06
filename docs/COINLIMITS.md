@@ -1,4 +1,4 @@
-# Available Currencies on Crypto Link System
+# :coin: Available Currencies on Crypto Link System :coin: 
 
 ## ![banner](../img/emojiLumen.png) Stellar Lumen (XLM) ![banner](../img/emojiLumen.png)
 
