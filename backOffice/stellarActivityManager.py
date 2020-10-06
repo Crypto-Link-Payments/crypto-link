@@ -7,6 +7,7 @@ import os
 import sys
 
 from pymongo import MongoClient, errors
+import motor.motor_asyncio
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
@@ -25,17 +26,23 @@ class StellarManager:
     def __init__(self):
         self.hot_wallet = hot['xlm']
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
-        self.stellar_coin = self.connection['CryptoLink']
+        self.cl_connection = self.connection['CryptoLink']
+        self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(d['database']['connection'])
+        self.as_cl_connection = self.as_connection['CryptoLink']
 
         # Collections connections
-        self.xlm_wallets = self.stellar_coin.userWallets  # Access to all stellar wallets
-        self.xlm_deposits = self.stellar_coin.StellarDeposits  # Access to history of successful deposits
-        self.xlm_withdrawals = self.stellar_coin.StellarWithdrawals  # Access to history of successful withdrawals
-        self.xlm_unprocessed = self.stellar_coin.StellarUnprocessedDeposits  # history of successful deposits
-        self.xlm_unprocessed_withdrawals = self.stellar_coin.StellarUnprocessedWithdrawals  # history of error withdrawals
+        self.xlm_wallets = self.cl_connection.userWallets  # Access to all stellar wallets
+        self.xlm_deposits = self.cl_connection.StellarDeposits  # Access to history of successful deposits
+        self.xlm_withdrawals = self.cl_connection.StellarWithdrawals  # Access to history of successful withdrawals
+        self.xlm_unprocessed = self.cl_connection.StellarUnprocessedDeposits  # history of successful deposits
+        self.xlm_unprocessed_withdrawals = self.cl_connection.StellarUnprocessedWithdrawals  # history of error withdrawals
 
         #TODO rewrite to fit new wallet structures!
-        self.xlm_guild_wallets = self.stellar_coin.StellarCorporateWallets
+        self.xlm_guild_wallets = self.cl_connection.StellarCorporateWallets
+
+        # Async support
+        self.as_xlm_withdrawals = self.as_cl_connection.StellarWithdrawals
+        self.as_xlm_unprocessed_withdrawals = self.as_cl_connection.StellarUnprocessedWithdrawals
 
     def stellar_deposit_history(self, deposit_type: int, tx_data):
         """
@@ -54,7 +61,7 @@ class StellarManager:
         else:
             return False
 
-    def insert_to_withdrawal_hist(self, tx_type: int, tx_data: dict):
+    async def insert_to_withdrawal_hist(self, tx_type: int, tx_data: dict):
         """
         Managing history off withdrawals
 
@@ -63,9 +70,9 @@ class StellarManager:
         :return:
         """
         if tx_type == 1:  # IF successful
-            result = self.xlm_withdrawals.insert_one(tx_data)
+            result = await self.as_xlm_withdrawals.insert_one(tx_data)
         elif tx_type == 2:  # IF error
-            result = self.xlm_unprocessed_withdrawals.insert_one(tx_data)
+            result = await self.as_xlm_unprocessed_withdrawals.insert_one(tx_data)
 
         if result.inserted_id:
             return True
