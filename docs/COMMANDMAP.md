@@ -50,8 +50,8 @@ To check the fees implemented and their values use command:
 ### Making off-chain peer to peer transactions
 
 ```text
-!send <amount:float> <ticker> <@discord.User> <message optional> --> Creating public transaction
-!private <amount:float> <ticker> <@discord.User> <message optional> --> Creating private transaction
+!send <amount:float> <ticker> <@discord.User> <message optional> --> Creates a public P2P transaction
+!private <amount:float> <ticker> <@discord.User> <message optional> --> Initiates a private P2P transaction
 ```
 
 ### Making on-chain withdrawals
@@ -63,7 +63,7 @@ To check the fees implemented and their values use command:
 
 ### Participating in merchant system
 ```text
-!membership --> Returs description on all available sub-commands
+!membership --> Returns description on all available sub-commands
 !membership current --> Returns on-going purchased memberships for the community user has obtained
 !membership roles --> Get all available roles/memberships listed for purchase on community
 !membership subscribe --> Subscribe to role which is available on community to be purchased 
@@ -77,7 +77,7 @@ To check the fees implemented and their values use command:
 !merchant_initiate --> Registers community for the merchant service
 !merchant --> Representation of available sub-commands
 !merchant manual --> HOW-TO monetize community
-!merchant  create_role <role name> <dolar_value> <weeks:int> <days:int> <hours:int> <minutes:int>
+!merchant  create_role <role name> <dollar_value> <weeks:int> <days:int> <hours:int> <minutes:int>
 !merchant  delete_role <@discord.Role> --> Deletes role from merchant system 
 !merchant  community_roles --> Queries all monetized roles and provides details
 !merchant  stop_role <@discord.Role> --> Prevents the monetized role to be purchased 
@@ -100,39 +100,38 @@ To check the fees implemented and their values use command:
 !license buy with_xlm --> Use Stellar Lumen to purchase license
 ```
 
-# System management commands
+## System management commands
+Locked for bot owner
+
+### Crypto Link Hot Wallet commands
+```text
+!hot --> Information on available sub-commands
+!hot balance --> Check hot wallet balance details
+```
+
+### Crypto Link off chain information
 
 ```text
-
-# Stats of the system 
-!stats --> Returns indepth live statistical data on the system
-
-# System management commands
-!god --> Available sub commands in god system
-!god system --> Available sub commands 
-!god system off --> Turning off Crypto Link
-!god system update --> Updating the Crypto Link through Github
-!god system load_cog <cog.name> --> Loads the cog back and its respective commands
-!god system unload_cog <cog.name> --> Unloads cog and its respective commands
-!god system list_cogs --> Provides information on all cog names
-!god system reload --> Reloads all cogs 
-
-# Corporate account balances
-!check_corp_balance --> Returns the balance of the off-chain corporate LPI account 
-!transfer --> Representation of all available sub-commands
-!transfer sweep_xlm --> Transfers from corporate account to one of god users
-!transfer sweep_xmr --> Transfers from corporate account to one of god users
-
-# Hot wallet commands
-!hot_wallet --> Representation of all available commands
-!hot_wallet stellar_balance --> Return the hot wallet state on Stellar Chain
-
-# Managing fees
-!fee --> representation of all available sub-commands
-!fee current --> Information on current set fee values for each category
-!fee change --> representation of all available sub-commands
-!fee change minimum_merchant_transfer_value <dollar amount:float> -> Set minimum withdrawal amount from merchant to owner wallet
-!fee change merchant_license_fee <dollar amount:float> -> Set Monthly merchant license fee
-!fee change merchant_wallet_transfer_fee <dollar amount:float> --> Set withdrawal fee from merchant wallet to owner wallet if no license
-!fee change xlm_withdrawal_fee <dollar amount:float> --> Set on chain withdrawal fee from user wallet 
+!cl --> Information on available sub-commands
+!cl balance --> Crypto Link own wallet balance information 
+!cl stats --> Statistical details about the system
+!cl sweep <ticker> --> Transferring balance from Crypto Link wallet to developer 
 ```
+
+### Crypto Link SYS commands
+```text
+!system --> Information on available sub-comands
+!system off --> Turning the System completely OFF
+!system update --> Pull neew updates from github and reload COGS
+```
+
+### Crypto Link management from Discord
+```text
+!manage --> Information on available sub-commands
+!manage scripts --> Information on available sub-commands
+!manage scripts list_cogs --> Returns names of all implemented COGS
+!manage scripts unload <cog name> --> Turns off COG and its relevant commands
+!manage script load <cog name> --> Turns on COG and its relevant commands
+!manage script reload --> Reloads all the cogs in the system 
+```
+
