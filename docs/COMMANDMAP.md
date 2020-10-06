@@ -135,3 +135,4 @@ Locked for bot owner
 !manage script reload --> Reloads all the cogs in the system 
 ```
 
+[Back to main page](README.md)
