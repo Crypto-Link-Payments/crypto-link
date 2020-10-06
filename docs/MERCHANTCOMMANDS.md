@@ -7,14 +7,20 @@
 
 ## About
 Merchant system allows Discord Guild Owners to monetize their Discord Roles. By providing USD value of the role and its
-duration, users will be able to purchase role with XLM after conversion from USD to XLM based on CoinGecko deta
+duration, users will be able to purchase role with XLM after conversion from USD to XLM based on CoinGecko data.
 
-## Register merchant system
+## Merchant manual
+```text
+!merchant manual
+```
+
+## Register merchant system and create monetized role
+Command bellow will create Discord Guild Profile into the system
 ```text
 !merchant_initiate
 ```
-## How to create and activate monetized role 
-Once you successfully register into the merchant system you can start to monetize your community.
+
+Once you successfully register into the merchant system its time to monetize your community.
 
 ### Step 1 -> Create role and assign parameters
 
@@ -51,20 +57,16 @@ Referencing to step 1 example would be:
 
 ***__Congratulations you have just monetized your community. Now inform your members and earn some XLM.__***
 
-## Other available commands 
+Inform your members on monetized role which is up for grabs.
 
-### Merchant manual
-```text
-!merchant manual
-```
 
-### Role management
+## Role management
 
-#### Removing role from the system
+### Removing role from the Crypto Link System
 ```text
 !merchant monetize delete_role <@discord.Role>
 ```
-#### Deactivate merchant role from available to purchase:
+### Deactivate merchant role from being available to purchase:
 ```text
 !merchant stop_role <@discord.Role>
 ```
@@ -73,12 +75,11 @@ Referencing to step 1 example would be:
 !merchant start_role <@discord.Role>
 ```
 
-### Community Wallet Commands
-#### Checking details of merchant wallet
+## Merchant Wallet Commands
+### Checking details of merchant wallet
 ```text
 !merchant balance
 ```
-
 
 ### Withdraw XLM from wallet to personal wallet
 
@@ -86,4 +87,4 @@ Referencing to step 1 example would be:
 !merchant transfer_xlm
 ```
 
-[Back to main page](README.md)
+[Back to Guild Owner Commands](GUILDOWNERS.md)  |   [Back to main page](README.md)
