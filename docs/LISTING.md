@@ -1,3 +1,3 @@
 # Listing of token to Crypto Link
 
-Coming soon...
+Listings will be opened up once Crypto Link Will transition to Stellar Main net.
