@@ -57,11 +57,14 @@ class WithdrawalCommands(commands.Cog):
             title = '__Available withdrawal commands__'
             description = "All commands available to withdraw funds from Discord Wallet"
             list_of_values = [
-                {
-                    "name": f"{CONST_STELLAR_EMOJI} Withdraw Stellar (XLM) from Discord wallet {CONST_STELLAR_EMOJI}",
-                    "value": f"{d['command']}withdraw xlm <amount> <destination address>\n"
-                             f"\nexample:\n"
-                             f"```!withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"}]
+                {"name": f"{CONST_STELLAR_EMOJI} Withdraw Stellar (XLM) from Discord wallet {CONST_STELLAR_EMOJI}",
+                 "value": f"{d['command']}withdraw xlm <amount> <destination address>\n"
+                          f"\nexample:\n"
+                          f"```!withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"},
+                {"name": f" Withdraw Tokens",
+                 "value": f"{d['command']}withdraw <ticker> <amount> <destination address>\n"
+                          f"\nexample:\n"
+                          f"```!withdraw clt 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"}]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1)
@@ -162,7 +165,7 @@ class WithdrawalCommands(commands.Cog):
                                                               f"tokenFee": token_fee}
 
                                     # TODO rewrite this to async version
-                                    stellar.insert_to_withdrawal_hist(tx_type=1, tx_data=result)
+                                    await stellar.insert_to_withdrawal_hist(tx_type=1, tx_data=result)
 
                                     # Update CL on chain stats
                                     await stats_manager.update_cl_on_chain_stats(ticker=token,
@@ -319,7 +322,7 @@ class WithdrawalCommands(commands.Cog):
                                                                       coin_details=to_deduct):
 
                             # Initiate on chain withdrawal
-                            result = stellar_wallet.token_withdrawal(address=address,token='xlm',
+                            result = stellar_wallet.token_withdrawal(address=address, token='xlm',
                                                                      amount=str(xlm_with_amount))
 
                             if result.get("hash"):
@@ -329,7 +332,7 @@ class WithdrawalCommands(commands.Cog):
                                 result['offChainData'] = {"xlmFee": stellar_fee}
 
                                 # Insert in the history of withdrawals
-                                stellar.insert_to_withdrawal_hist(tx_type=1, tx_data=result)
+                                await stellar.insert_to_withdrawal_hist(tx_type=1, tx_data=result)
 
                                 # Send message to user on withdrawal
                                 await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
