@@ -19,7 +19,7 @@
 # About Crypto Link
 Crypto Link is a Discord multi functional bot. Built on top of Stellar, utilizing its native Stellar Lumen 
 (XLM) crypto currency and tokens issued on Stellar chain, allows for execution of peer-to-peer crypto transactions, 
- token ICOs/project promotions, and Discord community monetization opportunities.
+ token ICOs/project promotions, and Discord community monetization opportunities. 
 
 ## License
 Crypto Link is an open-source project operating under the [GNU GENERAL PUBLIC LICENSE](https://github.com/launch-pad-investments/crypto-link/blob/master/LICENSE).
@@ -74,7 +74,6 @@ To check current fees and their conversion please use command:
 Majority of the requests can be done through github by opening issue and assigning appropriate label to it. 
 Currently implemented tags are: bug, Discord Community Invite request, documentation updates requests, enhancement 
 proposal, help, ivalid if something does not seem right, general question, or listing request. 
-
 
 ##Roadmap
 
