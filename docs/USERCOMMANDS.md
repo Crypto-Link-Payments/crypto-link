@@ -1,4 +1,4 @@
-# Full command list for Discord User
+#  :joystick: Full command list for Discord User :joystick: 
 
 ## :key: Access list :key:
 - [ ] Crypto Link Staff 
@@ -9,6 +9,7 @@
 ## Available commands for Discord members
 
 ### Account and wallet related commands
+
 #### Register yourself to Crypto Link System
 If you have not received any transaction yet or you are new to Crypto Link system use command 
 bellow to register yourself. 
