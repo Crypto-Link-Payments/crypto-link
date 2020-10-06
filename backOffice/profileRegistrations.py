@@ -2,7 +2,6 @@ import os
 import sys
 from uuid import uuid4
 
-from pymongo import MongoClient
 from pymongo import errors
 
 from utils.tools import Helpers
@@ -11,7 +10,6 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 helper = Helpers()
-d = helper.read_json_file(file_name='botSetup.json')
 hot = helper.read_json_file(file_name='hotWallets.json')
 
 
@@ -20,10 +18,10 @@ class AccountManager(object):
     Class handling discord user accounts
     """
 
-    def __init__(self):
+    def __init__(self, connection):
         self.hot_wallet_addr = hot['xlm']
         # main db connection
-        self.connection = MongoClient(d['database']['connection'])
+        self.connection = connection
 
         # Database of bot users
         self.cl_connection = self.connection['CryptoLink']

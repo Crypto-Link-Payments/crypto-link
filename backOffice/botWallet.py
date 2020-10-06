@@ -1,23 +1,20 @@
 import os
 import sys
 
-from pymongo import MongoClient, errors
-
 from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 helper = Helpers()
-d = helper.read_json_file(file_name='botSetup.json')
 
 
 class BotManager:
     """Class dealing with the management of Crypto Link own bot wallet and fees management"""
 
-    def __init__(self):
+    def __init__(self, connection):
         """Connection to Database and Crypto Link collections"""
-        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
+        self.connection = connection
         self.bot_stuff = self.connection['CryptoLink']
         self.bot_wallet = self.bot_stuff.CLWallets
         self.bot_fees = self.bot_stuff.CLFees

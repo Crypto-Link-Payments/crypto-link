@@ -14,7 +14,6 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 helper = Helpers()
-d = helper.read_json_file(file_name='botSetup.json')
 CONST_CURRENT_DATE = '$currentDate'
 CONST_INC = '$inc'
 
@@ -24,10 +23,10 @@ class StatsManager(object):
     Class handling Crypto Link statistics
     """
 
-    def __init__(self):
+    def __init__(self, connection, as_connectin):
         # main db connection
-        self.connection = MongoClient(d['database']['connection'])
-        self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(d['database']['connection'])  # Async connection
+        self.connection = connection
+        self.as_connection = as_connectin
 
         # Database of bot users
         self.cl_connection = self.connection['CryptoLink']

@@ -11,15 +11,11 @@ from datetime import datetime, timedelta
 from discord import Embed, Color, Colour
 from discord.ext import commands
 
-from backOffice.botWallet import BotManager
-from backOffice.stellarActivityManager import StellarManager
 from cogs.utils.customCogChecks import is_owner, has_wallet, merchant_com_reg_stats, is_public
 from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
-bot_manager = BotManager()
-stellar = StellarManager()
 custom_messages = CustomMessages()
 helper = Helpers()
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
@@ -37,6 +33,7 @@ class MerchantLicensingCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.backoffice = bot.backoffice
+        self.command_string = bot.get_command_str()
 
     @commands.group()
     @commands.check(is_owner)
@@ -53,16 +50,16 @@ class MerchantLicensingCommands(commands.Cog):
             title = "__System Message__"
             description = 'Representation of all available commands under ***merchant*** category.'
             list_of_commands = [
-                {"name": f'{d["command"]}license about',
+                {"name": f'{self.command_string}license about',
                  "value": 'Returns detailed information on Licensing'},
-                {"name": f'{d["command"]}license price',
+                {"name": f'{self.command_string}license price',
                  "value": 'Returns information on current monthly license fee calculated '
                           'into XLM and XMR.'},
-                {"name": f'{d["command"]}license status',
+                {"name": f'{self.command_string}license status',
                  "value": 'Returns details if license has been activated for the community.'},
-                {"name": f'{d["command"]}license buy',
+                {"name": f'{self.command_string}license buy',
                  "value": 'Returns detailed information on ways how to purchase license'},
-                {"name": f'{d["command"]}license buy with_xlm',
+                {"name": f'{self.command_string}license buy with_xlm',
                  "value": 'Use Stellar Lumen (XLM) to buy monthly license '}
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands)
@@ -92,7 +89,7 @@ class MerchantLicensingCommands(commands.Cog):
         :return:
         """
 
-        data = bot_manager.get_fees_by_category(all_fees=False, key='license')
+        data = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='license')
         fee_value = data['fee']
         in_lumen = convert_to_currency(fee_value, coin_name='stellar')
         fee_info = Embed(title="__Merchant license information__",
@@ -163,9 +160,10 @@ class MerchantLicensingCommands(commands.Cog):
 
         channel_id = auto_channels["merchant"]
         merchant_manager = self.backoffice.merchant_manager
+        stellar = self.backoffice.stellar_manager
         # Check if community does not have license yet
         if not merchant_manager.check_community_license_status(community_id=ctx.message.guild.id):
-            data = bot_manager.get_fees_by_category(all_fees=False, key='license')  # Get the fee value for the license
+            data = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='license')  # Get the fee value for the license
             fee_value = data['fee']  # Get out fee
             in_lumen = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
             total = (in_lumen['total'])  # Get total in lumen
@@ -177,7 +175,7 @@ class MerchantLicensingCommands(commands.Cog):
             if wallet_value['balance'] >= stroops:
                 if stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id, stroops=stroops,
                                                                 direction=0):
-                    if bot_manager.update_lpi_wallet_balance(amount=stroops, wallet='xlm', direction=1):
+                    if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=stroops, wallet='xlm', direction=1):
                         license_start = datetime.utcnow()  # Current UTC date
                         four_week_range = timedelta(days=31)  # Determining the range
                         license_end = license_start + four_week_range  # Calculation of expiration date
@@ -250,7 +248,7 @@ class MerchantLicensingCommands(commands.Cog):
                             # Revert value to user and remove value from LPI wallet
                             stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                          stroops=stroops, direction=1)
-                            bot_manager.update_lpi_wallet_balance(amount=stroops, wallet='xlm', direction=0)
+                            self.backoffice.bot_manager.update_lpi_wallet_balance(amount=stroops, wallet='xlm', direction=0)
                             message = f" There has been an issue with the system. Please try again later. If " \
                                       f"the issue persists " \
                                       f"contact Crypto Link Staff. Thank you for your understanding."

@@ -6,16 +6,10 @@ import os
 import sys
 
 from bson.objectid import ObjectId
-from pymongo import MongoClient
 from pymongo import errors
-
-from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
-
-helper = Helpers()
-d = helper.read_json_file(file_name='botSetup.json')
 
 
 class MerchantManager:
@@ -23,8 +17,8 @@ class MerchantManager:
     Class handling Merchant system. Storing licenses, purchases, etc.
     """
 
-    def __init__(self):
-        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
+    def __init__(self, connection):
+        self.connection = connection
         self.communities = self.connection['CryptoLink']
 
         # Collection of community profiles

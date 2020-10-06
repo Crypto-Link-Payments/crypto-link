@@ -3,10 +3,8 @@ from datetime import datetime
 import discord
 from discord import errors
 from discord import Role, Embed, Colour, TextChannel
-from backOffice.guildServicesManager import GuildProfileManager
 from utils.tools import Helpers
 
-guild_profiles = GuildProfileManager()
 helper = Helpers()
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')

@@ -52,3 +52,17 @@ class DiscordBot(commands.Bot):
 
     def run(self):
         super().run(self.bot_settings['token'], reconnect=True)
+
+    def is_animus(self, user_id):
+        """
+        Check if creator
+        """
+        return user_id == self.bot_settings['creator']
+
+    def is_one_of_gods(self, user_id):
+        list_of_gods = [self.bot_settings['ownerId'], self.bot_settings['creator']]
+        return [god for god in list_of_gods if god == user_id]
+
+    def get_command_str(self):
+        return self.bot_settings['command']
+

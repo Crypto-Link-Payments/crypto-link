@@ -4,13 +4,7 @@ Class handling the corporate wallet activities
 import os
 import sys
 
-from pymongo import MongoClient
-import motor.motor_asyncio
-
 from utils.tools import Helpers
-
-helper = Helpers()
-d = helper.read_json_file(file_name='botSetup.json')
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
@@ -19,12 +13,12 @@ sys.path.append(project_path)
 class GuildProfileManager:
     """Class managing guild profiles"""
 
-    def __init__(self):
-        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
+    def __init__(self, connection, as_connection):
+        self.connection = connection
         self.cl_db_access = self.connection['CryptoLink']
         self.guild_profiles = self.cl_db_access.guildProfiles
 
-        self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(d['database']['connection'])
+        self.as_connection = as_connection
         self.as_cl_db_access = self.as_connection['CryptoLink']
         self.as_guild_profiles = self.as_cl_db_access.guildProfiles  # Connection to user profiles
 

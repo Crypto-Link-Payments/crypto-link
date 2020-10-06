@@ -4,13 +4,11 @@ Class handling the corporate wallet activities
 import os
 import sys
 
-from pymongo import MongoClient
 from pymongo import errors
 
 from utils.tools import Helpers
 
 helper = Helpers()
-d = helper.read_json_file(file_name='botSetup.json')
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
@@ -19,8 +17,8 @@ sys.path.append(project_path)
 class CorporateHistoryManager:
     """Class dealing with corporate withdrawal history"""
 
-    def __init__(self):
-        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
+    def __init__(self, connection):
+        self.connection = connection
         self.corp_activity = self.connection['CryptoLink']
         self.corp_withdrawals = self.corp_activity.CORPFromTransactions
 

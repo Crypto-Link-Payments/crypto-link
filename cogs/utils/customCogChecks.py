@@ -4,28 +4,16 @@ File includes custom security checks for the Discord GUI part
 
 from discord import ChannelType
 
-from backOffice.profileRegistrations import AccountManager
-from utils.tools import Helpers
-from backOffice.guildServicesManager import GuildProfileManager
-from backOffice.merchatManager import MerchantManager
-
-helper = Helpers()
-d = helper.read_json_file(file_name='botSetup.json')
-account_mng = AccountManager()
-merchant_manager = MerchantManager()
-guild_manager = GuildProfileManager()
-
 
 def is_animus(ctx):
     """
     Check if creator
     """
-    return ctx.message.author.id == d['creator']
+    return ctx.bot.is_animus( ctx.message.author.id )
 
 
 def is_one_of_gods(ctx):
-    list_of_gods = [d['ownerId'], d['creator']]
-    return [god for god in list_of_gods if god == ctx.message.author.id]
+    return ctx.bot.is_one_of_gods(ctx.message.author.id)
 
 
 def is_public(ctx):
@@ -43,7 +31,7 @@ def has_wallet(ctx):
     :param ctx: Context
     :return: Boolean
     """
-    return account_mng.check_user_existence(user_id=ctx.message.author.id)
+    return ctx.bot.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id)
 
 
 def is_owner(ctx):
@@ -58,7 +46,7 @@ def merchant_com_reg_stats(ctx):
     Checks if community is registered in the merchant system
     """
     try:
-        return merchant_manager.check_if_community_exist(community_id=int(ctx.message.guild.id))
+        return ctx.bot.backoffice.merchant_manager.check_if_community_exist(community_id=int(ctx.message.guild.id))
     except AttributeError:
         return False
 
@@ -67,14 +55,14 @@ def community_missing(ctx):
     """
     Check if community not registered in the system
     """
-    return merchant_manager.check_if_community_does_not_exist(community_id=ctx.message.guild.id)
+    return ctx.bot.backoffice.merchant_manager.check_if_community_does_not_exist(community_id=ctx.message.guild.id)
 
 
 def user_has_wallet(ctx):
     """
     Check if user has wallet registered in the system
     """
-    return account_mng.check_user_existence(user_id=ctx.message.author.id)
+    return ctx.bot.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id)
 
 
 def guild_has_merchant(ctx):
@@ -88,4 +76,4 @@ def guild_has_stats(ctx):
     """
     Guild registration status check for stats
     """
-    return guild_manager.check_guild_registration_stats(guild_id=ctx.guild.id)
+    return ctx.bot.backoffice.guild_manager.check_guild_registration_stats(guild_id=ctx.guild.id)

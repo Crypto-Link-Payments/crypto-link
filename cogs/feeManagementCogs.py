@@ -5,17 +5,14 @@ Cogs to handle fee management
 import discord
 from discord.ext import commands
 
-from backOffice.botWallet import BotManager
 from cogs.utils.customCogChecks import is_one_of_gods
 from cogs.utils.monetaryConversions import convert_to_currency, get_rates
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
-bot_manager = BotManager()
 custom_messages = CustomMessages()
 helper = Helpers()
 
-d = helper.read_json_file(file_name='botSetup.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_MERCHANT_LICENSE_CHANGE = '__Merchant monthly license change information__'
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
@@ -26,6 +23,7 @@ class FeeManagementAndControl(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.list_of_coins = list(integrated_coins.keys())
+        self.command_string = bot.get_command_str()
 
     @staticmethod
     def filter_db_keys(fee_type: str):
@@ -43,7 +41,7 @@ class FeeManagementAndControl(commands.Cog):
 
     @commands.command()
     async def fees(self, ctx):
-        fees = bot_manager.get_fees_by_category(all_fees=True)
+        fees = self.backoffice.bot_manager.get_fees_by_category(all_fees=True)
         from pprint import pprint
         pprint(fees)
         fee_info = discord.Embed(title='Applied fees for system',
@@ -88,9 +86,9 @@ class FeeManagementAndControl(commands.Cog):
             title = '__All available commands to manipulate system fees__'
             description = "Commands presented bellow allow for manipulation of fees and their review per each segment."
             list_of_values = [
-                {"name": f"{d['command']}fee change",
+                {"name": f"{self.command_string}fee change",
                  "value": f"Entry to sub category of commands to set fees for various parts of {self.bot.user} system"},
-                {"name": f"{d['command']}fee current",
+                {"name": f"{self.command_string}fee current",
                  "value": f"Information on current state of the fees"},
             ]
 
@@ -108,13 +106,13 @@ class FeeManagementAndControl(commands.Cog):
             title = '__Change fee commands__'
             description = "Representation of all commands needed to be execute if you are willing to change the fee"
             list_of_values = [
-                {"name": f"{d['command']}fee change minimum_merchant_transfer_value <value in $ in format 0.00>",
+                {"name": f"{self.command_string}fee change minimum_merchant_transfer_value <value in $ in format 0.00>",
                  "value": "Minimum amount in $ crypto value to be eligible for withdrawal from it"},
-                {"name": f"{d['command']}fee change merchant_license_fee <value in $ in format 0.00>",
+                {"name": f"{self.command_string}fee change merchant_license_fee <value in $ in format 0.00>",
                  "value": "Monthly License Fee for Merchant"},
-                {"name": f"{d['command']}fee change merchant_wallet_transfer_fee <value in $ in format 0.00>",
+                {"name": f"{self.command_string}fee change merchant_wallet_transfer_fee <value in $ in format 0.00>",
                  "value": "Fee when transferring from merchant wallet of the community"},
-                {"name": f"{d['command']}fee change xlm_withdrawal_fee <value in $ in format 0.00>",
+                {"name": f"{self.command_string}fee change xlm_withdrawal_fee <value in $ in format 0.00>",
                  "value": "Withdrawal fee from personal wallet to outside wallet on Stellar chain"},
 
             ]
@@ -134,7 +132,7 @@ class FeeManagementAndControl(commands.Cog):
             fee_data = {
                 f"fee_list.{ticker}": rounded
             }
-            if bot_manager.manage_fees_and_limits(key='withdrawals', data_to_update=fee_data):
+            if self.backoffice.bot_manager.manage_fees_and_limits(key='withdrawals', data_to_update=fee_data):
                 message = f'You have successfully set Stellar Lumen withdrawal fee to be {rounded}$.'
                 title = '__Stellar Lumen withdrawal fee information__'
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
@@ -165,7 +163,7 @@ class FeeManagementAndControl(commands.Cog):
         merch_data = {
             f"fee": rounded
         }
-        if bot_manager.manage_fees_and_limits(key='merchant_min', data_to_update=merch_data):
+        if self.backoffice.bot_manager.manage_fees_and_limits(key='merchant_min', data_to_update=merch_data):
             message = f'You have successfully set merchant minimum withdrawal to be {rounded}$ per currency used.'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
                                                  sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
@@ -189,7 +187,7 @@ class FeeManagementAndControl(commands.Cog):
         merch_data = {
             f"fee": rounded
         }
-        if bot_manager.manage_fees_and_limits(key='license', data_to_update=merch_data):
+        if self.backoffice.bot_manager.manage_fees_and_limits(key='license', data_to_update=merch_data):
             message = f'You have successfully set merchant monthly license fee to be {rounded}$.'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
                                                  sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
@@ -213,7 +211,7 @@ class FeeManagementAndControl(commands.Cog):
         merch_data = {
             f"fee": rounded
         }
-        if bot_manager.manage_fees_and_limits(key='wallet_transfer', data_to_update=merch_data):
+        if self.backoffice.bot_manager.manage_fees_and_limits(key='wallet_transfer', data_to_update=merch_data):
             message = f'You have successfully set merchant wallet transfer fee to be {rounded}$.'
             title = '__Merchant wallet transfer fee information__'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,

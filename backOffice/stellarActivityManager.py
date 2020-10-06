@@ -14,7 +14,6 @@ from utils.tools import Helpers
 
 helper = Helpers()
 hot = helper.read_json_file(file_name='hotWallets.json')
-d = helper.read_json_file(file_name='botSetup.json')
 
 
 class StellarManager:
@@ -22,9 +21,9 @@ class StellarManager:
     Manages Stellar on chain activities
     """
 
-    def __init__(self):
+    def __init__(self, connection):
         self.hot_wallet = hot['xlm']
-        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
+        self.connection = connection
         self.stellar_coin = self.connection['CryptoLink']
 
         # Collections connections
