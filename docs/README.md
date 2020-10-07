@@ -46,6 +46,7 @@ experience.
 - [Integrated Currencies and Tokens](COINLIMITS.md)
 - [Discord User Commands](USERCOMMANDS.md)
 - [Initiate Merchant as Guild owner](MERCHANTCOMMANDS.md)
+- [Crypto Link Uplink Setup as Guild owner](MERCHANTCOMMANDS.md)
 - [Help Commands](HELPCMDS.md)
 - [Complete System Command list](COMMANDMAP.md)
 
