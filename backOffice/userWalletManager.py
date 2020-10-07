@@ -5,8 +5,6 @@ into history
 
 import os
 import sys
-from pymongo import MongoClient, errors
-import motor.motor_asyncio
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
@@ -15,7 +13,6 @@ from utils.tools import Helpers
 
 helper = Helpers()
 hot = helper.read_json_file(file_name='hotWallets.json')
-d = helper.read_json_file(file_name='botSetup.json')
 
 
 class UserWalletManager:
@@ -23,10 +20,10 @@ class UserWalletManager:
     Manages Stellar on chain activities
     """
 
-    def __init__(self):
+    def __init__(self, connection, as_connection):
         self.hot_wallet = hot['xlm']
-        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
-        self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(d['database']['connection'])  # Async connection
+        self.connection = connection
+        self.as_connection = as_connection
         self.crypto_link = self.connection['CryptoLink']
 
         self.user_wallets = self.crypto_link.userWallets

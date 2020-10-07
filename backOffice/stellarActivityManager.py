@@ -8,6 +8,7 @@ import sys
 
 from pymongo import MongoClient, errors
 import motor.motor_asyncio
+
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
@@ -17,14 +18,14 @@ helper = Helpers()
 hot = helper.read_json_file(file_name='hotWallets.json')
 d = helper.read_json_file(file_name='botSetup.json')
 
-
 class StellarManager:
     """
     Manages Stellar on chain activities
     """
 
-    def __init__(self):
+    def __init__(self, connection):
         self.hot_wallet = hot['xlm']
+        # to be corrected with a small change in bakcoffice.py also :
         self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
         self.cl_connection = self.connection['CryptoLink']
         self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(d['database']['connection'])

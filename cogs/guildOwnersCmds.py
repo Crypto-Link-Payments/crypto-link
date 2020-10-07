@@ -2,16 +2,13 @@ from datetime import datetime
 
 from discord.ext import commands
 from discord import TextChannel, Embed, Colour
-from backOffice.guildServicesManager import GuildProfileManager
 
 from cogs.utils.customCogChecks import is_owner, is_public, guild_has_stats
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
 helper = Helpers()
-guild_manager = GuildProfileManager()
 customMessages = CustomMessages()
-d = helper.read_json_file(file_name='botSetup.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
@@ -19,6 +16,8 @@ CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 class GuildOwnerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.backoffice = bot.backoffice
+        self.command_string = bot.get_command_str()
 
     @commands.group()
     @commands.check(is_owner)
@@ -28,11 +27,11 @@ class GuildOwnerCommands(commands.Cog):
             title = '__Guild Owner Manual__'
             description = "All available commands to operate with guild system"
             list_of_values = [
-                {"name": "Register Guild", "value": f"{d['command']}owner register"},
-                {"name": "Guild Crypto Link Stats", "value": f"{d['command']}owner stats"},
-                {"name": "Guild Applied Services", "value": f"{d['command']}owner services"},
-                {"name": "Guild CL Explorer Settings", "value": f"{d['command']}owner explorer"},
-                {"name": "Guild CL Transaction Fee Settings", "value": f"{d['command']}owner fees"},
+                {"name": "Register Guild", "value": f"{self.command_string}owner register"},
+                {"name": "Guild Crypto Link Stats", "value": f"{self.command_string}owner stats"},
+                {"name": "Guild Applied Services", "value": f"{self.command_string}owner services"},
+                {"name": "Guild CL Explorer Settings", "value": f"{self.command_string}owner explorer"},
+                {"name": "Guild CL Transaction Fee Settings", "value": f"{self.command_string}owner fees"},
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -41,7 +40,7 @@ class GuildOwnerCommands(commands.Cog):
     @owner.command()
     @commands.check(is_owner)
     async def register(self, ctx):
-        if not guild_manager.check_guild_registration_stats(guild_id=ctx.guild.id):
+        if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
             new_guild = {
                 "guildId": ctx.message.guild.id,
                 "guildName": f'{ctx.guild}',
@@ -62,7 +61,7 @@ class GuildOwnerCommands(commands.Cog):
                         "emojiTxCount": int(0),
                         "multiTxCount": int(0)}
             }
-            await guild_manager.register_guild(guild_data=new_guild)
+            await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
 
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message='You have successfully registered guild into the system',
@@ -74,8 +73,7 @@ class GuildOwnerCommands(commands.Cog):
     @owner.command()
     @commands.check(guild_has_stats)
     async def stats(self, ctx):
-        stats = await guild_manager.get_guild_stats(guild_id=ctx.guild.id)
-        from pprint import pprint
+        stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=ctx.guild.id)
 
         stats_info = Embed(title="__Guild Statistics__",
                            timestamp=datetime.utcnow(),
@@ -104,7 +102,7 @@ class GuildOwnerCommands(commands.Cog):
     @owner.command()
     @commands.check(guild_has_stats)
     async def services(self, ctx):
-        service_status = await guild_manager.get_service_statuses(guild_id=ctx.guild.id)
+        service_status = await self.backoffice.guild_profiles.get_service_statuses(guild_id=ctx.guild.id)
         explorer_channel = self.bot.get_channel(id=int(service_status["explorerSettings"]["channelId"]))
 
         service_info = Embed(title="__Guild Service Status__",
@@ -128,8 +126,8 @@ class GuildOwnerCommands(commands.Cog):
             description = "All available commands to operate with guild system"
             list_of_values = [
                 {"name": "Apply Channel for CL feed",
-                 "value": f"{d['command']}owner explorer apply <#discord.Channel>"},
-                {"name": "Remove Channel for CL feed", "value": f"{d['command']}owner explorer remove"}
+                 "value": f"{self.command_string}owner explorer apply <#discord.Channel>"},
+                {"name": "Remove Channel for CL feed", "value": f"{self.command_string}owner explorer remove"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -141,7 +139,7 @@ class GuildOwnerCommands(commands.Cog):
             "explorerSettings.channelId": int(chn.id)
         }
 
-        if await guild_manager.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
+        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message=f'You have successfully set channel {chn} to receive Crypto'
                                                         f' Link Network Feed',
@@ -157,7 +155,7 @@ class GuildOwnerCommands(commands.Cog):
             "explorerSettings.channelId": int(0)
         }
 
-        if await guild_manager.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
+        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message=f'You have successfully turned OFF Crypto Link Network Feed',
                                                 destination=ctx.message.author, sys_msg_title='__System Message__')

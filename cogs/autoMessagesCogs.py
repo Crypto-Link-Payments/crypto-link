@@ -10,7 +10,6 @@ from discord import Embed, Colour, TextChannel
 from discord.ext import commands
 
 from cogs.utils.systemMessaages import CustomMessages
-from backOffice.guildServicesManager import GuildProfileManager
 from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,7 +17,6 @@ sys.path.append(project_path)
 
 helpers = Helpers()
 custom_messages = CustomMessages()
-guild_manager = GuildProfileManager()
 
 d = helpers.read_json_file(file_name='botSetup.json')
 auto_messaging = helpers.read_json_file(file_name='autoMessagingChannels.json')
@@ -172,7 +170,7 @@ class AutoFunctions(commands.Cog):
         print(Fore.LIGHTGREEN_EX + f'Member reach: {reach} members')
         print(Fore.LIGHTYELLOW_EX + '===================================')
 
-        if not guild_manager.check_guild_registration_stats(guild_id=guild.id):
+        if not self.bot.guild_profiles.check_guild_registration_stats(guild_id=guild.id):
             new_guild = {
                 "guildId": guild.id,
                 "guildName": f'{guild}',
@@ -193,7 +191,7 @@ class AutoFunctions(commands.Cog):
                         "emojiTxCount": int(0),
                         "multiTxCount": int(0)}
             }
-            await guild_manager.register_guild(guild_data=new_guild)
+            await self.bot.guild_profiles.register_guild(guild_data=new_guild)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
