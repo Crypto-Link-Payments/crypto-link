@@ -9,13 +9,7 @@ from datetime import datetime
 from discord import Embed, Colour
 from discord.ext import commands
 from git import Repo, InvalidGitRepositoryError
-from backOffice.profileRegistrations import AccountManager
-from backOffice.botWallet import BotManager
-from backOffice.stellarActivityManager import StellarManager
-from backOffice.stellarOnChainHandler import StellarWallet
-from backOffice.corpHistory import CorporateHistoryManager
-from backOffice.statsManager import StatsManager
-from cogs.utils.monetaryConversions import get_decimal_point, get_normal, convert_to_usd
+from cogs.utils.monetaryConversions import get_decimal_point, get_normal
 from cogs.utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -24,14 +18,7 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 helper = Helpers()
-account_mng = AccountManager()
 customMessages = CustomMessages()
-stellar_manager = StellarManager()
-stellar_wallet = StellarWallet()
-corporate_hist_mng = CorporateHistoryManager()
-bot_manager = BotManager()
-stats_manager = StatsManager()
-d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
@@ -54,6 +41,8 @@ class BotManagementCommands(commands.Cog):
         Passing discord bot instance
         """
         self.bot = bot
+        self.backoffice = bot.backoffice
+        self.command_string = bot.get_command_str()
 
     async def send_transfer_notification(self, ctx, member, channel_id: int, normal_amount, emoji: str,
                                          chain_name: str):
@@ -93,15 +82,15 @@ class BotManagementCommands(commands.Cog):
             title = '__Crypto Link commands__'
             description = "All commands to operate with Crypto Link Corporate Wallet"
             list_of_values = [
-                {"name": "Check Corporate Balance", "value": f"{d['command']}cl balance"},
+                {"name": "Check Corporate Balance", "value": f"{self.command_string}cl balance"},
                 {"name": "Withdrawing XLM from Corp to personal",
-                 "value": f"{d['command']}cl sweep"},
+                 "value": f"{self.command_string}cl sweep"},
                 {"name": "Statistics of crypto link system",
-                 "value": f"{d['command']}cl stats"},
+                 "value": f"{self.command_string}cl stats"},
                 {"name": "Other categories",
-                 "value": f"{d['command']}system\n"
-                          f"{d['command']}manage\n"
-                          f"{d['command']}hot"}
+                 "value": f"{self.command_string}system\n"
+                          f"{self.command_string}manage\n"
+                          f"{self.command_string}hot"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -114,7 +103,7 @@ class BotManagementCommands(commands.Cog):
         Check the off-chain balance status of Crypto Link system
         """
         print(f'CL BALANCE : {ctx.author} -> {ctx.message.content}')
-        data = bot_manager.get_bot_wallets_balance()
+        data = self.backoffice.bot_manager.get_bot_wallets_balance()
         values = Embed(title="Balance of Crypto-Link Off chain balance",
                        description="Current state of Crypto Link Lumen wallet",
                        color=Colour.blurple())
@@ -134,7 +123,7 @@ class BotManagementCommands(commands.Cog):
         """
         Statistical information on Crypto Link system
         """
-        data = stats_manager.get_all_stats()
+        data = self.backoffice.stats_manager.get_all_stats()
         cl_off_chain = data["xlm"]["offChain"]
         cl_on_chain = data['xlm']['onChain']
 
@@ -198,24 +187,24 @@ class BotManagementCommands(commands.Cog):
         Transfer funds from Crypto Link to develop wallet
         """
         if ticker in list(integrated_coins.keys()):
-            balance = int(bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
+            balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
             print(balance)
             if balance > 0:  # Check if balance greater than -
                 # Checks if recipient exists
-                if not account_mng.check_user_existence(user_id=ctx.message.author.id):
-                    account_mng.register_user(discord_id=ctx.message.author.id,
+                if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
+                    self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
                                               discord_username=f'{ctx.message.author}')
 
-                if stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
+                if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                         stroops=int(balance), direction=1):
                     # Deduct the balance from the community balance
-                    if bot_manager.update_lpi_wallet_balance(amount=balance, wallet="xlm", direction=2):
+                    if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=balance, wallet="xlm", direction=2):
                         # Store in history and send notifications to owner and to channel
                         dec_point = get_decimal_point(symbol='xlm')
                         normal_amount = get_normal(str(balance), decimal_point=dec_point)
 
                         # Store into the history of corporate transfers
-                        corporate_hist_mng.store_transfer_from_corp_wallet(time_utc=int(time.time()),
+                        self.backoffice.corporate_hist_mng.store_transfer_from_corp_wallet(time_utc=int(time.time()),
                                                                            author=f'{ctx.message.author}',
                                                                            destination=int(ctx.message.author.id),
                                                                            amount_atomic=balance, amount=normal_amount,
@@ -230,7 +219,7 @@ class BotManagementCommands(commands.Cog):
 
                     else:
                         # Revert the user balance if community balance can not be updated
-                        stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
+                        self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                              stroops=int(balance), direction=2)
 
                         message = f"Stellar funds could not be deducted from corporate account. Please try again later"
@@ -255,9 +244,9 @@ class BotManagementCommands(commands.Cog):
     async def system(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__Turning bot off__',
-                      'value': f"***{d['command']}system off*** "},
+                      'value': f"***{self.command_string}system off*** "},
                      {'name': '__Pulling update from Github__',
-                      'value': f"***{d['command']}system update*** "},
+                      'value': f"***{self.command_string}system update*** "},
                      ]
 
             await customMessages.embed_builder(ctx, title='Available sub commands for system',
@@ -327,7 +316,7 @@ class BotManagementCommands(commands.Cog):
 
         if ctx.invoked_subcommand is None:
             value = [{'name': 'Entry for commands to manage COGS',
-                      'value': f"{d['command']}manage scripts*** "}
+                      'value': f"{self.command_string}manage scripts*** "}
                      ]
             await customMessages.embed_builder(ctx, title='Crypto Link Management commands',
                                                description=f"",
@@ -337,13 +326,13 @@ class BotManagementCommands(commands.Cog):
     async def scripts(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__List all cogs__',
-                      'value': f"***{d['command']}manage scripts list_cogs*** "},
+                      'value': f"***{self.command_string}manage scripts list_cogs*** "},
                      {'name': '__Loading specific cog__',
-                      'value': f"***{d['command']}manage scripts load <cog name>*** "},
+                      'value': f"***{self.command_string}manage scripts load <cog name>*** "},
                      {'name': '__Unloading specific cog__',
-                      'value': f"***{d['command']}manage scripts unload <cog name>*** "},
+                      'value': f"***{self.command_string}manage scripts unload <cog name>*** "},
                      {'name': '__Reload all cogs__',
-                      'value': f"***{d['command']}manage scripts reload*** "}
+                      'value': f"***{self.command_string}manage scripts reload*** "}
                      ]
 
             await customMessages.embed_builder(ctx, title='Available sub commands for system',
@@ -431,7 +420,7 @@ class BotManagementCommands(commands.Cog):
         Command entry point for hot wallet functions
         """
         if ctx.invoked_subcommand is None:
-            value = [{'name': f'***{d["command"]}hot balance*** ',
+            value = [{'name': f'***{self.command_string}hot balance*** ',
                       'value': "Returns information from wallet RPC on stellar balance"}
                      ]
             await customMessages.embed_builder(ctx, title='Querying hot wallet details',
@@ -443,7 +432,7 @@ class BotManagementCommands(commands.Cog):
         """
         Check Stellar hot wallet details
         """
-        data = stellar_wallet.get_stellar_hot_wallet_details()
+        data = self.backoffice.stellar_wallet.get_stellar_hot_wallet_details()
 
         if data:
             bal_start = Embed(title='Stellar hot wallet details',

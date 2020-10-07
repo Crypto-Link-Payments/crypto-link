@@ -8,23 +8,16 @@ import discord
 from discord.ext import commands
 from pycoingecko import CoinGeckoAPI
 
-from backOffice.profileRegistrations import AccountManager
-from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 
-from backOffice.statsManager import StatsManager
 from cogs.utils.monetaryConversions import get_decimal_point
 from utils import numbers
 from utils.tools import Helpers
 
 helper = Helpers()
-account_mng = AccountManager()
 customMessages = CustomMessages()
 gecko = CoinGeckoAPI()
-guild_profiles = GuildProfileManager()
-stats_manager = StatsManager()
-d = helper.read_json_file(file_name='botSetup.json')
 sys_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -36,6 +29,7 @@ class ConsumerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.backoffice = bot.backoffice
+        self.command_string = bot.get_command_str()
 
     @staticmethod
     def get_coin_usd_value(coin_name):
@@ -69,11 +63,11 @@ class ConsumerCommands(commands.Cog):
         title = '__Membership available commands__'
         description = 'Representation of all available commands under ***membership*** category.'
         list_of_commands = [
-            {"name": f'{d["command"]}membership roles',
+            {"name": f'{self.command_string}membership roles',
              "value": f'All available roles to be bought on the community {ctx.message.guild}'},
-            {"name": f'{d["command"]}membership subscribe <@discord Role> <ticker xlm>',
+            {"name": f'{self.command_string}membership subscribe <@discord Role> <ticker xlm>',
              "value": 'Gets yourself a role'},
-            {"name": f'{d["command"]}membership current',
+            {"name": f'{self.command_string}membership current',
              "value": 'Returns the list and description on all roles user currently has, which have been'
                       'obtained through merchant system and have not yet expired.'}
         ]
@@ -188,7 +182,7 @@ class ConsumerCommands(commands.Cog):
                     role_value_crypto = float(convert_to_dollar / coin_usd_price)
                     role_rounded = round(role_value_crypto, get_decimal_point(symbol=ticker))
                     crypto_price_atomic = self.make_atomic(amount=role_value_crypto, coin_name=ticker)
-                    balance = account_mng.get_balance_based_on_ticker(user_id=int(ctx.message.author.id),
+                    balance = self.backoffice.account_mng.get_balance_based_on_ticker(user_id=int(ctx.message.author.id),
                                                                       ticker=ticker)
                     # Check if user has sufficient balance
                     if balance >= crypto_price_atomic and merchant_manager.modify_funds_in_community_merchant_wallet(
@@ -198,7 +192,7 @@ class ConsumerCommands(commands.Cog):
                             wallet_tick=ticker):
 
                         # Update the community wallet
-                        if account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
+                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
                                                                   ticker=ticker,
                                                                   direction=1,
                                                                   amount=crypto_price_atomic):
@@ -263,7 +257,7 @@ class ConsumerCommands(commands.Cog):
                                     'xlmStats.roleTxCount': int(1),
                                 }
 
-                                await stats_manager.as_update_role_purchase_stats(user_id=ctx.message.author.id,
+                                await self.backoffice.stats_manager.as_update_role_purchase_stats(user_id=ctx.message.author.id,
                                                                                   merchant_data=user_stats_update)
 
                                 global_merchant_stats = {
@@ -275,7 +269,7 @@ class ConsumerCommands(commands.Cog):
                                     "merchantPurchases": 1,
                                     "merchantMoved": role_rounded
                                 }
-                                await stats_manager.update_cl_merchant_stats(ticker='xlm',
+                                await self.backoffice.stats_manager.update_cl_merchant_stats(ticker='xlm',
                                                                              merchant_stats=global_merchant_stats,
                                                                              ticker_stats=global_ticker_stats)
 
@@ -285,11 +279,11 @@ class ConsumerCommands(commands.Cog):
                                     "communityStats.xlmVolume": role_rounded
 
                                 }
-                                await stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
+                                await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
                                                                        guild_stats_data=guild_stats)
 
                                 load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                 guild_profiles.get_all_explorer_applied_channels()]
+                                                 self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                                 explorer_msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
                                                f'(${convert_to_dollar}) on ' \
                                                f'{ctx.message.guild}'
@@ -317,7 +311,7 @@ class ConsumerCommands(commands.Cog):
             else:
                 message = f'Role {role} is either deactivated at this moment or has not bee monetized ' \
                           f'on {ctx.message.guild}. Please contact {ctx.guild.owner} or use ' \
-                          f' ***{d["command"]}membership roles*** to familiarize yourself with all available ' \
+                          f' ***{self.command_string}membership roles*** to familiarize yourself with all available ' \
                           f'roles and their status'
                 await customMessages.system_message(ctx=ctx, message=message,
                                                     sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,

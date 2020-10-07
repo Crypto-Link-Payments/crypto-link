@@ -3,12 +3,6 @@ import re
 from discord.ext import commands
 from discord import TextChannel
 
-from backOffice.botWallet import BotManager
-from backOffice.guildServicesManager import GuildProfileManager
-from backOffice.statsManager import StatsManager
-from backOffice.stellarActivityManager import StellarManager
-from backOffice.userWalletManager import UserWalletManager
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.customCogChecks import user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd
 from cogs.utils.securityChecks import check_stellar_address
@@ -16,14 +10,7 @@ from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
 helper = Helpers()
-stellar_wallet = StellarWallet()
 custom_messages = CustomMessages()
-user_wallets = UserWalletManager()
-bot_manager = BotManager()
-stats_manager = StatsManager()
-stellar = StellarManager()
-guild_profiles = GuildProfileManager()
-d = helper.read_json_file(file_name='botSetup.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 notify_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -47,6 +34,8 @@ def check(author):
 class WithdrawalCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.backoffice = bot.backoffice
+        self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
 
     @commands.group()
@@ -58,11 +47,11 @@ class WithdrawalCommands(commands.Cog):
             description = "All commands available to withdraw funds from Discord Wallet"
             list_of_values = [
                 {"name": f"{CONST_STELLAR_EMOJI} Withdraw Stellar (XLM) from Discord wallet {CONST_STELLAR_EMOJI}",
-                 "value": f"{d['command']}withdraw xlm <amount> <destination address>\n"
+                 "value": f"{self.command_string}withdraw xlm <amount> <destination address>\n"
                           f"\nexample:\n"
                           f"```!withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"},
                 {"name": f" Withdraw Tokens",
-                 "value": f"{d['command']}withdraw <ticker> <amount> <destination address>\n"
+                 "value": f"{self.command_string}withdraw <ticker> <amount> <destination address>\n"
                           f"\nexample:\n"
                           f"```!withdraw clt 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"}]
 
@@ -78,7 +67,7 @@ class WithdrawalCommands(commands.Cog):
                 address=address):
 
             # get and convert coin withdrawal fee from major to atomic
-            all_coin_fees = bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')['fee_list']
+            all_coin_fees = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')['fee_list']
 
             # Stellar details
             stellar_details = integrated_coins['xlm']
@@ -96,7 +85,7 @@ class WithdrawalCommands(commands.Cog):
             token_major = (int(token_withdrawal_amount_atomic / (10 ** int(token_decimal))))
 
             # User balances
-            user_balances = user_wallets.get_balances(user_id=ctx.message.author.id)
+            user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
             user_stellar_balance = user_balances['xlm']
             stellar_balance_major = (int(user_stellar_balance / (10 ** int(token_decimal))))
             user_token_balance = user_balances[token]
@@ -138,7 +127,7 @@ class WithdrawalCommands(commands.Cog):
                         }
 
                         # Withdraw balance from user wallet
-                        if user_wallets.update_user_balance_off_chain(user_id=ctx.message.author.id,
+                        if self.backoffice.wallet_manager.update_user_balance_off_chain(user_id=ctx.message.author.id,
                                                                       coin_details=to_deduct):
                             bot_append = {
                                 "xlm": {"balance": int(total_stellar_to_withdraw)},
@@ -146,10 +135,10 @@ class WithdrawalCommands(commands.Cog):
                             }
 
                             # Give fees to the bot
-                            if bot_manager.update_lpi_wallet_balance_multi(fees_data=bot_append, token=token):
+                            if self.backoffice.bot_manager.update_lpi_wallet_balance_multi(fees_data=bot_append, token=token):
 
                                 # Initiate on chain withdrawal from hot wallet
-                                result = stellar_wallet.token_withdrawal(address=address, token=ticker.upper(),
+                                result = self.backoffice.stellar_wallet.token_withdrawal(address=address, token=ticker.upper(),
                                                                          amount=f'{withdrawal_amount}')
 
                                 # Check result of the on-chain withdrawal
@@ -165,10 +154,10 @@ class WithdrawalCommands(commands.Cog):
                                                               f"tokenFee": token_fee}
 
                                     # TODO rewrite this to async version
-                                    await stellar.insert_to_withdrawal_hist(tx_type=1, tx_data=result)
+                                    await self.backoffice.stellar_manager.insert_to_withdrawal_hist(tx_type=1, tx_data=result)
 
                                     # Update CL on chain stats
-                                    await stats_manager.update_cl_on_chain_stats(ticker=token,
+                                    await self.backoffice.stats_manager.update_cl_on_chain_stats(ticker=token,
                                                                                  stat_details={"withdrawalCount": 1,
                                                                                                "withdrawnAmount":
                                                                                                    token_major})
@@ -177,12 +166,12 @@ class WithdrawalCommands(commands.Cog):
                                         f"{token}.withdrawalsCount": 1,
                                         f"{token}.totalWithdrawn": token_major,
                                     }
-                                    await stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
+                                    await self.backoffice.stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
                                                                             tx_stats_data=withdrawal_data)
 
                                     # Message to explorer
                                     load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                     guild_profiles.get_all_explorer_applied_channels()]
+                                                     self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                                     explorer_msg = f':outbox_tray: {token_name} amount {token_major} {token_emoji}  ' \
                                                    f'withdrawn'
                                     await custom_messages.explorer_messages(applied_channels=load_channels,
@@ -212,7 +201,7 @@ class WithdrawalCommands(commands.Cog):
                                         f"{token}": int(total_token_to_withdraw)
                                     }
 
-                                    user_wallets.update_user_balance_off_chain(user_id=ctx.message.author.id,
+                                    self.backoffice.wallet_manager.update_user_balance_off_chain(user_id=ctx.message.author.id,
                                                                                coin_details=to_return)
 
                                     # Deduct appended fees from Bot wallet due to failed transaction
@@ -221,7 +210,7 @@ class WithdrawalCommands(commands.Cog):
                                         f'{token}': {"balance": int(token_fee_atomic) * (-1)}
                                     }
 
-                                    bot_manager.update_lpi_wallet_balance_multi(fees_data=bot_deduct, token=token)
+                                    self.backoffice.bot_manager.update_lpi_wallet_balance_multi(fees_data=bot_deduct, token=token)
 
                                     await custom_messages.system_message(ctx, color_code=1, message=result['error'],
                                                                          destination=ctx.message.author,
@@ -231,7 +220,7 @@ class WithdrawalCommands(commands.Cog):
                                     "xlm": int(total_stellar_to_withdraw),
                                     f"{token}": int(total_token_to_withdraw)
                                 }
-                                user_wallets.update_user_balance_off_chain(user_id=ctx.message.author.id,
+                                self.backoffice.wallet_manager.update_user_balance_off_chain(user_id=ctx.message.author.id,
                                                                            coin_details=to_append)
 
                                 message = f'There has been system issue, please try again later'
@@ -279,7 +268,7 @@ class WithdrawalCommands(commands.Cog):
         :return:
         """
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
-        stellar_fee = bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')['fee_list']['xlm']
+        stellar_fee = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')['fee_list']['xlm']
         fee_in_stroops = int(stellar_fee * (10 ** 7))
 
         # Get stellar details from json
@@ -292,7 +281,7 @@ class WithdrawalCommands(commands.Cog):
                 final_stroop = stroops + fee_in_stroops
                 # Check user balance
 
-                wallet_details = user_wallets.get_ticker_balance(ticker='xlm', user_id=ctx.message.author.id)
+                wallet_details = self.backoffice.wallet_manager.get_ticker_balance(ticker='xlm', user_id=ctx.message.author.id)
 
                 if wallet_details >= final_stroop:
                     xlm_with_amount = stroops / 10000000
@@ -318,11 +307,11 @@ class WithdrawalCommands(commands.Cog):
                         }
 
                         # Withdraw balance from user wallet
-                        if user_wallets.update_user_balance_off_chain(user_id=ctx.message.author.id,
+                        if self.backoffice.wallet_manager.update_user_balance_off_chain(user_id=ctx.message.author.id,
                                                                       coin_details=to_deduct):
 
                             # Initiate on chain withdrawal
-                            result = stellar_wallet.token_withdrawal(address=address, token='xlm',
+                            result = self.backoffice.stellar_wallet.token_withdrawal(address=address, token='xlm',
                                                                      amount=str(xlm_with_amount))
 
                             if result.get("hash"):
@@ -332,7 +321,7 @@ class WithdrawalCommands(commands.Cog):
                                 result['offChainData'] = {"xlmFee": stellar_fee}
 
                                 # Insert in the history of withdrawals
-                                await stellar.insert_to_withdrawal_hist(tx_type=1, tx_data=result)
+                                await self.backoffice.stellar_manager.insert_to_withdrawal_hist(tx_type=1, tx_data=result)
 
                                 # Send message to user on withdrawal
                                 await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
@@ -348,7 +337,7 @@ class WithdrawalCommands(commands.Cog):
                                                                                       channel=channel_sys,
                                                                                       withdrawal_data=result)
 
-                                if bot_manager.update_lpi_wallet_balance(ticker='xlm',
+                                if self.backoffice.bot_manager.update_lpi_wallet_balance(ticker='xlm',
                                                                          to_update={'balance': int(fee_in_stroops)}):
                                     await custom_messages.cl_staff_incoming_funds_notification(sys_channel=channel_sys,
                                                                                                incoming_fees=f'{stellar_fee} {CONST_STELLAR_EMOJI}')
@@ -358,7 +347,7 @@ class WithdrawalCommands(commands.Cog):
                                         "xlmStats.withdrawalsCount": 1,
                                         "xlmStats.totalWithdrawn": round(stroops / 10000000, 7),
                                     }
-                                    await stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
+                                    await self.backoffice.stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
                                                                             tx_stats_data=withdrawal_data)
 
                                     # Update bot stats
@@ -366,12 +355,12 @@ class WithdrawalCommands(commands.Cog):
                                         "withdrawalCount": 1,
                                         "withdrawnAmount": round(stroops / 10000000, 7)
                                     }
-                                    await stats_manager.update_cl_on_chain_stats(ticker='xlm',
+                                    await self.backoffice.stats_manager.update_cl_on_chain_stats(ticker='xlm',
                                                                                  stat_details=bot_stats_data)
                                     # Message to explorer
                                     in_dollar = convert_to_usd(amount=xlm_with_amount, coin_name='stellar')
                                     load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                     guild_profiles.get_all_explorer_applied_channels()]
+                                                     self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                                     explorer_msg = f':outbox_tray: {xlm_with_amount} {CONST_STELLAR_EMOJI} ' \
                                                    f'(${in_dollar["total"]}) on {ctx.message.guild}'
                                     await custom_messages.explorer_messages(applied_channels=load_channels,
@@ -384,7 +373,7 @@ class WithdrawalCommands(commands.Cog):
                                 to_append = {
                                     "xlm": int(final_stroop)
                                 }
-                                user_wallets.update_user_balance_off_chain(user_id=ctx.message.author.id,
+                                self.backoffice.wallet_manager.update_user_balance_off_chain(user_id=ctx.message.author.id,
                                                                            coin_details=to_append)
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                      destination=0,
@@ -435,7 +424,7 @@ class WithdrawalCommands(commands.Cog):
         elif isinstance(error, commands.MissingRequiredArgument):
             message = f'**You have not provided one of the required arguments for the command ' \
                       f'to work. Command structure ' \
-                      f'to initiate withdrawal is {d["command"]}withdraw stellar <amount> <address>'
+                      f'to initiate withdrawal is {self.command_string}withdraw stellar <amount> <address>'
             title = f'**__Missing required argument__** :clipboard:'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)

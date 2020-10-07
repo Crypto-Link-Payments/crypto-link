@@ -1,26 +1,15 @@
-import discord
+
 from discord.ext import commands
 from discord import User
 import re
-from backOffice.profileRegistrations import AccountManager
-from backOffice.statsManager import StatsManager
-from backOffice.userWalletManager import UserWalletManager
-from backOffice.stellarActivityManager import StellarManager
-from backOffice.guildServicesManager import GuildProfileManager
 from cogs.utils import monetaryConversions
 from cogs.utils.customCogChecks import is_public, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
 helper = Helpers()
-account_mng = AccountManager()
-stellar = StellarManager()
-user_wallets = UserWalletManager()
-stats_manager = StatsManager()
-guild_profiles = GuildProfileManager()
 customMessages = CustomMessages()
 
-d = helper.read_json_file(file_name='botSetup.json')
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -47,6 +36,7 @@ class TransactionCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.backoffice = bot.backoffice
         self.list_of_coins = list(integrated_coins.keys())
 
     def build_stats(self, transaction_data: dict, tx_type: str):
@@ -101,16 +91,16 @@ class TransactionCommands(commands.Cog):
         processed_stats = self.build_stats(transaction_data=transaction_data, tx_type=tx_type)
 
         # Update stats stats
-        await stats_manager.update_cl_off_chain_stats(ticker=transaction_data["ticker"],
+        await self.backoffice.stats_manager.update_cl_off_chain_stats(ticker=transaction_data["ticker"],
                                                       ticker_stats=processed_stats["globalBot"])
 
         # Updates sender and recipient public transaction stats
-        await stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
+        await self.backoffice.stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
                                                 tx_stats_data=processed_stats['senderStats'])
-        await stats_manager.update_usr_tx_stats(user_id=transaction_data["recipientId"],
+        await self.backoffice.stats_manager.update_usr_tx_stats(user_id=transaction_data["recipientId"],
                                                 tx_stats_data=processed_stats["recipientStats"])
 
-        await stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
+        await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
                                                guild_stats_data=processed_stats["guildStats"])
 
     async def stream_transaction(self, ctx, recipient, tx_details: dict, message: str, tx_type: str):
@@ -144,17 +134,13 @@ class TransactionCommands(commands.Cog):
 
         # Send out explorer
         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                         guild_profiles.get_all_explorer_applied_channels()]
+                         self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
         explorer_msg = f'💵  {tx_details["amount"]} {CONST_STELLAR_EMOJI} (${in_dollar["total"]}) on ' \
                        f'{ctx.message.guild} channel {ctx.message.channel}'
         await customMessages.explorer_messages(applied_channels=load_channels,
                                                message=explorer_msg, tx_type=tx_type)
 
-    @commands.group()
-    @commands.check(is_public)
-    @commands.check(has_wallet)
-    @commands.cooldown(1, 60, commands.BucketType.user)
-    async def send(self, ctx, amount: float, ticker: str, recipient: User, *, message: str = None):
+    async def send_impl(self, ctx, amount:float, ticker:str, recipient: User, *, tx_type: str, message:str = None):
         coin = ticker.lower()
         if amount > 0:
             if not ctx.message.author == recipient and not recipient.bot:
@@ -162,29 +148,29 @@ class TransactionCommands(commands.Cog):
                     coin_data = integrated_coins[ticker]
                     atomic_value = (int(amount * (10 ** int(coin_data["decimal"]))))
                     # Get user wallet ticker balance
-                    wallet_value = user_wallets.get_ticker_balance(ticker=ticker, user_id=ctx.message.author.id)
+                    wallet_value = self.backoffice.wallet_manager.get_ticker_balance(ticker=ticker, user_id=ctx.message.author.id)
                     if wallet_value >= atomic_value:
                         # Check if recipient has wallet or not
-                        if not account_mng.check_user_existence(user_id=recipient.id):
-                            account_mng.register_user(discord_id=recipient.id, discord_username=f'{recipient}')
+                        if not self.backoffice.account_mng.check_user_existence(user_id=recipient.id):
+                            self.backoffice.account_mng.register_user(discord_id=recipient.id, discord_username=f'{recipient}')
 
-                        if user_wallets.update_coin_balance(coin=ticker, user_id=ctx.message.author.id,
+                        if self.backoffice.wallet_manager.update_coin_balance(coin=ticker, user_id=ctx.message.author.id,
                                                             amount=int(atomic_value), direction=2):
-                            if user_wallets.update_coin_balance(coin=ticker, user_id=recipient.id,
+                            if self.backoffice.wallet_manager.update_coin_balance(coin=ticker, user_id=recipient.id,
                                                                 amount=int(atomic_value), direction=1):
                                 coin_data["amount"] = (atomic_value / (10 ** 7))
                                 coin_data["ticker"] = ticker
 
                                 # Produce dict for streamer
                                 await self.stream_transaction(ctx=ctx, recipient=recipient, tx_details=coin_data,
-                                                              message=message, tx_type='public')
+                                                              message=message, tx_type=tx_type)
 
                                 coin_data["recipientId"] = recipient.id
 
-                                await self.update_stats(ctx=ctx, transaction_data=coin_data, tx_type='public')
+                                await self.update_stats(ctx=ctx, transaction_data=coin_data, tx_type=tx_type)
 
                             else:
-                                user_wallets.update_coin_balance(coin=ticker, user_id=ctx.message.author.id,
+                                self.backoffice.wallet_manager.update_coin_balance(coin=ticker, user_id=ctx.message.author.id,
                                                                  amount=int(atomic_value), direction=1)
                                 message = f'{amount} XLA could not be sent to the {recipient} please try again later'
                                 await customMessages.system_message(ctx=ctx, color_code=1, message=message,
@@ -218,71 +204,21 @@ class TransactionCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
 
+
+
+    @commands.group()
+    @commands.check(is_public)
+    @commands.check(has_wallet)
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def send(self, ctx, amount: float, ticker: str, recipient: User, *, message: str = None):
+        await self.send_impl( ctx, amount, ticker, recipient, tx_type= "public", message=message)
+
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def private(self, ctx, amount: float, ticker: str, recipient: User, *, message: str = None):
-        coin = ticker.lower()
-        if amount > 0:
-            if not ctx.message.author == recipient and not recipient.bot:
-                if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins:
-                    coin_data = integrated_coins[ticker]
-                    atomic_value = (int(amount * (10 ** int(coin_data["decimal"]))))
-                    # Get user wallet ticker balance
-                    wallet_value = user_wallets.get_ticker_balance(ticker=ticker, user_id=ctx.message.author.id)
-                    if wallet_value >= atomic_value:
-                        # Check if recipient has wallet or not
-                        if not account_mng.check_user_existence(user_id=recipient.id):
-                            account_mng.register_user(discord_id=recipient.id, discord_username=f'{recipient}')
-
-                        if user_wallets.update_coin_balance(coin=ticker, user_id=ctx.message.author.id,
-                                                            amount=int(atomic_value), direction=2):
-                            if user_wallets.update_coin_balance(coin=ticker, user_id=recipient.id,
-                                                                amount=int(atomic_value), direction=1):
-                                coin_data["amount"] = (atomic_value / (10 ** 7))
-                                coin_data["ticker"] = ticker
-
-                                # Produce dict for streamer
-                                await self.stream_transaction(ctx=ctx, recipient=recipient, tx_details=coin_data,
-                                                              message=message, tx_type='private')
-
-                                coin_data["recipientId"] = recipient.id
-
-                                await self.update_stats(ctx=ctx, transaction_data=coin_data, tx_type='private')
-                            else:
-                                user_wallets.update_coin_balance(coin=ticker, user_id=ctx.message.author.id,
-                                                                 amount=int(atomic_value), direction=1)
-                                message = f'Transaction could not be executed at this moment. Please try again later'
-                                await customMessages.system_message(ctx=ctx, color_code=1, message=message,
-                                                                    destination=1,
-                                                                    sys_msg_title=CONST_TX_ERROR_TITLE)
-
-                        else:
-                            message = f'There has been an error while making P2P transaction please try again later'
-                            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                                sys_msg_title=CONST_TX_ERROR_TITLE)
-                    else:
-
-                        message = f'You have insufficient balance!'
-                        await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                            sys_msg_title=CONST_TX_ERROR_TITLE)
-                else:
-
-                    message = f'Coin {coin} has not been integrated yet into {self.bot.user}.'
-                    await customMessages.system_message(ctx=ctx, color_code=1, message=message,
-                                                        destination=1,
-                                                        sys_msg_title=CONST_TX_ERROR_TITLE)
-            else:
-
-                message = f'Making transaction to yourself or bot is just....funny!'
-                await customMessages.system_message(ctx=ctx, color_code=1, message=message,
-                                                    destination=1,
-                                                    sys_msg_title=CONST_TX_ERROR_TITLE)
-        else:
-            message = 'Nothing is nothing which mens that nothing can not be sent'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=CONST_TX_ERROR_TITLE)
+        await self.send_impl(ctx, amount, ticker, recipient, tx_type="private", message=message)
 
     @send.error
     async def send_error(self, ctx, error):

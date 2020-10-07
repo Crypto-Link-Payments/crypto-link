@@ -4,8 +4,6 @@ from datetime import datetime
 from discord import Role, Embed, Color, utils
 from discord.ext import commands
 
-from backOffice.botWallet import BotManager
-from backOffice.profileRegistrations import AccountManager
 from cogs.utils.customCogChecks import is_owner, has_wallet, is_public, merchant_com_reg_stats
 from cogs.utils.monetaryConversions import convert_to_currency, get_decimal_point
 from cogs.utils.monetaryConversions import get_normal
@@ -13,10 +11,7 @@ from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
 helper = Helpers()
-lpi_wallet = BotManager()
 customMessages = CustomMessages()
-account_mng = AccountManager()
-d = helper.read_json_file(file_name='botSetup.json')
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_ROLE_CREATION_ERROR = "__Role creation error___"
@@ -33,6 +28,7 @@ class MerchantCommunityOwner(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.backoffice = bot.backoffice
+        self.command_string = bot.get_command_str()
 
     @commands.command()
     @commands.check(is_owner)
@@ -52,7 +48,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                           community_name=f'{ctx.message.guild}'):
                 msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
                 message = f'You have successfully created community wallet. You can proceed' \
-                          f' with {d["command"]}merchant ' \
+                          f' with {self.command_string}merchant ' \
                           f'in order to familiarize yourself with all available commands. '
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                     destination=1)
@@ -65,7 +61,7 @@ class MerchantCommunityOwner(commands.Cog):
         else:
             msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
             message = f'You have already registered {ctx.guild} for Merchant system on {self.bot.user}. Proceed' \
-                      f' with command ***{d["command"]} merchant***'
+                      f' with command ***{self.command_string} merchant***'
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
                                                 destination=1)
 
@@ -80,22 +76,22 @@ class MerchantCommunityOwner(commands.Cog):
             title = "💱 __Merchant System Message Setup__💱 "
             description = 'All available commands under ***merchant*** category.'
             list_of_commands = [
-                {"name": f'{d["command"]}merchant manual',
+                {"name": f'{self.command_string}merchant manual',
                  "value": 'Step by step guide how to set-up and monetize community'},
-                {"name": f'{d["command"]}merchant monetize',
+                {"name": f'{self.command_string}merchant monetize',
                  "value": 'All available commands to monetize the roles on Discord'},
-                {"name": f'{d["command"]}merchant wallet',
+                {"name": f'{self.command_string}merchant wallet',
                  "value": 'All commands available for community wallet operations'},
-                {"name": f'{d["command"]}merchant create_role <role name> <value in dollars > '
+                {"name": f'{self.command_string}merchant create_role <role name> <value in dollars > '
                          f'<weeks> <days> <hours> <minutes>',
                  "value": 'Creates the role which is monetized with desired length'},
-                {"name": f'{d["command"]}merchant  delete_role <@Discord Role>',
+                {"name": f'{self.command_string}merchant  delete_role <@Discord Role>',
                  "value": 'Deletes the monetized role from the system and removes if from list of roles on community.'},
-                {"name": f'{d["command"]}merchant stop_role <@Discord Role>',
+                {"name": f'{self.command_string}merchant stop_role <@Discord Role>',
                  "value": 'Stops the role from being obtained by the users however does not delete it from the system'},
-                {"name": f'{d["command"]}merchant  start_role <@Discord Role>',
+                {"name": f'{self.command_string}merchant  start_role <@Discord Role>',
                  "value": 'Restarts the role which has been stopped and makes it available to discord members again.'},
-                {"name": f'{d["command"]}merchant community_roles',
+                {"name": f'{self.command_string}merchant community_roles',
                  "value": 'Returns information on all roles you have set to be monetized on the community'}
             ]
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands)
@@ -105,7 +101,7 @@ class MerchantCommunityOwner(commands.Cog):
         manual = Embed(title='__Merchant system manual__',
                        colour=Color.green())
         manual.add_field(name=':one: Create monetized roles',
-                         value=f'{d["command"]}monetize create_role <role name> <Dollar value of role> '
+                         value=f'{self.command_string}monetize create_role <role name> <Dollar value of role> '
                                f'<duration weeks> <days> <hours> <minutes>\n'
                                f':warning: Required parameters :warning: \n'
                                f'--> No spaces in role name and max length 20 characters'
@@ -114,7 +110,7 @@ class MerchantCommunityOwner(commands.Cog):
                          inline=False)
         manual.add_field(name=':two: Inform members',
                          value=f'Once role successfully create, it can be purchased by your members with command\n'
-                               f'{d["command"]}membership subscribe @discord.Role',
+                               f'{self.command_string}membership subscribe @discord.Role',
                          inline=False)
         await ctx.channel.send(embed=manual, delete_after=600)
 
@@ -180,7 +176,7 @@ class MerchantCommunityOwner(commands.Cog):
 
                                 msg_title = '__Time to Inform Members___'
                                 message = f'Users can now apply for the role by executing the' \
-                                          f' command bellow: \n ***{d["command"]}membership subscribe ' \
+                                          f' command bellow: \n ***{self.command_string}membership subscribe ' \
                                           f'<@Discord Role>***\n. ' \
                                           f'Thank You for using Merchant Service'
                                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
@@ -309,7 +305,7 @@ class MerchantCommunityOwner(commands.Cog):
                 if merchant_manager.change_role_details(role_data=role_details):
                     title = '__Role status change notification__'
                     message = f'Role has been deactivated successfully. in order to re-activate it and make it ' \
-                              f'available to users again, use command {d["command"]}monetize start_role <@discord.Role>'
+                              f'available to users again, use command {self.command_string}monetize start_role <@discord.Role>'
                     await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                         destination=1)
                 else:
@@ -326,7 +322,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                     destination=1)
         else:
             message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
-                      f'{d["command"]} monetize community_roles to obtain all roles on the community'
+                      f'{self.command_string} monetize community_roles to obtain all roles on the community'
             await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE_ERROR, message=message,
                                                 color_code=1,
                                                 destination=1)
@@ -364,7 +360,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                     destination=1)
         else:
             message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
-                      f'{d["command"]} monetize community_roles to obtain all roles on the community'
+                      f'{self.command_string} monetize community_roles to obtain all roles on the community'
             await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE, message=message,
                                                 color_code=1,
                                                 destination=1)
@@ -418,14 +414,14 @@ class MerchantCommunityOwner(commands.Cog):
         merchant_manager = self.backoffice.merchant_manager
         # Check merchant situation and modify fee accordingly
         if not merchant_manager.check_community_license_status(community_id=ctx.message.author.id):
-            fee_dollar_details = lpi_wallet.get_fees_by_category(all_fees=False, key='wallet_transfer')
+            fee_dollar_details = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='wallet_transfer')
             fee_value = fee_dollar_details['fee']  # Get out fee
             in_stellar = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
             total = (in_stellar['total'])  # Get total in lumen
             fee_in_stroops = (int(total * (10 ** 7)))  # Convert to stroops
 
         # Get the current minimum withdrawal fee in Dollars
-        minimum_with_limit = lpi_wallet.get_fees_by_category(all_fees=False, key='merchant_min')
+        minimum_with_limit = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='merchant_min')
         with_fee = minimum_with_limit['fee']  # Get out fee
         with_fee_stellar = convert_to_currency(with_fee, coin_name='stellar')  # Convert fee to currency
         total_xlm = (with_fee_stellar['total'])
@@ -445,10 +441,10 @@ class MerchantCommunityOwner(commands.Cog):
                     # TODO fix bug where it could happen that fee in stroops us greater than the available balance
 
                     # credit fee to launch pad investment wallet
-                    if lpi_wallet.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm', direction=1):
+                    if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm', direction=1):
 
                         # Append withdrawal amount to the community owner personal wallet
-                        if account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm', direction=0,
+                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm', direction=0,
                                                                   amount=for_owner):
                             info_embed = Embed(title='__Corporate account Transaction details__',
                                                description="Here are the details on withdrawal from Merchant "
@@ -524,7 +520,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                   f"Owner:{author_name}\n"
                                                   f"ID: {ctx.message.author.id}")
                         merch_fee.add_field(name='Command',
-                                            value=f"{d['command']}corp transfer_xlm",
+                                            value=f"{self.command_string}corp transfer_xlm",
                                             inline=False)
                         merch_fee.add_field(name='Error details',
                                             value='Could not apply fees from transaction to Launch Pad Investment Corp'
@@ -574,13 +570,13 @@ class MerchantCommunityOwner(commands.Cog):
         """
         if isinstance(error, commands.MissingRequiredArgument):
             message = f'You have not provide some of the arguments. Command structure is:\n' \
-                      f'{d["command"]}merchant monetize create_role <dollar value> <length in weeks as ' \
+                      f'{self.command_string}merchant monetize create_role <dollar value> <length in weeks as ' \
                       f'integer> <length in days as integer>  <length in hours as integer>'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title="__Role creation error___")
         elif isinstance(error, commands.BadArgument):
             message = f'You have not provide some of the arguments. Command structure is:\n' \
-                      f'{d["command"]}merchant monetize create_role <dollar value $> <length in weeks ' \
+                      f'{self.command_string}merchant monetize create_role <dollar value $> <length in weeks ' \
                       f'as integer> <length in days as integer>  <length in hours as integer>\n' \
                       f'dollar value => float number with tvo decimals, where decimals are indicated with .\n' \
                       f'length in weeks => Integer\n' \
@@ -645,7 +641,7 @@ class MerchantCommunityOwner(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
         elif isinstance(error, commands.BadArgument):
             message = f'You have provided wrong command arguments. Appropriate command structure is:\n' \
-                      f'**{d["command"]}merchant monetize create_role <role name> <dollar value> <week amount> ' \
+                      f'**{self.command_string}merchant monetize create_role <role name> <dollar value> <week amount> ' \
                       f'<day amount> <hour amount> <minute amount>.\n' \
                       f'__Note__: duration amount need to be given as integer.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
