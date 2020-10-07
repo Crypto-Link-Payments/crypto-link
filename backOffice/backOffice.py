@@ -21,6 +21,7 @@ class BackOffice:
         bot_data = helper.read_json_file(file_name='botSetup.json')
         self.connection = MongoClient(bot_data['database']['connection'], maxPoolSize=20)
         self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(bot_data['database']['connection'])
+        self.twitter_details = bot_data["twitter"]
 
         self.backend_check = BotStructureCheck(self.connection)
         self.stellar_wallet = StellarWallet()

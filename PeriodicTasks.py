@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+import tweepy
 
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -13,7 +14,6 @@ init(autoreset=True)
 custom_messages = CustomMessages()
 helper = Helpers()
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
 
 
 def get_time():
@@ -30,6 +30,12 @@ class PeriodicTasks:
         self.backoffice = backoffice
         self.notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
         self.bot = bot
+        self.twitter_acc = self.backoffice.twitter_details
+
+        self.auth = tweepy.OAuthHandler(consumer_key=self.twitter_acc['apiKey']
+                                        , consumer_secret=self.twitter_acc['apiSecret'])
+        self.auth.set_access_token(key=self.twitter_acc['accessToken'], secret=self.twitter_acc['accessSecret'])
+        self.api = tweepy.API(self.auth)
 
     async def global_bot_stats_update(self, tx):
         bot_stats = {
@@ -37,7 +43,7 @@ class PeriodicTasks:
             "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
         }
         await self.backoffice.stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
-                                                     stat_details=bot_stats)
+                                                                     stat_details=bot_stats)
 
     def filter_transaction(self, new_transactions: list):
         # Building list of deposits if memo included
@@ -61,7 +67,7 @@ class PeriodicTasks:
                     await self.global_bot_stats_update(tx=tx)
                 else:
                     print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
-                    f'HASH{tx["hash"]}')
+                                     f'HASH{tx["hash"]}')
             else:
                 print(Fore.YELLOW + 'Unknown processed already')
 
@@ -93,7 +99,7 @@ class PeriodicTasks:
                                          guild_profiles.get_all_explorer_applied_channels()]
 
                         explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"] / 10000000, 7)} ' \
-                            f'{tx["asset_type"]["code"].upper()} to {bot.user}'
+                                       f'{tx["asset_type"]["code"].upper()} to {bot.user}'
 
                         await custom_messages.explorer_messages(applied_channels=load_channels,
                                                                 message=explorer_msg,
@@ -111,7 +117,7 @@ class PeriodicTasks:
 
                     else:
                         print(Fore.RED + f'TX Processing error: \n'
-                        f'{tx}')
+                                         f'{tx}')
                 else:
                     print(Fore.RED + 'Could not store to history')
             else:
@@ -126,7 +132,7 @@ class PeriodicTasks:
                     await self.global_bot_stats_update(tx=tx)
                 else:
                     print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
-                    f'HASH{tx["hash"]}')
+                                     f'HASH{tx["hash"]}')
             else:
                 print(Fore.YELLOW + 'Unknown processed already')
 
@@ -141,7 +147,8 @@ class PeriodicTasks:
         channel_id = self.notification_channels["stellar"]  # Sys channel where details are sent
         if new_transactions:
             # Filter transactions
-            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = self.filter_transaction(new_transactions)
+            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = self.filter_transaction(
+                new_transactions)
 
             channel = bot.get_channel(id=int(channel_id))
             if tx_with_registered_memo:
@@ -327,6 +334,33 @@ class PeriodicTasks:
             print(Fore.CYAN + 'No communities with overdue license\n'
                               ' ===================================')
 
+    async def new_tweet_checker(self):
+        print(Fore.BLUE + 'Checking for new tweet')
+        user = self.api.get_user('CryptoLink8')  # Crypto Link accout
+        tweet_channel_id = self.notification_channels['twitter']
+        last_processed = helper.read_json_file(file_name='lastTweet.json')["tweetId"]
+        new_tweets = list(
+            self.api.user_timeline(id=user, exclude_replies=True, include_rts=False,
+                                   since_id=last_processed))
+        if new_tweets:
+            # Get last tweet ID
+            latest_tweet = new_tweets[0].id
+
+            # Create link from new tweets to be send
+            link_list = [f'https://twitter.com/CryptoLink8/status/{t.id}' for t in new_tweets]
+            tweet_channel = self.bot.get_channel(id=int(tweet_channel_id))
+            print(f'{tweet_channel}')
+            for link in list(reversed(link_list)):
+                await tweet_channel.send(content=link)
+
+            print('All tweets sent')
+            if helper.update_json_file(file_name='lastTweet.json', key='tweetId', value=int(latest_tweet)):
+                pass
+            else:
+                print('Last tweet id could not be stored to file')
+        else:
+            print(Fore.BLUE + 'No new tweets on the timeline')
+
 
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
@@ -338,7 +372,8 @@ def start_scheduler(timed_updater):
         second='00'), misfire_grace_time=10, max_instances=20)
     scheduler.add_job(timed_updater.check_merchant_licences,
                       CronTrigger(minute='00', second='10'), misfire_grace_time=10, max_instances=20)
+    scheduler.add_job(timed_updater.new_tweet_checker, CronTrigger(second='30'), misfire_grace_time=10,
+                      max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
     return scheduler
-
