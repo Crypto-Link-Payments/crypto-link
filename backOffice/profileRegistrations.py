@@ -71,8 +71,7 @@ class AccountManager(object):
 
         try:
             self.user_wallets.update_one({"userId": int(discord_id)},
-                                         {"$inc": {f"{ticker}": amount},
-                                          "$currentDate": {"lastModified": True}})
+                                         {"$inc": {f"{ticker}": amount}})
             return True
         except errors.PyMongoError as e:
             print(f' Could not update user wallet with xlm: {e}')
