@@ -23,11 +23,9 @@ class BotManager:
         xlm_data = fees_data["xlm"]
         token_data = fees_data[f'{token}']
         xlm_result = self.bot_wallet.update_one({"ticker": f"xlm"},
-                                                {"$inc": {"balance": xlm_data["balance"]},
-                                                 "$currentDate": {"lastModified": True}})
+                                                {"$inc": {"balance": xlm_data["balance"]}})
         token_result = self.bot_wallet.update_one({"ticker": f"{token}"},
-                                                  {"$inc": {"balance": token_data["balance"]},
-                                                   "$currentDate": {"lastModified": True}})
+                                                  {"$inc": {"balance": token_data["balance"]}})
         count_modifications = (int(xlm_result.modified_count) + int(token_result.modified_count))
         return count_modifications == 2
 
@@ -37,8 +35,7 @@ class BotManager:
         """
 
         result = self.bot_wallet.update_one({"ticker": f"{ticker}"},
-                                            {"$inc": to_update,
-                                             "$currentDate": {"lastModified": True}})
+                                            {"$inc": to_update})
         return result.modified_count > 0
 
     def get_bot_wallets_balance(self):
@@ -58,8 +55,7 @@ class BotManager:
     def manage_fees_and_limits(self, key: str, data_to_update: dict):
 
         result = self.bot_fees.update_one({"key": key},
-                                          {"$set": data_to_update,
-                                           "$currentDate": {"lastModified": True}})
+                                          {"$set": data_to_update})
         return result.modified_count > 0
 
     def get_fees_by_category(self, all_fees: bool, key: str = None):
