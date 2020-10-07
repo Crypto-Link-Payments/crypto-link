@@ -94,8 +94,10 @@ proposal, help, and general question. Open up issue and we will do our best to r
 
 ### Social gateway
 [Crypto Link Homepage](https://cryptolink.carrd.co/)
+[Medium](https://medium.com/@cryptolinkpayments)
 [Twitter](https://twitter.com/CryptoLink8)
 [Patreon](https://www.patreon.com/CryptoLink)
+
 
 ### Join us on Discord
 [Discord Invite Link](https://discord.gg/ddvGTsb)
