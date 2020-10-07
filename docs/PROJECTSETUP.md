@@ -57,12 +57,14 @@ autoMessagingChannels.json
 {
   "stellar": 0,  
   "merchant": 0,
-  "sys": 0
+  "sys": 0,
+  "twitter": 0
 }
 ```
 - ***stellar*** : discord channel id as INT where on chain activities will be relayed
 - ***merchant*** : discord channel id as INT where merchant wallet transfers will be relayed
 - ***sys***: discord channel id as INT where other system messages will be relayed
+- ***twitter***: discord channel id where twitter messages will be relayed
 
 ### Discord Bot config file
 ***filename***: 
@@ -79,7 +81,14 @@ botSetup.json
   "creator": 0,
   "trustedMembers": [],
   "database": {
-    "connection": "mongodb://127.0.0.1:27017"}
+    "connection": "mongodb://127.0.0.1:27017"},
+  "twitter": {
+    "apiKey": "xxxx",
+    "apiSecret": "xxxx",
+    "accessToken": "xxxx",
+    "accessSecret":"xxxx"
+  }
+
 }
 ```
 
@@ -90,6 +99,7 @@ botSetup.json
 - ***creator***: User id of Discord User who created the bot
 - ***trustedMembers***: all additional user IDs who should have access to system commands
 - ***database***: connection to mongodb database. leave it like this if you run bot locally
+- ***twitter***: api key details from twitter developer account
 
 ### Stellar hot wallet setup
 Two different files are required. You can create Stellar testnet account through [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test)
@@ -131,6 +141,15 @@ stellarPag.json
 {
   "pag":"4232625845706753"
 }
+```
+
+### Last Processed Tweet file
+***filename***: 
+```text
+lastTweet.json
+```
+```text
+{"tweetId": 1313421059119616002}
 ```
 
 ## Running the bot 
