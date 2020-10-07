@@ -69,9 +69,16 @@ To check the fees implemented and their values use command:
 !membership subscribe --> Subscribe to role which is available on community to be purchased 
 ```
 
-## Community Owners and merchant system setup
+## Community Owners 
 
-### Merchant setup and general commands
+### Up-Link activation deactivation
+```text
+!owner services explorer apply <#discord.TextChannel> 
+!owner services explorer remove 
+```
+### Merchant system setup
+
+#### Merchant setup and general commands
 
 ```text
 !merchant_initiate --> Registers community for the merchant service
@@ -84,12 +91,12 @@ To check the fees implemented and their values use command:
 !merchant  start_role <@discord.Role> --> Re-starts the monetized role
 ```
 
-### Merchant wallet withdrawals
+#### Merchant wallet withdrawals
 ```text
 !merchant balance --> Get the balance of the community wallet 
 !merchant transfer_xlm --> Withdraws the XLM from corporate account to owners personal wallet
 ```
-### Merchant Licensing details
+#### Merchant Licensing details
 
 ```text
 !license --> Representation of available sub-commands
@@ -100,6 +107,7 @@ To check the fees implemented and their values use command:
 !license buy with_xlm --> Use Stellar Lumen to purchase license
 ```
 
+### 
 ## System management commands
 Locked for bot owner
 
