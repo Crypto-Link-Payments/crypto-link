@@ -6,9 +6,6 @@ import os
 import sys
 
 from colorama import Fore, init
-from pymongo import MongoClient
-
-from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
