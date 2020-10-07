@@ -6,16 +6,10 @@ import os
 import sys
 
 from bson.objectid import ObjectId
-from pymongo import MongoClient
 from pymongo import errors
-
-from utils.tools import Helpers
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
-
-helper = Helpers()
-d = helper.read_json_file(file_name='botSetup.json')
 
 
 class MerchantManager:
@@ -23,8 +17,8 @@ class MerchantManager:
     Class handling Merchant system. Storing licenses, purchases, etc.
     """
 
-    def __init__(self):
-        self.connection = MongoClient(d['database']['connection'], maxPoolSize=20)
+    def __init__(self, connection):
+        self.connection = connection
         self.communities = self.connection['CryptoLink']
 
         # Collection of community profiles
@@ -139,8 +133,7 @@ class MerchantManager:
         :param role_id: Unique role id
         :return: role details as dict, or empty dict
         """
-        role_details = self.monetized_roles.find_one({"roleId": role_id},
-                                                     {'lastModified': 0})
+        role_details = self.monetized_roles.find_one({"roleId": role_id})
 
         return role_details
 
@@ -204,8 +197,7 @@ class MerchantManager:
         if wallet_tick == 'xlm':
             try:
                 self.community_stellar_wallets.update_one({"communityId": community_id},
-                                                          {"$inc": {"balance": amount},
-                                                           "$currentDate": {"lastModified": True}})
+                                                          {"$inc": {"balance": amount}})
                 return True
             except errors.PyMongoError as e:
                 print(e)
@@ -288,8 +280,7 @@ class MerchantManager:
         :return:
         """
         result = self.monetized_roles.update_one({'_id': ObjectId(role_data['_id'])},
-                                                 {"$set": role_data,
-                                                  "$currentDate": {"lastModified": True}})
+                                                 {"$set": role_data})
         return result.modified_count > 0
 
     def delete_user_from_applied(self, community_id: int, user_id: int):

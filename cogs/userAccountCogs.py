@@ -3,9 +3,6 @@ import re
 from discord import Embed, Colour
 from discord.ext import commands
 
-from backOffice.profileRegistrations import AccountManager
-from backOffice.stellarOnChainHandler import StellarWallet
-from backOffice.userWalletManager import UserWalletManager
 from cogs.utils.customCogChecks import is_public, user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal, scientific_conversion
@@ -14,11 +11,7 @@ from cogs.utils.securityChecks import check_stellar_private
 from utils.tools import Helpers
 
 helper = Helpers()
-account_mng = AccountManager()
 custom_messages = CustomMessages()
-stellar_wallet = StellarWallet()
-user_wallets = UserWalletManager()
-d = helper.read_json_file(file_name='botSetup.json')
 hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -29,13 +22,15 @@ CONST_TRUST_ERROR = ':warning: __Trustline error__ :warning:'
 class UserAccountCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.backoffice = bot.backoffice
+        self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
 
     @commands.group()
     @commands.check(user_has_wallet)
     async def acc(self, ctx):
         utc_now = datetime.utcnow()
-        wallet_data = user_wallets.get_full_details(user_id=ctx.message.author.id)
+        wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
 
         xlm_balance = round(float(wallet_data["xlm"]) / 10000000, 7)
         rates = get_rates(coin_name='stellar')
@@ -84,10 +79,10 @@ class UserAccountCommands(commands.Cog):
     @commands.check(is_public)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def register(self, ctx):
-        if not account_mng.check_user_existence(user_id=ctx.message.author.id):
-            if account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
+        if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
+            if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
-                          f' Please use {d["command"]}acc or {d["command"]}wallet.'
+                          f' Please use {self.command_string}acc or {self.command_string}wallet.'
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
             else:
@@ -95,8 +90,8 @@ class UserAccountCommands(commands.Cog):
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
         else:
-            message = f'You have already registered account into the system. Please use ***{d["command"]}acc*** or ' \
-                      f'***{d["command"]}wallet*** to obtain details on balances and your profile'
+            message = f'You have already registered account into the system. Please use ***{self.command_string}acc*** or ' \
+                      f'***{self.command_string}wallet*** to obtain details on balances and your profile'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
@@ -107,12 +102,12 @@ class UserAccountCommands(commands.Cog):
         if ctx.invoked_subcommand is None:
             title = '__Available Wallets__'
             description = "All commands to check wallet details for each available cryptocurrency"
-            list_of_values = [{"name": "Quick balance check", "value": f"{d['command']}acc"},
-                              {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet deposit"},
-                              {"name": "How to deposit to Discord wallet", "value": f"{d['command']}wallet stats"},
-                              {"name": "Get Stellar (XLM) wallet details", "value": f"{d['command']}wallet balance"},
+            list_of_values = [{"name": "Quick balance check", "value": f"{self.command_string}acc"},
+                              {"name": "How to deposit to Discord wallet", "value": f"{self.command_string}wallet deposit"},
+                              {"name": "How to deposit to Discord wallet", "value": f"{self.command_string}wallet stats"},
+                              {"name": "Get Stellar (XLM) wallet details", "value": f"{self.command_string}wallet balance"},
                               {"name": "Create trustline for tokens",
-                               "value": f"{d['command']}trust <private key> <token>"}]
+                               "value": f"{self.command_string}trust <private key> <token>"}]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1)
@@ -120,12 +115,12 @@ class UserAccountCommands(commands.Cog):
     @wallet.command()
     async def stats(self, ctx):
         utc_now = datetime.utcnow()
-        account_details = account_mng.get_account_stats(discord_id=ctx.message.author.id)
+        account_details = self.backoffice.account_mng.get_account_stats(discord_id=ctx.message.author.id)
         await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
 
     @wallet.command()
     async def deposit(self, ctx):
-        user_profile = account_mng.get_user_memo(user_id=ctx.message.author.id)
+        user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
                           ' wallet(GUI, CLI) to the address and deposit ID provided below. Of them will result in ' \
@@ -144,7 +139,7 @@ class UserAccountCommands(commands.Cog):
                 name=f' {CONST_STELLAR_EMOJI} Stellar Lumen Deposit details {CONST_STELLAR_EMOJI}',
                 value=f'Stellar wallet Address:\n'
                       f'```{hot_wallets["xlm"]}```\n'
-                      f'\nMEMO:'
+                      f'MEMO:\n'
                       f'> {user_profile["stellarDepositId"]}',
                 inline=False)
 
@@ -162,7 +157,7 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def balance(self, ctx):
-        user_balances = user_wallets.get_balances(user_id=ctx.message.author.id)
+        user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
         coin_data = helper.read_json_file(file_name='integratedCoins.json')
         if user_balances:
             all_wallets = list(user_balances.keys())
@@ -203,7 +198,7 @@ class UserAccountCommands(commands.Cog):
         # check strings, stellar address and token integration status
         if check_stellar_private(private_key=private_key):
             if not re.search("[~!#$%^&*()_+{}:;\']", token) and token in self.list_of_coins and token != 'xlm':
-                if stellar_wallet.establish_trust(private_key=private_key, token=f'{token.upper()}'):
+                if self.backoffice.stellar_wallet.establish_trust(private_key=private_key, token=f'{token.upper()}'):
                     title = ':rocket: __Trust line established__ :rocket:'
                     message = f'Trustline between your personal wallet and issuer has been successfully established. ' \
                               f' You can now withdraw token {token} to your personal wallet'
@@ -230,7 +225,7 @@ class UserAccountCommands(commands.Cog):
         if isinstance(error, commands.CheckFailure):
             title = f'__System Error__'
             message = f'You have not registered yourself into the system yet. Please head to one of the public ' \
-                      f'channels, where Virtual Interactive Pilot is Accessible and  execute {d["command"]}register'
+                      f'channels, where Virtual Interactive Pilot is Accessible and  execute {self.command_string}register'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
@@ -245,26 +240,26 @@ class UserAccountCommands(commands.Cog):
     @register.error
     async def register_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            title = f'__{d["command"]}register error__'
+            title = f'__{self.command_string}register error__'
             message = f'You can not register over DM with the bot. Please head to one of the channel on Launch Pad ' \
-                      f'Investment community and execute command  {d["command"]}register'
+                      f'Investment community and execute command  {self.command_string}register'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
     @deposit.error
     async def deposit_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            title = f'__{d["command"]}wallet deposit error__'
-            message = f'You have not registered yourself yet into the system. Please use first {d["command"]}register'
+            title = f'__{self.command_string}wallet deposit error__'
+            message = f'You have not registered yourself yet into the system. Please use first {self.command_string}register'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
     @wallet.error
     async def wallet_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            title = f'__{d["command"]}wallet Error__'
+            title = f'__{self.command_string}wallet Error__'
             message = f'In order to access your wallet you need to be first registered into payment system. You' \
-                      f' can do that with {d["command"]}register!'
+                      f' can do that with {self.command_string}register!'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
