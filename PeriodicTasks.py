@@ -59,7 +59,6 @@ class PeriodicTasks:
 
     async def process_tx_with_no_memo(self, channel, no_memo_transaction):
         stellar_manager = self.backoffice.stellar_manager
-        stats_manager = self.backoffice.stats_manager
         for tx in no_memo_transaction:
             if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
                 if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
