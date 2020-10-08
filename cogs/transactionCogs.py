@@ -110,13 +110,26 @@ class TransactionCommands(commands.Cog):
         msg = process_message(message=message)
 
         # Send to channel where tx has been executed
-        in_dollar = monetaryConversions.convert_to_usd(amount=tx_details["amount"], coin_name='stellar')
-        tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']}" \
-                        f" {tx_details['emoji']} (${in_dollar['total']})"
+        if tx_details['ticker'] == 'stellar':
+            in_dollar = monetaryConversions.convert_to_usd(amount=tx_details["amount"], coin_name='stellar')
+            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']}" \
+                            f" {tx_details['emoji']} (${in_dollar['total']})"
+            explorer_msg = f'💵  {tx_details["amount"]} {CONST_STELLAR_EMOJI} (${in_dollar["total"]}) on ' \
+                           f'{ctx.message.guild} channel {ctx.message.channel}'
+            total_dollar_value = in_dollar['total']
+            conversion_rate = in_dollar["usd"]
+        else:
+            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']}" \
+                            f" {tx_details['emoji']}"
+            explorer_msg = f'💵  {tx_details["amount"]} {tx_details["emoji"]} ({tx_details["ticker"]}) on ' \
+                           f'{ctx.message.guild} channel {ctx.message.channel}'
+            total_dollar_value = 0
+            conversion_rate = 0
+
         await customMessages.transaction_report_to_channel(ctx=ctx, message=tx_report_msg, tx_type=tx_type)
 
-        tx_details["conversion"] = in_dollar['total']
-        tx_details["conversionRate"] = in_dollar["usd"]
+        tx_details["conversion"] = total_dollar_value
+        tx_details["conversionRate"] = conversion_rate
 
         # report to sender
         await customMessages.transaction_report_to_user(ctx=ctx, user=recipient, transaction_data=tx_details,
@@ -133,8 +146,7 @@ class TransactionCommands(commands.Cog):
         # Send out explorer
         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-        explorer_msg = f'💵  {tx_details["amount"]} {CONST_STELLAR_EMOJI} (${in_dollar["total"]}) on ' \
-                       f'{ctx.message.guild} channel {ctx.message.channel}'
+
         await customMessages.explorer_messages(applied_channels=load_channels,
                                                message=explorer_msg, tx_type=tx_type)
 
