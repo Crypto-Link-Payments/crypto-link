@@ -5,9 +5,7 @@ from discord import TextChannel, Embed, Colour
 
 from cogs.utils.customCogChecks import is_owner, is_public, guild_has_stats
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 
-helper = Helpers()
 customMessages = CustomMessages()
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'

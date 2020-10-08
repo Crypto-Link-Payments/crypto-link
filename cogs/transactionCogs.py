@@ -1,4 +1,3 @@
-
 from discord.ext import commands
 from discord import User
 import re
@@ -48,18 +47,17 @@ class TransactionCommands(commands.Cog):
                                        'totalMoved': transaction_data["amount"],
                                        "totalPublicCount": 1,
                                        "totalPublicMoved": transaction_data["amount"]},
-                         "senderStats": {f"{transaction_data['ticker']}Stats.publicTxSendCount": 1,
-                                         f"{transaction_data['ticker']}Stats.publicSent": transaction_data["amount"],
+                         "senderStats": {f"{transaction_data['ticker']}.publicTxSendCount": 1,
+                                         f"{transaction_data['ticker']}.publicSent": transaction_data["amount"],
                                          },
-                         "recipientStats": {f"{transaction_data['ticker']}Stats.publicTxReceivedCount": 1,
-                                            f"{transaction_data['ticker']}Stats.publicReceived": transaction_data[
+                         "recipientStats": {f"{transaction_data['ticker']}.publicTxReceivedCount": 1,
+                                            f"{transaction_data['ticker']}.publicReceived": transaction_data[
                                                 "amount"],
                                             },
                          "guildStats": {
-                             f"communityStats.{transaction_data['ticker']}Volume": transaction_data["amount"],
-                             "communityStats.txCount": 1,
-                             "communityStats.publicCount": 1
-
+                             f'{transaction_data["ticker"]}.publicCount': 1,
+                             f"{transaction_data['ticker']}.txCount": 1,
+                             f"{transaction_data['ticker']}.volume": 1
                          }
                          }
 
@@ -68,17 +66,17 @@ class TransactionCommands(commands.Cog):
                                        'totalMoved': transaction_data["amount"],
                                        "totalPrivateCount": 1,
                                        "totalPrivateMoved": transaction_data["amount"]},
-                         "senderStats": {f"{transaction_data['ticker']}Stats.privateTxSendCount": 1,
-                                         f"{transaction_data['ticker']}Stats.privateSent": transaction_data["amount"],
+                         "senderStats": {f"{transaction_data['ticker']}.privateTxSendCount": 1,
+                                         f"{transaction_data['ticker']}.privateSent": transaction_data["amount"],
                                          },
-                         "recipientStats": {f"{transaction_data['ticker']}Stats.privateTxReceivedCount": 1,
-                                            f"{transaction_data['ticker']}Stats.privateReceived": transaction_data[
+                         "recipientStats": {f"{transaction_data['ticker']}.privateTxReceivedCount": 1,
+                                            f"{transaction_data['ticker']}.privateReceived": transaction_data[
                                                 "amount"],
                                             },
                          "guildStats": {
-                             f"communityStats.{transaction_data['ticker']}Volume": transaction_data["amount"],
-                             "communityStats.txCount": 1,
-                             "communityStats.privateCount": 1
+                             f'{transaction_data["ticker"]}.privateCount': 1,
+                             f"{transaction_data['ticker']}.txCount": 1,
+                             f"{transaction_data['ticker']}.volume": 1
                          }
                          }
 
@@ -92,16 +90,16 @@ class TransactionCommands(commands.Cog):
 
         # Update stats stats
         await self.backoffice.stats_manager.update_cl_off_chain_stats(ticker=transaction_data["ticker"],
-                                                      ticker_stats=processed_stats["globalBot"])
+                                                                      ticker_stats=processed_stats["globalBot"])
 
         # Updates sender and recipient public transaction stats
         await self.backoffice.stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
-                                                tx_stats_data=processed_stats['senderStats'])
+                                                                tx_stats_data=processed_stats['senderStats'])
         await self.backoffice.stats_manager.update_usr_tx_stats(user_id=transaction_data["recipientId"],
-                                                tx_stats_data=processed_stats["recipientStats"])
+                                                                tx_stats_data=processed_stats["recipientStats"])
 
         await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
-                                               guild_stats_data=processed_stats["guildStats"])
+                                                               guild_stats_data=processed_stats["guildStats"])
 
     async def stream_transaction(self, ctx, recipient, tx_details: dict, message: str, tx_type: str):
         """
@@ -112,13 +110,26 @@ class TransactionCommands(commands.Cog):
         msg = process_message(message=message)
 
         # Send to channel where tx has been executed
-        in_dollar = monetaryConversions.convert_to_usd(amount=tx_details["amount"], coin_name='stellar')
-        tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']}" \
-                        f" {tx_details['emoji']} (${in_dollar['total']})"
+        if tx_details['ticker'] == 'stellar':
+            in_dollar = monetaryConversions.convert_to_usd(amount=tx_details["amount"], coin_name='stellar')
+            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']}" \
+                            f" {tx_details['emoji']} (${in_dollar['total']})"
+            explorer_msg = f'💵  {tx_details["amount"]} {CONST_STELLAR_EMOJI} (${in_dollar["total"]}) on ' \
+                           f'{ctx.message.guild} channel {ctx.message.channel}'
+            total_dollar_value = in_dollar['total']
+            conversion_rate = in_dollar["usd"]
+        else:
+            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']}" \
+                            f" {tx_details['emoji']}"
+            explorer_msg = f'💵  {tx_details["amount"]} {tx_details["emoji"]} ({tx_details["ticker"]}) on ' \
+                           f'{ctx.message.guild} channel {ctx.message.channel}'
+            total_dollar_value = 0
+            conversion_rate = 0
+
         await customMessages.transaction_report_to_channel(ctx=ctx, message=tx_report_msg, tx_type=tx_type)
 
-        tx_details["conversion"] = in_dollar['total']
-        tx_details["conversionRate"] = in_dollar["usd"]
+        tx_details["conversion"] = total_dollar_value
+        tx_details["conversionRate"] = conversion_rate
 
         # report to sender
         await customMessages.transaction_report_to_user(ctx=ctx, user=recipient, transaction_data=tx_details,
@@ -135,12 +146,11 @@ class TransactionCommands(commands.Cog):
         # Send out explorer
         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-        explorer_msg = f'💵  {tx_details["amount"]} {CONST_STELLAR_EMOJI} (${in_dollar["total"]}) on ' \
-                       f'{ctx.message.guild} channel {ctx.message.channel}'
+
         await customMessages.explorer_messages(applied_channels=load_channels,
                                                message=explorer_msg, tx_type=tx_type)
 
-    async def send_impl(self, ctx, amount:float, ticker:str, recipient: User, *, tx_type: str, message:str = None):
+    async def send_impl(self, ctx, amount: float, ticker: str, recipient: User, *, tx_type: str, message: str = None):
         coin = ticker.lower()
         if amount > 0:
             if not ctx.message.author == recipient and not recipient.bot:
@@ -148,16 +158,20 @@ class TransactionCommands(commands.Cog):
                     coin_data = integrated_coins[ticker]
                     atomic_value = (int(amount * (10 ** int(coin_data["decimal"]))))
                     # Get user wallet ticker balance
-                    wallet_value = self.backoffice.wallet_manager.get_ticker_balance(ticker=ticker, user_id=ctx.message.author.id)
+                    wallet_value = self.backoffice.wallet_manager.get_ticker_balance(ticker=ticker,
+                                                                                     user_id=ctx.message.author.id)
                     if wallet_value >= atomic_value:
                         # Check if recipient has wallet or not
                         if not self.backoffice.account_mng.check_user_existence(user_id=recipient.id):
-                            self.backoffice.account_mng.register_user(discord_id=recipient.id, discord_username=f'{recipient}')
+                            self.backoffice.account_mng.register_user(discord_id=recipient.id,
+                                                                      discord_username=f'{recipient}')
 
-                        if self.backoffice.wallet_manager.update_coin_balance(coin=ticker, user_id=ctx.message.author.id,
-                                                            amount=int(atomic_value), direction=2):
+                        if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
+                                                                              user_id=ctx.message.author.id,
+                                                                              amount=int(atomic_value), direction=2):
                             if self.backoffice.wallet_manager.update_coin_balance(coin=ticker, user_id=recipient.id,
-                                                                amount=int(atomic_value), direction=1):
+                                                                                  amount=int(atomic_value),
+                                                                                  direction=1):
                                 coin_data["amount"] = (atomic_value / (10 ** 7))
                                 coin_data["ticker"] = ticker
 
@@ -170,8 +184,10 @@ class TransactionCommands(commands.Cog):
                                 await self.update_stats(ctx=ctx, transaction_data=coin_data, tx_type=tx_type)
 
                             else:
-                                self.backoffice.wallet_manager.update_coin_balance(coin=ticker, user_id=ctx.message.author.id,
-                                                                 amount=int(atomic_value), direction=1)
+                                self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
+                                                                                   user_id=ctx.message.author.id,
+                                                                                   amount=int(atomic_value),
+                                                                                   direction=1)
                                 message = f'{amount} XLA could not be sent to the {recipient} please try again later'
                                 await customMessages.system_message(ctx=ctx, color_code=1, message=message,
                                                                     destination=1,
@@ -204,14 +220,12 @@ class TransactionCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
 
-
-
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def send(self, ctx, amount: float, ticker: str, recipient: User, *, message: str = None):
-        await self.send_impl( ctx, amount, ticker, recipient, tx_type= "public", message=message)
+        await self.send_impl(ctx, amount, ticker, recipient, tx_type="public", message=message)
 
     @commands.group()
     @commands.check(is_public)
