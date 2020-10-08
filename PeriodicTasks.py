@@ -35,7 +35,7 @@ class PeriodicTasks:
         self.auth = tweepy.OAuthHandler(consumer_key=self.twitter_acc['apiKey']
                                         , consumer_secret=self.twitter_acc['apiSecret'])
         self.auth.set_access_token(key=self.twitter_acc['accessToken'], secret=self.twitter_acc['accessSecret'])
-        self.api = tweepy.API(self.auth)
+        self.tweeter = tweepy.API(self.auth)
 
     async def global_bot_stats_update(self, tx):
         bot_stats = {
@@ -59,7 +59,6 @@ class PeriodicTasks:
 
     async def process_tx_with_no_memo(self, channel, no_memo_transaction):
         stellar_manager = self.backoffice.stellar_manager
-        stats_manager = self.backoffice.stats_manager
         for tx in no_memo_transaction:
             if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
                 if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
@@ -336,12 +335,12 @@ class PeriodicTasks:
 
     async def new_tweet_checker(self):
         print(Fore.BLUE + 'Checking for new tweet')
-        user = self.api.get_user('CryptoLink8')  # Crypto Link accout
+        user = self.tweeter.get_user('CryptoLink8')  # Crypto Link accout
         tweet_channel_id = self.notification_channels['twitter']
         last_processed = helper.read_json_file(file_name='lastTweet.json')["tweetId"]
         new_tweets = list(
-            self.api.user_timeline(id=user, exclude_replies=True, include_rts=False,
-                                   since_id=last_processed))
+            self.tweeter.user_timeline(id=user, exclude_replies=True, include_rts=False,
+                                       since_id=last_processed))
         if new_tweets:
             # Get last tweet ID
             latest_tweet = new_tweets[0].id

@@ -26,7 +26,7 @@ class BackOffice:
         self.backend_check = BotStructureCheck(self.connection)
         self.stellar_wallet = StellarWallet()
         self.merchant_manager = MerchantManager(self.connection)
-        self.stellar_manager = StellarManager(self.connection)
+        self.stellar_manager = StellarManager(self.connection, self.as_connection)
         self.stats_manager = StatsManager(self.connection, self.as_connection)
         self.wallet_manager = UserWalletManager(self.connection, self.as_connection)
         self.guild_profiles = GuildProfileManager(self.connection, self.as_connection)

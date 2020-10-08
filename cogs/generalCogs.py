@@ -6,11 +6,8 @@ from discord.ext import commands
 
 from cogs.utils.customCogChecks import is_owner, is_public
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 
-helper = Helpers()
 customMessages = CustomMessages()
-d = helper.read_json_file(file_name='botSetup.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
@@ -59,12 +56,12 @@ class HelpCommands(commands.Cog):
         about.add_field(name="Peer to Peer transactions",
                         value=f"Users are able to execute instant peer-2-peer transactions either with the Stellar"
                               f" native currency or its tokens which have been integrated onto Crypto Link. For full"
-                              f" list of supported currencies please use command {d['command']}currencies",
+                              f" list of supported currencies please use command {self.command_string}currencies",
                         inline=False)
         about.add_field(name="Merchant system",
                         value=f"If you are a Discord Guild owner you can monetize your roles with various lengths and "
                               f"values. So far system support only XLM as a currency to be used in merchant system. "
-                              f"For more information execute command {d['command']}help owner ",
+                              f"For more information execute command {self.command_string}help owner ",
                         inline=False)
         about.add_field(name="ICO's and Project promotions",
                         value=f"Would you like to have another project sourcing stream? Crypto Link supports all"

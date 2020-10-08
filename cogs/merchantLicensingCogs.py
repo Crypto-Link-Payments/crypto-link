@@ -19,7 +19,6 @@ from utils.tools import Helpers
 custom_messages = CustomMessages()
 helper = Helpers()
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-d = helper.read_json_file(file_name='botSetup.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_MERCHANT_LICENSE_PURCHASE_ERROR = '__Merchant License Purchase error__'
