@@ -47,18 +47,17 @@ class TransactionCommands(commands.Cog):
                                        'totalMoved': transaction_data["amount"],
                                        "totalPublicCount": 1,
                                        "totalPublicMoved": transaction_data["amount"]},
-                         "senderStats": {f"{transaction_data['ticker']}Stats.publicTxSendCount": 1,
-                                         f"{transaction_data['ticker']}Stats.publicSent": transaction_data["amount"],
+                         "senderStats": {f"{transaction_data['ticker']}.publicTxSendCount": 1,
+                                         f"{transaction_data['ticker']}.publicSent": transaction_data["amount"],
                                          },
-                         "recipientStats": {f"{transaction_data['ticker']}Stats.publicTxReceivedCount": 1,
-                                            f"{transaction_data['ticker']}Stats.publicReceived": transaction_data[
+                         "recipientStats": {f"{transaction_data['ticker']}.publicTxReceivedCount": 1,
+                                            f"{transaction_data['ticker']}.publicReceived": transaction_data[
                                                 "amount"],
                                             },
                          "guildStats": {
-                             f"communityStats.{transaction_data['ticker']}Volume": transaction_data["amount"],
-                             "communityStats.txCount": 1,
-                             "communityStats.publicCount": 1
-
+                             f'{transaction_data["ticker"]}.publicCount': 1,
+                             f"{transaction_data['ticker']}.txCount": 1,
+                             f"{transaction_data['ticker']}.volume": 1
                          }
                          }
 
@@ -67,17 +66,17 @@ class TransactionCommands(commands.Cog):
                                        'totalMoved': transaction_data["amount"],
                                        "totalPrivateCount": 1,
                                        "totalPrivateMoved": transaction_data["amount"]},
-                         "senderStats": {f"{transaction_data['ticker']}Stats.privateTxSendCount": 1,
-                                         f"{transaction_data['ticker']}Stats.privateSent": transaction_data["amount"],
+                         "senderStats": {f"{transaction_data['ticker']}.privateTxSendCount": 1,
+                                         f"{transaction_data['ticker']}.privateSent": transaction_data["amount"],
                                          },
-                         "recipientStats": {f"{transaction_data['ticker']}Stats.privateTxReceivedCount": 1,
-                                            f"{transaction_data['ticker']}Stats.privateReceived": transaction_data[
+                         "recipientStats": {f"{transaction_data['ticker']}.privateTxReceivedCount": 1,
+                                            f"{transaction_data['ticker']}.privateReceived": transaction_data[
                                                 "amount"],
                                             },
                          "guildStats": {
-                             f"communityStats.{transaction_data['ticker']}Volume": transaction_data["amount"],
-                             "communityStats.txCount": 1,
-                             "communityStats.privateCount": 1
+                             f'{transaction_data["ticker"]}.privateCount': 1,
+                             f"{transaction_data['ticker']}.txCount": 1,
+                             f"{transaction_data['ticker']}.volume": 1
                          }
                          }
 
