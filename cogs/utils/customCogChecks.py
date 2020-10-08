@@ -69,11 +69,11 @@ def guild_has_merchant(ctx):
     """
     Check if community has activate merchant system
     """
-    return merchant_manager.check_if_community_exist(int(ctx.message.guild.id))
+    return ctx.bot.backoffice.merchant_manager.check_if_community_exist(int(ctx.message.guild.id))
 
 
 def guild_has_stats(ctx):
     """
     Guild registration status check for stats
     """
-    return ctx.bot.backoffice.guild_manager.check_guild_registration_stats(guild_id=ctx.guild.id)
+    return ctx.bot.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id)
