@@ -184,9 +184,10 @@ class CustomMessages:
         tx_report.add_field(name='Transaction value',
                             value=f'{transaction_data["amount"]} {transaction_data["emoji"]} (${transaction_data["conversion"]})',
                             inline=False)
-        tx_report.add_field(name='Conversion Rate',
-                            value=f'${transaction_data["conversionRate"]}/{transaction_data["ticker"]}',
-                            inline=False)
+        if transaction_data["conversion"] != 0:
+            tx_report.add_field(name='Conversion Rate',
+                                value=f'${transaction_data["conversionRate"]}/{transaction_data["ticker"]}',
+                                inline=False)
         tx_report.set_footer(text='Conversion rates provided by CoinGecko',
                              icon_url='https://static.coingecko.com/s/thumbnail-'
                                       '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
