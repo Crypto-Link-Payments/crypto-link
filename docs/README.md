@@ -24,8 +24,14 @@ Crypto Link is a Discord multi functional bot. Built on top of Stellar, utilizin
 ## :scroll: License :scroll: 
 Crypto Link is an open-source project operating under the [GNU GENERAL PUBLIC LICENSE](https://github.com/launch-pad-investments/crypto-link/blob/master/LICENSE).
 
-## :office: Project governance :office:
-Project is governed by the Crypto Link Team Staff.
+## :office: Crypto Link Team :office:
+
+Project lead (CEO)
+- [X] [Animus](https://github.com/AnimusXCASH)
+
+Crypto Link Official Maintainer:
+- [X] [Alocaly](https://github.com/Alocaly)
+
 
 ## ![banner](../img/emojiLumen.png) About Stellar Lumen ![banner](../img/emojiLumen.png) 
 
@@ -79,6 +85,16 @@ To check values applied for fees and limits please use command bellow over Disco
 Majority of the requests can be done through github by opening issue and assigning appropriate label to it. 
 Currently implemented tags are: bug, Discord Community, documentation updates requests, enhancement 
 proposal, help, and general question. Open up issue and we will do our best to respond to best of our current abilities.
+
+## Would You like to be part of the team
+We are currently searching for following positions in Crypto Link Team:
+
+- [X] Marketing Manager and PR
+- [X] Discord Community Manager
+- [X] Web-Developer
+
+If you would like to join us please fill up the [JOB APPLICATION FORM](https://forms.gle/GVdzJaNCP2S43hV87)
+
 
 ## :wrench: Contributing :wrench:
 
