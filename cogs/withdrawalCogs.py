@@ -356,8 +356,8 @@ class WithdrawalCommands(commands.Cog):
 
                                     # Update user withdrawal stats
                                     withdrawal_data = {
-                                        "xlmStats.withdrawalsCount": 1,
-                                        "xlmStats.totalWithdrawn": round(stroops / 10000000, 7),
+                                        "xlm.withdrawalsCount": 1,
+                                        "xlm.totalWithdrawn": round(stroops / 10000000, 7),
                                     }
                                     await self.backoffice.stats_manager.update_usr_tx_stats(
                                         user_id=ctx.message.author.id,
