@@ -305,8 +305,6 @@ class WithdrawalCommands(commands.Cog):
                     verification = await ctx.channel.send(content=message_content)
                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
 
-                    if isinstance(ctx.message.channel, TextChannel):
-                        await ctx.channel.delete_messages([verification, msg_usr])
 
                     if str(msg_usr.content.lower()) == 'yes':
                         processing_msg = 'Processing withdrawal request, please wait few moments....'
@@ -396,11 +394,18 @@ class WithdrawalCommands(commands.Cog):
                             message = 'Funds could not be withdrawn at this point. Please try again later.'
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
-                        await ctx.channel.delete_messages([processing_msg])
+
+                        if isinstance(ctx.message.channel, TextChannel):
+                            await ctx.channel.delete_messages([processing_msg])
+
                     else:
                         message = f'You have cancelled withdrawal request of {round(xlm_with_amount, 7)}'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                              sys_msg_title=CONST_WITHDRAWAL_ERROR)
+
+                    if isinstance(ctx.message.channel, TextChannel):
+                        await ctx.channel.delete_messages([verification, msg_usr])
+
 
                 else:
                     message = f'Amount you are willing to withdraw is greater than your current wallet balance.\n' \
