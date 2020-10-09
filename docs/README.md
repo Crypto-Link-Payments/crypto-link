@@ -90,8 +90,9 @@ proposal, help, and general question. Open up issue and we will do our best to r
 We are currently searching for following positions in Crypto Link Team:
 
 - [X] Marketing Manager and PR
-- [X] Discord Community Manager
 - [X] Web-Developer
+- [ ] Discord Community Manager
+
 
 If you would like to join us please fill up the [JOB APPLICATION FORM](https://forms.gle/GVdzJaNCP2S43hV87)
 
@@ -110,10 +111,10 @@ If you would like to join us please fill up the [JOB APPLICATION FORM](https://f
 ## :phone: Get in touch :phone:
 
 ### Social gateway
-[Crypto Link Homepage](https://cryptolink.carrd.co/)
-[Medium](https://medium.com/@cryptolinkpayments)
-[Twitter](https://twitter.com/CryptoLink8)
-[Patreon](https://www.patreon.com/CryptoLink)
+- [Crypto Link Homepage](https://cryptolink.carrd.co/)
+- [Medium](https://medium.com/@cryptolinkpayments)
+- [Twitter](https://twitter.com/CryptoLink8)
+- [Patreon](https://www.patreon.com/CryptoLink)
 
 
 ### Join us on Discord
