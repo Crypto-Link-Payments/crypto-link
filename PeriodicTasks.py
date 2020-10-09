@@ -105,8 +105,8 @@ class PeriodicTasks:
                                                                 on_chain=True, tx_type='deposit')
 
                         on_chain_stats = {
-                            f"{tx['asset_type']['code']}.depositsCount": 1,
-                            f"{tx['asset_type']['code']}.totalDeposited": round(
+                            f"{tx['asset_type']['code'].lower()}.depositsCount": 1,
+                            f"{tx['asset_type']['code'].lower()}.totalDeposited": round(
                                 int(tx['asset_type']["amount"]) / 10000000,
                                 7)}
 

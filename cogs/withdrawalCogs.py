@@ -156,7 +156,6 @@ class WithdrawalCommands(commands.Cog):
                                     result['offChainData'] = {"xlmFee": stellar_fee,
                                                               f"tokenFee": token_fee}
 
-                                    # TODO rewrite this to async version
                                     await self.backoffice.stellar_manager.insert_to_withdrawal_hist(tx_type=1,
                                                                                                     tx_data=result)
 
