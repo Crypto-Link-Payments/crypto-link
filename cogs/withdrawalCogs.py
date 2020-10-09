@@ -239,10 +239,16 @@ class WithdrawalCommands(commands.Cog):
                             message = f'There has been system issue, please try again later'
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
+
+                        if isinstance(ctx.message.channel, TextChannel):
+                            await ctx.channel.delete_messages([processing_msg])
                     else:
                         message = f'You have cancelled withdrawal request'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                              sys_msg_title=CONST_WITHDRAWAL_ERROR)
+
+                    if isinstance(ctx.message.channel, TextChannel):
+                        await ctx.channel.delete_messages([verification, msg_usr])
 
                 else:
                     message = f"You have insufficient balances:\n" \
@@ -304,7 +310,6 @@ class WithdrawalCommands(commands.Cog):
 
                     verification = await ctx.channel.send(content=message_content)
                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
-
 
                     if str(msg_usr.content.lower()) == 'yes':
                         processing_msg = 'Processing withdrawal request, please wait few moments....'
