@@ -26,7 +26,7 @@ Crypto Link is an open-source project operating under the [GNU GENERAL PUBLIC LI
 
 ## :office: Crypto Link Team :office:
 
-Project lead (CEO)
+Founder and CEO
 - [X] [Animus](https://github.com/AnimusXCASH)
 
 Crypto Link Official Maintainer:
