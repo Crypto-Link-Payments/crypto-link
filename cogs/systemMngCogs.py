@@ -193,10 +193,11 @@ class BotManagementCommands(commands.Cog):
                 # Checks if recipient exists
                 if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
                     self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
-                                              discord_username=f'{ctx.message.author}')
+                                                              discord_username=f'{ctx.message.author}')
 
-                if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
-                                                                        stroops=int(balance), direction=1):
+                if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
+                        discord_id=ctx.message.author.id,
+                        stroops=int(balance), direction=1):
                     # Deduct the balance from the community balance
                     if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=balance, wallet="xlm", direction=2):
                         # Store in history and send notifications to owner and to channel
@@ -205,10 +206,12 @@ class BotManagementCommands(commands.Cog):
 
                         # Store into the history of corporate transfers
                         self.backoffice.corporate_hist_mng.store_transfer_from_corp_wallet(time_utc=int(time.time()),
-                                                                           author=f'{ctx.message.author}',
-                                                                           destination=int(ctx.message.author.id),
-                                                                           amount_atomic=balance, amount=normal_amount,
-                                                                           currency='xlm')
+                                                                                           author=f'{ctx.message.author}',
+                                                                                           destination=int(
+                                                                                               ctx.message.author.id),
+                                                                                           amount_atomic=balance,
+                                                                                           amount=normal_amount,
+                                                                                           currency='xlm')
 
                         # notification to corp account discord channel
                         stellar_channel_id = auto_channels['stellar']
@@ -219,8 +222,9 @@ class BotManagementCommands(commands.Cog):
 
                     else:
                         # Revert the user balance if community balance can not be updated
-                        self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
-                                                                             stroops=int(balance), direction=2)
+                        self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
+                            discord_id=ctx.message.author.id,
+                            stroops=int(balance), direction=2)
 
                         message = f"Stellar funds could not be deducted from corporate account. Please try again later"
                         await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
