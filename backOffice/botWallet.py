@@ -56,16 +56,19 @@ class BotManager:
                                           {"$set": data_to_update})
         return result.modified_count > 0
 
-    def get_fees_by_category(self, all_fees: bool, key: str = None):
+    def get_fees_by_category(self, key: str ):
         """
         Return details on the fees from database
-        :param all_fees: boolean True if all keys returned
         :param key: Key names
         :return:
         """
-        if all_fees:
-            data = list(self.bot_fees.find({}))
-        else:
-            data = self.bot_fees.find_one({"key": key},
+        data = self.bot_fees.find_one({"key": key},
                                           {"_id": 0})
+        return data
+
+    def get_all_fees(self):
+        """
+        Return details on all the fees from database
+        """
+        data = list(self.bot_fees.find({}))
         return data

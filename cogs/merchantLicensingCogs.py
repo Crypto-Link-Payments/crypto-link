@@ -88,7 +88,7 @@ class MerchantLicensingCommands(commands.Cog):
         :return:
         """
 
-        data = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='license')
+        data = self.backoffice.bot_manager.get_fees_by_category(key='license')
         fee_value = data['fee']
         in_lumen = convert_to_currency(fee_value, coin_name='stellar')
         fee_info = Embed(title="__Merchant license information__",
@@ -162,7 +162,7 @@ class MerchantLicensingCommands(commands.Cog):
         stellar = self.backoffice.stellar_manager
         # Check if community does not have license yet
         if not merchant_manager.check_community_license_status(community_id=ctx.message.guild.id):
-            data = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='license')  # Get the fee value for the license
+            data = self.backoffice.bot_manager.get_fees_by_category(key='license')
             fee_value = data['fee']  # Get out fee
             in_lumen = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
             total = (in_lumen['total'])  # Get total in lumen

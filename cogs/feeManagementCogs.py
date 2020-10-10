@@ -41,7 +41,7 @@ class FeeManagementAndControl(commands.Cog):
 
     @commands.command()
     async def fees(self, ctx):
-        fees = self.backoffice.bot_manager.get_fees_by_category(all_fees=True)
+        fees = self.backoffice.bot_manager.get_all_fees()
         from pprint import pprint
         pprint(fees)
         fee_info = discord.Embed(title='Applied fees for system',

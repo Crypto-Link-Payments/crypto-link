@@ -67,7 +67,7 @@ class WithdrawalCommands(commands.Cog):
                 address=address):
 
             # get and convert coin withdrawal fee from major to atomic
-            all_coin_fees = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')[
+            all_coin_fees = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')[
                 'fee_list']
 
             # Stellar details
@@ -282,8 +282,7 @@ class WithdrawalCommands(commands.Cog):
         :return:
         """
         print(f'WITHDRAW XLM  : {ctx.author} -> {ctx.message.content}')
-        stellar_fee = self.backoffice.bot_manager.get_fees_by_category(all_fees=False, key='withdrawals')['fee_list'][
-            'xlm']
+        stellar_fee = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')['fee_list']['xlm']
         fee_in_stroops = int(stellar_fee * (10 ** 7))
 
         # Get stellar details from json
