@@ -6,8 +6,6 @@ from utils.tools import Helpers
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
-helper = Helpers()
-
 
 class BotManager:
     """Class dealing with the management of Crypto Link own bot wallet and fees management"""

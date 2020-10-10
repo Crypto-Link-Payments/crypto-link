@@ -55,7 +55,7 @@ def community_missing(ctx):
     """
     Check if community not registered in the system
     """
-    return ctx.bot.backoffice.merchant_manager.check_if_community_does_not_exist(community_id=ctx.message.guild.id)
+    return ctx.bot.backoffice.merchant_manager.check_if_community_exist(community_id=ctx.message.guild.id) is None
 
 
 def user_has_wallet(ctx):

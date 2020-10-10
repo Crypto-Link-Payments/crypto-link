@@ -95,18 +95,6 @@ class MerchantManager:
         result = self.community_profiles.find_one({"communityId": community_id})
         return result
 
-    def check_if_community_does_not_exist(self, community_id):
-        """
-        Check if community is not registered in system
-        :param community_id: unique community ID provided by discord
-        :return: boolean
-        """
-        result = self.community_profiles.find_one({"communityId": community_id})
-        if result:
-            return False
-        else:
-            return True
-
     def register_role(self, new_role_data: dict):
         """
         Register community role into the system and make it available to be monetized

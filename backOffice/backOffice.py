@@ -5,7 +5,7 @@ from utils.tools import Helpers
 
 from backOffice.backendCheck import BotStructureCheck
 from backOffice.stellarOnChainHandler import StellarWallet
-from backOffice.merchatManager import MerchantManager
+from backOffice.merchantManager import MerchantManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.statsManager import StatsManager
 from backOffice.userWalletManager import UserWalletManager
@@ -33,8 +33,6 @@ class BackOffice:
         self.account_mng = AccountManager(self.connection)
         self.bot_manager = BotManager(self.connection)
         self.corporate_hist_mng = CorporateHistoryManager(self.connection)
-
-
 
     def check_backend(self):
         self.backend_check.check_collections()
