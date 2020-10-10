@@ -63,7 +63,7 @@ class BotManager:
         :return:
         """
         data = self.bot_fees.find_one({"key": key},
-                                          {"_id": 0})
+                                      {"_id": 0})
         return data
 
     def get_all_fees(self):
