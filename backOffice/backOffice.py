@@ -5,7 +5,7 @@ from utils.tools import Helpers
 
 from backOffice.backendCheck import BotStructureCheck
 from backOffice.stellarOnChainHandler import StellarWallet
-from backOffice.merchatManager import MerchantManager
+from backOffice.merchantManager import MerchantManager
 from backOffice.stellarActivityManager import StellarManager
 from backOffice.statsManager import StatsManager
 from backOffice.userWalletManager import UserWalletManager

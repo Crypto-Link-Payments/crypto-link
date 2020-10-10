@@ -1,8 +1,3 @@
-"""
-Class StellarManager is designed to handle off-chain and on-chain activities and store data
-into history
-"""
-
 import os
 import sys
 
