@@ -34,8 +34,6 @@ class BackOffice:
         self.bot_manager = BotManager(self.connection)
         self.corporate_hist_mng = CorporateHistoryManager(self.connection)
 
-
-
     def check_backend(self):
         self.backend_check.check_collections()
         self.backend_check.checking_stats_documents()
