@@ -82,3 +82,5 @@ class UserWalletManager:
         result = self.user_wallets.find_one({"userId": user_id},
                                             {"_id": 0})
         return result
+
+

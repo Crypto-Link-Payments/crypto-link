@@ -156,7 +156,6 @@ class WithdrawalCommands(commands.Cog):
                                     result['offChainData'] = {"xlmFee": stellar_fee,
                                                               f"tokenFee": token_fee}
 
-                                    # TODO rewrite this to async version
                                     await self.backoffice.stellar_manager.insert_to_withdrawal_hist(tx_type=1,
                                                                                                     tx_data=result)
 
@@ -240,10 +239,16 @@ class WithdrawalCommands(commands.Cog):
                             message = f'There has been system issue, please try again later'
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
+
+                        if isinstance(ctx.message.channel, TextChannel):
+                            await ctx.channel.delete_messages([processing_msg])
                     else:
                         message = f'You have cancelled withdrawal request'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                              sys_msg_title=CONST_WITHDRAWAL_ERROR)
+
+                    if isinstance(ctx.message.channel, TextChannel):
+                        await ctx.channel.delete_messages([verification, msg_usr])
 
                 else:
                     message = f"You have insufficient balances:\n" \
@@ -306,9 +311,6 @@ class WithdrawalCommands(commands.Cog):
                     verification = await ctx.channel.send(content=message_content)
                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
 
-                    if isinstance(ctx.message.channel, TextChannel):
-                        await ctx.channel.delete_messages([verification, msg_usr])
-
                     if str(msg_usr.content.lower()) == 'yes':
                         processing_msg = 'Processing withdrawal request, please wait few moments....'
                         processing_msg = await ctx.channel.send(content=processing_msg)
@@ -357,8 +359,8 @@ class WithdrawalCommands(commands.Cog):
 
                                     # Update user withdrawal stats
                                     withdrawal_data = {
-                                        "xlmStats.withdrawalsCount": 1,
-                                        "xlmStats.totalWithdrawn": round(stroops / 10000000, 7),
+                                        "xlm.withdrawalsCount": 1,
+                                        "xlm.totalWithdrawn": round(stroops / 10000000, 7),
                                     }
                                     await self.backoffice.stats_manager.update_usr_tx_stats(
                                         user_id=ctx.message.author.id,
@@ -397,11 +399,18 @@ class WithdrawalCommands(commands.Cog):
                             message = 'Funds could not be withdrawn at this point. Please try again later.'
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
-                        await ctx.channel.delete_messages([processing_msg])
+
+                        if isinstance(ctx.message.channel, TextChannel):
+                            await ctx.channel.delete_messages([processing_msg])
+
                     else:
                         message = f'You have cancelled withdrawal request of {round(xlm_with_amount, 7)}'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                              sys_msg_title=CONST_WITHDRAWAL_ERROR)
+
+                    if isinstance(ctx.message.channel, TextChannel):
+                        await ctx.channel.delete_messages([verification, msg_usr])
+
 
                 else:
                     message = f'Amount you are willing to withdraw is greater than your current wallet balance.\n' \
