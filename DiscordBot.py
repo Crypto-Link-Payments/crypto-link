@@ -4,12 +4,11 @@ from colorama import Fore, init
 
 from utils.tools import Helpers
 
-#init colorama :
+# init colorama :
 init(autoreset=True)
 
-
 extensions = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
-              'cogs.system', 'cogs.withdrawalCogs',
+              'cogs.system', 'cogs.withdrawals',
               'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.merchantLicensingCogs',
               'cogs.feeManagementCogs', 'cogs.guildOwners']
 
@@ -65,4 +64,3 @@ class DiscordBot(commands.Bot):
 
     def get_command_str(self):
         return self.bot_settings['command']
-
