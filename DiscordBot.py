@@ -8,7 +8,7 @@ from utils.tools import Helpers
 init(autoreset=True)
 
 
-extensions = ['cogs.help', 'cogs.transactions', 'cogs.userAccountCogs',
+extensions = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
               'cogs.systemMngCogs', 'cogs.withdrawalCogs',
               'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.merchantLicensingCogs',
               'cogs.feeManagementCogs', 'cogs.guildOwners']
