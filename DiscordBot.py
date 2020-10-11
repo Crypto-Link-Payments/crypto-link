@@ -10,7 +10,7 @@ init(autoreset=True)
 
 extensions = ['cogs.help', 'cogs.transactionCogs', 'cogs.userAccountCogs',
               'cogs.systemMngCogs', 'cogs.withdrawalCogs',
-              'cogs.merchantCogs', 'cogs.consumerMerchant', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
+              'cogs.merchantCogs', 'cogs.consumer', 'cogs.autoMessagesCogs', 'cogs.merchantLicensingCogs',
               'cogs.feeManagementCogs', 'cogs.guildOwnersCmds']
 
 
