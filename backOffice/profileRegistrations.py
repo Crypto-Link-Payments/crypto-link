@@ -4,13 +4,8 @@ from uuid import uuid4
 
 from pymongo import errors
 
-from utils.tools import Helpers
-
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
-
-helper = Helpers()
-hot = helper.read_json_file(file_name='hotWallets.json')
 
 
 class AccountManager(object):
@@ -19,7 +14,6 @@ class AccountManager(object):
     """
 
     def __init__(self, connection):
-        self.hot_wallet_addr = hot['xlm']
         # main db connection
         self.connection = connection
 

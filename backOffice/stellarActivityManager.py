@@ -11,18 +11,12 @@ from pymongo import errors
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
-from utils.tools import Helpers
-
-helper = Helpers()
-hot = helper.read_json_file(file_name='hotWallets.json')
-
 
 class StellarManager:
     """
     Manages Stellar on chain activities
     """
     def __init__(self, connection, as_connection):
-        self.hot_wallet = hot['xlm']
         self.connection = connection
         self.cl_connection = self.connection['CryptoLink']
         self.as_connection = as_connection

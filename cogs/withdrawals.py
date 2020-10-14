@@ -11,7 +11,6 @@ from utils.tools import Helpers
 
 helper = Helpers()
 custom_messages = CustomMessages()
-hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 notify_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_WITHDRAWAL_ERROR = "__Withdrawal error___"

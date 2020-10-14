@@ -4,11 +4,6 @@ import sys
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
-from utils.tools import Helpers
-
-helper = Helpers()
-hot = helper.read_json_file(file_name='hotWallets.json')
-
 
 class UserWalletManager:
     """
@@ -16,7 +11,6 @@ class UserWalletManager:
     """
 
     def __init__(self, connection, as_connection):
-        self.hot_wallet = hot['xlm']
         self.connection = connection
         self.as_connection = as_connection
         self.crypto_link = self.connection['CryptoLink']
