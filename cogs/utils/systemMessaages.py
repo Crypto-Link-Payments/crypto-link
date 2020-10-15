@@ -438,3 +438,12 @@ class CustomMessages:
         """
         msg_streamed = self.filter_message(message=message, tx_type=tx_type)
         await ctx.channel.send(content=msg_streamed, delete_after=360)
+
+    @staticmethod
+    async def send_special_char_notification(channel, tx:dict):
+        special_char = Embed(title=':monkey: Business ',
+                             description='Special characters have been identified in MEMO',
+                             colour=Colour.red())
+        special_char.add_field(name='Transaction details',
+                               value=f'{tx}')
+        await channel.send(embed=special_char)
