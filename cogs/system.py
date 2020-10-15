@@ -9,7 +9,7 @@ from datetime import datetime
 from discord import Embed, Colour
 from discord.ext import commands
 from git import Repo, InvalidGitRepositoryError
-from cogs.utils.monetaryConversions import get_decimal_point, get_normal
+from cogs.utils.monetaryConversions import get_decimal_point, get_normal, get_rates, convert_to_currency
 from cogs.utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -18,13 +18,13 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 helper = Helpers()
-customMessages = CustomMessages()
+custom_messages = CustomMessages()
 auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_CORP_TRANSFER_ERROR_TITLE = '__Corporate Transfer Error__'
-
+CONST_MERCHANT_LICENSE_CHANGE = '__Merchant monthly license change information__'
 CONST_WARNING_TITLE = f':warning: __Restricted area__ :warning: '
 CONST_WARNING_MESSAGE = f'You do not have rights to access this are of the bot'
 
@@ -42,7 +42,22 @@ class BotManagementCommands(commands.Cog):
         """
         self.bot = bot
         self.backoffice = bot.backoffice
+        self.list_of_coins = list(integrated_coins.keys())
         self.command_string = bot.get_command_str()
+
+    @staticmethod
+    def filter_db_keys(fee_type: str):
+
+        if fee_type == 'withdrawal_fees':
+            fee_type = "Coin withdrawal fees"
+        elif fee_type == 'merch_transfer_cost':
+            fee_type = "Merchant wallet withdrawal fee"
+        elif fee_type == 'merch_license':
+            fee_type = "Merchant Monthly License cost"
+        elif fee_type == 'merch_transfer_min':
+            fee_type = 'Merchant minimum transfer'
+
+        return fee_type
 
     async def send_transfer_notification(self, ctx, member, channel_id: int, normal_amount, emoji: str,
                                          chain_name: str):
@@ -93,8 +108,8 @@ class BotManagementCommands(commands.Cog):
                           f"{self.command_string}hot"}
             ]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=ctx.message.author)
+            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                                destination=ctx.message.author)
 
     @cl.command()
     @commands.check(is_one_of_gods)
@@ -227,21 +242,21 @@ class BotManagementCommands(commands.Cog):
                             stroops=int(balance), direction=2)
 
                         message = f"Stellar funds could not be deducted from corporate account. Please try again later"
-                        await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
-                                                            sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+                        await custom_messages.system_message(ctx, color_code=1, message=message, destination=0,
+                                                             sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
                 else:
                     message = f"Stellar funds could not be moved from corporate account to {ctx.message.author}." \
                               f"Please try again later "
-                    await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
-                                                        sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+                    await custom_messages.system_message(ctx, color_code=1, message=message, destination=0,
+                                                         sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
             else:
                 message = f"You can not sweep the account as its balance is 0.0000000 {CONST_STELLAR_EMOJI}"
-                await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
-                                                    sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+                await custom_messages.system_message(ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
         else:
             message = f"{ticker} has not been implemented yet and therefore bot wallet does not exist"
-            await customMessages.system_message(ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+            await custom_messages.system_message(ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
 
     @commands.group()
     @commands.check(is_one_of_gods)
@@ -253,8 +268,9 @@ class BotManagementCommands(commands.Cog):
                       'value': f"***{self.command_string}system update*** "},
                      ]
 
-            await customMessages.embed_builder(ctx, title='Available sub commands for system',
-                                               description='Available commands under category ***system***', data=value)
+            await custom_messages.embed_builder(ctx, title='Available sub commands for system',
+                                                description='Available commands under category ***system***',
+                                                data=value)
 
     @system.command()
     async def off(self, ctx):
@@ -322,9 +338,9 @@ class BotManagementCommands(commands.Cog):
             value = [{'name': 'Entry for commands to manage COGS',
                       'value': f"{self.command_string}manage scripts*** "}
                      ]
-            await customMessages.embed_builder(ctx, title='Crypto Link Management commands',
-                                               description=f"",
-                                               data=value)
+            await custom_messages.embed_builder(ctx, title='Crypto Link Management commands',
+                                                description=f"",
+                                                data=value)
 
     @manage.group()
     async def scripts(self, ctx):
@@ -339,8 +355,9 @@ class BotManagementCommands(commands.Cog):
                       'value': f"***{self.command_string}manage scripts reload*** "}
                      ]
 
-            await customMessages.embed_builder(ctx, title='Available sub commands for system',
-                                               description='Available commands under category ***system***', data=value)
+            await custom_messages.embed_builder(ctx, title='Available sub commands for system',
+                                                description='Available commands under category ***system***',
+                                                data=value)
 
     @scripts.command()
     async def load(self, ctx, extension: str):
@@ -427,9 +444,9 @@ class BotManagementCommands(commands.Cog):
             value = [{'name': f'***{self.command_string}hot balance*** ',
                       'value': "Returns information from wallet RPC on stellar balance"}
                      ]
-            await customMessages.embed_builder(ctx, title='Querying hot wallet details',
-                                               description="All available commands to operate with hot wallets",
-                                               data=value, destination=1)
+            await custom_messages.embed_builder(ctx, title='Querying hot wallet details',
+                                                description="All available commands to operate with hot wallets",
+                                                data=value, destination=1)
 
     @hot.command()
     async def balance(self, ctx):
@@ -458,32 +475,216 @@ class BotManagementCommands(commands.Cog):
         else:
             sys_msg_title = 'Stellar Wallet Query Server error'
             message = 'Status of the wallet could not be obtained at this moment'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=sys_msg_title)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=sys_msg_title)
+
+    @commands.command()
+    async def fees(self, ctx):
+        fees = self.backoffice.bot_manager.get_all_fees()
+        from pprint import pprint
+        pprint(fees)
+        fee_info = Embed(title='Applied fees for system',
+                         description='State of fees for each segment of the bot',
+                         colour=Colour.blue())
+
+        rates = get_rates(coin_name='stellar')
+        for data in fees:
+            if not data.get('fee_list'):
+                conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
+                fee_type = self.filter_db_keys(fee_type=data['type'])
+
+                fee_info.add_field(name=fee_type,
+                                   value=f"XLM = {conversion['total']} {CONST_STELLAR_EMOJI}\n"
+                                         f"Dollar = {data['fee']}$",
+                                   inline=False)
+            else:
+                fee_type = self.filter_db_keys(fee_type=data['type'])
+                fee_info.add_field(name=fee_type,
+                                   value=f"{data['fee_list']}",
+                                   inline=False)
+
+        fee_info.add_field(name='Conversion rates',
+                           value=f'{rates["stellar"]["usd"]} :dollar: / {CONST_STELLAR_EMOJI}\n'
+                                 f'{rates["stellar"]["eur"]} :euro: / {CONST_STELLAR_EMOJI}')
+
+        fee_info.set_thumbnail(url=self.bot.user.avatar_url)
+        fee_info.set_footer(text='Conversion rates provided by CoinGecko',
+                            icon_url='https://static.coingecko.com/s/thumbnail-'
+                                     '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
+        await ctx.channel.send(embed=fee_info)
+
+    @commands.group()
+    @commands.check(is_one_of_gods)
+    async def fee(self, ctx):
+        """
+        Command category/ entry for the system
+        :param ctx:
+        :return:
+        """
+        if ctx.invoked_subcommand is None:
+            title = '__All available commands to manipulate system fees__'
+            description = "Commands presented bellow allow for manipulation of fees and their review per each segment."
+            list_of_values = [
+                {"name": f"{self.command_string}fee change",
+                 "value": f"Entry to sub category of commands to set fees for various parts of {self.bot.user} system"},
+                {"name": f"{self.command_string}fee current",
+                 "value": f"Information on current state of the fees"},
+            ]
+
+            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                                thumbnail=self.bot.user.avatar_url, destination=ctx.message.author)
+
+    @fee.group()
+    async def change(self, ctx):
+        """
+        Commands entry for sub categories to manipulate fees
+        :param ctx:
+        :return:
+        """
+        if ctx.invoked_subcommand is None:
+            title = '__Change fee commands__'
+            description = "Representation of all commands needed to be execute if you are willing to change the fee"
+            list_of_values = [
+                {"name": f"{self.command_string}fee change minimum_merchant_transfer_value <value in $ in format 0.00>",
+                 "value": "Minimum amount in $ crypto value to be eligible for withdrawal from it"},
+                {"name": f"{self.command_string}fee change merchant_license_fee <value in $ in format 0.00>",
+                 "value": "Monthly License Fee for Merchant"},
+                {"name": f"{self.command_string}fee change merchant_wallet_transfer_fee <value in $ in format 0.00>",
+                 "value": "Fee when transferring from merchant wallet of the community"},
+                {"name": f"{self.command_string}fee change xlm_withdrawal_fee <value in $ in format 0.00>",
+                 "value": "Withdrawal fee from personal wallet to outside wallet on Stellar chain"},
+
+            ]
+
+            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                                thumbnail=self.bot.user.avatar_url, destination=ctx.message.author)
+
+    @change.command()
+    async def coin_fee(self, ctx, value: float, ticker: str):
+        """
+        Set the coin withdrawal fee
+        """
+        if ticker in self.list_of_coins:
+            penny = (int(value * (10 ** 2)))
+            rounded = round(penny / 100, 2)
+
+            fee_data = {
+                f"fee_list.{ticker}": rounded
+            }
+            if self.backoffice.bot_manager.manage_fees_and_limits(key='withdrawals', data_to_update=fee_data):
+                message = f'You have successfully set Stellar Lumen withdrawal fee to be {rounded}$.'
+                title = '__Stellar Lumen withdrawal fee information__'
+                await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
+                                                     sys_msg_title=title)
+            else:
+                message = f'There has been an error while trying to set Stellar Lumen withdrawal fee to {rounded}$.' \
+                          f'Please try again later or contact system administrator!'
+                title = '__Stellar Lumen withdrawal fee information__'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=title)
+        else:
+            message = f'Coin {ticker} not listed yet'
+            title = '__Stellar Lumen withdrawal fee information__'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @change.command()
+    async def minimum_merchant_transfer_value(self, ctx, value: float):
+        """
+        Set minimum amount in merchant wallet for withdrawal from it
+        :param ctx: Discord Context
+        :param value:
+        :return:
+        """
+        # Get value in in pennies
+        penny = (int(value * (10 ** 2)))
+        rounded = round(penny / 100, 2)
+        merch_data = {
+            f"fee": rounded
+        }
+        if self.backoffice.bot_manager.manage_fees_and_limits(key='merchant_min', data_to_update=merch_data):
+            message = f'You have successfully set merchant minimum withdrawal to be {rounded}$ per currency used.'
+            await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
+                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
+        else:
+            message = f'There has been an error while trying to set merchant minimum withdrawal amount to {rounded}$.' \
+                      f'Please try again later or contact system administrator!'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
+
+    @change.command()
+    async def merchant_license_fee(self, ctx, value: float):
+        """
+        Change merchant license fee
+        :param ctx: Discord Context
+        :param value:
+        :return:
+        """
+        # Get value in in pennies
+        penny = (int(value * (10 ** 2)))
+        rounded = round(penny / 100, 2)
+        merch_data = {
+            f"fee": rounded
+        }
+        if self.backoffice.bot_manager.manage_fees_and_limits(key='license', data_to_update=merch_data):
+            message = f'You have successfully set merchant monthly license fee to be {rounded}$.'
+            await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
+                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
+        else:
+            message = f'There has been an error while trying to set monthly merchant license fee to {rounded}$.' \
+                      f'Please try again later or contact system administrator!'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
+
+    @change.command()
+    async def merchant_wallet_transfer_fee(self, ctx, value: float):
+        """
+        Change fee for merchant wallet transfer in $
+        :param ctx: Discord Context
+        :param value:
+        :return:
+        """
+        # Get value in in pennies
+        penny = (int(value * (10 ** 2)))
+        rounded = round(penny / 100, 2)
+        merch_data = {
+            f"fee": rounded
+        }
+        if self.backoffice.bot_manager.manage_fees_and_limits(key='wallet_transfer', data_to_update=merch_data):
+            message = f'You have successfully set merchant wallet transfer fee to be {rounded}$.'
+            title = '__Merchant wallet transfer fee information__'
+            await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
+                                                 sys_msg_title=title)
+        else:
+            message = f'There has been an error while trying to set merchant wallet transfer fee to {rounded}$.' \
+                      f'Please try again later or contact system administrator!'
+            title = '__Merchant wallet transfer fee information__'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
 
     @cl.error
     async def cl_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
-                                                sys_msg_title=CONST_WARNING_MESSAGE)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                 sys_msg_title=CONST_WARNING_MESSAGE)
 
     @system.error
     async def system_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
-                                                sys_msg_title=CONST_WARNING_MESSAGE)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                 sys_msg_title=CONST_WARNING_MESSAGE)
 
     @manage.error
     async def manage_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
-                                                sys_msg_title=CONST_WARNING_MESSAGE)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                 sys_msg_title=CONST_WARNING_MESSAGE)
 
     @hot.error
     async def hot_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
-                                                sys_msg_title=CONST_WARNING_MESSAGE)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                 sys_msg_title=CONST_WARNING_MESSAGE)
 
 
 def setup(bot):
