@@ -144,12 +144,10 @@ class PeriodicTasks:
                     else:
                         print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                          f'HASH{tx["hash"]}')
-
                 else:
                     print(Fore.RED + f'Special characters in Memo write to file: \n'
                                      f'{tx}')
                     await custom_messages.send_special_char_notification(channel=channel, tx=tx)
-
             else:
                 print(Fore.YELLOW + 'Unknown processed already')
 
