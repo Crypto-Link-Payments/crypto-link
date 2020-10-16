@@ -182,8 +182,9 @@ class ConsumerCommands(commands.Cog):
                     role_value_crypto = float(convert_to_dollar / coin_usd_price)
                     role_rounded = round(role_value_crypto, get_decimal_point(symbol=ticker))
                     crypto_price_atomic = self.make_atomic(amount=role_value_crypto, coin_name=ticker)
-                    balance = self.backoffice.account_mng.get_balance_based_on_ticker(user_id=int(ctx.message.author.id),
-                                                                      ticker=ticker)
+                    balance = self.backoffice.account_mng.get_balance_based_on_ticker(
+                        user_id=int(ctx.message.author.id),
+                        ticker=ticker)
                     # Check if user has sufficient balance
                     if balance >= crypto_price_atomic and merchant_manager.modify_funds_in_community_merchant_wallet(
                             community_id=int(ctx.message.guild.id),
@@ -193,9 +194,9 @@ class ConsumerCommands(commands.Cog):
 
                         # Update the community wallet
                         if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
-                                                                  ticker=ticker,
-                                                                  direction=1,
-                                                                  amount=crypto_price_atomic):
+                                                                                  ticker=ticker,
+                                                                                  direction=1,
+                                                                                  amount=crypto_price_atomic):
 
                             # Assign the role to the user
                             await ctx.message.author.add_roles(role,
@@ -257,8 +258,9 @@ class ConsumerCommands(commands.Cog):
                                     'xlmStats.roleTxCount': int(1),
                                 }
 
-                                await self.backoffice.stats_manager.as_update_role_purchase_stats(user_id=ctx.message.author.id,
-                                                                                  merchant_data=user_stats_update)
+                                await self.backoffice.stats_manager.as_update_role_purchase_stats(
+                                    user_id=ctx.message.author.id,
+                                    merchant_data=user_stats_update)
 
                                 global_merchant_stats = {
                                     'totalSpentInUsd': convert_to_dollar,
@@ -270,8 +272,8 @@ class ConsumerCommands(commands.Cog):
                                     "merchantMoved": role_rounded
                                 }
                                 await self.backoffice.stats_manager.update_cl_merchant_stats(ticker='xlm',
-                                                                             merchant_stats=global_merchant_stats,
-                                                                             ticker_stats=global_ticker_stats)
+                                                                                             merchant_stats=global_merchant_stats,
+                                                                                             ticker_stats=global_ticker_stats)
 
                                 guild_stats = {
 
@@ -280,7 +282,7 @@ class ConsumerCommands(commands.Cog):
 
                                 }
                                 await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
-                                                                       guild_stats_data=guild_stats)
+                                                                                       guild_stats_data=guild_stats)
 
                                 load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
