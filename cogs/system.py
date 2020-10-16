@@ -512,9 +512,7 @@ class BotManagementCommands(commands.Cog):
             description = "Commands presented bellow allow for manipulation of fees and their review per each segment."
             list_of_values = [
                 {"name": f"{self.command_string}fee change",
-                 "value": f"Entry to sub category of commands to set fees for various parts of {self.bot.user} system"},
-                {"name": f"{self.command_string}fee current",
-                 "value": f"Information on current state of the fees"},
+                 "value": f"Entry to sub category of commands to set fees for various parts of {self.bot.user} system"}
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -531,7 +529,7 @@ class BotManagementCommands(commands.Cog):
             title = '__Change fee commands__'
             description = "Representation of all commands needed to be execute if you are willing to change the fee"
             list_of_values = [
-                {"name": f"{self.command_string}fee change minimum_merchant_transfer_value <value in $ in format 0.00>",
+                {"name": f"{self.command_string}fee change min_merchant_transfer <value in $ in format 0.00>",
                  "value": "Minimum amount in $ crypto value to be eligible for withdrawal from it"},
                 {"name": f"{self.command_string}fee change merchant_license_fee <value in $ in format 0.00>",
                  "value": "Monthly License Fee for Merchant"},
@@ -575,7 +573,7 @@ class BotManagementCommands(commands.Cog):
                                                  sys_msg_title=title)
 
     @change.command()
-    async def minimum_merchant_transfer_value(self, ctx, value: float):
+    async def min_merchant_transfer(self, ctx, value: float):
         """
         Set minimum amount in merchant wallet for withdrawal from it
         :param ctx: Discord Context
