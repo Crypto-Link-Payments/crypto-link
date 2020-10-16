@@ -31,8 +31,7 @@ CONST_WARNING_MESSAGE = f'You do not have rights to access this are of the bot'
 # Extensions integrated into Crypto Link
 extensions = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
               'cogs.system', 'cogs.withdrawals',
-              'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.licensing',
-              'cogs.fees', 'cogs.guildOwners']
+              'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.licensing','cogs.guildOwners']
 
 
 class BotManagementCommands(commands.Cog):
