@@ -48,7 +48,7 @@ class UserAccountCommands(commands.Cog):
         acc_details.set_author(name=f'Discord Account details', icon_url=ctx.author.avatar_url)
         acc_details.add_field(name=":map: Wallet address :map: ",
                               value=f"```{hot_wallets['xlm']}```")
-        acc_details.add_field(name=":compass:  MEMO :compass: ",
+        acc_details.add_field(name=":compass: MEMO :compass: ",
                               value=f"```{wallet_data['depositId']}```",
                               inline=False)
         acc_details.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag: ',
@@ -139,15 +139,17 @@ class UserAccountCommands(commands.Cog):
                                           'address for each currency , otherwise your deposit will be lost!',
                                     inline=False)
             deposit_embed.add_field(
-                name=f' {CONST_STELLAR_EMOJI} Stellar Lumen Deposit details {CONST_STELLAR_EMOJI}',
-                value=f'Stellar wallet Address:\n'
+                name=f' {CONST_STELLAR_EMOJI} Stellar wallet Deposit Details {CONST_STELLAR_EMOJI}',
+                value=f'\n:map: Public Address :map: \n'
                       f'```{hot_wallets["xlm"]}```\n'
-                      f'MEMO:\n'
+                      f':compass: MEMO :compass:\n'
                       f'> {user_profile["stellarDepositId"]}',
                 inline=False)
 
+            coins_string = ', '.join([str(coin.upper()) for coin in self.list_of_coins])
+
             deposit_embed.add_field(name="Currently available currencies on Crypto Link",
-                                    value=f'XLM, CLT')
+                                    value=f'{coins_string}')
 
             deposit_embed.set_thumbnail(url=ctx.message.author.avatar_url)
             await ctx.author.send(embed=deposit_embed)
