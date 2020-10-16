@@ -118,20 +118,21 @@ class GuildOwnerCommands(commands.Cog):
         await ctx.author.send(embed=service_info)
 
     @owner.group()
-    async def explorer(self, ctx):
+    async def uplink(self, ctx):
         if ctx.invoked_subcommand is None:
             title = '__Crypto Link Explorer Manual__'
             description = "All available commands to operate with guild system"
             list_of_values = [
                 {"name": "Apply Channel for CL feed",
-                 "value": f"{self.command_string}owner explorer apply <#discord.Channel>"},
-                {"name": "Remove Channel for CL feed", "value": f"{self.command_string}owner explorer remove"}
+                 "value": f"{self.command_string}owner uplink apply <#discord.Channel>"},
+                {"name": "Remove Channel for CL feed",
+                 "value": f"{self.command_string}owner uplink remove"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                destination=1)
 
-    @explorer.command()
+    @uplink.command()
     async def apply(self, ctx, chn: TextChannel):
         data_to_update = {
             "explorerSettings.channelId": int(chn.id)
@@ -147,7 +148,7 @@ class GuildOwnerCommands(commands.Cog):
                                                                                'to update data.',
                                                 destination=ctx.message.channel, sys_msg_title='__System error__')
 
-    @explorer.command()
+    @uplink.command()
     async def remove(self, ctx):
         data_to_update = {
             "explorerSettings.channelId": int(0)
