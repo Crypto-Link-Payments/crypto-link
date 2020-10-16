@@ -244,35 +244,24 @@ class HelpCommands(commands.Cog):
         """
         Entry point for merchant system
         """
-        merchant_nfo = discord.Embed(title=':convenience_store: __Merchant System Commands__ :convenience_store: ',
-                                     description='Basic explanation on what is merchant system.',
-                                     colour=discord.Color.blue())
-        merchant_nfo.add_field(name=':mega: About Merchant System:mega:',
-                               value='Merchant is part of the Crypto Link eco system and provides owners of the '
-                                     'community opportunity to, automize'
-                                     ' and fully automate role system. Once monetized roles are created, '
-                                     'Discord members can use available Crypto Link integrated currencies'
-                                     ' to purchase roles in various durations and values (determined by community '
-                                     'owner). System will than handle distribution on appropriate role'
-                                     ', transfer of funds to corporate account, and as well remove it from the user '
-                                     'once duration expires.',
-                               inline=False)
-        merchant_nfo.add_field(name=':scroll: Fees and licensing :scroll: ',
-                               value='Activation and integration of merchant system is free of charge, however once '
-                                     'owner wants to withdraw funds from merchant account'
-                                     'to his own, a dynamic fee is applied. There is an option as well to obtain '
-                                     'monthly license, and with it remove the transfer fees.',
-                               inline=False)
-        merchant_nfo.add_field(name=':rocket: Get Started with Merchant :rocket: ',
-                               value=f":one: Register yourself {self.bot.user.name} account with "
-                                     f"`{self.command_string}register`\n"
-                                     f":two: Register your guild  into the {self.bot.user.name} system "
-                                     f"with`{self.command_string}owner register`\n"
-                                     f":three: Initiate the merchant with `{self.command_string}merchant_initiate`\n"
-                                     f":four: Familiarize yourself with merchant system through command `{self.command_string}merchant`",
-                               inline=False)
-        merchant_nfo.set_thumbnail(url=self.bot.user.avatar_url)
-        await ctx.author.send(embed=merchant_nfo, delete_after=500)
+        uplink_nfo = discord.Embed(title=':convenience_store: Uplink System Commands__ :convenience_store: ',
+                                   description='Basic explanation on what is merchant system',
+                                   colour=discord.Color.blue())
+        uplink_nfo.add_field(name=':mega: About Up-Link :mega:',
+                             value=' Crypto Link Up-Link is a service, allowing Discord Guild Owner to opt-in one '
+                                   'of the text channels available for updates on Crypto Link activity. It serves'
+                                   'as a "explorer" of activity. As soon as someone purchases role, or makes '
+                                   'p2p transaction, a Discord Wide messages will be sent to channels opted in for'
+                                   'service.  ',
+                             inline=False)
+        uplink_nfo.add_field(name=':rocket: Get Started with Up-Link :rocket: ',
+                             value=f':one: {self.command_string}uplink apply <#discord.TextChannel>\n'
+                                   f':two: Watch the magic happen on next activity\n'
+                                   f':three: For further references use {self.command_string}owner uplink',
+                             inline=False)
+
+        uplink_nfo.set_thumbnail(url=self.bot.user.avatar_url)
+        await ctx.author.send(embed=uplink_nfo, delete_after=500)
 
     @owner.error
     async def owner_error_assistance(self, ctx, error):
