@@ -26,8 +26,8 @@ class UserAccountCommands(commands.Cog):
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
 
-    @commands.group()
-    @commands.check(user_has_wallet)
+    @commands.command(aliases=['me', 'account'])
+    @commands.check(user_has_wallet)\
     async def acc(self, ctx):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
@@ -41,8 +41,8 @@ class UserAccountCommands(commands.Cog):
         in_rub = rate_converter(xlm_balance, rates["stellar"]["rub"])
         in_ltc = rate_converter(xlm_balance, rates["stellar"]["ltc"])
 
-        acc_details = Embed(title=f'{ctx.author}',
-                            description=f'***__Basic details on your Discord account__***',
+        acc_details = Embed(title=f':office_worker: {ctx.author} :office_worker:',
+                            description=f' ***__Basic details on your Discord account__*** ',
                             colour=Colour.light_grey(),
                             timestamp=utc_now)
         acc_details.set_author(name=f'Discord Account details', icon_url=ctx.author.avatar_url)
@@ -67,11 +67,12 @@ class UserAccountCommands(commands.Cog):
         acc_details.add_field(name=f'LTC',
                               value=f'Ł {scientific_conversion(in_ltc, 8)}')
 
-        acc_details.add_field(name=f'More On Stellar Lumen (XLM)',
+        acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
                               value=f'[Stellar](https://www.stellar.org/)\n'
                                     f'[Stellar Foundation](https://www.stellar.org/foundation)\n'
                                     f'[Stellar Lumens](https://www.stellar.org/lumens)\n'
-                                    f'[CMC](https://coinmarketcap.com/currencies/stellar/)')
+                                    f'[CMC](https://coinmarketcap.com/currencies/stellar/)\n'
+                                    f'[Stellar Expert](https://stellar.expert/explorer/public)')
         acc_details.set_footer(text='Conversion rates provided by CoinGecko')
         await ctx.author.send(embed=acc_details)
 
