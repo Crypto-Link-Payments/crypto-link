@@ -2,7 +2,10 @@
 # :joystick: Command map for Crypto Link System :joystick: 
 
 ## Commands Count
-System has currently 48 various commands of various categories
+System has currently 65 various commands of various categories dedicate to:
+- Discord User accounts and P2P transactions
+- Discord Guild Owner and merchant
+- Crypto Link System Management for bot owner
 
 ## Prefix
 Bot listens to prefix 
