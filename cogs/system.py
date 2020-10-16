@@ -278,7 +278,7 @@ class BotManagementCommands(commands.Cog):
         sys.exit(0)
 
     @system.command()
-    async def update(self):
+    async def update(self,ctx):
         notification_str = ''
         channel_id = auto_channels['sys']
         channel = self.bot.get_channel(id=int(channel_id))
