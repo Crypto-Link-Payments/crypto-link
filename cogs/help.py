@@ -105,7 +105,7 @@ class HelpCommands(commands.Cog):
                               inline=False)
         start_embed.add_field(name=':three: Make P-2-P Transaction :three:',
                               value=f'`{self.command_string}send <amount> <ticker> <@discord.Member>`\n'
-                                    f'__Example__: `!send 10 xlm @animus`',
+                                    f'Example: `{self.command_string}send 10 xlm @animus`',
                               inline=False)
         start_embed.add_field(name=':sos: Access Help Menu :sos: ',
                               value=f'`{self.command_string}help` or check '
@@ -148,35 +148,35 @@ class HelpCommands(commands.Cog):
         list_of_values = [
             {"name": f":cowboy: Public P-2-P transactions :cowboy:",
              "value": f"{self.command_string}send <amount> <ticker> <Discord User> <message=optional>\n"
-                      f"Example:`!send 10 xlm @animus Have a nice day`"},
+                      f"Example:`{self.command_string}send 10 xlm @animus Have a nice day`"},
             {"name": f":detective: Private transactions :detective:  ",
              "value": f"{self.command_string}private <amount> <ticker> <Discord User> <message=optional>\n"
-                      f"Example: `!private 10 xlm @animus Dont tell anyone`"}
+                      f"Example: `{self.command_string}private 10 xlm @animus Dont tell anyone`"}
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
 
-    @help.command()
+    @help.command(aliases=['acc', 'user', 'profile'])
     async def account(self, ctx):
-        title = '__Obtain information on personal account__'
+        title = ':office_worker: __Obtain information on personal account__:office_worker: '
         description = "Bellow are presented all currencies available for P2P transactions"
         list_of_values = [
-            {"name": "Get balance information",
+            {"name": ":credit_card: Get balance information :credit_card: ",
              "value": f"{self.command_string}acc"},
-            {"name": "Access wallet",
+            {"name": ":moneybag: Access wallet commands :moneybag: ",
              "value": f"{self.command_string}wallet"},
-            {"name": "Get instructions on how to deposit",
-             "value": f"{self.command_string}wallet deposit"},
-            {"name": "Get full account report",
+            {"name": " :woman_technologist: Get full account balance report :woman_technologist:  ",
              "value": f"{self.command_string}wallet balance"},
-            {"name": "Wallet Statistics",
+            {"name": ":bar_chart: Wallet Statistics :bar_chart:",
              "value": f"{self.command_string}wallet stats"},
-            {"name": "Get details on how to withdraw from Discord Wallet",
+            {"name": ":inbox_tray: Get instructions on how to deposit :inbox_tray:",
+             "value": f"{self.command_string}wallet deposit"},
+            {"name": ":outbox_tray: Withdrawal instructions :outbox_tray: ",
              "value": f"{self.command_string}withdraw"}]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                            destination=1)
+                                            destination=1, c=Colour.blue())
 
     @help.group()
     @commands.check(is_public)
