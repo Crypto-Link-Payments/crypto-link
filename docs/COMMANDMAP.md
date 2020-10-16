@@ -1,5 +1,12 @@
 
-# Command map for Crypto Link System 
+# :joystick: Command map for Crypto Link System :joystick: 
+
+## Commands Count
+System has currently 65 various commands of various categories dedicate to:
+- Discord User accounts and P2P transactions
+- Discord Guild Owner and merchant
+- Crypto Link System Management for bot owner
+
 ## Prefix
 Bot listens to prefix 
 ```text
@@ -107,9 +114,13 @@ To check the fees implemented and their values use command:
 !license buy with_xlm --> Use Stellar Lumen to purchase license
 ```
 
-### 
 ## System management commands
-Locked for bot owner
+Locked for bot owner/creators
+
+### Overview of all commands
+```text
+!gods
+```
 
 ### Crypto Link Hot Wallet commands
 ```text
@@ -133,14 +144,23 @@ Locked for bot owner
 !system update --> Pull neew updates from github and reload COGS
 ```
 
-### Crypto Link management from Discord
+### Crypto Link COG management
 ```text
-!manage --> Information on available sub-commands
-!manage scripts --> Information on available sub-commands
-!manage scripts list_cogs --> Returns names of all implemented COGS
-!manage scripts unload <cog name> --> Turns off COG and its relevant commands
-!manage script load <cog name> --> Turns on COG and its relevant commands
-!manage script reload --> Reloads all the cogs in the system 
+!cogs --> Information on available sub-commands
+!cogs list --> Returns names of all implemented COGS
+!cogs unload <cog name> --> Turns off COG and its relevant commands
+!cogs load <cog name> --> Turns on COG and its relevant commands
+!cogs reload --> Reloads all the cogs in the system 
+```
+
+### Crypto Link Fee Management
+```text
+!fee --> Returns details on all available categories
+!fee change --> Sub-commands expanations
+!fee change coin_fee <value in $ in format 0.00> <coin ticker> --> Sets withdrawal fee for integrated coin
+!fee change merchant_license_fee <value in $ in format 0.00> --> Sets the merchant license fee
+!fee change min_merchant_transfer <value in $ in format 0.00> --> Sets minimum merchant transfer
+!fee change merchant_wallet_transfer_fee <value in $ in format 0.00> --> Set fee for transfers from merchant earnings
 ```
 
 [Back to main page](README.md)
