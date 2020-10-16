@@ -27,7 +27,7 @@ class UserAccountCommands(commands.Cog):
         self.list_of_coins = list(integrated_coins.keys())
 
     @commands.command(aliases=['me', 'account'])
-    @commands.check(user_has_wallet)\
+    @commands.check(user_has_wallet)
     async def acc(self, ctx):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
@@ -43,7 +43,7 @@ class UserAccountCommands(commands.Cog):
 
         acc_details = Embed(title=f':office_worker: {ctx.author} :office_worker:',
                             description=f' ***__Basic details on your Discord account__*** ',
-                            colour=Colour.light_grey(),
+                            colour=Colour.dark_orange(),
                             timestamp=utc_now)
         acc_details.set_author(name=f'Discord Account details', icon_url=ctx.author.avatar_url)
         acc_details.add_field(name=":map: Wallet address :map: ",
@@ -76,12 +76,13 @@ class UserAccountCommands(commands.Cog):
         acc_details.set_footer(text='Conversion rates provided by CoinGecko')
         await ctx.author.send(embed=acc_details)
 
-    @commands.command()
+    @commands.command(aliases=['reg', 'apply'])
     @commands.check(is_public)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def register(self, ctx):
         if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
-            if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
+            if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
+                                                         discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
                           f' Please use {self.command_string}acc or {self.command_string}wallet.'
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
@@ -101,17 +102,18 @@ class UserAccountCommands(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = '__Available Wallets__'
-            description = "All commands to check wallet details for each available cryptocurrency"
-            list_of_values = [{"name": "Quick balance check", "value": f"{self.command_string}acc"},
-                              {"name": "How to deposit to Discord wallet", "value": f"{self.command_string}wallet deposit"},
-                              {"name": "How to deposit to Discord wallet", "value": f"{self.command_string}wallet stats"},
-                              {"name": "Get Stellar (XLM) wallet details", "value": f"{self.command_string}wallet balance"},
-                              {"name": "Create trustline for tokens",
-                               "value": f"{self.command_string}trust <private key> <token>"}]
-
+            title = ':joystick: __Available Wallet Commands__ :joystick: '
+            description = "All commands available to operate execute wallet related actions"
+            list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
+                               "value": f"`{self.command_string}wallet balance`"},
+                              {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
+                               "value": f"`{self.command_string}wallet stats`"},
+                              {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
+                               "value": f"`{self.command_string}wallet deposit`"},
+                              {"name": ":outbox_tray: Get Withdrawal Instructions :outbox_tray: ",
+                               "value": f"`{self.command_string}withdraw`"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                destination=1)
+                                                destination=1, c=Colour.dark_orange())
 
     @wallet.command()
     async def stats(self, ctx):
