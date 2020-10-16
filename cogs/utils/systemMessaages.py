@@ -89,7 +89,7 @@ class CustomMessages:
         await channel.send(embed=notify)
 
     @staticmethod
-    async def embed_builder(ctx, title, description, data: list, destination=None, thumbnail=None):
+    async def embed_builder(ctx, title, description, data: list, destination=None, thumbnail=None, c: Colour = None):
         """
         Build embed from data provided
         :param ctx: Discord Context
@@ -100,9 +100,13 @@ class CustomMessages:
         :param thumbnail: where embed is sent
         :return:
         """
+
+        if not c:
+            c = discord.Colour.gold()
+
         embed = discord.Embed(title=title,
                               description=description,
-                              colour=discord.Colour.gold())
+                              colour=c)
         for d in data:
             embed.add_field(name=d['name'],
                             value=d['value'],
