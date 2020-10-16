@@ -259,6 +259,8 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.system_message(ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
 
+    #############################  Crypto Link System #############################
+
     @commands.group()
     @commands.check(is_one_of_gods)
     async def system(self, ctx):
@@ -272,9 +274,6 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.embed_builder(ctx, title='Available sub commands for system',
                                                 description='Available commands under category ***system***',
                                                 data=value)
-
-
-    #############################  Crypto Link System #############################
 
     @system.command()
     async def off(self, ctx):
