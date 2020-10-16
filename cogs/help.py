@@ -8,7 +8,7 @@ from utils.tools import Helpers
 from cogs.utils.customCogChecks import is_owner, is_public
 from cogs.utils.systemMessaages import CustomMessages
 
-customMessages = CustomMessages()
+custom_messages = CustomMessages()
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 
@@ -36,8 +36,8 @@ class HelpCommands(commands.Cog):
                 {"name": "Explanation on the Merchant System", "value": f"{self.command_string}help owner merchant"}
             ]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1, c=Colour.blue())
+            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                                destination=1, c=Colour.blue())
 
     @commands.command()
     async def about(self, ctx):
@@ -55,7 +55,7 @@ class HelpCommands(commands.Cog):
                       ' allows for execution of peer-to-peer crypto transactions, token ICOs/project'
                       ' promotions, and Discord community monetization opportunities.'},
 
-            {"name": ":incoming_envelope: Peer to Peer transactions :incoming_envelope: ",
+            {"name": ":money_with_wings:  Peer to Peer transactions :money_with_wings:  ",
              "value": f"Users are able to execute instant peer-2-peer transactions either with the Stellar"
                       f" native currency or its tokens which have been integrated onto Crypto Link. For full"
                       f" list of supported currencies please use command {self.command_string}currencies"},
@@ -78,8 +78,8 @@ class HelpCommands(commands.Cog):
                       f'[Twitter](https://twitter.com/CryptoLink8)'},
         ]
 
-        await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                           destination=1, c=Colour.blue())
+        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                            destination=1, c=Colour.blue())
 
     @help.command()
     async def get_started(self, ctx):
@@ -135,25 +135,27 @@ class HelpCommands(commands.Cog):
                 value=f'`Symbol:` ***{coins[coin]["ticker"]}***\n'
                       f'`Issuer:` ***{coins[coin]["assetIssuer"]}***\n'
                       f'`Decimals:` ***{coins[coin]["decimal"]}***\n'
-                      f'`Min. Withdrawal:` ***{coins[coin]["minimumWithdrawal"]/10000000}***\n'
+                      f'`Min. Withdrawal:` ***{coins[coin]["minimumWithdrawal"] / 10000000}***\n'
                       f'`Expert Link:` ***{coins[coin]["expert"]}***\n'
                       f'`Homepage:` ***{coins[coin]["homepage"]}***',
                 inline=False)
         await ctx.author.send(embed=available)
 
-    @help.command()
+    @help.command(aliases=['tx', 'pay'])
     async def transactions(self, ctx):
-        title = '__How to make peer to peer transaction__'
-        description = "Bellow are presented all currencies available for P2P transactions"
+        title = ':money_with_wings: __How to make peer to peer transaction__ :money_with_wings: '
+        description = f"Forms of transactions available on {self.bot.user.name}"
         list_of_values = [
-            {"name": f"Public transactions ",
-             "value": f"{self.command_string}send <amount> <ticker> <Discord User> <message=optional>"},
-            {"name": f"Private transactions ",
-             "value": f"{self.command_string}private <amount> <ticker> <Discord User> <message=optional>"}
+            {"name": f":cowboy: Public P-2-P transactions :cowboy:",
+             "value": f"{self.command_string}send <amount> <ticker> <Discord User> <message=optional>\n"
+                      f"Example:`!send 10 xlm @animus Have a nice day`"},
+            {"name": f":detective: Private transactions :detective:  ",
+             "value": f"{self.command_string}private <amount> <ticker> <Discord User> <message=optional>\n"
+                      f"Example: `!private 10 xlm @animus Dont tell anyone`"}
         ]
 
-        await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                           destination=1)
+        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                            destination=1, c=Colour.blue())
 
     @help.command()
     async def account(self, ctx):
@@ -173,8 +175,8 @@ class HelpCommands(commands.Cog):
             {"name": "Get details on how to withdraw from Discord Wallet",
              "value": f"{self.command_string}withdraw"}]
 
-        await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                           destination=1)
+        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                            destination=1)
 
     @help.group()
     @commands.check(is_public)
@@ -188,8 +190,8 @@ class HelpCommands(commands.Cog):
                 {"name": f"{self.command_string}help owner merchant",
                  "value": f"Return the information on Merchant system for owners of the communities"}]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1)
+            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                                destination=1)
 
     @owner.command()
     async def merchant(self, ctx):
@@ -230,7 +232,7 @@ class HelpCommands(commands.Cog):
         if isinstance(error, commands.CheckFailure):
             message = f'You can access this are only if you are the owner of the guild and command is executed on ' \
                       f'public channel'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
 
 
 def setup(bot):
