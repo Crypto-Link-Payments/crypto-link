@@ -26,7 +26,7 @@ class UserAccountCommands(commands.Cog):
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
 
-    @commands.group()
+    @commands.command(aliases=['me', 'account'])
     @commands.check(user_has_wallet)
     async def acc(self, ctx):
         utc_now = datetime.utcnow()
@@ -41,14 +41,14 @@ class UserAccountCommands(commands.Cog):
         in_rub = rate_converter(xlm_balance, rates["stellar"]["rub"])
         in_ltc = rate_converter(xlm_balance, rates["stellar"]["ltc"])
 
-        acc_details = Embed(title=f'{ctx.author}',
-                            description=f'***__Basic details on your Discord account__***',
-                            colour=Colour.light_grey(),
+        acc_details = Embed(title=f':office_worker: {ctx.author} :office_worker:',
+                            description=f' ***__Basic details on your Discord account__*** ',
+                            colour=Colour.dark_orange(),
                             timestamp=utc_now)
         acc_details.set_author(name=f'Discord Account details', icon_url=ctx.author.avatar_url)
         acc_details.add_field(name=":map: Wallet address :map: ",
                               value=f"```{hot_wallets['xlm']}```")
-        acc_details.add_field(name=":compass:  MEMO :compass: ",
+        acc_details.add_field(name=":compass: MEMO :compass: ",
                               value=f"```{wallet_data['depositId']}```",
                               inline=False)
         acc_details.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag: ',
@@ -67,20 +67,22 @@ class UserAccountCommands(commands.Cog):
         acc_details.add_field(name=f'LTC',
                               value=f'Ł {scientific_conversion(in_ltc, 8)}')
 
-        acc_details.add_field(name=f'More On Stellar Lumen (XLM)',
+        acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
                               value=f'[Stellar](https://www.stellar.org/)\n'
                                     f'[Stellar Foundation](https://www.stellar.org/foundation)\n'
                                     f'[Stellar Lumens](https://www.stellar.org/lumens)\n'
-                                    f'[CMC](https://coinmarketcap.com/currencies/stellar/)')
+                                    f'[CMC](https://coinmarketcap.com/currencies/stellar/)\n'
+                                    f'[Stellar Expert](https://stellar.expert/explorer/public)')
         acc_details.set_footer(text='Conversion rates provided by CoinGecko')
         await ctx.author.send(embed=acc_details)
 
-    @commands.command()
+    @commands.command(aliases=['reg', 'apply'])
     @commands.check(is_public)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def register(self, ctx):
         if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
-            if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id, discord_username=f'{ctx.message.author}'):
+            if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
+                                                         discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
                           f' Please use {self.command_string}acc or {self.command_string}wallet.'
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
@@ -100,17 +102,18 @@ class UserAccountCommands(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = '__Available Wallets__'
-            description = "All commands to check wallet details for each available cryptocurrency"
-            list_of_values = [{"name": "Quick balance check", "value": f"{self.command_string}acc"},
-                              {"name": "How to deposit to Discord wallet", "value": f"{self.command_string}wallet deposit"},
-                              {"name": "How to deposit to Discord wallet", "value": f"{self.command_string}wallet stats"},
-                              {"name": "Get Stellar (XLM) wallet details", "value": f"{self.command_string}wallet balance"},
-                              {"name": "Create trustline for tokens",
-                               "value": f"{self.command_string}trust <private key> <token>"}]
-
+            title = ':joystick: __Available Wallet Commands__ :joystick: '
+            description = "All commands available to operate execute wallet related actions"
+            list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
+                               "value": f"`{self.command_string}wallet balance`"},
+                              {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
+                               "value": f"`{self.command_string}wallet stats`"},
+                              {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
+                               "value": f"`{self.command_string}wallet deposit`"},
+                              {"name": ":outbox_tray: Get Withdrawal Instructions :outbox_tray: ",
+                               "value": f"`{self.command_string}withdraw`"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                destination=1)
+                                                destination=1, c=Colour.dark_orange())
 
     @wallet.command()
     async def stats(self, ctx):
@@ -128,7 +131,7 @@ class UserAccountCommands(commands.Cog):
                           'responsible for. :warning:'
 
             deposit_embed = Embed(title='How to deposit',
-                                  colour=Colour.green(),
+                                  colour=Colour.dark_orange(),
                                   description=description)
 
             deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
@@ -136,15 +139,17 @@ class UserAccountCommands(commands.Cog):
                                           'address for each currency , otherwise your deposit will be lost!',
                                     inline=False)
             deposit_embed.add_field(
-                name=f' {CONST_STELLAR_EMOJI} Stellar Lumen Deposit details {CONST_STELLAR_EMOJI}',
-                value=f'Stellar wallet Address:\n'
+                name=f' {CONST_STELLAR_EMOJI} Stellar wallet Deposit Details {CONST_STELLAR_EMOJI}',
+                value=f'\n:map: Public Address :map: \n'
                       f'```{hot_wallets["xlm"]}```\n'
-                      f'MEMO:\n'
+                      f':compass: MEMO :compass:\n'
                       f'> {user_profile["stellarDepositId"]}',
                 inline=False)
 
+            coins_string = ', '.join([str(coin.upper()) for coin in self.list_of_coins])
+
             deposit_embed.add_field(name="Currently available currencies on Crypto Link",
-                                    value=f'XLM, CLT')
+                                    value=f'{coins_string}')
 
             deposit_embed.set_thumbnail(url=ctx.message.author.avatar_url)
             await ctx.author.send(embed=deposit_embed)
@@ -155,7 +160,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @wallet.command()
+    @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
         coin_data = helper.read_json_file(file_name='integratedCoins.json')
@@ -163,9 +168,9 @@ class UserAccountCommands(commands.Cog):
             all_wallets = list(user_balances.keys())
 
             # initiate Discord embed
-            balance_embed = Embed(title=f"Wallet details for {ctx.message.author}",
+            balance_embed = Embed(title=f":office_worker: Wallet details for {ctx.message.author} :office_worker:",
                                   timestamp=datetime.utcnow(),
-                                  colour=Colour.green())
+                                  colour=Colour.dark_orange())
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
             for wallet_ticker in all_wallets:
                 coin_settings = coin_data[wallet_ticker]
@@ -194,6 +199,10 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def trust(self, ctx, private_key, token: str):
+        """
+        Command which is used for users to establish a trust line between their personal dekstop accounts and
+        token issuer
+        """
         token = token.lower()
         # check strings, stellar address and token integration status
         if check_stellar_private(private_key=private_key):
