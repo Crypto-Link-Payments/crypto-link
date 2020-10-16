@@ -60,16 +60,16 @@ class ConsumerCommands(commands.Cog):
         Entry point for membership connected with merchant system
         """
 
-        title = '__Membership available commands__'
-        description = 'Representation of all available commands under ***membership*** category.'
+        title = ':joystick: __Subscription available commands__ :joystick:'
+        description = 'Representation of all available commands under ***membership*** category to purchase' \
+                      ' and monitor roles.'
         list_of_commands = [
-            {"name": f'{self.command_string}membership roles',
-             "value": f'All available roles to be bought on the community {ctx.message.guild}'},
-            {"name": f'{self.command_string}membership subscribe <@discord Role> <ticker xlm>',
-             "value": 'Gets yourself a role'},
-            {"name": f'{self.command_string}membership current',
-             "value": 'Returns the list and description on all roles user currently has, which have been'
-                      'obtained through merchant system and have not yet expired.'}
+            {"name": f':circus_tent: Available Roles on {ctx.message.guild} :circus_tent:',
+             "value": f'`{self.command_string}membership roles`'},
+            {"name": f':person_juggling: Gets yourself a role :person_juggling: ',
+             "value": f'`{self.command_string}membership subscribe <@discord Role>`'},
+            {"name": f':man_mage: List active roles :man_mage:',
+             "value": f'`{self.command_string}membership current`'}
         ]
 
         if ctx.invoked_subcommand is None:
