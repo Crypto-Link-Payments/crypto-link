@@ -131,7 +131,7 @@ class UserAccountCommands(commands.Cog):
                           'responsible for. :warning:'
 
             deposit_embed = Embed(title='How to deposit',
-                                  colour=Colour.green(),
+                                  colour=Colour.dark_orange(),
                                   description=description)
 
             deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
@@ -160,7 +160,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @wallet.command()
+    @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
         coin_data = helper.read_json_file(file_name='integratedCoins.json')
@@ -168,9 +168,9 @@ class UserAccountCommands(commands.Cog):
             all_wallets = list(user_balances.keys())
 
             # initiate Discord embed
-            balance_embed = Embed(title=f"Wallet details for {ctx.message.author}",
+            balance_embed = Embed(title=f":office_worker: Wallet details for {ctx.message.author} :office_worker:",
                                   timestamp=datetime.utcnow(),
-                                  colour=Colour.green())
+                                  colour=Colour.dark_orange())
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
             for wallet_ticker in all_wallets:
                 coin_settings = coin_data[wallet_ticker]
