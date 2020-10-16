@@ -199,6 +199,10 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def trust(self, ctx, private_key, token: str):
+        """
+        Command which is used for users to establish a trust line between their personal dekstop accounts and
+        token issuer
+        """
         token = token.lower()
         # check strings, stellar address and token integration status
         if check_stellar_private(private_key=private_key):
