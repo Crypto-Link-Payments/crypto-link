@@ -280,8 +280,6 @@ class BotManagementCommands(commands.Cog):
     @system.command()
     async def update(self,ctx):
         notification_str = ''
-        channel_id = auto_channels['sys']
-        channel = self.bot.get_channel(id=int(channel_id))
         current_time = datetime.utcnow()
         try:
             repo = Repo()  # Initiate repo
@@ -294,7 +292,7 @@ class BotManagementCommands(commands.Cog):
             notification_str += 'GIT UPDATE: There has been an error while pulling latest commits :red_circle:  \n' \
                                 'Error: Git Repository could not be found\n' \
                                 '=============================================\n'
-            await channel.send(content=notification_str)
+            await ctx.author.send(content=notification_str)
 
         notification_str += 'STATUS OF COGS AFTER RELOAD\n'
         for extension in extensions:
@@ -322,7 +320,7 @@ class BotManagementCommands(commands.Cog):
         load_status.add_field(name='Status Message',
                               value=notification_str,
                               inline=False)
-        await channel.send(embed=load_status)
+        await ctx.author.send(embed=load_status)
 
     @commands.group()
     @commands.check(is_one_of_gods)
