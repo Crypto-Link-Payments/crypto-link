@@ -69,7 +69,9 @@ class BotManagementCommands(commands.Cog):
         list_of_values = [
             {"name": "Crypto Link off-chain wallet", "value": f"{self.command_string}cl"},
             {"name": "Crypto Link system backend", "value": f"{self.command_string}system"},
-            {"name": "Crypto Link COG Management", "value": f"{self.command_string}manage"},
+            {"name": "Crypto Link COG Management", "value": f"{self.command_string}cogs"},
+            {"name": "Crypto Link HOT Wallet Management", "value": f"{self.command_string}hot"},
+            {"name": "Crypto Link fee management", "value": f"{self.command_string}fee"}
 
         ]
 
@@ -323,39 +325,23 @@ class BotManagementCommands(commands.Cog):
 
     @commands.group()
     @commands.check(is_one_of_gods)
-    async def manage(self, ctx):
-        """
-        Category of commands under team category
-        :param ctx:
-        :return:
-        """
-
-        if ctx.invoked_subcommand is None:
-            value = [{'name': 'Entry for commands to manage COGS',
-                      'value': f"{self.command_string}manage scripts*** "}
-                     ]
-            await custom_messages.embed_builder(ctx, title='Crypto Link Management commands',
-                                                description=f"",
-                                                data=value)
-
-    @manage.group()
-    async def scripts(self, ctx):
+    async def cogs(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__List all cogs__',
-                      'value': f"***{self.command_string}manage scripts list_cogs*** "},
+                      'value': f"***{self.command_string}cogs list*** "},
                      {'name': '__Loading specific cog__',
-                      'value': f"***{self.command_string}manage scripts load <cog name>*** "},
+                      'value': f"***{self.command_string}cogs load <cog name>*** "},
                      {'name': '__Unloading specific cog__',
-                      'value': f"***{self.command_string}manage scripts unload <cog name>*** "},
+                      'value': f"***{self.command_string}cogs unload <cog name>*** "},
                      {'name': '__Reload all cogs__',
-                      'value': f"***{self.command_string}manage scripts reload*** "}
+                      'value': f"***{self.command_string}cogs reload*** "}
                      ]
 
             await custom_messages.embed_builder(ctx, title='Available sub commands for system',
                                                 description='Available commands under category ***system***',
                                                 data=value)
 
-    @scripts.command()
+    @cogs.command()
     async def load(self, ctx, extension: str):
         """
         Load specific COG == Turn ON
@@ -375,7 +361,7 @@ class BotManagementCommands(commands.Cog):
         except Exception as error:
             await ctx.channel.send(content=error)
 
-    @scripts.command()
+    @cogs.command()
     async def unload(self, ctx, extension: str):
         """
         Unloads COG == Turns OFF commands under certain COG
@@ -395,8 +381,8 @@ class BotManagementCommands(commands.Cog):
         except Exception as error:
             await ctx.channel.send(content=error)
 
-    @scripts.command()
-    async def list_cogs(self, ctx):
+    @cogs.command()
+    async def list(self, ctx):
         """
         List all cogs implemented in the system
         """
@@ -409,7 +395,7 @@ class BotManagementCommands(commands.Cog):
                                      inline=False)
         await ctx.channel.send(embed=cog_list_embed)
 
-    @scripts.command()
+    @cogs.command()
     async def reload(self, ctx):
         """
          Reload all cogs
@@ -674,7 +660,7 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
 
-    @manage.error
+    @cogs.error
     async def manage_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
