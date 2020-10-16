@@ -4,7 +4,7 @@ COGS: Help commands for the payment services
 import discord
 from discord.ext import commands
 from discord import Colour
-
+from utils.tools import Helpers
 from cogs.utils.customCogChecks import is_owner, is_public
 from cogs.utils.systemMessaages import CustomMessages
 
@@ -16,6 +16,7 @@ CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 class HelpCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.helper = Helpers()
         self.command_string = bot.get_command_str()
 
     @commands.group()
@@ -88,7 +89,7 @@ class HelpCommands(commands.Cog):
         :return: Discord Embed
         """
         start_embed = discord.Embed(title=f':rocket: Launch {self.bot.user.name} Experience :rocket:',
-                                    colour=discord.Colour.blue())
+                                    colour=Colour.blue())
         start_embed.add_field(name=':one: Register your account :one:',
                               value=f'In order for you to be able to make peer to peer transactions and use merchant'
                                     f' system, you must be registered in the system.\n'
@@ -112,22 +113,32 @@ class HelpCommands(commands.Cog):
                               inline=False)
         await ctx.author.send(embed=start_embed)
 
-    @help.command()
+    @help.command(aliases=['tokens', 'coins'])
     async def currencies(self, ctx):
         """
         Returns representation of all available currencies available to be utilized int transactions
         :return: Discord Embed
         """
 
-        available = discord.Embed(title='All available currencies',
+        available = discord.Embed(title=':coin: Integrated coins and tokens :coin: ',
                                   description='Bellow is a list of all available currencies for making peer 2 peer'
-                                              ' transactions or to be used with merchant system')
-        available.add_field(
-            name=f"{CONST_STELLAR_EMOJI} Stellar Lumen {CONST_STELLAR_EMOJI}",
-            value=f'tx symbol: xlm\n'
-                  f'web: https://www.stellar.org/\n'
-                  f'cmc: https://coinmarketcap.com/currencies/stellar/',
-            inline=False)
+                                              ' transactions or to be used with merchant system',
+                                  colour=Colour.blue())
+        await ctx.author.send(embed=available)
+
+        coins = self.helper.read_json_file(file_name='integratedCoins.json')
+        for coin in coins:
+            available.add_field(name=f'====================================',
+                                value='\u200b')
+            available.add_field(
+                name=f"{coins[coin]['emoji']} {coins[coin]['name']} {coins[coin]['emoji']}",
+                value=f'`Symbol:` ***{coins[coin]["ticker"]}***\n'
+                      f'`Issuer:` ***{coins[coin]["assetIssuer"]}***\n'
+                      f'`Decimals:` ***{coins[coin]["decimal"]}***\n'
+                      f'`Min. Withdrawal:` ***{coins[coin]["minimumWithdrawal"]/10000000}***\n'
+                      f'`Expert Link:` ***{coins[coin]["expert"]}***\n'
+                      f'`Homepage:` ***{coins[coin]["homepage"]}***',
+                inline=False)
         await ctx.author.send(embed=available)
 
     @help.command()
