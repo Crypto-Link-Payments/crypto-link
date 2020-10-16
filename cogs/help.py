@@ -87,20 +87,29 @@ class HelpCommands(commands.Cog):
         :param ctx: Discord Context
         :return: Discord Embed
         """
-        start_embed = discord.Embed(title='How to get started',
-                                    description='Bellow are provided instructions on how to get started',
-                                    colour=discord.Colour.purple())
-        start_embed.add_field(name='Start here',
+        start_embed = discord.Embed(title=f':rocket: Launch {self.bot.user.name} Experience :rocket:',
+                                    colour=discord.Colour.blue())
+        start_embed.add_field(name=':one: Register your account :one:',
                               value=f'In order for you to be able to make peer to peer transactions and use merchant'
                                     f' system, you must be registered in the system.\n'
                                     f'You can do that by executing command on any public Discord channel, where system'
-                                    f' is present with: __{self.command_string}register__ .\n'
+                                    f' is present with command `{self.command_string}register`.\n'
                                     f'Once successful, you will create personal wallets with details which you can use '
                                     f' to move or deposit funds. To further familiarize yourself with other'
                                     f' commands use __{self.command_string}help__ ',
                               inline=False)
-        start_embed.add_field(name=f'Github version',
-                              value=f'[Get started](https://github.com/launch-pad-investments/crypto-link/blob/master/docs/USERCOMMANDS.md)')
+        start_embed.add_field(name=':two: Get Deposit Details :two:',
+                              value=f'Get deposit details of your Discord wallet with `{self.command_string}wallet'
+                                    f' deposit` and deposit XLM.',
+                              inline=False)
+        start_embed.add_field(name=':three: Make P-2-P Transaction :three:',
+                              value=f'`{self.command_string}send <amount> <ticker> <@discord.Member>`\n'
+                                    f'__Example__: `!send 10 xlm @animus`',
+                              inline=False)
+        start_embed.add_field(name=':sos: Access Help Menu :sos: ',
+                              value=f'`{self.command_string}help` or check '
+                                    f'[user command list on Github](https://github.com/launch-pad-investments/crypto-link/blob/master/docs/USERCOMMANDS.md)',
+                              inline=False)
         await ctx.author.send(embed=start_embed)
 
     @help.command()
