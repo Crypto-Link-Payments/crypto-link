@@ -22,20 +22,25 @@ class HelpCommands(commands.Cog):
     @commands.group()
     async def help(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = '__Available help categories__'
-            description = "All available help sub-categories for you to familiarize yourself with payment " \
-                          "and merchant " \
-                          "services available."
+            title = ':sos: __Available Help Commands__ :sos: '
+            description = f"Available sub commands for {self.command_string}"
             list_of_values = [
-                {"name": "How to get started", "value": f"{self.command_string}help get_started"},
-                {"name": "About the payment solution", "value": f"{self.command_string} about"},
-                {"name": "Account commands", "value": f"{self.command_string}help account"},
-                {"name": "How to make peer to peer transactions", "value": f"{self.command_string}help transactions"},
-                {"name": "List of available currencies", "value": f"{self.command_string}help currencies"},
-                {"name": "List of commands if you are community owner", "value": f"{self.command_string}help owner"},
-                {"name": "Explanation on the Merchant System", "value": f"{self.command_string}help owner merchant"}
-            ]
+                {"name": ":rocket: How to get started :rocket:",
+                 "value": f"{self.command_string}help get_started"},
+                {"name": " :mega: About the payment solution :mega:",
+                 "value": f"{self.command_string} about"},
+                {"name": ":office_worker: Account commands :office_worker:",
+                 "value": f"{self.command_string}help account"},
+                {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
+                 "value": f"{self.command_string}help transactions"},
+                {"name": ":coin: Available Currencies :coin:",
+                 "value": f"{self.command_string}help currencies"},
+                {"name": ":crown: Guild Owner Commands :crown:",
+                 "value": f"{self.command_string}help owner"},
+                {"name": ":crown: Guild Owner Commands :crown:",
+                 "value": f"{self.command_string}help owner"},
 
+            ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.blue())
 
@@ -46,24 +51,32 @@ class HelpCommands(commands.Cog):
         :param ctx:
         :return:
         """
-        title = ':mega: __About the system__ :mega: '
-        description = "Description about the system"
+        title = ':mega: __Welcome to Crypto Link__ :mega: '
+        description = "What Crypto Link is and what it offers"
         list_of_values = [
             {"name": ":information_source: About :information_source: ",
-             "value": 'Crypto Link is a Discord multi functional bot. Built on top of Stellar, utilizing '
-                      'its native Stellar Lumen (XLM) crypto currency and tokens issued on Stellar chain,'
-                      ' allows for execution of peer-to-peer crypto transactions, token ICOs/project'
-                      ' promotions, and Discord community monetization opportunities.'},
+             "value": 'Crypto Link is a multi-functional & multi-guild Discord bot serving as a bridge between the '
+                      'Stellar Ecosystem and Discord users. Being built ontop of the Stellar Blockchain, it utilizes '
+                      'the native token, Stellar Lumen (a.k.a XLM) and tokens issued on Stellar chain, '
+                      'allowing for execution of Peer to Peer transactions amongst users, monetization'
+                      ' opportunities for Discord guild owners and project promotions/crowdfunding/ICOs activities'
+                      ' at low costs for aspiring fintech-companies building with the help of Stellar.'},
 
-            {"name": ":money_with_wings:  Peer to Peer transactions :money_with_wings:  ",
-             "value": f"Users are able to execute instant peer-2-peer transactions either with the Stellar"
-                      f" native currency or its tokens which have been integrated onto Crypto Link. For full"
-                      f" list of supported currencies please use command {self.command_string}currencies"},
+            {"name": ":money_with_wings: Instant Peer to Peer feeless transactions :money_with_wings:  ",
+             "value": f"Users are able to execute instant peer-2-peer transactions without fees either with the Stellar"
+                      f" native currency XLM or integrated tokens. Currently system supports public and private types."
+                      f" For full list of supported currencies please use command {self.command_string}currencies"},
 
             {"name": ":convenience_store: Merchant system :convenience_store: ",
-             "value": f"If you are a Discord Guild owner you can monetize your roles with various lengths and "
-                      f"values. So far system support only XLM as a currency to be used in merchant system. "
-                      f"For more information execute command {self.command_string}help owner "},
+             "value": f"Discord Guild owners can monetize roles in various lengths and "
+                      f"values and make them available for purchase. Once role is purchased, Crypto Link will handle"
+                      f" micro management tasks (role management, transfer of funds, role monitoring and its removal "
+                      f"uppon expiration) on its own, saving owners a lot of time."},
+
+            {"name": ":satellite_orbital: Crypto Link Up-Link system :satellite_orbital:  ",
+             "value": f"Owners can as well set-up Up-Link which provides opportunity to monitor Crypto Link System"
+                      f" activities. Serving as an 'Network Explorer' users are able to see activvites happening"
+                      f" across other guilds who have integrated it "},
 
             {"name": ":postal_horn: ICO's and Project promotions :postal_horn: ",
              "value": f"Would you like to have another project sourcing stream? Crypto Link supports all"
@@ -188,6 +201,8 @@ class HelpCommands(commands.Cog):
                           "services available as owner of the community."
 
             list_of_values = [
+                {"name": f":scales:  Register Guild into System :scales: ",
+                 "value": f"{self.command_string}owner register"},
                 {"name": f":bank: Guild wallet commands :bank:",
                  "value": f"{self.command_string}help owner corporate"},
                 {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
@@ -202,7 +217,21 @@ class HelpCommands(commands.Cog):
 
     @owner.command(aliases=['corp', 'business'])
     async def corporate(self, ctx):
-        print('guild accessed')
+        corp_info = discord.Embed(title=':bank:  __Merchant System Commands__ :bank:',
+                                  description=' Commands to operate with the guilds own wallet',
+                                  colour=discord.Color.blue())
+        corp_info.add_field(name=':bar_chart: Obtain Statistics on Guild activity',
+                            value=f'{self.command_string}owner stats',
+                            inline=False)
+        corp_info.add_field(name=':service_dog: Get status of activated services :service_dog:  ',
+                            value=f'{self.command_string}owner services',
+                            inline=False)
+        corp_info.add_field(name=':moneybag: Merchant wallet balance check :moneybag: ',
+                            value=f'{self.command_string}merchant balance',
+                            inline=False)
+
+        corp_info.set_thumbnail(url=self.bot.user.avatar_url)
+        await ctx.author.send(embed=corp_info, delete_after=500)
 
     @owner.command(aliases=['store', 'monetize', 'merch'])
     async def merchant(self, ctx):
