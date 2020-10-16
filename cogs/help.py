@@ -25,21 +25,18 @@ class HelpCommands(commands.Cog):
             title = ':sos: __Available Help Commands__ :sos: '
             description = f"Available sub commands for {self.command_string}"
             list_of_values = [
+                {"name": " :mega: About the Crypto Link :mega:",
+                 "value": f"{self.command_string}about"},
+                {"name": ":coin: Available Currencies :coin:",
+                 "value": f"{self.command_string}help currencies"},
                 {"name": ":rocket: How to get started :rocket:",
                  "value": f"{self.command_string}help get_started"},
-                {"name": " :mega: About the payment solution :mega:",
-                 "value": f"{self.command_string} about"},
-                {"name": ":office_worker: Account commands :office_worker:",
+                {"name": ":office_worker: Accessing personal account :office_worker:",
                  "value": f"{self.command_string}help account"},
                 {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
                  "value": f"{self.command_string}help transactions"},
-                {"name": ":coin: Available Currencies :coin:",
-                 "value": f"{self.command_string}help currencies"},
                 {"name": ":crown: Guild Owner Commands :crown:",
                  "value": f"{self.command_string}help owner"},
-                {"name": ":crown: Guild Owner Commands :crown:",
-                 "value": f"{self.command_string}help owner"},
-
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.blue())
@@ -75,15 +72,16 @@ class HelpCommands(commands.Cog):
 
             {"name": ":satellite_orbital: Crypto Link Up-Link system :satellite_orbital:  ",
              "value": f"Owners can as well set-up Up-Link which provides opportunity to monitor Crypto Link System"
-                      f" activities. Serving as an 'Network Explorer' users are able to see activvites happening"
-                      f" across other guilds who have integrated it "},
+                      f" activities. Serving as an 'Network Explorer' users are able to see activites happening"
+                      f" across other guilds who have integrated the system"},
 
             {"name": ":postal_horn: ICO's and Project promotions :postal_horn: ",
-             "value": f"Would you like to have another project sourcing stream? Crypto Link supports all"
-                      f" tokens issued on Stellar. This as well provides perfect opportunity to run ICO"
-                      f" with minimal costs, or as additional channel to get a hold of potential customers. "
-                      f"Contact us by sending an email to cryptolinkpayments@gmail.com or one of the members"
-                      f" with the role Crypto Link Staff on Discord Community."},
+             "value": f'Integrated support for Stellar Native Crypto Currency and its tokens provides as well '
+                      f'possibility for Crypto Link to be utilized as one of the channels for running '
+                      f'ICOs/Crowdfundings or simple project promotion activities. If you would like to know more '
+                      f'or would like to get in touch with us, please write us on'
+                      f' ***__cryptolinkpayments@gmail.com__***, open issue on Github or contact us directly over '
+                      f'Discord Crypto Link Community.'},
 
             {"name": ":placard: Further information and links:placard: ",
              "value": f'[Homepage](https://cryptolink.carrd.co/) \n'
