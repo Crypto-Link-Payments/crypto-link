@@ -1,5 +1,9 @@
 
-# Command map for Crypto Link System 
+# :joystick: Command map for Crypto Link System :joystick: 
+
+## Commands Count
+System has currently 48 various commands of various categories
+
 ## Prefix
 Bot listens to prefix 
 ```text
