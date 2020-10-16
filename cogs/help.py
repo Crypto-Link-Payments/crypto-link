@@ -186,15 +186,23 @@ class HelpCommands(commands.Cog):
             title = ':crown: __Available Commands for guild owners__ :crown: '
             description = "All available commands for you to familiarize yourself with payment and merchant " \
                           "services available as owner of the community."
+
             list_of_values = [
-                {"name": f"{self.command_string}help owner merchant",
-                 "value": f"Return the information on Merchant system for owners of the communities"},
-                {"name": f"{self.command_string}help owner merchant",
-                 "value": f"Return the information on Merchant system for owners of the communities"}
+                {"name": f":bank: Guild wallet commands :bank:",
+                 "value": f"{self.command_string}help owner corporate"},
+                {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
+                 "value": f" {self.command_string}help owner merchant"},
+                {"name": f":satellite_orbital: About Uplink and Setup :satellite_orbital:  ",
+                 "value": f"{self.command_string}help owner uplink"}
+
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.blue())
+
+    @owner.command(aliases=['corp', 'business'])
+    async def corporate(self, ctx):
+        print('guild accessed')
 
     @owner.command(aliases=['store', 'monetize', 'merch'])
     async def merchant(self, ctx):
@@ -231,14 +239,14 @@ class HelpCommands(commands.Cog):
         merchant_nfo.set_thumbnail(url=self.bot.user.avatar_url)
         await ctx.author.send(embed=merchant_nfo, delete_after=500)
 
-    @owner.command()
-    async def merchant(self, ctx):
+    @owner.command(aliases=['link', 'up_link'])
+    async def uplink(self, ctx):
         """
         Entry point for merchant system
         """
         merchant_nfo = discord.Embed(title=':convenience_store: __Merchant System Commands__ :convenience_store: ',
                                      description='Basic explanation on what is merchant system.',
-                                     colour=discord.Color.magenta())
+                                     colour=discord.Color.blue())
         merchant_nfo.add_field(name=':mega: About Merchant System:mega:',
                                value='Merchant is part of the Crypto Link eco system and provides owners of the '
                                      'community opportunity to, automize'
@@ -264,10 +272,7 @@ class HelpCommands(commands.Cog):
                                      f":four: Familiarize yourself with merchant system through command `{self.command_string}merchant`",
                                inline=False)
         merchant_nfo.set_thumbnail(url=self.bot.user.avatar_url)
-        try:
-            await ctx.author.send(embed=merchant_nfo, delete_after=500)
-        except Exception:
-            pass
+        await ctx.author.send(embed=merchant_nfo, delete_after=500)
 
     @owner.error
     async def owner_error_assistance(self, ctx, error):
