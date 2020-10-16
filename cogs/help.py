@@ -26,17 +26,17 @@ class HelpCommands(commands.Cog):
             description = f"Available sub commands for {self.command_string}"
             list_of_values = [
                 {"name": " :mega: About the Crypto Link :mega:",
-                 "value": f"{self.command_string}about"},
+                 "value": f"`{self.command_string}about`"},
                 {"name": ":coin: Available Currencies :coin:",
-                 "value": f"{self.command_string}help currencies"},
+                 "value": f"`{self.command_string}help currencies`"},
                 {"name": ":rocket: How to get started :rocket:",
-                 "value": f"{self.command_string}help get_started"},
+                 "value": f"`{self.command_string}help get_started`"},
                 {"name": ":office_worker: Accessing personal account :office_worker:",
-                 "value": f"{self.command_string}help account"},
+                 "value": f"`{self.command_string}help account`"},
                 {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
-                 "value": f"{self.command_string}help transactions"},
+                 "value": f"`{self.command_string}help transactions`"},
                 {"name": ":crown: Guild Owner Commands :crown:",
-                 "value": f"{self.command_string}help owner"},
+                 "value": f"`{self.command_string}help owner`"},
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.blue())
@@ -108,7 +108,7 @@ class HelpCommands(commands.Cog):
                                     f' is present with command `{self.command_string}register`.\n'
                                     f'Once successful, you will create personal wallets with details which you can use '
                                     f' to move or deposit funds. To further familiarize yourself with other'
-                                    f' commands use __{self.command_string}help__ ',
+                                    f' commands use `{self.command_string}help`',
                               inline=False)
         start_embed.add_field(name=':two: Get Deposit Details :two:',
                               value=f'Get deposit details of your Discord wallet with `{self.command_string}wallet'
@@ -158,10 +158,10 @@ class HelpCommands(commands.Cog):
         description = f"Forms of transactions available on {self.bot.user.name}"
         list_of_values = [
             {"name": f":cowboy: Public P-2-P transactions :cowboy:",
-             "value": f"{self.command_string}send <amount> <ticker> <Discord User> <message=optional>\n"
+             "value": f"`{self.command_string}send <amount> <ticker> <Discord User> <message=optional>`\n"
                       f"Example:`{self.command_string}send 10 xlm @animus Have a nice day`"},
             {"name": f":detective: Private transactions :detective:  ",
-             "value": f"{self.command_string}private <amount> <ticker> <Discord User> <message=optional>\n"
+             "value": f"`{self.command_string}private <amount> <ticker> <Discord User> <message=optional>`\n"
                       f"Example: `{self.command_string}private 10 xlm @animus Dont tell anyone`"}
         ]
 
@@ -174,17 +174,17 @@ class HelpCommands(commands.Cog):
         description = "Bellow are presented all currencies available for P2P transactions"
         list_of_values = [
             {"name": ":credit_card: Get balance information :credit_card: ",
-             "value": f"{self.command_string}acc"},
+             "value": f"`{self.command_string}acc`"},
             {"name": ":moneybag: Access wallet commands :moneybag: ",
-             "value": f"{self.command_string}wallet"},
+             "value": f"`{self.command_string}wallet`"},
             {"name": " :woman_technologist: Get full account balance report :woman_technologist:  ",
-             "value": f"{self.command_string}wallet balance"},
+             "value": f"`{self.command_string}wallet balance`"},
             {"name": ":bar_chart: Wallet Statistics :bar_chart:",
-             "value": f"{self.command_string}wallet stats"},
+             "value": f"`{self.command_string}wallet stats`"},
             {"name": ":inbox_tray: Get instructions on how to deposit :inbox_tray:",
-             "value": f"{self.command_string}wallet deposit"},
+             "value": f"`{self.command_string}wallet deposit`"},
             {"name": ":outbox_tray: Withdrawal instructions :outbox_tray: ",
-             "value": f"{self.command_string}withdraw"}]
+             "value": f"`{self.command_string}withdraw`"}]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
@@ -200,13 +200,13 @@ class HelpCommands(commands.Cog):
 
             list_of_values = [
                 {"name": f":scales:  Register Guild into System :scales: ",
-                 "value": f"{self.command_string}owner register"},
+                 "value": f"`{self.command_string}owner register`"},
                 {"name": f":bank: Guild wallet commands :bank:",
-                 "value": f"{self.command_string}help owner corporate"},
+                 "value": f"`{self.command_string}help owner corporate`"},
                 {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
-                 "value": f" {self.command_string}help owner merchant"},
+                 "value": f"`{self.command_string}help owner merchant`"},
                 {"name": f":satellite_orbital: About Uplink and Setup :satellite_orbital:  ",
-                 "value": f"{self.command_string}help owner uplink"}
+                 "value": f"`{self.command_string}help owner uplink`"}
 
             ]
 
@@ -219,13 +219,13 @@ class HelpCommands(commands.Cog):
                                   description=' Commands to operate with the guilds own wallet',
                                   colour=discord.Color.blue())
         corp_info.add_field(name=':bar_chart: Obtain Statistics on Guild activity',
-                            value=f'{self.command_string}owner stats',
+                            value=f'`{self.command_string}owner stats`',
                             inline=False)
         corp_info.add_field(name=':service_dog: Get status of activated services :service_dog:  ',
-                            value=f'{self.command_string}owner services',
+                            value=f'`{self.command_string}owner services`',
                             inline=False)
         corp_info.add_field(name=':moneybag: Merchant wallet balance check :moneybag: ',
-                            value=f'{self.command_string}merchant balance',
+                            value=f'`{self.command_string}merchant balance`',
                             inline=False)
 
         corp_info.set_thumbnail(url=self.bot.user.avatar_url)
@@ -282,9 +282,9 @@ class HelpCommands(commands.Cog):
                                    'service.  ',
                              inline=False)
         uplink_nfo.add_field(name=':rocket: Get Started with Up-Link :rocket: ',
-                             value=f':one: {self.command_string}uplink apply <#discord.TextChannel>\n'
+                             value=f':one: `{self.command_string}uplink apply <#discord.TextChannel>`\n'
                                    f':two: Watch the magic happen on next activity\n'
-                                   f':three: For further references use {self.command_string}owner uplink',
+                                   f':three: For further references use `{self.command_string}owner uplink`',
                              inline=False)
 
         uplink_nfo.set_thumbnail(url=self.bot.user.avatar_url)
