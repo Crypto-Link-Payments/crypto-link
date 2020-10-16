@@ -60,16 +60,33 @@ class BotManagementCommands(commands.Cog):
 
     #############################  Crypto Link Commands #############################
 
+    @commands.command()
+    @commands.check(is_one_of_gods)
+    async def gods(self, ctx):
+        title = ':man_mage:  __Crypto Link commands__ :man_mage:  '
+        description = "All commands and their subcommands to operate with the Crypto Link System as administrator" \
+                      " owner of the system"
+        list_of_values = [
+            {"name": "Crypto Link off-chain wallet", "value": f"{self.command_string}cl"},
+            {"name": "Crypto Link system backend", "value": f"{self.command_string}system"},
+            {"name": "Crypto Link COG Management", "value": f"{self.command_string}manage"},
+
+        ]
+
+        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                            destination=ctx.message.author, thumbnail=self.bot.user.avatar_url)
+
     @commands.group()
     @commands.check(is_one_of_gods)
     async def cl(self, ctx):
         """
         Entry point for cl sub commands
         """
-        print(f'CL : {ctx.author} -> {ctx.message.content}')
+
         if ctx.invoked_subcommand is None:
-            title = '__Crypto Link commands__'
-            description = "All commands to operate with Crypto Link Corporate Wallet"
+            title = ':joystick: __Crypto Link commands__:joystick: '
+            description = "All commands and their subcommands to operate with the Crypto Link System as administrator" \
+                          " owner of the system"
             list_of_values = [
                 {"name": "Check Corporate Balance", "value": f"{self.command_string}cl balance"},
                 {"name": "Withdrawing XLM from Corp to personal",
@@ -83,7 +100,7 @@ class BotManagementCommands(commands.Cog):
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                destination=ctx.message.author)
+                                                destination=ctx.message.author, thumbnail=self.bot.user.avatar_url)
 
     @cl.command()
     @commands.check(is_one_of_gods)
