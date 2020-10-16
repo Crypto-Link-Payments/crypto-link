@@ -75,7 +75,7 @@ to withdraw token
 ***Note***: Be sure to provide exact Stellar Deposit address and your unique MEMO otherwise funds might get lost
 
 
-###  Peer to Peer Transaction related commands
+### :incoming_envelope:  Peer to Peer Transaction related commands :incoming_envelope: 
 
 #### Public peer to peer transactions
 ```text
