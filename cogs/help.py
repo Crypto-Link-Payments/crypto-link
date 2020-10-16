@@ -203,7 +203,7 @@ class HelpCommands(commands.Cog):
         """
         merchant_nfo = discord.Embed(title=':convenience_store: __Merchant System Commands__ :convenience_store: ',
                                      description='Basic explanation on what is merchant system.',
-                                     colour=discord.Color.magenta())
+                                     colour=discord.Color.blue())
         merchant_nfo.add_field(name=':mega: About Merchant System:mega:',
                                value='Merchant is part of the Crypto Link eco system and provides owners of the '
                                      'community opportunity to, automize'
