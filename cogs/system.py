@@ -85,6 +85,8 @@ class BotManagementCommands(commands.Cog):
                                value=f'{normal_amount} {emoji}')
         await stellar_notify_channel.send(embed=corp_channel)
 
+    #############################  Crypto Link Commands #############################
+
     @commands.group()
     @commands.check(is_one_of_gods)
     async def cl(self, ctx):
@@ -271,6 +273,9 @@ class BotManagementCommands(commands.Cog):
                                                 description='Available commands under category ***system***',
                                                 data=value)
 
+
+    #############################  Crypto Link System #############################
+
     @system.command()
     async def off(self, ctx):
         await ctx.channel.send(content='Going Offline!')
@@ -321,6 +326,8 @@ class BotManagementCommands(commands.Cog):
                               value=notification_str,
                               inline=False)
         await ctx.author.send(embed=load_status)
+
+    #############################  Crypto Link COGS Management #############################
 
     @commands.group()
     @commands.check(is_one_of_gods)
@@ -431,6 +438,9 @@ class BotManagementCommands(commands.Cog):
                                  value=notification_str)
         await ctx.channel.send(embed=ext_load_embed)
 
+
+    #############################  Crypto Link Hot Wallet #############################
+
     @commands.group()
     @commands.check(is_animus)
     async def hot(self, ctx):
@@ -474,6 +484,8 @@ class BotManagementCommands(commands.Cog):
             message = 'Status of the wallet could not be obtained at this moment'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=sys_msg_title)
+
+    #############################  Crypto Link Fee management #############################
 
     @commands.command()
     async def fees(self, ctx):
