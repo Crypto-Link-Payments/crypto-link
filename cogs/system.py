@@ -31,7 +31,7 @@ CONST_WARNING_MESSAGE = f'You do not have rights to access this are of the bot'
 # Extensions integrated into Crypto Link
 extensions = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
               'cogs.system', 'cogs.withdrawals',
-              'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.licensing','cogs.guildOwners']
+              'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.licensing', 'cogs.guildOwners']
 
 
 class BotManagementCommands(commands.Cog):
@@ -57,33 +57,6 @@ class BotManagementCommands(commands.Cog):
             fee_type = 'Merchant minimum transfer'
 
         return fee_type
-
-    async def send_transfer_notification(self, ctx, member, channel_id: int, normal_amount, emoji: str,
-                                         chain_name: str):
-        """
-        Function send information to corporate channel on corp wallet activity
-        :param ctx: Discord Context
-        :param member: Member to where funds have been transferred
-        :param channel_id: channel ID applied for notifications
-        :param normal_amount: converted amount from atomic
-        :param emoji: emoji identification for the currency
-        :param chain_name: name of the chain used in transactions
-        :return: discord.Embed
-        """
-
-        stellar_notify_channel = self.bot.get_channel(id=int(channel_id))
-        corp_channel = Embed(
-            title=f'__{emoji} Corporate account transfer activity__ {emoji}',
-            description=f'Notification on corporate funds transfer activity on {chain_name}',
-            colour=Colour.greyple())
-        corp_channel.add_field(name='Author',
-                               value=f'{ctx.message.author}',
-                               inline=False)
-        corp_channel.add_field(name='Destination',
-                               value=f'{member}')
-        corp_channel.add_field(name='Amount',
-                               value=f'{normal_amount} {emoji}')
-        await stellar_notify_channel.send(embed=corp_channel)
 
     #############################  Crypto Link Commands #############################
 
@@ -231,10 +204,13 @@ class BotManagementCommands(commands.Cog):
 
                         # notification to corp account discord channel
                         stellar_channel_id = auto_channels['stellar']
-                        await self.send_transfer_notification(ctx=ctx, member=ctx.message.author,
-                                                              channel_id=stellar_channel_id,
-                                                              normal_amount=normal_amount, emoji=CONST_STELLAR_EMOJI,
-                                                              chain_name='Stellar Chain')
+                        stellar_notify_channel = self.bot.get_channel(id=int(stellar_channel_id))
+
+                        await custom_messages.send_transfer_notification(ctx=ctx, member=ctx.message.author,
+                                                                         sys_channel=stellar_notify_channel,
+                                                                         normal_amount=normal_amount,
+                                                                         emoji=CONST_STELLAR_EMOJI,
+                                                                         chain_name='Stellar Chain')
 
                     else:
                         # Revert the user balance if community balance can not be updated
@@ -282,7 +258,7 @@ class BotManagementCommands(commands.Cog):
         sys.exit(0)
 
     @system.command()
-    async def update(self,ctx):
+    async def update(self, ctx):
         notification_str = ''
         current_time = datetime.utcnow()
         try:
@@ -436,7 +412,6 @@ class BotManagementCommands(commands.Cog):
         ext_load_embed.add_field(name='Status',
                                  value=notification_str)
         await ctx.channel.send(embed=ext_load_embed)
-
 
     #############################  Crypto Link Hot Wallet #############################
 
