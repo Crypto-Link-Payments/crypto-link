@@ -22,14 +22,16 @@ class GuildOwnerCommands(commands.Cog):
     @commands.check(is_public)
     async def owner(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = '__Guild Owner Manual__'
-            description = "All available commands to operate with guild system"
+            title = ':joystick: __Guild Owner Manual__ :joystick: '
+            description = "All available commands to operate with guild system."
             list_of_values = [
-                {"name": "Register Guild", "value": f"{self.command_string}owner register"},
-                {"name": "Guild Crypto Link Stats", "value": f"{self.command_string}owner stats"},
-                {"name": "Guild Applied Services", "value": f"{self.command_string}owner services"},
-                {"name": "Guild CL Explorer Settings", "value": f"{self.command_string}owner explorer"},
-                {"name": "Guild CL Transaction Fee Settings", "value": f"{self.command_string}owner fees"},
+                {"name": ":bellhop: Register Guild :bellhop: ", "value": f"`{self.command_string}owner register`"},
+                {"name": ":bar_chart: Guild Crypto Link Stats :bar_chart: ",
+                 "value": f"`{self.command_string}owner stats`"},
+                {"name": ":service_dog: Guild Applied Services :service_dog: ",
+                 "value": f"`{self.command_string}owner services`"},
+                {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
+                 "value": f"`{self.command_string}owner uplink`"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -138,7 +140,8 @@ class GuildOwnerCommands(commands.Cog):
             "explorerSettings.channelId": int(chn.id)
         }
 
-        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
+        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id,
+                                                                     data_to_update=data_to_update):
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message=f'You have successfully set channel {chn} to receive Crypto'
                                                         f' Link Network Feed',
@@ -154,7 +157,8 @@ class GuildOwnerCommands(commands.Cog):
             "explorerSettings.channelId": int(0)
         }
 
-        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
+        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id,
+                                                                     data_to_update=data_to_update):
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message=f'You have successfully turned OFF Crypto Link Network Feed',
                                                 destination=ctx.message.author, sys_msg_title='__System Message__')
