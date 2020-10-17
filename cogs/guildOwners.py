@@ -82,7 +82,7 @@ class GuildOwnerCommands(commands.Cog):
         for k, v in stats.items():
             stats_info = Embed(title=f":bar_chart: __{k.upper()} Stats__ :bar_chart: ",
                                timestamp=datetime.utcnow(),
-                               colour=Colour.magenta())
+                               colour=Colour.dark_gold())
             stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
                                  value=f'{v["txCount"]}')
             stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
@@ -105,16 +105,16 @@ class GuildOwnerCommands(commands.Cog):
         service_status = await self.backoffice.guild_profiles.get_service_statuses(guild_id=ctx.guild.id)
         explorer_channel = self.bot.get_channel(id=int(service_status["explorerSettings"]["channelId"]))
 
-        service_info = Embed(title="__Guild Service Status__",
+        service_info = Embed(title=":service_dog: __Guild Service Status__ :service_dog: ",
                              timestamp=datetime.utcnow(),
-                             colour=Colour.magenta())
+                             colour=Colour.dark_gold())
         service_info.set_thumbnail(url=self.bot.user.avatar_url)
 
         if explorer_channel:
-            service_info.add_field(name='Crypto Link Feed Channel',
+            service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
                                    value=f'{explorer_channel} ({explorer_channel.id})')
         else:
-            service_info.add_field(name='Crypto Link Feed Channel',
+            service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
                                    value=f':red_circle:')
 
         await ctx.author.send(embed=service_info)
@@ -122,13 +122,13 @@ class GuildOwnerCommands(commands.Cog):
     @owner.group()
     async def uplink(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = '__Crypto Link Explorer Manual__'
+            title = ':satellite_orbital: __Crypto Link Uplink manual__ :satellite_orbital:'
             description = "All available commands to operate with guild system"
             list_of_values = [
                 {"name": "Apply Channel for CL feed",
-                 "value": f"{self.command_string}owner uplink apply <#discord.Channel>"},
+                 "value": f"`{self.command_string}owner uplink apply <#discord.Channel>`"},
                 {"name": "Remove Channel for CL feed",
-                 "value": f"{self.command_string}owner uplink remove"}
+                 "value": f"`{self.command_string}owner uplink remove`"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
