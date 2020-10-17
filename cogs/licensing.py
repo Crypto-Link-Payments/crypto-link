@@ -218,23 +218,23 @@ class MerchantLicensingCommands(commands.Cog):
                                 await ctx.channel.send(embed=user_info)
 
                             # send notification to merchant channel of LPI community
-                            license_slip = Embed(title='Merchant license order processed',
+                            license_slip = Embed(title=':scroll: License Order Processed :scroll:',
                                                  description='This report was sent because, some community\n'
                                                              'obtained merchant license for 31 days. Details :',
                                                  colour=Color.green())
-                            license_slip.add_field(name='Community of purchase',
+                            license_slip.add_field(name=':bank: Community of purchase :bank: ',
                                                    value=f'{ctx.message.guild} (ID: {ctx.message.guild.id}',
                                                    inline=False)
-                            license_slip.add_field(name='Community owner details',
+                            license_slip.add_field(name=':crown: Community Owner Details :crown: ',
                                                    value=f'{ctx.message.author}',
                                                    inline=False)
-                            license_slip.add_field(name='Time of purchase',
+                            license_slip.add_field(name=':calendar: Time of purchase :calendar: ',
                                                    value=f'{license_start}',
                                                    inline=False)
-                            license_slip.add_field(name='Time of expiration',
+                            license_slip.add_field(name=':timer: Time of expiration :timer: ',
                                                    value=f'{license_end}',
                                                    inline=False)
-                            license_slip.add_field(name='Value Payed',
+                            license_slip.add_field(name=':money_with_wings: Value Payed :money_with_wings:',
                                                    value=f'XLM: {total}{CONST_STELLAR_EMOJI}\n'
                                                          f'Rate: {rate}$ / {CONST_STELLAR_EMOJI}',
                                                    inline=False)
