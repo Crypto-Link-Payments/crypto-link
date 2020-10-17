@@ -38,6 +38,9 @@ class CustomMessages:
         elif tx_type == 'squad':
             pass
 
+        elif tx_type == 'role_purchase':
+            pass
+
         return msg_streamed
 
     def get_emoji(self, tx_type):
