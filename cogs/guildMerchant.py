@@ -294,7 +294,7 @@ class MerchantCommunityOwner(commands.Cog):
             await customMessages.system_message(ctx=ctx, sys_msg_title=title1, message=message, color_code=1,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['stop'])
     @commands.check(is_public)
     @commands.check(is_owner)
     async def stop_role(self, ctx, role: Role):
@@ -332,7 +332,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 color_code=1,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['start'])
     @commands.check(is_public)
     @commands.check(is_owner)
     async def start_role(self, ctx, role: Role):
@@ -365,7 +365,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                     destination=1)
         else:
             message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
-                      f'{self.command_string} monetize community_roles to obtain all roles on the community'
+                      f'`{self.command_string}` monetize community_roles to obtain all roles on the community'
             await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE, message=message,
                                                 color_code=1,
                                                 destination=1)
