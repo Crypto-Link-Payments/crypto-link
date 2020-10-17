@@ -101,7 +101,7 @@ class MerchantLicensingCommands(commands.Cog):
                                      '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
         await ctx.message.channel.send(embed=fee_info)
 
-    @license.command()
+    @license.command(aliases=["live"])
     async def status(self, ctx):
         """
         Checks the validity of the license
@@ -114,13 +114,13 @@ class MerchantLicensingCommands(commands.Cog):
             license_start = datetime.fromtimestamp(int(data['start']))
             licensed_end = datetime.fromtimestamp(int(data['end']))
 
-            license_details = Embed(title='__License information__',
+            license_details = Embed(title=':scroll: __License information__ :scroll: ',
                                     description="Current details on the license",
-                                    colour=Colour.green())
-            license_details.add_field(name='License purchase time',
+                                    colour=Colour.dark_orange())
+            license_details.add_field(name=':calendar: License Purchase Time :calendar: ',
                                       value=f"{license_start} (UTC)",
                                       inline=False)
-            license_details.add_field(name='License expiration time',
+            license_details.add_field(name=':clock: License Expiration Time :clock: ',
                                       value=f"{licensed_end} (UTC)",
                                       inline=False)
             await ctx.message.channel.send(embed=license_details)
