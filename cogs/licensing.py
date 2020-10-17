@@ -193,21 +193,21 @@ class MerchantLicensingCommands(commands.Cog):
                         if merchant_manager.insert_license(new_license):
 
                             # Send notification to the user on purchased licence details
-                            user_info = Embed(title='Merchant License Slip',
+                            user_info = Embed(title=':receipt: Merchant License Slip :receipt: ',
                                               description='Thank You for purchasing the 31 day license. '
                                                           'Bellow are presented details',
-                                              colour=Color.green())
+                                              colour=Color.dark_orange())
                             user_info.set_thumbnail(url=self.bot.user.avatar_url)
-                            user_info.add_field(name='Date of Purchase',
+                            user_info.add_field(name=':calendar: Date of Purchase :calendar: ',
                                                 value=f'{license_start}',
                                                 inline=False)
-                            user_info.add_field(name='Date of Expiration',
+                            user_info.add_field(name=':timer: Date of Expiration :timer: ',
                                                 value=f'{license_end}',
                                                 inline=False)
-                            user_info.add_field(name='License Fee',
+                            user_info.add_field(name=':dollar:  License Fee :dollar: ',
                                                 value=f'{fee_value}$',
                                                 inline=False)
-                            user_info.add_field(name='Value Payed',
+                            user_info.add_field(name=':money_with_wings: Payed for license :money_with_wings: ',
                                                 value=f'XLM: {total}{CONST_STELLAR_EMOJI}\n'
                                                       f'Rate: {rate}$ / {CONST_STELLAR_EMOJI}',
                                                 inline=False)
