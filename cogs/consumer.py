@@ -75,7 +75,7 @@ class ConsumerCommands(commands.Cog):
 
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
-                                                destination=1)
+                                                destination=1, c= Colour.magenta())
 
     @membership.command()
     @commands.check(is_public)
@@ -152,7 +152,7 @@ class ConsumerCommands(commands.Cog):
                                     f"hour/s {role['minutes']} minute/s"}]
                 description = "Role details"
                 await custom_messages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
-                                                    data=values)
+                                                    data=values, c=Colour.magenta())
         else:
             message = f"{ctx.message.guild} does not have any available roles for purchase at this moment."
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
