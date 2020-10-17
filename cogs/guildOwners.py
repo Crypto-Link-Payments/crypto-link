@@ -132,7 +132,7 @@ class GuildOwnerCommands(commands.Cog):
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1)
+                                               destination=1, c=Colour.dark_gold())
 
     @uplink.command()
     async def apply(self, ctx, chn: TextChannel):
