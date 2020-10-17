@@ -312,7 +312,7 @@ class CustomMessages:
                                    title='Congratulations on '
                                          'obtaining the role',
                                    description='Details on obtained role',
-                                   colour=discord.Colour.gold())
+                                   colour=Colour.magenta())
         role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
         role_embed.add_field(name=':convenience_store: Community :convenience_store:',
                              value=f'{ctx.message.guild}  \n'
@@ -345,7 +345,7 @@ class CustomMessages:
                   'wallet___',
             description=f'Role has been purchased on your community '
                         f'at {role_details["roleStart"]}.',
-            colour=discord.Colour.green())
+            colour=Colour.magenta())
 
         incoming_funds.add_field(name=':japanese_ogre: Role Purchased :japanese_ogre: ',
                                  value=f"Name: {role.name}\n"
