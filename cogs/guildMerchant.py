@@ -383,9 +383,8 @@ class MerchantCommunityOwner(commands.Cog):
         """
         merchant_manager = self.backoffice.merchant_manager
         data = merchant_manager.get_wallet_balance(community_id=ctx.message.guild.id)
-
         if data:
-            stellar_balance = data['stellar']['balance']
+            stellar_balance = data['balance']
             get_xlm_point = get_decimal_point(symbol='xlm')
             stellar_real = get_normal(value=str(stellar_balance), decimal_point=get_xlm_point)
 
