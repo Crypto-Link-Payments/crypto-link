@@ -263,7 +263,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 color_code=0,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['community','roles'])
     @commands.check(is_owner)
     @commands.check(is_public)
     async def community_roles(self, ctx):
@@ -274,15 +274,15 @@ class MerchantCommunityOwner(commands.Cog):
         """
         merchant_manager = self.backoffice.merchant_manager
         roles = merchant_manager.get_all_roles_community(community_id=ctx.message.guild.id)
-        title = f'__Available Roles on Community {ctx.message.guild}__'
+        title = f':circus_tent: __Available Roles on Community {ctx.message.guild}__ :circus_tent: '
         description = 'Details on monetized role.'
         if roles:
             for role in roles:
                 dollar_value = float(role["pennyValues"] / 100)
-                values = [{"name": 'Role', "value": f'{role["roleName"]} ID({role["roleId"]}'},
-                          {"name": 'Status', "value": role["status"]},
-                          {"name": 'Values', "value": f"{dollar_value} $"},
-                          {"name": 'Role Length',
+                values = [{"name": ':person_juggling: Role :person_juggling: ', "value": f'{role["roleName"]} ID({role["roleId"]}'},
+                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": role["status"]},
+                          {"name": ':dollar: Values :dollar: ', "value": f"{dollar_value} $"},
+                          {"name": ':timer: Role Length :timer:',
                            "value": f"{role['weeks']} week/s {role['days']} day/s {role['hours']} "
                                     f"hour/s {role['minutes']} minute/s"}]
                 await customMessages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
