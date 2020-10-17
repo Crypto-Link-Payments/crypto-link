@@ -81,8 +81,10 @@ class MerchantCommunityOwner(commands.Cog):
                  "value": f'`{self.command_string}merchant manual`'},
                 {"name": f':joystick: Command sub-categories :joystick: ',
                  "value": f'`{self.command_string}merchant monetize`'},
-                {"name": f':moneybag: Guild Wallet Commands :moneybag: ',
-                 "value": f'`{self.command_string}merchant wallet`'},
+                {"name": f':moneybag: Guild Wallet Balance :moneybag: ',
+                 "value": f'`{self.command_string}merchant balance`'},
+                {"name": f':broom: Merchant Wallet withdrawals :broom:  ',
+                 "value": f'`{self.command_string}merchant sweep`'},
                 {"name": f':tools: Create Monetized Role :tools: ',
                  "value": f'`{self.command_string}merchant create_role <role name> <value in dollars > '
                           f'<weeks> <days> <hours> <minutes>`'},
@@ -401,7 +403,7 @@ class MerchantCommunityOwner(commands.Cog):
             await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['sweep'])
     @commands.check(is_owner)
     async def transfer_xlm(self, ctx):
         """
@@ -453,26 +455,27 @@ class MerchantCommunityOwner(commands.Cog):
                         if self.backoffice.account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm',
                                                                                   direction=0,
                                                                                   amount=for_owner):
-                            info_embed = Embed(title='__Corporate account Transaction details__',
-                                               description="Here are the details on withdrawal from Merchant "
-                                                           "Corporate Account to your personal account.",
-                                               colour=Color.green())
-                            info_embed.add_field(name='Time of withdrawal',
+                            info_embed = Embed(
+                                title=' :money_with_wings: __Corporate account Transaction details__  :money_with_wings:',
+                                description="Here are the details on withdrawal from Merchant "
+                                            "Corporate Account to your personal account.",
+                                colour=Color.purple())
+                            info_embed.add_field(name=':clock: Time of withdrawal :clock: ',
                                                  value=f"{current_time} (UTC)",
                                                  inline=False)
-                            info_embed.add_field(name="Wallet Balance Before Withdrawal",
+                            info_embed.add_field(name=":moneybag: Wallet Balance Before Withdrawal :moneybag: ",
                                                  value=f"{balance / 10000000} {CONST_STELLAR_EMOJI}",
                                                  inline=False)
 
                             # Info according to has license or does not have license
                             if fee_in_stroops != 0:
-                                info_embed.add_field(name="Final Withdrawal Amount",
+                                info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
                                                      value=f'{balance / 10000000} {CONST_STELLAR_EMOJI}\n'
                                                            f'Service Fee: {fee_in_stroops / 10000000}'
                                                            f' {CONST_STELLAR_EMOJI} (est. {total}$)',
                                                      inline=False)
                             else:
-                                info_embed.add_field(name="Final Withdrawal Amount",
+                                info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
                                                      value=f'{balance / 10000000} {CONST_STELLAR_EMOJI}\n'
                                                            f'Service Fee: 0 {CONST_STELLAR_EMOJI} (License activated)',
                                                      inline=False)
@@ -481,28 +484,30 @@ class MerchantCommunityOwner(commands.Cog):
 
                             # Send information to corporate account channel
 
-                            corp_info = Embed(title="__ Merchant withdrawal fee incoming to Corp Wallet__",
-                                              description="This message was sent from the system, to inform you,"
-                                                          "that additional funds have been transferred and credited"
-                                                          " to Launch Pad Investment Corporate wallet",
-                                              colour=Color.green()
-                                              )
-                            corp_info.add_field(name='Time of initiated withdrawal',
+                            corp_info = Embed(
+                                title=":convenience_store: __ Merchant withdrawal fee incoming to Corp"
+                                      " Wallet__ :convenience_store:",
+                                description="This message was sent from the system, to inform you,"
+                                            "that additional funds have been transferred and credited"
+                                            " to Launch Pad Investment Corporate wallet",
+                                colour=Color.green()
+                            )
+                            corp_info.add_field(name=':clock: Time of initiated withdrawal :clock:',
                                                 value=f"{current_time} UTC",
                                                 inline=False)
-                            corp_info.add_field(name="Merchant Corp Account of:",
+                            corp_info.add_field(name=" :bank: Merchant Corp Account :bank:",
                                                 value=f"{ctx.message.guild}",
                                                 inline=False)
-                            corp_info.add_field(name="Owner",
+                            corp_info.add_field(name=":crown: Guild Owner :crown: ",
                                                 value=f"{ctx.message.author}",
                                                 inline=False)
-                            corp_info.add_field(name="Income amount to corporate wallet",
+                            corp_info.add_field(name=":money_mouth: Income amount to corporate wallet :money_mouth: ",
                                                 value=f"Amount: {fee_in_stroops / 10000000} {CONST_STELLAR_EMOJI}\n"
                                                       f"Amount is 0 if community has purchased monthly license",
                                                 inline=False)
-                            corp_info.add_field(name="Slip",
-                                                value=f"Wallet balance:{balance / 10000000} {CONST_STELLAR_EMOJI}\n"
-                                                      f"Net withdrawal: {for_owner / 10000000} {CONST_STELLAR_EMOJI}",
+                            corp_info.add_field(name=":receipt: Transaction Slip :receipt: ",
+                                                value=f":moneybag: balance:{balance / 10000000} {CONST_STELLAR_EMOJI}\n"
+                                                      f":atm: Net withdrawal: {for_owner / 10000000} {CONST_STELLAR_EMOJI}",
                                                 inline=False)
                             notification_channel = self.bot.get_channel(id=int(channel_id))
                             await notification_channel.send(embed=corp_info)
