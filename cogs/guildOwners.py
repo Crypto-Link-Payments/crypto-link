@@ -144,7 +144,7 @@ class GuildOwnerCommands(commands.Cog):
                                                                      data_to_update=data_to_update):
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message=f'You have successfully set channel {chn} to receive Crypto'
-                                                        f' Link Network Feed',
+                                                        f' Link Network Activity feed',
                                                 destination=ctx.message.author, sys_msg_title='__System Message__')
         else:
             await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue while trying'
