@@ -101,15 +101,15 @@ class MerchantCommunityOwner(commands.Cog):
 
     @merchant.command()
     async def manual(self, ctx):
-        manual = Embed(title='__Merchant system manual__',
-                       colour=Color.green())
+        manual = Embed(title=':convenience_store: __Merchant system manual__ :convenience_store: ',
+                       colour=Color.purple())
         manual.add_field(name=':one: Create monetized roles',
                          value=f'{self.command_string}monetize create_role <role name> <Dollar value of role> '
                                f'<duration weeks> <days> <hours> <minutes>\n'
                                f':warning: Required parameters :warning: \n'
-                               f'--> No spaces in role name and max length 20 characters'
-                               f'--> At least one of the time parameters needs to be greater than 0\n'
-                               '--> Dollar value of the role is not allowed to be 0.00 $',
+                               f':exclamation:  No spaces in role name and max length 20 characters'
+                               f':exclamation:  At least one of the time parameters needs to be greater than 0\n'
+                               ':exclamation: Dollar value of the role required to be greater than 0.00 $',
                          inline=False)
         manual.add_field(name=':two: Inform members',
                          value=f'Once role successfully create, it can be purchased by your members with command\n'
