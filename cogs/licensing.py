@@ -68,13 +68,14 @@ class MerchantLicensingCommands(commands.Cog):
         :param ctx:
         :return:
         """
-        license_info = Embed(name="__System Message__",
+        license_info = Embed(name=":information_source:  __Information on Licensing__ :information_source: ",
                              description='All about licensing',
-                             colour=Color.gold())
-        license_info.add_field(name='About:',
+                             colour=Color.dark_orange())
+        license_info.add_field(name='About',
                                value='License allows for withdrawal amounts from merchant wallet to, '
                                      'owners wallet without additional fees. It represents a one time fee, '
-                                     'owner has to pay in order to obtain himself license.',
+                                     ' guild owner can pay to have merchant wallet free transfers without any'
+                                     ' additional fees. License is especially suitable for guilds with + 100 members.',
                                inline=False)
         await ctx.channel.send(embed=license_info)
 
