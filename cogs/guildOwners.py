@@ -35,7 +35,7 @@ class GuildOwnerCommands(commands.Cog):
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1)
+                                               destination=1, c=Colour.dark_gold())
 
     @owner.command()
     @commands.check(is_owner)
@@ -75,27 +75,27 @@ class GuildOwnerCommands(commands.Cog):
     async def stats(self, ctx):
         stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=ctx.guild.id)
 
-        stats_info = Embed(title="__Guild Statistics__",
+        stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
                            timestamp=datetime.utcnow(),
-                           colour=Colour.magenta())
+                           colour=Colour.dark_gold())
         await ctx.author.send(embed=stats_info)
         for k, v in stats.items():
-            stats_info = Embed(title=f"__{k.upper()} Stats__",
+            stats_info = Embed(title=f":bar_chart: __{k.upper()} Stats__ :bar_chart: ",
                                timestamp=datetime.utcnow(),
                                colour=Colour.magenta())
-            stats_info.add_field(name="Transactions sent",
+            stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
                                  value=f'{v["txCount"]}')
-            stats_info.add_field(name="Volume",
+            stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
                                  value=f'{v["volume"]}')
-            stats_info.add_field(name="Public Tx",
+            stats_info.add_field(name=":cowboy: Public Transactions :cowboy: ",
                                  value=f'{v["publicCount"]}')
-            stats_info.add_field(name="Private Tx",
+            stats_info.add_field(name=":detective: Private Transactions :detective:",
                                  value=f'{v["privateCount"]}')
-            stats_info.add_field(name="Role purchases",
+            stats_info.add_field(name=":person_juggling: Roles Sold :person_juggling: ",
                                  value=f'{v["roleTxCount"]}')
-            stats_info.add_field(name="Emoji tx",
+            stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
                                  value=f'{v["emojiTxCount"]}')
-            stats_info.add_field(name="Multi tx",
+            stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
                                  value=f'{v["multiTxCount"]}')
             await ctx.author.send(embed=stats_info)
 
