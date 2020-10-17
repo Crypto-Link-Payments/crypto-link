@@ -103,7 +103,7 @@ class WithdrawalCommands(commands.Cog):
                 if user_stellar_balance >= total_stellar_to_withdraw and user_token_balance >= total_token_to_withdraw:
 
                     # Ask for verification
-                    message_content = f"{ctx.message.author.mention} fees for withdrawal request are:\n" \
+                    message_content = f":robot: {ctx.message.author.mention} fees for withdrawal request are:\n" \
                                       f"***XLM***: {stellar_fee} {CONST_STELLAR_EMOJI}\n" \
                                       f"***{token.upper()}***: {token_fee}{token_emoji}\n" \
                                       f"Are you still willing to withdraw and pay the fess? answer with ***yes*** " \
@@ -118,7 +118,7 @@ class WithdrawalCommands(commands.Cog):
 
                     # Check verification
                     if str(msg_usr.content.lower()) == 'yes':
-                        processing_msg = 'Processing withdrawal request, please wait few moments....'
+                        processing_msg = ':robot: Processing withdrawal request, please wait few moments....'
                         await ctx.channel.send(processing_msg)
 
                         to_deduct = {
@@ -301,8 +301,8 @@ class WithdrawalCommands(commands.Cog):
                     xlm_with_amount = stroops / 10000000
 
                     # Confirmation message
-                    message_content = f"{ctx.message.author.mention} Current withdrawal fee which will be appended " \
-                                      f"to your withdrawal amount is " \
+                    message_content = f":robot: {ctx.message.author.mention} Current withdrawal fee which " \
+                                      f"will be appended to your withdrawal amount is " \
                                       f"{stellar_fee} {CONST_STELLAR_EMOJI}\n" \
                                       f"Are you still willing to withdraw? answer with ***yes*** or ***no***"
 
@@ -310,7 +310,7 @@ class WithdrawalCommands(commands.Cog):
                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
 
                     if str(msg_usr.content.lower()) == 'yes':
-                        processing_msg = 'Processing withdrawal request, please wait few moments....'
+                        processing_msg = ':robot: Processing withdrawal request, please wait few moments....'
                         processing_msg = await ctx.channel.send(content=processing_msg)
 
                         to_deduct = {
