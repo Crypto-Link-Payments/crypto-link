@@ -22,18 +22,20 @@ class GuildOwnerCommands(commands.Cog):
     @commands.check(is_public)
     async def owner(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = '__Guild Owner Manual__'
-            description = "All available commands to operate with guild system"
+            title = ':joystick: __Guild Owner Manual__ :joystick: '
+            description = "All available commands to operate with guild system."
             list_of_values = [
-                {"name": "Register Guild", "value": f"{self.command_string}owner register"},
-                {"name": "Guild Crypto Link Stats", "value": f"{self.command_string}owner stats"},
-                {"name": "Guild Applied Services", "value": f"{self.command_string}owner services"},
-                {"name": "Guild CL Explorer Settings", "value": f"{self.command_string}owner explorer"},
-                {"name": "Guild CL Transaction Fee Settings", "value": f"{self.command_string}owner fees"},
+                {"name": ":bellhop: Register Guild :bellhop: ", "value": f"`{self.command_string}owner register`"},
+                {"name": ":bar_chart: Guild Crypto Link Stats :bar_chart: ",
+                 "value": f"`{self.command_string}owner stats`"},
+                {"name": ":service_dog: Guild Applied Services :service_dog: ",
+                 "value": f"`{self.command_string}owner services`"},
+                {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
+                 "value": f"`{self.command_string}owner uplink`"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1)
+                                               destination=1, c=Colour.dark_gold())
 
     @owner.command()
     @commands.check(is_owner)
@@ -73,27 +75,27 @@ class GuildOwnerCommands(commands.Cog):
     async def stats(self, ctx):
         stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=ctx.guild.id)
 
-        stats_info = Embed(title="__Guild Statistics__",
+        stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
                            timestamp=datetime.utcnow(),
-                           colour=Colour.magenta())
+                           colour=Colour.dark_gold())
         await ctx.author.send(embed=stats_info)
         for k, v in stats.items():
-            stats_info = Embed(title=f"__{k.upper()} Stats__",
+            stats_info = Embed(title=f":bar_chart: __{k.upper()} Stats__ :bar_chart: ",
                                timestamp=datetime.utcnow(),
-                               colour=Colour.magenta())
-            stats_info.add_field(name="Transactions sent",
+                               colour=Colour.dark_gold())
+            stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
                                  value=f'{v["txCount"]}')
-            stats_info.add_field(name="Volume",
+            stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
                                  value=f'{v["volume"]}')
-            stats_info.add_field(name="Public Tx",
+            stats_info.add_field(name=":cowboy: Public Transactions :cowboy: ",
                                  value=f'{v["publicCount"]}')
-            stats_info.add_field(name="Private Tx",
+            stats_info.add_field(name=":detective: Private Transactions :detective:",
                                  value=f'{v["privateCount"]}')
-            stats_info.add_field(name="Role purchases",
+            stats_info.add_field(name=":person_juggling: Roles Sold :person_juggling: ",
                                  value=f'{v["roleTxCount"]}')
-            stats_info.add_field(name="Emoji tx",
+            stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
                                  value=f'{v["emojiTxCount"]}')
-            stats_info.add_field(name="Multi tx",
+            stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
                                  value=f'{v["multiTxCount"]}')
             await ctx.author.send(embed=stats_info)
 
@@ -103,16 +105,16 @@ class GuildOwnerCommands(commands.Cog):
         service_status = await self.backoffice.guild_profiles.get_service_statuses(guild_id=ctx.guild.id)
         explorer_channel = self.bot.get_channel(id=int(service_status["explorerSettings"]["channelId"]))
 
-        service_info = Embed(title="__Guild Service Status__",
+        service_info = Embed(title=":service_dog: __Guild Service Status__ :service_dog: ",
                              timestamp=datetime.utcnow(),
-                             colour=Colour.magenta())
+                             colour=Colour.dark_gold())
         service_info.set_thumbnail(url=self.bot.user.avatar_url)
 
         if explorer_channel:
-            service_info.add_field(name='Crypto Link Feed Channel',
+            service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
                                    value=f'{explorer_channel} ({explorer_channel.id})')
         else:
-            service_info.add_field(name='Crypto Link Feed Channel',
+            service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
                                    value=f':red_circle:')
 
         await ctx.author.send(embed=service_info)
@@ -120,17 +122,17 @@ class GuildOwnerCommands(commands.Cog):
     @owner.group()
     async def uplink(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = '__Crypto Link Explorer Manual__'
+            title = ':satellite_orbital: __Crypto Link Uplink manual__ :satellite_orbital:'
             description = "All available commands to operate with guild system"
             list_of_values = [
                 {"name": "Apply Channel for CL feed",
-                 "value": f"{self.command_string}owner uplink apply <#discord.Channel>"},
+                 "value": f"`{self.command_string}owner uplink apply <#discord.Channel>`"},
                 {"name": "Remove Channel for CL feed",
-                 "value": f"{self.command_string}owner uplink remove"}
+                 "value": f"`{self.command_string}owner uplink remove`"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1)
+                                               destination=1, c=Colour.dark_gold())
 
     @uplink.command()
     async def apply(self, ctx, chn: TextChannel):
@@ -138,10 +140,11 @@ class GuildOwnerCommands(commands.Cog):
             "explorerSettings.channelId": int(chn.id)
         }
 
-        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
+        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id,
+                                                                     data_to_update=data_to_update):
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message=f'You have successfully set channel {chn} to receive Crypto'
-                                                        f' Link Network Feed',
+                                                        f' Link Network Activity feed',
                                                 destination=ctx.message.author, sys_msg_title='__System Message__')
         else:
             await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue while trying'
@@ -154,7 +157,8 @@ class GuildOwnerCommands(commands.Cog):
             "explorerSettings.channelId": int(0)
         }
 
-        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id, data_to_update=data_to_update):
+        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id,
+                                                                     data_to_update=data_to_update):
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message=f'You have successfully turned OFF Crypto Link Network Feed',
                                                 destination=ctx.message.author, sys_msg_title='__System Message__')

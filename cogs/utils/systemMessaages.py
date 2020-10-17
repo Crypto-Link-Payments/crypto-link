@@ -38,6 +38,9 @@ class CustomMessages:
         elif tx_type == 'squad':
             pass
 
+        elif tx_type == 'role_purchase':
+            pass
+
         return msg_streamed
 
     def get_emoji(self, tx_type):
@@ -227,27 +230,27 @@ class CustomMessages:
 
     @staticmethod
     async def withdrawal_notify(ctx, withdrawal_data: dict, fee):
-        notify = discord.Embed(title="Withdrawal Notification",
+        notify = discord.Embed(title=":outbox_tray: Withdrawal Notification :outbox_tray:",
                                description=f'Withdrawal Successfully processed',
                                timestamp=datetime.utcnow(),
                                colour=discord.Colour.green())
 
-        notify.add_field(name="Time of withdrawal",
+        notify.add_field(name=":calendar: Time of withdrawal :calendar: ",
                          value=str(datetime.utcnow()),
                          inline=False)
-        notify.add_field(name='Destination',
+        notify.add_field(name=':map: Destination :map: ',
                          value=withdrawal_data["destination"],
                          inline=False)
-        notify.add_field(name='Transaction hash',
+        notify.add_field(name=':hash: Transaction hash :hash: ',
                          value=withdrawal_data["hash"],
                          inline=False)
-        notify.add_field(name='Withdrawal asset details',
+        notify.add_field(name=':receipt: Withdrawal asset details :receipt: ',
                          value=f'{round(withdrawal_data["amount"] / 10000000, 7)} {withdrawal_data["asset"]}',
                          inline=False)
-        notify.add_field(name='Crypto Link Fee',
+        notify.add_field(name=':money_mouth: Crypto Link Fee :money_mouth: ',
                          value=fee,
                          inline=False)
-        notify.add_field(name='Explorer Link',
+        notify.add_field(name=':compass: Explorer Link :compass: ',
                          value=withdrawal_data['explorer'],
                          inline=False)
         notify.set_thumbnail(url=ctx.message.author.avatar_url)
@@ -256,13 +259,13 @@ class CustomMessages:
             await ctx.author.send(embed=notify)
 
         except errors.DiscordException:
-            error_msg = discord.Embed(title=f'Withdrawal Notification',
+            error_msg = discord.Embed(title=f':warning: Withdrawal Notification :warning:',
                                       description=f'You have received this message because'
                                                   f' withdrawal notification could not be'
                                                   f' send to DM. Please allow bot to send'
                                                   f' you messages',
                                       colour=discord.Colour.green())
-            error_msg.add_field(name='Explorer Link',
+            error_msg.add_field(name=':compass: Explorer Link :compass:',
                                 value=withdrawal_data['explorer'])
             error_msg.set_footer(text='This message will self-destruct in 360 seconds')
             await ctx.channel.send(embed=error_msg, content=f'{ctx.message.author.mention}',
@@ -309,7 +312,7 @@ class CustomMessages:
                                    title='Congratulations on '
                                          'obtaining the role',
                                    description='Details on obtained role',
-                                   colour=discord.Colour.gold())
+                                   colour=Colour.magenta())
         role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
         role_embed.add_field(name=':convenience_store: Community :convenience_store:',
                              value=f'{ctx.message.guild}  \n'
@@ -342,7 +345,7 @@ class CustomMessages:
                   'wallet___',
             description=f'Role has been purchased on your community '
                         f'at {role_details["roleStart"]}.',
-            colour=discord.Colour.green())
+            colour=Colour.magenta())
 
         incoming_funds.add_field(name=':japanese_ogre: Role Purchased :japanese_ogre: ',
                                  value=f"Name: {role.name}\n"

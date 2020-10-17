@@ -5,6 +5,7 @@ from datetime import datetime
 from datetime import timedelta
 
 import discord
+from discord import Colour
 from discord.ext import commands
 from pycoingecko import CoinGeckoAPI
 
@@ -16,7 +17,7 @@ from utils import numbers
 from utils.tools import Helpers
 
 helper = Helpers()
-customMessages = CustomMessages()
+custom_messages = CustomMessages()
 gecko = CoinGeckoAPI()
 sys_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 
@@ -60,21 +61,21 @@ class ConsumerCommands(commands.Cog):
         Entry point for membership connected with merchant system
         """
 
-        title = '__Membership available commands__'
-        description = 'Representation of all available commands under ***membership*** category.'
+        title = ':joystick: __Subscription available commands__ :joystick:'
+        description = 'Representation of all available commands under ***membership*** category to purchase' \
+                      ' and monitor roles.'
         list_of_commands = [
-            {"name": f'{self.command_string}membership roles',
-             "value": f'All available roles to be bought on the community {ctx.message.guild}'},
-            {"name": f'{self.command_string}membership subscribe <@discord Role> <ticker xlm>',
-             "value": 'Gets yourself a role'},
-            {"name": f'{self.command_string}membership current',
-             "value": 'Returns the list and description on all roles user currently has, which have been'
-                      'obtained through merchant system and have not yet expired.'}
+            {"name": f':circus_tent: Available Roles on {ctx.message.guild} :circus_tent:',
+             "value": f'`{self.command_string}membership roles`'},
+            {"name": f':person_juggling: Gets yourself a role :person_juggling: ',
+             "value": f'`{self.command_string}membership subscribe <@discord Role>`'},
+            {"name": f':man_mage: List active roles :man_mage:',
+             "value": f'`{self.command_string}membership current`'}
         ]
 
         if ctx.invoked_subcommand is None:
-            await customMessages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
-                                               destination=1)
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
+                                                destination=1, c= Colour.magenta())
 
     @membership.command()
     @commands.check(is_public)
@@ -89,45 +90,42 @@ class ConsumerCommands(commands.Cog):
 
         roles = merchant_manager.check_user_roles(user_id=author, discord_id=community)
         if roles:
-            for data in roles:
-                value_in_stellar = round(int(data['atomicValue']) / 10000000, 7)
+            for role in roles:
+                value_in_stellar = round(int(role['atomicValue']) / 10000000, 7)
 
-                starting_time = datetime.fromtimestamp(int(data['start']))
-                ending_time = datetime.fromtimestamp(int(data['end']))
+                starting_time = datetime.fromtimestamp(int(role['start']))
+                ending_time = datetime.fromtimestamp(int(role['end']))
                 count_left = ending_time - datetime.utcnow()
-                dollar_worth = round(int(data['pennies']) / 100, 4)
+                dollar_worth = round(int(role['pennies']) / 100, 4)
 
-                role_name = data['roleName']
-                role_id = int(data['roleId'])
+                role_name = role['roleName']
+                role_id = int(role['roleId'])
 
-                role_embed = discord.Embed(title='Active role information',
-                                           colour=discord.Colour.green())
-                role_embed.add_field(name="Active Role",
+                role_embed = discord.Embed(title=f':person_juggling: Active role information :person_juggling:',
+                                           colour=Colour.magenta())
+                role_embed.add_field(name=":circus_tent: Active Role :circus_tent:",
                                      value=f'***{role_name}*** (id:{role_id})',
                                      inline=False)
-                role_embed.add_field(name="Role Obtained:",
+                role_embed.add_field(name=":calendar: Role Obtained :calendar: ",
                                      value=f"{starting_time} UTC",
                                      inline=False)
-                role_embed.add_field(name="Paid for Role ",
-                                     value=f"{value_in_stellar} {CONST_STELLAR_EMOJI}",
+                role_embed.add_field(name=":money_with_wings: Role Value :money_with_wings: ",
+                                     value=f"{value_in_stellar} {CONST_STELLAR_EMOJI} (${dollar_worth})",
                                      inline=False)
-                role_embed.add_field(name="Role value in $",
-                                     value=f"${dollar_worth}",
-                                     inline=True)
-                role_embed.add_field(name="Role expires",
+                role_embed.add_field(name=":stopwatch: Role Expires :stopwatch: ",
                                      value=f'{ending_time} UTC',
                                      inline=False)
-                role_embed.add_field(name="Left",
+                role_embed.add_field(name=":timer: Time Remaining :timer: ",
                                      value=f'{count_left}',
                                      inline=False)
 
                 await ctx.author.send(embed=role_embed)
         else:
             message = f"You have not purchased any roles on {ctx.message.guild}, or all of them have expired."
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
-    @membership.command()
+    @membership.command(aliases=['rls'])
     @commands.check(is_public)
     async def roles(self, ctx):
         """
@@ -136,29 +134,31 @@ class ConsumerCommands(commands.Cog):
         """
         merchant_manager = self.backoffice.merchant_manager
         roles = merchant_manager.get_all_roles_community(community_id=ctx.message.guild.id)
-        title = f'__Available Roles on Community {ctx.message.guild}__'
+        title = f':circus_tent: __Available Roles on Community {ctx.message.guild}__ :circus_tent:'
         dollar_xlm = gecko.get_price(ids='stellar', vs_currencies='usd')
 
         if roles:
             for role in roles:
                 value = float(role["pennyValues"] / 100)
                 value_in_stellar = value / dollar_xlm['stellar']['usd']
-                values = [{"name": 'Role', "value": f'{role["roleName"]} ID({role["roleId"]})'},
-                          {"name": 'Status', "value": role["status"]},
-                          {"name": 'Fiat value', "value": f"{value} $"},
-                          {"name": 'Conversion to crypto', "value": f"{value_in_stellar:.7} {CONST_STELLAR_EMOJI}"},
-                          {"name": 'Role Length',
+                values = [{"name": ':person_juggling: Role :person_juggling: ',
+                           "value": f'{role["roleName"]} ID({role["roleId"]})'},
+                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": role["status"]},
+                          {"name": ':dollar: Fiat value :dollar: ', "value": f"{value} $"},
+                          {"name": ':currency_exchange: Conversion to crypto :currency_exchange: ',
+                           "value": f"{value_in_stellar:.7} {CONST_STELLAR_EMOJI}"},
+                          {"name": ':timer: Role Length:timer:  ',
                            "value": f"{role['weeks']} week/s {role['days']} day/s {role['hours']} "
                                     f"hour/s {role['minutes']} minute/s"}]
                 description = "Role details"
-                await customMessages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
-                                                   data=values)
+                await custom_messages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
+                                                    data=values, c=Colour.magenta())
         else:
             message = f"{ctx.message.guild} does not have any available roles for purchase at this moment."
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
-    @membership.command()
+    @membership.command(aliases=['purchase', 'buy', 'get'])
     @commands.bot_has_permissions(manage_roles=True)
     async def subscribe(self, ctx, role: discord.Role):
         """
@@ -182,8 +182,9 @@ class ConsumerCommands(commands.Cog):
                     role_value_crypto = float(convert_to_dollar / coin_usd_price)
                     role_rounded = round(role_value_crypto, get_decimal_point(symbol=ticker))
                     crypto_price_atomic = self.make_atomic(amount=role_value_crypto, coin_name=ticker)
-                    balance = self.backoffice.account_mng.get_balance_based_on_ticker(user_id=int(ctx.message.author.id),
-                                                                      ticker=ticker)
+                    balance = self.backoffice.account_mng.get_balance_based_on_ticker(
+                        user_id=int(ctx.message.author.id),
+                        ticker=ticker)
                     # Check if user has sufficient balance
                     if balance >= crypto_price_atomic and merchant_manager.modify_funds_in_community_merchant_wallet(
                             community_id=int(ctx.message.guild.id),
@@ -193,9 +194,9 @@ class ConsumerCommands(commands.Cog):
 
                         # Update the community wallet
                         if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
-                                                                  ticker=ticker,
-                                                                  direction=1,
-                                                                  amount=crypto_price_atomic):
+                                                                                  ticker=ticker,
+                                                                                  direction=1,
+                                                                                  amount=crypto_price_atomic):
 
                             # Assign the role to the user
                             await ctx.message.author.add_roles(role,
@@ -245,11 +246,11 @@ class ConsumerCommands(commands.Cog):
                                 }
 
                                 # Send user payment slip info on purchased role
-                                await customMessages.user_role_purchase_msg(ctx=ctx, role=role,
-                                                                            role_details=purchase_role_data)
+                                await custom_messages.user_role_purchase_msg(ctx=ctx, role=role,
+                                                                             role_details=purchase_role_data)
 
-                                await customMessages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
-                                                                                   role_details=purchase_role_data)
+                                await custom_messages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
+                                                                                    role_details=purchase_role_data)
 
                                 print('Updating user role stats')
                                 user_stats_update = {
@@ -257,8 +258,9 @@ class ConsumerCommands(commands.Cog):
                                     'xlmStats.roleTxCount': int(1),
                                 }
 
-                                await self.backoffice.stats_manager.as_update_role_purchase_stats(user_id=ctx.message.author.id,
-                                                                                  merchant_data=user_stats_update)
+                                await self.backoffice.stats_manager.as_update_role_purchase_stats(
+                                    user_id=ctx.message.author.id,
+                                    merchant_data=user_stats_update)
 
                                 global_merchant_stats = {
                                     'totalSpentInUsd': convert_to_dollar,
@@ -270,8 +272,8 @@ class ConsumerCommands(commands.Cog):
                                     "merchantMoved": role_rounded
                                 }
                                 await self.backoffice.stats_manager.update_cl_merchant_stats(ticker='xlm',
-                                                                             merchant_stats=global_merchant_stats,
-                                                                             ticker_stats=global_ticker_stats)
+                                                                                             merchant_stats=global_merchant_stats,
+                                                                                             ticker_stats=global_ticker_stats)
 
                                 guild_stats = {
 
@@ -280,69 +282,70 @@ class ConsumerCommands(commands.Cog):
 
                                 }
                                 await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
-                                                                       guild_stats_data=guild_stats)
+                                                                                       guild_stats_data=guild_stats)
 
                                 load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                                 explorer_msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
                                                f'(${convert_to_dollar}) on ' \
                                                f'{ctx.message.guild}'
-                                await customMessages.explorer_messages(applied_channels=load_channels,
-                                                                       message=explorer_msg)
+                                await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                                        message=explorer_msg, on_chain=False,
+                                                                        tx_type='role_purchase')
                         else:
                             message = f'Error while trying to deduct funds from user'
-                            await customMessages.system_message(ctx=ctx, message=message,
-                                                                sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
-                                                                color_code=1, destination=1)
+                            await custom_messages.system_message(ctx=ctx, message=message,
+                                                                 sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                                                                 color_code=1, destination=1)
                     else:
                         message = f'You have insufficient balance in your wallet to purchase {role.mention}. Your' \
                                   f' current balance is {balance / 10000000}{CONST_STELLAR_EMOJI} and role value ' \
                                   f'according to current rate is {role_value_crypto}{CONST_STELLAR_EMOJI}.'
-                        await customMessages.system_message(ctx=ctx, message=message,
-                                                            sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
-                                                            color_code=1, destination=0)
+                        await custom_messages.system_message(ctx=ctx, message=message,
+                                                             sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                                                             color_code=1, destination=0)
 
                 else:
                     message = f'You have already obtained role with name ***{role}***. In order ' \
                               f'to extend the role you will need to first wait that role expires.'
-                    await customMessages.system_message(ctx=ctx, message=message,
-                                                        sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
-                                                        color_code=1, destination=0)
+                    await custom_messages.system_message(ctx=ctx, message=message,
+                                                         sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                                                         color_code=1, destination=0)
             else:
                 message = f'Role {role} is either deactivated at this moment or has not bee monetized ' \
                           f'on {ctx.message.guild}. Please contact {ctx.guild.owner} or use ' \
                           f' ***{self.command_string}membership roles*** to familiarize yourself with all available ' \
                           f'roles and their status'
-                await customMessages.system_message(ctx=ctx, message=message,
-                                                    sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
-                                                    color_code=1,
-                                                    destination=1)
+                await custom_messages.system_message(ctx=ctx, message=message,
+                                                     sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                                                     color_code=1,
+                                                     destination=1)
         else:
             message = f'You can not purchase {role} with {ticker} as it is not integrated into the {self.bot.user}.'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR, message=message,
-                                                color_code=1,
-                                                destination=1)
+            await custom_messages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR, message=message,
+                                                 color_code=1,
+                                                 destination=1)
 
     @subscribe.error
     async def subscribe_error(self, ctx, error):
         if isinstance(error, commands.MissingPermissions):
             title = 'Role error'
             message = 'role can not be given'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
-                                                destination=1)
+            await custom_messages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
+                                                 destination=1)
         elif isinstance(error, commands.BotMissingPermissions):
             message = f'Role can not be given as bot does not have sufficient rights please contact guild ' \
                       f'owner {ctx.guild.owner.mention}.' \
                       f' Current missing permissions are:\n' \
                       f'{error.missing_perms}'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_ROLE_ERROR, message=message,
-                                                color_code=1,
-                                                destination=1)
+            await custom_messages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_ROLE_ERROR, message=message,
+                                                 color_code=1,
+                                                 destination=1)
         elif isinstance(error, commands.BadArgument):
             message = f'Either you have provided bad argument or role does not exist int he merchant system'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_ROLE_ERROR, message=message,
-                                                color_code=1,
-                                                destination=0)
+            await custom_messages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_ROLE_ERROR, message=message,
+                                                 color_code=1,
+                                                 destination=0)
 
         else:
             print(error)
@@ -351,8 +354,8 @@ class ConsumerCommands(commands.Cog):
     async def membership_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             message = 'Community has not activated merchant service or you have used command over the DM with the bot.'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
 
 def setup(bot):

@@ -42,22 +42,22 @@ class WithdrawalCommands(commands.Cog):
     async def withdraw(self, ctx):
         print(f'WITHDRAW: {ctx.author} -> {ctx.message.content}')
         if ctx.invoked_subcommand is None:
-            title = '__Available withdrawal commands__'
+            title = ':joystick: __Available withdrawal commands__ :joystick: '
             description = "All commands available to withdraw funds from Discord Wallet"
             list_of_values = [
-                {"name": f"{CONST_STELLAR_EMOJI} Withdraw Stellar (XLM) from Discord wallet {CONST_STELLAR_EMOJI}",
-                 "value": f"{self.command_string}withdraw xlm <amount> <destination address>\n"
+                {"name": f":outbox_tray: Withdraw Stellar (XLM) from Discord wallet :outbox_tray:",
+                 "value": f"`{self.command_string}withdraw xlm <amount> <destination address>`\n"
                           f"\nexample:\n"
-                          f"```!withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"},
+                          f"`!withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7``"},
                 {"name": f" Withdraw Tokens",
                  "value": f"{self.command_string}withdraw <ticker> <amount> <destination address>\n"
                           f"\nexample:\n"
-                          f"```!withdraw clt 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"}]
+                          f"`!withdraw clt 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7`"}]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1)
 
-    @withdraw.command()
+    @withdraw.command(aliases=["t"])
     @commands.check(user_has_wallet)
     async def token(self, ctx, ticker: str, withdrawal_amount: float, address: str):
         token = ticker.lower()
@@ -103,7 +103,7 @@ class WithdrawalCommands(commands.Cog):
                 if user_stellar_balance >= total_stellar_to_withdraw and user_token_balance >= total_token_to_withdraw:
 
                     # Ask for verification
-                    message_content = f"{ctx.message.author.mention} fees for withdrawal request are:\n" \
+                    message_content = f":robot: {ctx.message.author.mention} fees for withdrawal request are:\n" \
                                       f"***XLM***: {stellar_fee} {CONST_STELLAR_EMOJI}\n" \
                                       f"***{token.upper()}***: {token_fee}{token_emoji}\n" \
                                       f"Are you still willing to withdraw and pay the fess? answer with ***yes*** " \
@@ -118,7 +118,7 @@ class WithdrawalCommands(commands.Cog):
 
                     # Check verification
                     if str(msg_usr.content.lower()) == 'yes':
-                        processing_msg = 'Processing withdrawal request, please wait few moments....'
+                        processing_msg = ':robot: Processing withdrawal request, please wait few moments....'
                         await ctx.channel.send(processing_msg)
 
                         to_deduct = {
@@ -270,7 +270,7 @@ class WithdrawalCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
-    @withdraw.command()
+    @withdraw.command(aliases = ["x"])
     @commands.check(user_has_wallet)
     async def xlm(self, ctx, amount: float, address: str):
         """
@@ -301,8 +301,8 @@ class WithdrawalCommands(commands.Cog):
                     xlm_with_amount = stroops / 10000000
 
                     # Confirmation message
-                    message_content = f"{ctx.message.author.mention} Current withdrawal fee which will be appended " \
-                                      f"to your withdrawal amount is " \
+                    message_content = f":robot: {ctx.message.author.mention} Current withdrawal fee which " \
+                                      f"will be appended to your withdrawal amount is " \
                                       f"{stellar_fee} {CONST_STELLAR_EMOJI}\n" \
                                       f"Are you still willing to withdraw? answer with ***yes*** or ***no***"
 
@@ -310,7 +310,7 @@ class WithdrawalCommands(commands.Cog):
                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
 
                     if str(msg_usr.content.lower()) == 'yes':
-                        processing_msg = 'Processing withdrawal request, please wait few moments....'
+                        processing_msg = ':robot: Processing withdrawal request, please wait few moments....'
                         processing_msg = await ctx.channel.send(content=processing_msg)
 
                         to_deduct = {

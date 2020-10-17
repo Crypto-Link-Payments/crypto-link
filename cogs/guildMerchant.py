@@ -76,37 +76,43 @@ class MerchantCommunityOwner(commands.Cog):
             title = "💱 __Merchant System Message Setup__💱 "
             description = 'All available commands under ***merchant*** category.'
             list_of_commands = [
-                {"name": f'{self.command_string}merchant manual',
-                 "value": 'Step by step guide how to set-up and monetize community'},
-                {"name": f'{self.command_string}merchant monetize',
-                 "value": 'All available commands to monetize the roles on Discord'},
-                {"name": f'{self.command_string}merchant wallet',
-                 "value": 'All commands available for community wallet operations'},
-                {"name": f'{self.command_string}merchant create_role <role name> <value in dollars > '
-                         f'<weeks> <days> <hours> <minutes>',
-                 "value": 'Creates the role which is monetized with desired length'},
-                {"name": f'{self.command_string}merchant  delete_role <@Discord Role>',
-                 "value": 'Deletes the monetized role from the system and removes if from list of roles on community.'},
-                {"name": f'{self.command_string}merchant stop_role <@Discord Role>',
-                 "value": 'Stops the role from being obtained by the users however does not delete it from the system'},
-                {"name": f'{self.command_string}merchant  start_role <@Discord Role>',
-                 "value": 'Restarts the role which has been stopped and makes it available to discord members again.'},
-                {"name": f'{self.command_string}merchant community_roles',
-                 "value": 'Returns information on all roles you have set to be monetized on the community'}
+
+                {"name": f':information_source: How to Monetize Roles :information_source: ',
+                 "value": f'`{self.command_string}merchant manual`'},
+                {"name": f':joystick: Command sub-categories :joystick: ',
+                 "value": f'`{self.command_string}merchant monetize`'},
+                {"name": f':moneybag: Guild Wallet Balance :moneybag: ',
+                 "value": f'`{self.command_string}merchant balance`'},
+                {"name": f':broom: Merchant Wallet withdrawals :broom:  ',
+                 "value": f'`{self.command_string}merchant sweep`'},
+                {"name": f':tools: Create Monetized Role :tools: ',
+                 "value": f'`{self.command_string}merchant create_role <role name> <value in dollars > '
+                          f'<weeks> <days> <hours> <minutes>`'},
+                {"name": f':x: Remove Monetized Role :x: ',
+                 "value": f'`{self.command_string}merchant  delete_role <@Discord Role>`'},
+                {"name": f':octagonal_sign: Stop Monetized Role :octagonal_sign: ',
+                 "value": f'`{self.command_string}merchant stop_role <@Discord Role>`'},
+                {"name": f':arrow_forward: Start Monetized Role :arrow_forward: ',
+                 "value": f'`{self.command_string}merchant start_role <@Discord Role>`'},
+                {"name": f':person_juggling: List Monetized Roles :person_juggling: ',
+                 "value": f'`{self.command_string}merchant community_roles`'}
+
             ]
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands)
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands,
+                                               c=Color.purple())
 
     @merchant.command()
     async def manual(self, ctx):
-        manual = Embed(title='__Merchant system manual__',
-                       colour=Color.green())
+        manual = Embed(title=':convenience_store: __Merchant system manual__ :convenience_store: ',
+                       colour=Color.purple())
         manual.add_field(name=':one: Create monetized roles',
-                         value=f'{self.command_string}monetize create_role <role name> <Dollar value of role> '
-                               f'<duration weeks> <days> <hours> <minutes>\n'
-                               f':warning: Required parameters :warning: \n'
-                               f'--> No spaces in role name and max length 20 characters'
-                               f'--> At least one of the time parameters needs to be greater than 0\n'
-                               '--> Dollar value of the role is not allowed to be 0.00 $',
+                         value=f'`{self.command_string}monetize create_role <role name> <Dollar value of role> '
+                               f'<duration weeks> <days> <hours> <minutes>`\n'
+                               f'\n:warning: __Required parameters__ :warning: \n'
+                               f'\n'
+                               f'> :white_check_mark:  No spaces in role name and max length 20 characters\n'
+                               f'> :white_check_mark:  At least one of the time parameters needs to be greater than 0\n'
+                               f'> :white_check_mark:  Dollar value of the role required to be greater than 0.00 $',
                          inline=False)
         manual.add_field(name=':two: Inform members',
                          value=f'Once role successfully create, it can be purchased by your members with command\n'
@@ -161,7 +167,7 @@ class MerchantCommunityOwner(commands.Cog):
                             if merchant_manager.register_role(new_role):
 
                                 # Send the message to the owner
-                                msg_title = '__Role Creation Status___'
+                                msg_title = ':person_juggling: __Role Creation Status___ :person_juggling: '
                                 message = f'Role with name ***{role_name}*** has been successfully created.\n' \
                                           f'Details:\n' \
                                           f'Role ID: {created_role.id}\n' \
@@ -174,11 +180,11 @@ class MerchantCommunityOwner(commands.Cog):
                                                                     color_code=0,
                                                                     destination=1)
 
-                                msg_title = '__Time to Inform Members___'
+                                msg_title = ':mega: __ Time to Inform Members__ :mega:'
                                 message = f'Users can now apply for the role by executing the' \
                                           f' command bellow: \n ***{self.command_string}membership subscribe ' \
                                           f'<@Discord Role>***\n. ' \
-                                          f'Thank You for using Merchant Service'
+                                          f'Thank You for using Merchant System!'
                                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
                                                                     color_code=0,
                                                                     destination=1)
@@ -260,7 +266,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 color_code=0,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['community', 'roles'])
     @commands.check(is_owner)
     @commands.check(is_public)
     async def community_roles(self, ctx):
@@ -271,15 +277,16 @@ class MerchantCommunityOwner(commands.Cog):
         """
         merchant_manager = self.backoffice.merchant_manager
         roles = merchant_manager.get_all_roles_community(community_id=ctx.message.guild.id)
-        title = f'__Available Roles on Community {ctx.message.guild}__'
+        title = f':circus_tent: __Available Roles on Community {ctx.message.guild}__ :circus_tent: '
         description = 'Details on monetized role.'
         if roles:
             for role in roles:
                 dollar_value = float(role["pennyValues"] / 100)
-                values = [{"name": 'Role', "value": f'{role["roleName"]} ID({role["roleId"]}'},
-                          {"name": 'Status', "value": role["status"]},
-                          {"name": 'Values', "value": f"{dollar_value} $"},
-                          {"name": 'Role Length',
+                values = [{"name": ':person_juggling: Role :person_juggling: ',
+                           "value": f'{role["roleName"]} ID({role["roleId"]}'},
+                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": role["status"]},
+                          {"name": ':dollar: Values :dollar: ', "value": f"{dollar_value} $"},
+                          {"name": ':timer: Role Length :timer:',
                            "value": f"{role['weeks']} week/s {role['days']} day/s {role['hours']} "
                                     f"hour/s {role['minutes']} minute/s"}]
                 await customMessages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
@@ -290,7 +297,7 @@ class MerchantCommunityOwner(commands.Cog):
             await customMessages.system_message(ctx=ctx, sys_msg_title=title1, message=message, color_code=1,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['stop'])
     @commands.check(is_public)
     @commands.check(is_owner)
     async def stop_role(self, ctx, role: Role):
@@ -305,7 +312,8 @@ class MerchantCommunityOwner(commands.Cog):
                 if merchant_manager.change_role_details(role_data=role_details):
                     title = '__Role status change notification__'
                     message = f'Role has been deactivated successfully. in order to re-activate it and make it ' \
-                              f'available to users again, use command {self.command_string}monetize start_role <@discord.Role>'
+                              f'available to users again, use command' \
+                              f' `{self.command_string}monetize start_role <@discord.Role>`'
                     await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                         destination=1)
                 else:
@@ -322,12 +330,12 @@ class MerchantCommunityOwner(commands.Cog):
                                                     destination=1)
         else:
             message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
-                      f'{self.command_string} monetize community_roles to obtain all roles on the community'
+                      f'`{self.command_string} monetize community_roles` to obtain all roles on the community'
             await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE_ERROR, message=message,
                                                 color_code=1,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['start'])
     @commands.check(is_public)
     @commands.check(is_owner)
     async def start_role(self, ctx, role: Role):
@@ -360,12 +368,12 @@ class MerchantCommunityOwner(commands.Cog):
                                                     destination=1)
         else:
             message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
-                      f'{self.command_string} monetize community_roles to obtain all roles on the community'
+                      f'`{self.command_string}` monetize community_roles to obtain all roles on the community'
             await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE, message=message,
                                                 color_code=1,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['bal'])
     @commands.check(is_owner)
     async def balance(self, ctx):
         """
@@ -375,16 +383,15 @@ class MerchantCommunityOwner(commands.Cog):
         """
         merchant_manager = self.backoffice.merchant_manager
         data = merchant_manager.get_wallet_balance(community_id=ctx.message.guild.id)
-
         if data:
-            stellar_balance = data['stellar']['balance']
+            stellar_balance = data['balance']
             get_xlm_point = get_decimal_point(symbol='xlm')
             stellar_real = get_normal(value=str(stellar_balance), decimal_point=get_xlm_point)
 
-            wallet_details = Embed(title='Merchant wallet status',
+            wallet_details = Embed(title=' :bank: __Merchant wallet status__ :bank:',
                                    description="Current state of the Merchant Community wallet",
                                    colour=Color.gold())
-            wallet_details.add_field(name='Stellar balance',
+            wallet_details.add_field(name=f'{CONST_STELLAR_EMOJI} Stellar Lumen {CONST_STELLAR_EMOJI}',
                                      value=f"{stellar_real} {CONST_STELLAR_EMOJI}",
                                      inline=False)
 
@@ -396,7 +403,7 @@ class MerchantCommunityOwner(commands.Cog):
             await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=1,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['sweep'])
     @commands.check(is_owner)
     async def transfer_xlm(self, ctx):
         """
@@ -441,31 +448,34 @@ class MerchantCommunityOwner(commands.Cog):
                     # TODO fix bug where it could happen that fee in stroops us greater than the available balance
 
                     # credit fee to launch pad investment wallet
-                    if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm', direction=1):
+                    if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm',
+                                                                             direction=1):
 
                         # Append withdrawal amount to the community owner personal wallet
-                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm', direction=0,
-                                                                  amount=for_owner):
-                            info_embed = Embed(title='__Corporate account Transaction details__',
-                                               description="Here are the details on withdrawal from Merchant "
-                                                           "Corporate Account to your personal account.",
-                                               colour=Color.green())
-                            info_embed.add_field(name='Time of withdrawal',
+                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm',
+                                                                                  direction=0,
+                                                                                  amount=for_owner):
+                            info_embed = Embed(
+                                title=' :money_with_wings: __Corporate account Transaction details__  :money_with_wings:',
+                                description="Here are the details on withdrawal from Merchant "
+                                            "Corporate Account to your personal account.",
+                                colour=Color.purple())
+                            info_embed.add_field(name=':clock: Time of withdrawal :clock: ',
                                                  value=f"{current_time} (UTC)",
                                                  inline=False)
-                            info_embed.add_field(name="Wallet Balance Before Withdrawal",
+                            info_embed.add_field(name=":moneybag: Wallet Balance Before Withdrawal :moneybag: ",
                                                  value=f"{balance / 10000000} {CONST_STELLAR_EMOJI}",
                                                  inline=False)
 
                             # Info according to has license or does not have license
                             if fee_in_stroops != 0:
-                                info_embed.add_field(name="Final Withdrawal Amount",
+                                info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
                                                      value=f'{balance / 10000000} {CONST_STELLAR_EMOJI}\n'
                                                            f'Service Fee: {fee_in_stroops / 10000000}'
                                                            f' {CONST_STELLAR_EMOJI} (est. {total}$)',
                                                      inline=False)
                             else:
-                                info_embed.add_field(name="Final Withdrawal Amount",
+                                info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
                                                      value=f'{balance / 10000000} {CONST_STELLAR_EMOJI}\n'
                                                            f'Service Fee: 0 {CONST_STELLAR_EMOJI} (License activated)',
                                                      inline=False)
@@ -474,28 +484,30 @@ class MerchantCommunityOwner(commands.Cog):
 
                             # Send information to corporate account channel
 
-                            corp_info = Embed(title="__ Merchant withdrawal fee incoming to Corp Wallet__",
-                                              description="This message was sent from the system, to inform you,"
-                                                          "that additional funds have been transferred and credited"
-                                                          " to Launch Pad Investment Corporate wallet",
-                                              colour=Color.green()
-                                              )
-                            corp_info.add_field(name='Time of initiated withdrawal',
+                            corp_info = Embed(
+                                title=":convenience_store: __ Merchant withdrawal fee incoming to Corp"
+                                      " Wallet__ :convenience_store:",
+                                description="This message was sent from the system, to inform you,"
+                                            "that additional funds have been transferred and credited"
+                                            " to Launch Pad Investment Corporate wallet",
+                                colour=Color.green()
+                            )
+                            corp_info.add_field(name=':clock: Time of initiated withdrawal :clock:',
                                                 value=f"{current_time} UTC",
                                                 inline=False)
-                            corp_info.add_field(name="Merchant Corp Account of:",
+                            corp_info.add_field(name=" :bank: Merchant Corp Account :bank:",
                                                 value=f"{ctx.message.guild}",
                                                 inline=False)
-                            corp_info.add_field(name="Owner",
+                            corp_info.add_field(name=":crown: Guild Owner :crown: ",
                                                 value=f"{ctx.message.author}",
                                                 inline=False)
-                            corp_info.add_field(name="Income amount to corporate wallet",
+                            corp_info.add_field(name=":money_mouth: Income amount to corporate wallet :money_mouth: ",
                                                 value=f"Amount: {fee_in_stroops / 10000000} {CONST_STELLAR_EMOJI}\n"
                                                       f"Amount is 0 if community has purchased monthly license",
                                                 inline=False)
-                            corp_info.add_field(name="Slip",
-                                                value=f"Wallet balance:{balance / 10000000} {CONST_STELLAR_EMOJI}\n"
-                                                      f"Net withdrawal: {for_owner / 10000000} {CONST_STELLAR_EMOJI}",
+                            corp_info.add_field(name=":receipt: Transaction Slip :receipt: ",
+                                                value=f":moneybag: balance:{balance / 10000000} {CONST_STELLAR_EMOJI}\n"
+                                                      f":atm: Net withdrawal: {for_owner / 10000000} {CONST_STELLAR_EMOJI}",
                                                 inline=False)
                             notification_channel = self.bot.get_channel(id=int(channel_id))
                             await notification_channel.send(embed=corp_info)
