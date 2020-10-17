@@ -57,7 +57,7 @@ class WithdrawalCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1)
 
-    @withdraw.command()
+    @withdraw.command(aliases=["t"])
     @commands.check(user_has_wallet)
     async def token(self, ctx, ticker: str, withdrawal_amount: float, address: str):
         token = ticker.lower()
@@ -270,7 +270,7 @@ class WithdrawalCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
-    @withdraw.command()
+    @withdraw.command(aliases = ["x"])
     @commands.check(user_has_wallet)
     async def xlm(self, ctx, amount: float, address: str):
         """
