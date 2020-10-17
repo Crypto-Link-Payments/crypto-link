@@ -158,7 +158,7 @@ class ConsumerCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
-    @membership.command()
+    @membership.command(aliases=['purchase', 'buy', 'get'])
     @commands.bot_has_permissions(manage_roles=True)
     async def subscribe(self, ctx, role: discord.Role):
         """
@@ -290,7 +290,8 @@ class ConsumerCommands(commands.Cog):
                                                f'(${convert_to_dollar}) on ' \
                                                f'{ctx.message.guild}'
                                 await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                        message=explorer_msg)
+                                                                        message=explorer_msg, on_chain=False,
+                                                                        tx_type='role_purchase')
                         else:
                             message = f'Error while trying to deduct funds from user'
                             await custom_messages.system_message(ctx=ctx, message=message,
