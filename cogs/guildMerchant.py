@@ -263,7 +263,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 color_code=0,
                                                 destination=1)
 
-    @merchant.command(aliases=['community','roles'])
+    @merchant.command(aliases=['community', 'roles'])
     @commands.check(is_owner)
     @commands.check(is_public)
     async def community_roles(self, ctx):
@@ -279,7 +279,8 @@ class MerchantCommunityOwner(commands.Cog):
         if roles:
             for role in roles:
                 dollar_value = float(role["pennyValues"] / 100)
-                values = [{"name": ':person_juggling: Role :person_juggling: ', "value": f'{role["roleName"]} ID({role["roleId"]}'},
+                values = [{"name": ':person_juggling: Role :person_juggling: ',
+                           "value": f'{role["roleName"]} ID({role["roleId"]}'},
                           {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": role["status"]},
                           {"name": ':dollar: Values :dollar: ', "value": f"{dollar_value} $"},
                           {"name": ':timer: Role Length :timer:',
@@ -308,7 +309,8 @@ class MerchantCommunityOwner(commands.Cog):
                 if merchant_manager.change_role_details(role_data=role_details):
                     title = '__Role status change notification__'
                     message = f'Role has been deactivated successfully. in order to re-activate it and make it ' \
-                              f'available to users again, use command {self.command_string}monetize start_role <@discord.Role>'
+                              f'available to users again, use command' \
+                              f' `{self.command_string}monetize start_role <@discord.Role>`'
                     await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                         destination=1)
                 else:
@@ -325,7 +327,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                     destination=1)
         else:
             message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
-                      f'{self.command_string} monetize community_roles to obtain all roles on the community'
+                      f'`{self.command_string} monetize community_roles` to obtain all roles on the community'
             await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE_ERROR, message=message,
                                                 color_code=1,
                                                 destination=1)
