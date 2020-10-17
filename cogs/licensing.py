@@ -130,8 +130,8 @@ class MerchantLicensingCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @license.group()
-    async def buy(self, ctx):
+    @license.group(aliases=['buy', 'get'])
+    async def purchase(self, ctx):
         """
         Initiates purchase of license
         :param ctx:
@@ -141,12 +141,13 @@ class MerchantLicensingCommands(commands.Cog):
             title = "__Available options to purchase license__"
             description = 'Representation of all available currencies and options to purchase license.'
             list_of_commands = [
-                {"name": '!license buy with_xlm',
-                 "value": 'Use Stellar Lumen to purchase license'}
+                {"name": ':money_with_wings: Purchase License :money_with_wings: ',
+                 "value": f'`{self.command_string}license buy with_xlm`'}
             ]
-            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands)
+            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands,
+                                                c=Color.dark_orange())
 
-    @buy.command()
+    @purchase.command()
     async def with_xlm(self, ctx):
         """
         Use XLM to buy license
