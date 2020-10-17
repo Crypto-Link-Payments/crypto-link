@@ -76,25 +76,28 @@ class MerchantCommunityOwner(commands.Cog):
             title = "💱 __Merchant System Message Setup__💱 "
             description = 'All available commands under ***merchant*** category.'
             list_of_commands = [
-                {"name": f'{self.command_string}merchant manual',
-                 "value": 'Step by step guide how to set-up and monetize community'},
-                {"name": f'{self.command_string}merchant monetize',
-                 "value": 'All available commands to monetize the roles on Discord'},
-                {"name": f'{self.command_string}merchant wallet',
-                 "value": 'All commands available for community wallet operations'},
-                {"name": f'{self.command_string}merchant create_role <role name> <value in dollars > '
-                         f'<weeks> <days> <hours> <minutes>',
-                 "value": 'Creates the role which is monetized with desired length'},
-                {"name": f'{self.command_string}merchant  delete_role <@Discord Role>',
-                 "value": 'Deletes the monetized role from the system and removes if from list of roles on community.'},
-                {"name": f'{self.command_string}merchant stop_role <@Discord Role>',
-                 "value": 'Stops the role from being obtained by the users however does not delete it from the system'},
-                {"name": f'{self.command_string}merchant  start_role <@Discord Role>',
-                 "value": 'Restarts the role which has been stopped and makes it available to discord members again.'},
-                {"name": f'{self.command_string}merchant community_roles',
-                 "value": 'Returns information on all roles you have set to be monetized on the community'}
+
+                {"name": f':information_source: How to Monetize Roles :information_source: ',
+                 "value": f'`{self.command_string}merchant manual`'},
+                {"name": f':joystick: Command sub-categories :joystick: ',
+                 "value": f'`{self.command_string}merchant monetize`'},
+                {"name": f':moneybag: Guild Wallet Commands :moneybag: ',
+                 "value": f'`{self.command_string}merchant wallet`'},
+                {"name": f':tools: Create Monetized Role :tools: ',
+                 "value": f'`{self.command_string}merchant create_role <role name> <value in dollars > '
+                          f'<weeks> <days> <hours> <minutes>`'},
+                {"name": f':x: Remove Monetized Role :x: ',
+                 "value": f'`{self.command_string}merchant  delete_role <@Discord Role>`'},
+                {"name": f':octagonal_sign: Stop Monetized Role :octagonal_sign: ',
+                 "value": f'`{self.command_string}merchant stop_role <@Discord Role>`'},
+                {"name": f':arrow_forward: Start Monetized Role :arrow_forward: ',
+                 "value": f'`{self.command_string}merchant start_role <@Discord Role>`'},
+                {"name": f':person_juggling: List Monetized Roles :person_juggling: ',
+                 "value": f'`{self.command_string}merchant community_roles`'}
+
             ]
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands)
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands,
+                                               c=Color.purple())
 
     @merchant.command()
     async def manual(self, ctx):
@@ -441,11 +444,13 @@ class MerchantCommunityOwner(commands.Cog):
                     # TODO fix bug where it could happen that fee in stroops us greater than the available balance
 
                     # credit fee to launch pad investment wallet
-                    if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm', direction=1):
+                    if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm',
+                                                                             direction=1):
 
                         # Append withdrawal amount to the community owner personal wallet
-                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm', direction=0,
-                                                                  amount=for_owner):
+                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm',
+                                                                                  direction=0,
+                                                                                  amount=for_owner):
                             info_embed = Embed(title='__Corporate account Transaction details__',
                                                description="Here are the details on withdrawal from Merchant "
                                                            "Corporate Account to your personal account.",
