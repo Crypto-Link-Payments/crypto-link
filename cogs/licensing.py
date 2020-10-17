@@ -90,14 +90,12 @@ class MerchantLicensingCommands(commands.Cog):
         data = self.backoffice.bot_manager.get_fees_by_category(key='license')
         fee_value = data['fee']
         in_lumen = convert_to_currency(fee_value, coin_name='stellar')
-        fee_info = Embed(title="__Merchant license information__",
-                         description="Bellow are provided details on a monthly license"
-                                     " to be free from Merchant Withdrawal Fees",
-                         colour=Color.blue())
-        fee_info.add_field(name='License information',
-                           value=f'Duration: 1 moth from the day of purchase\n'
-                                 f'Fiat value: {fee_value}$\n'
-                                 f'Stellar Lumen: {in_lumen["total"]} {CONST_STELLAR_EMOJI}\n')
+        fee_info = Embed(title=":money_with_wings: __Merchant License Fee Information__ :money_with_wings: ",
+                         colour=Color.dark_orange())
+        fee_info.add_field(name=':receipt: Merchant License Details :receipt: ',
+                           value=f':clock: Duration: 1 moth from the day of purchase\n'
+                                 f':dollar: value: ${fee_value}\n'
+                                 f'{CONST_STELLAR_EMOJI} Conversion: {in_lumen["total"]} {CONST_STELLAR_EMOJI}\n')
         fee_info.set_footer(text="Conversion rates provided by CoinGecko",
                             icon_url='https://static.coingecko.com/s/thumbnail-'
                                      '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
