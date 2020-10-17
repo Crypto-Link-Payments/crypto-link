@@ -370,7 +370,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 color_code=1,
                                                 destination=1)
 
-    @merchant.command()
+    @merchant.command(aliases=['bal'])
     @commands.check(is_owner)
     async def balance(self, ctx):
         """
@@ -386,10 +386,10 @@ class MerchantCommunityOwner(commands.Cog):
             get_xlm_point = get_decimal_point(symbol='xlm')
             stellar_real = get_normal(value=str(stellar_balance), decimal_point=get_xlm_point)
 
-            wallet_details = Embed(title='Merchant wallet status',
+            wallet_details = Embed(title=' :bank: __Merchant wallet status__ :bank:',
                                    description="Current state of the Merchant Community wallet",
                                    colour=Color.gold())
-            wallet_details.add_field(name='Stellar balance',
+            wallet_details.add_field(name=f'{CONST_STELLAR_EMOJI} Stellar Lumen {CONST_STELLAR_EMOJI}',
                                      value=f"{stellar_real} {CONST_STELLAR_EMOJI}",
                                      inline=False)
 
