@@ -125,7 +125,7 @@ class ConsumerCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
-    @membership.command()
+    @membership.command(aliases=['rls'])
     @commands.check(is_public)
     async def roles(self, ctx):
         """
@@ -134,18 +134,20 @@ class ConsumerCommands(commands.Cog):
         """
         merchant_manager = self.backoffice.merchant_manager
         roles = merchant_manager.get_all_roles_community(community_id=ctx.message.guild.id)
-        title = f'__Available Roles on Community {ctx.message.guild}__'
+        title = f':circus_tent: __Available Roles on Community {ctx.message.guild}__ :circus_tent:'
         dollar_xlm = gecko.get_price(ids='stellar', vs_currencies='usd')
 
         if roles:
             for role in roles:
                 value = float(role["pennyValues"] / 100)
                 value_in_stellar = value / dollar_xlm['stellar']['usd']
-                values = [{"name": 'Role', "value": f'{role["roleName"]} ID({role["roleId"]})'},
+                values = [{"name": ':person_juggling: Role :person_juggling: ',
+                           "value": f'{role["roleName"]} ID({role["roleId"]})'},
                           {"name": 'Status', "value": role["status"]},
-                          {"name": 'Fiat value', "value": f"{value} $"},
-                          {"name": 'Conversion to crypto', "value": f"{value_in_stellar:.7} {CONST_STELLAR_EMOJI}"},
-                          {"name": 'Role Length',
+                          {"name": ':dollar: Fiat value :dollar: ', "value": f"{value} $"},
+                          {"name": ':currency_exchange: Conversion to crypto :currency_exchange: ',
+                           "value": f"{value_in_stellar:.7} {CONST_STELLAR_EMOJI}"},
+                          {"name": ':timer: Role Length:timer:  ',
                            "value": f"{role['weeks']} week/s {role['days']} day/s {role['hours']} "
                                     f"hour/s {role['minutes']} minute/s"}]
                 description = "Role details"
