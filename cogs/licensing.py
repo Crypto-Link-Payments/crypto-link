@@ -49,17 +49,15 @@ class MerchantLicensingCommands(commands.Cog):
             title = "__System Message__"
             description = 'Representation of all available commands under ***merchant*** category.'
             list_of_commands = [
-                {"name": f'{self.command_string}license about',
-                 "value": 'Returns detailed information on Licensing'},
-                {"name": f'{self.command_string}license price',
-                 "value": 'Returns information on current monthly license fee calculated '
-                          'into XLM and XMR.'},
-                {"name": f'{self.command_string}license status',
-                 "value": 'Returns details if license has been activated for the community.'},
-                {"name": f'{self.command_string}license buy',
-                 "value": 'Returns detailed information on ways how to purchase license'},
-                {"name": f'{self.command_string}license buy with_xlm',
-                 "value": 'Use Stellar Lumen (XLM) to buy monthly license '}
+                {"name": f':information_source: About License and Licensing System :information_source: ',
+                 "value": f'`{self.command_string}license about`'},
+                {"name": f':money_mouth: Price of  License :money_mouth: ',
+                 "value": f'`{self.command_string}license price`'},
+                {"name": f':vertical_traffic_light: license Status Check :vertical_traffic_light: ',
+                 "value": f'`{self.command_string}license status`'},
+                {"name": f':money_with_wings: Purchase License with XLM :money_with_wings: ',
+                 "value": f'`{self.command_string}license buy with_xlm`'}
+
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands)
 
@@ -247,7 +245,8 @@ class MerchantLicensingCommands(commands.Cog):
                             # Revert value to user and remove value from LPI wallet
                             stellar.update_stellar_balance_by_discord_id(discord_id=ctx.message.author.id,
                                                                          stroops=stroops, direction=1)
-                            self.backoffice.bot_manager.update_lpi_wallet_balance(amount=stroops, wallet='xlm', direction=0)
+                            self.backoffice.bot_manager.update_lpi_wallet_balance(amount=stroops, wallet='xlm',
+                                                                                  direction=0)
                             message = f" There has been an issue with the system. Please try again later. If " \
                                       f"the issue persists " \
                                       f"contact Crypto Link Staff. Thank you for your understanding."
