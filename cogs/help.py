@@ -208,6 +208,7 @@ class HelpCommands(commands.Cog):
                 {"name": f":satellite_orbital: About Uplink and Setup :satellite_orbital:  ",
                  "value": f"`{self.command_string}help owner uplink`"}
 
+
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -219,6 +220,7 @@ class HelpCommands(commands.Cog):
                                   description=' Commands to operate with the guilds own wallet',
                                   colour=discord.Color.blue())
         corp_info.add_field(name=':bar_chart: Obtain Statistics on Guild activity',
+
                             value=f'`{self.command_string}owner stats`',
                             inline=False)
         corp_info.add_field(name=':service_dog: Get status of activated services :service_dog:  ',
