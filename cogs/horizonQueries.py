@@ -6,7 +6,7 @@ from Merchant wallet to their won upon withdrawal.
 """
 
 from discord.ext import commands
-from discord import Embed, Color
+from discord import Embed, Colour
 from cogs.utils.customCogChecks import has_wallet
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
@@ -33,15 +33,38 @@ class HorizonAccessCommands(commands.Cog):
 
     @commands.group()
     @commands.check(has_wallet)
-    async def horizon(self,ctx):
-        pass
+    async def horizon(self, ctx):
+        """
+        Entry point for horizon queries
+        """
+
+        title = ':sunrise: __Stellar Horizon Commands__ :sunrise: '
+        description = 'Representation of all available commands available to interract with Stellar Horizon Network.'
+        list_of_commands = [
+            {"name": f':office_worker: Account commands :office_worker:',
+             "value": f'`{self.command_string}horizon account`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
+                                                destination=1, c=Colour.magenta())
 
     @horizon.group()
-    async def account(self,ctx):
-        pass
+    async def account(self, ctx):
+        title = ':office_worker: __Horizon Account Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Account*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f':new: Create New Account :new: ',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
+                                                destination=1, c=Colour.magenta())
 
     @account.command()
-    async def new(self, ctx):
+    async def create(self, ctx):
         """
         Creates new in-active account on Stellar Network
         """
@@ -50,7 +73,7 @@ class HorizonAccessCommands(commands.Cog):
             new_account = Embed(title=f':rocket: New Stellar Account Created :rocket:',
                                 description=f'You have successfully created new account on {details["network"]} '
                                             f'network.',
-                                colour=Color.lighter_gray()
+                                colour=Colour.lighter_gray()
                                 )
             new_account.add_field(name=f':map: Public Address :map: ',
                                   value=f'```{details["address"]}```',
