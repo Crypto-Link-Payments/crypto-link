@@ -15,6 +15,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/9fd3218417ba4c0db99701ce8aecfd13)](https://www.codacy.com/gh/launch-pad-investments/crypto-link/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=launch-pad-investments/crypto-link&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/launch-pad-investments/crypto-link/badge)](https://www.codefactor.io/repository/github/launch-pad-investments/crypto-link)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
+[![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/lovro@x-network.io)
 
 # About Crypto Link
 Crypto Link is a Discord multi functional bot. Built on top of Stellar, utilizing its native Stellar Lumen 
