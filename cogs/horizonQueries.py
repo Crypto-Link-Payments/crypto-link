@@ -21,7 +21,7 @@ CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 stellar_chain = StellarWallet()
 
 
-class HorizonExplorerCommands(commands.Cog):
+class HorizonAccessCommands(commands.Cog):
     """
     Discord Commands dealing with Merchant Licensing
     """
@@ -33,11 +33,11 @@ class HorizonExplorerCommands(commands.Cog):
 
     @commands.group()
     @commands.check(has_wallet)
-    async def horizon(self):
+    async def horizon(self,ctx):
         pass
 
-    @commands.group()
-    async def account(self):
+    @horizon.group()
+    async def account(self,ctx):
         pass
 
     @account.command()
@@ -50,18 +50,21 @@ class HorizonExplorerCommands(commands.Cog):
             new_account = Embed(title=f':rocket: New Stellar Account Created :rocket:',
                                 description=f'You have successfully created new account on {details["network"]} '
                                             f'network.',
+                                colour=Color.lighter_gray()
                                 )
             new_account.add_field(name=f':map: Public Address :map: ',
                                   value=f'```{details["address"]}```',
                                   inline=False)
             new_account.add_field(name=f':key: Secret :key: ',
-                                  value=f'```{details["secret"]}```')
+                                  value=f'```{details["secret"]}```',
+                                  inline=False)
             new_account.add_field(name=f':warning: Important Message:warning:',
                                   value=f'Please store/backup account details somewhere safe and delete this embed on'
                                         f' Discord. Exposure of Secret to any other entity or 3rd party application'
                                         f'might result in loss of funds. Crypto Link does not store details of newly'
                                         f' generate account nor can recover it. This message will self-destruct in '
-                                        f' 360 seconds.')
+                                        f' 360 seconds.',
+                                  inline=False)
             await ctx.author.send(embed=new_account, delete_after=360)
         else:
             message = f'New Stellar Account could not be created at this moment. Please try again later.'
@@ -82,4 +85,4 @@ class HorizonExplorerCommands(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(HorizonExplorerCommands(bot))
+    bot.add_cog(HorizonAccessCommands(bot))
