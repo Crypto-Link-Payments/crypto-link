@@ -57,7 +57,6 @@ class StellarWallet:
             return {}
 
     @staticmethod
-
     @staticmethod
     def __filter_error(result_code):
         if 'op_no_trust' in result_code:
@@ -231,3 +230,18 @@ class StellarWallet:
             return True
         except exceptions.NotFoundError:
             return False
+
+    def get_account_details(self, address: str):
+        data = self.server.accounts().account_id(account_id=address).call()
+        if 'status' not in data:
+            data.pop('_links')
+            data.pop('data')
+            data.pop('flags')
+            data.pop('sequence')
+            data.pop('subentry_count')
+            data.pop('thresholds')
+            data.pop('id')
+            data.pop('paging_token')
+            return data
+        else:
+            return {}
