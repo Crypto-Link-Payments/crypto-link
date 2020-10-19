@@ -37,6 +37,8 @@ class HelpCommands(commands.Cog):
                  "value": f"`{self.command_string}help transactions`"},
                 {"name": ":crown: Guild Owner Commands :crown:",
                  "value": f"`{self.command_string}help owner`"},
+                {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
+                 "value": f"`{self.command_string}help horizon`"},
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.blue())
@@ -82,7 +84,12 @@ class HelpCommands(commands.Cog):
                       f'or would like to get in touch with us, please write us on'
                       f' ***__cryptolinkpayments@gmail.com__***, open issue on Github or contact us directly over '
                       f'Discord Crypto Link Community.'},
-
+            {"name": ":sunrise: Queries to Horizon Network from Discord :sunrise: ",
+             "value": f'Crypto Link has integrated as well access to Horizon which is  client-facing API server for '
+                      f'the Stellar ecosystem. Discord Users can now query those API endpoints straight from Discord'
+                      f' with category of dedicated commands. For brief additional information initiate '
+                      f'`{self.command_string}help horizon` with the bot or jump straight into the experince as you go'
+                      f' with `{self.command_string}horizon`'},
             {"name": ":placard: Further information and links:placard: ",
              "value": f'[Homepage](https://cryptolink.carrd.co/) \n'
                       f'[Github](https://github.com/launch-pad-investments/crypto-link) \n'
@@ -207,7 +214,6 @@ class HelpCommands(commands.Cog):
                  "value": f"`{self.command_string}help owner merchant`"},
                 {"name": f":satellite_orbital: About Uplink and Setup :satellite_orbital:  ",
                  "value": f"`{self.command_string}help owner uplink`"}
-
 
             ]
 
