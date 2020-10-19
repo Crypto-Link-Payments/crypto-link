@@ -85,11 +85,11 @@ class HelpCommands(commands.Cog):
                       f' ***__cryptolinkpayments@gmail.com__***, open issue on Github or contact us directly over '
                       f'Discord Crypto Link Community.'},
             {"name": ":sunrise: Queries to Horizon Network from Discord :sunrise: ",
-             "value": f'Crypto Link has integrated as well access to Horizon which is  client-facing API server for '
-                      f'the Stellar ecosystem. Discord Users can now query those API endpoints straight from Discord'
-                      f' with category of dedicated commands. For brief additional information initiate '
-                      f'`{self.command_string}help horizon` with the bot or jump straight into the experince as you go'
-                      f' with `{self.command_string}horizon`'},
+             "value": f'Crypto Link has integrated as well access to Stellar Horizon which is  client-facing API server for '
+                      f'the Stellar ecosystem. Discord Users can now execute queries to it straight from Discord'
+                      f' through execution of specific Discord Commands. To find and familiarize yourself with Horizon'
+                      f' initiate `{self.command_string}help horizon` with the bot or jump straight into it '
+                      f' with `{self.command_string}horizon`.'},
             {"name": ":placard: Further information and links:placard: ",
              "value": f'[Homepage](https://cryptolink.carrd.co/) \n'
                       f'[Github](https://github.com/launch-pad-investments/crypto-link) \n'
@@ -297,6 +297,32 @@ class HelpCommands(commands.Cog):
 
         uplink_nfo.set_thumbnail(url=self.bot.user.avatar_url)
         await ctx.author.send(embed=uplink_nfo, delete_after=500)
+
+    @help.command(aliases=['hor', 'network'])
+    async def horizon(self, ctx):
+        """
+        Entry point for merchant system
+        """
+        horizon_info = discord.Embed(title=':sunrise: __ Stellar Horizon Access__ :sunrise:  ',
+                                     description='What is Horizon',
+                                     colour=Colour.lighter_gray())
+        horizon_info.add_field(name=':information_source:  About Horizon :information_source: ',
+                               value='Horizon is the client-facing API server for the Stellar ecosystem. It acts as '
+                                     'the interface between Stellar Core and applications that want to access the'
+                                     ' Stellar network. Horizon allows you to submit transactions to the network, '
+                                     'check the status of accounts, and subscribe to event streams. The goal'
+                                     ' of the Discord command over Crypto Link is to try to bridge as many API calls as'
+                                     ' possible and mimic the functions from '
+                                     '[Stellar Laboratory](https://laboratory.stellar.org/#?network=public) and '
+                                     'bring them to Discord Users.',
+                               inline=False)
+        horizon_info.add_field(name=':joystick:  Sections of commands :joystick: ',
+                               value=f'`{self.command_string}horizon` serving as an entry point has been '
+                                     f'broken down in multiple sub categories:\n'
+                                     f':one: `{self.command_string}horizon account`',
+                               inline=False)
+
+        await ctx.author.send(embed=horizon_info, delete_after=500)
 
     @owner.error
     async def owner_error_assistance(self, ctx, error):
