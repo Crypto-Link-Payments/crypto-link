@@ -11,6 +11,8 @@ sys.path.append(project_path)
 from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions, \
     ChangeTrust
 
+from stellar_sdk.exceptions import SdkError
+
 from utils.tools import Helpers
 
 
@@ -44,12 +46,17 @@ class StellarWallet:
         """
         Creates inactive stellar account which needs to be activated by depositing lumens
         """
-        key_pair = Keypair.random()
-        public_key = key_pair.public_key
-        private_key = key_pair.secret
-        return {f'address': f'{public_key}',
-                f'secret': f'{private_key}',
-                "network": 'testnet'}
+        try:
+            key_pair = Keypair.random()
+            public_key = key_pair.public_key
+            private_key = key_pair.secret
+            return {f'address': f'{public_key}',
+                    f'secret': f'{private_key}',
+                    "network": 'testnet'}
+        except SdkError:
+            return {}
+
+    @staticmethod
 
     @staticmethod
     def __filter_error(result_code):
