@@ -48,7 +48,8 @@ class StellarWallet:
         public_key = key_pair.public_key
         private_key = key_pair.secret
         return {f'address': f'{public_key}',
-                f'secret': f'{private_key}'}
+                f'secret': f'{private_key}',
+                "network": 'testnet'}
 
     @staticmethod
     def __filter_error(result_code):
