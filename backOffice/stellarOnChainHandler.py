@@ -40,6 +40,17 @@ class StellarWallet:
         return fee
 
     @staticmethod
+    def create_stellar_account():
+        """
+        Creates inactive stellar account which needs to be activated by depositing lumens
+        """
+        key_pair = Keypair.random()
+        public_key = key_pair.public_key
+        private_key = key_pair.secret
+        return {f'address': f'{public_key}',
+                f'secret': f'{private_key}'}
+
+    @staticmethod
     def __filter_error(result_code):
         if 'op_no_trust' in result_code:
             return 'no trust'
