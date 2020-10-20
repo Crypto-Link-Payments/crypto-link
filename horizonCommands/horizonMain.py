@@ -40,13 +40,45 @@ class HorizonAccessCommands(commands.Cog):
         Entry point for horizon queries
         """
 
-        title = ':sunrise: __Stellar Horizon Commands__ :sunrise: '
-        description = 'Representation of all available commands available to interract with Stellar Horizon Network.'
+        title = ':sunrise: __Stellar Horizon Access__ :sunrise: '
+        description = 'Available Stellar Laboratory commands over Discord.'
         list_of_commands = [
-            {"name": f':office_worker: Account commands :office_worker:',
-             "value": f'`{self.command_string}horizon account`'},
-            {"name": f':money_with_wings: Payments commands :money_with_wings:',
-             "value": f'`{self.command_string}horizon payments`'}
+            {"name": f':office_worker: Accounts :office_worker:',
+             "value": f'`{self.command_string}horizon accounts`'},
+
+            {"name": f':money_with_wings: Payments :money_with_wings:',
+             "value": f'`{self.command_string}horizon payments`'},
+
+            {"name": f':gem:  Assets :gem: ',
+             "value": f'`{self.command_string}horizon assets`'},
+
+            {"name": f':fireworks:  Effects :fireworks: ',
+             "value": f'`{self.command_string}horizon effects`'},
+
+            {"name": f':ledger:  Ledger :ledger: ',
+             "value": f'`{self.command_string}horizon ledger`'},
+
+            {"name": f':clipboard: Offers :clipboard: ',
+             "value": f'`{self.command_string}horizon offers`'},
+
+            {"name": f':wrench: Operations :wrench: ',
+             "value": f'`{self.command_string}horizon operations`'},
+
+            {"name": f':book: Order Book :book: ',
+             "value": f'`{self.command_string}horizon orderbook`'},
+
+            {"name": f':railway_track: Paths :railway_track: ',
+             "value": f'`{self.command_string}horizon paths`'},
+
+            {"name": f':bar_chart: Trade Aggregation :chart_with_upwards_trend: ',
+             "value": f'`{self.command_string}horizon aggregations`'},
+
+            {"name": f':chart_with_upwards_trend: Trades :chart_with_upwards_trend:',
+             "value": f'`{self.command_string}horizon trades`'},
+
+            {"name": f':incoming_envelope: Transactions :incoming_envelope: ',
+             "value": f'`{self.command_string}horizon Transactions`'}
+
         ]
 
         if ctx.invoked_subcommand is None:
@@ -60,9 +92,9 @@ class HorizonAccessCommands(commands.Cog):
                       'Stellar Horizon Server'
         list_of_commands = [
             {"name": f':new: Create New Account :new: ',
-             "value": f'`{self.command_string}horizon account create`'},
-            {"name": f':mag_right:  Query Account Details :mag_right:  ',
-             "value": f'`{self.command_string}horizon account create`'}
+             "value": f'`{self.command_string}accounts create`'},
+            {"name": f':new: Query Account Details :new: ',
+             "value": f'`{self.command_string}accounts get <Valid Stellar Address>`'}
         ]
 
         if ctx.invoked_subcommand is None:
@@ -90,6 +122,176 @@ class HorizonAccessCommands(commands.Cog):
 
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def assets(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def effects(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def ledger(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def offers(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def operations(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def orderbook(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def paths(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def tradeaggregation(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def trades(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @horizon.group()
+    async def transactions(self, ctx):
+        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f'',
+             "value": f''},
+            {"name": f'',
+             "value": f'`{self.command_string}horizon account create`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
     @horizon.error
