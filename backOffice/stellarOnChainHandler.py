@@ -11,7 +11,7 @@ sys.path.append(project_path)
 from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions, \
     ChangeTrust
 
-from stellar_sdk.exceptions import SdkError
+from stellar_sdk.exceptions import NotFoundError
 
 from utils.tools import Helpers
 
@@ -53,7 +53,7 @@ class StellarWallet:
             return {f'address': f'{public_key}',
                     f'secret': f'{private_key}',
                     "network": 'testnet'}
-        except SdkError:
+        except NotFoundError:
             return {}
 
     @staticmethod
