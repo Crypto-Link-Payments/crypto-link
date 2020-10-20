@@ -236,7 +236,6 @@ class StellarWallet:
         if 'status' not in data:
             data.pop('_links')
             data.pop('data')
-            data.pop('flags')
             data.pop('sequence')
             data.pop('subentry_count')
             data.pop('thresholds')
