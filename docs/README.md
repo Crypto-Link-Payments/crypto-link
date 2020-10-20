@@ -18,9 +18,44 @@
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/lovro@x-network.io)
 
 # About Crypto Link
-Crypto Link is a Discord multi functional bot. Built on top of Stellar, utilizing its native Stellar Lumen 
-(XLM) crypto currency and tokens issued on Stellar chain, allows for execution of peer-to-peer crypto transactions, 
- token ICOs/project promotions, and Discord community monetization opportunities. 
+Crypto Link is a multi-functional & multi-guild Discord bot serving as a bridge between the Stellar Ecosystem and 
+Discord users. Being built ontop of the Stellar Blockchain, it utilizes the native token, Stellar Lumen (a.k.a XLM) 
+and tokens issued on Stellar chain, allowing for execution of Peer to Peer transactions amongst users, monetization
+opportunities for Discord guild owners and project promotions/crowdfunding/ICOs activities at low costs for aspiring
+fintech-companies building with the help of Stellar.
+
+## Current Functionalities
+
+### :money_with_wings: Instant Peer to Peer feeless transactions :money_with_wings: 
+
+Users are able to execute instant peer-2-peer transactions without fees either with the Stellar native currency XLM or 
+integrated tokens. Currently system supports public and private off-chain transactions and on-chain deposits and 
+withdrawals
+
+### :convenience_store: Merchant system :convenience_store: 
+
+Discord Guild owners can monetize roles in various lengths and values and make them available for purchase. 
+Once role is purchased, Crypto Link will handle micro management tasks (role management, transfer of funds, 
+role monitoring and its removal uppon expiration) on its own, saving owners a lot of time.
+
+
+### :satellite_orbital: Crypto Link Up-Link system :satellite_orbital:
+
+Owners can as well set-up Up-Link which provides opportunity to monitor Crypto Link System activities. 
+Serving as an 'Network Explorer' users are able to see activities happening across other guilds who have integrated 
+the system
+
+### :postal_horn: ICO's and Project promotions :postal_horn:
+f'Integrated support for Stellar Native Crypto Currency and its tokens provides as well possibility for Crypto Link to 
+be utilized as one of the channels for running ICOs/Crowdfundings or simple project promotion activities. If you 
+would like to know more or would like to get in touch with us, please write us on
+ ***__cryptolinkpayments@gmail.com__***, open issue on Github or contact us directly over Discord Crypto Link Community.
+          
+### :sunrise: Queries to Horizon Network from Discord :sunrise:
+Crypto Link has integrated as well access to Stellar Horizon which is client-facing API server for the Stellar 
+ecosystem. Discord Users can now execute queries to it straight from Discord through execution of dedicated set of 
+Discord Commands.
+
 
 ## :scroll: License :scroll: 
 Crypto Link is an open-source project operating under the [GNU GENERAL PUBLIC LICENSE](https://github.com/launch-pad-investments/crypto-link/blob/master/LICENSE).
