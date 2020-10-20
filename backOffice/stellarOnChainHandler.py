@@ -251,7 +251,7 @@ class StellarWallet:
         Get payments based on account address
         """
         data = self.server.payments().for_account(account_id=address).include_failed(False).order(
-            desc=True).limit(limit=1).call()
+            desc=True).limit(limit=200).call()
         return data
 
     def get_payments_ledger(self, ledger_sequence: int):
