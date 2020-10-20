@@ -34,15 +34,15 @@ class HorizonAccounts(commands.Cog):
         self.command_string = bot.get_command_str()
 
     @commands.group()
-    async def account(self, ctx):
+    async def accounts(self, ctx):
         title = ':office_worker: __Horizon Account Operations__ :office_worker:'
         description = 'Representation of all available commands available to interact with ***Account*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
             {"name": f':new: Create New Account :new: ',
-             "value": f'`{self.command_string}account create`'},
-            {"name": f':new: Create New Account :new: ',
-             "value": f'`{self.command_string}account get <Valid Stellar Address>`'}
+             "value": f'`{self.command_string}accounts create`'},
+            {"name": f':new: Query Account Details :new: ',
+             "value": f'`{self.command_string}accounts get <Valid Stellar Address>`'}
         ]
 
         if ctx.invoked_subcommand is None:
@@ -50,7 +50,7 @@ class HorizonAccounts(commands.Cog):
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @account.command()
+    @accounts.command()
     async def create(self, ctx):
         """
         Creates new in-active account on Stellar Network
@@ -81,7 +81,7 @@ class HorizonAccounts(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
-    @account.command(aliases=["get"])
+    @accounts.command(aliases=["get"])
     async def details(self, ctx, address: str):
         """
         Query details for specific public address
@@ -149,7 +149,7 @@ class HorizonAccounts(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
-    @account.error
+    @accounts.error
     async def asset_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to user Stellar Expert Commands you need to have wallet registered in the system!. Use' \
