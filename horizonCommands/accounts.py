@@ -72,8 +72,7 @@ class HorizonAccounts(commands.Cog):
                                   value=f'Please store/backup account details somewhere safe and delete this embed on'
                                         f' Discord. Exposure of Secret to any other entity or 3rd party application'
                                         f'might result in loss of funds. Crypto Link does not store details of newly'
-                                        f' generate account nor can recover it. This message will self-destruct in '
-                                        f' 360 seconds.',
+                                        f' generate accounts nor can recover it.',
                                   inline=False)
             await ctx.author.send(embed=new_account, delete_after=360)
         else:
