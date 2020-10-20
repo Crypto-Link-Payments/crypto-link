@@ -57,3 +57,13 @@ Returns information on available sub-commands
 ```text
 !payments address <Valis Stellar Public Address>
 ```
+
+### Query Payments by Ledger Number
+```text
+!payments ledger <Ledger Number>
+```
+
+### Query Payments by Transaction Hash
+```text
+!payments transaction <transaction hash>
+```
