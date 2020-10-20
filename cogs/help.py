@@ -319,7 +319,8 @@ class HelpCommands(commands.Cog):
         horizon_info.add_field(name=':joystick:  Sections of commands :joystick: ',
                                value=f'`{self.command_string}horizon` serving as an entry point has been '
                                      f'broken down in multiple sub categories:\n'
-                                     f':one: `{self.command_string}horizon account`',
+                                     f':one: `{self.command_string}horizon account`\n'
+                                     f':two: `{self.command_string}horizon payments`',
                                inline=False)
 
         await ctx.author.send(embed=horizon_info, delete_after=500)
