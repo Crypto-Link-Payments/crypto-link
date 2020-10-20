@@ -231,8 +231,8 @@ class StellarWallet:
             return False
 
     def get_account_details(self, address: str):
-        data = self.server.accounts().account_id(account_id=address).call()
-        if 'status' not in data:
+        try:
+            data = self.server.accounts().account_id(account_id=address).call()
             data.pop('_links')
             data.pop('data')
             data.pop('sequence')
@@ -241,8 +241,9 @@ class StellarWallet:
             data.pop('id')
             data.pop('paging_token')
             return data
-        else:
-            return {}
+        except NotFoundError:
+            return None
+
 
     def get_payments_account(self, address: str):
         """
