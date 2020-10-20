@@ -44,7 +44,9 @@ class HorizonAccessCommands(commands.Cog):
         description = 'Representation of all available commands available to interract with Stellar Horizon Network.'
         list_of_commands = [
             {"name": f':office_worker: Account commands :office_worker:',
-             "value": f'`{self.command_string}horizon account`'}
+             "value": f'`{self.command_string}horizon account`'},
+            {"name": f':money_with_wings: Payments commands :money_with_wings:',
+             "value": f'`{self.command_string}horizon payments`'}
         ]
 
         if ctx.invoked_subcommand is None:
@@ -64,7 +66,8 @@ class HorizonAccessCommands(commands.Cog):
         ]
 
         if ctx.invoked_subcommand is None:
-            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
     @account.command()
@@ -161,6 +164,65 @@ class HorizonAccessCommands(commands.Cog):
             message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
+
+    @account.group()
+    async def payments(self, ctx):
+        """
+        End points for payments
+        """
+        title = ':money_with_wings:  __Horizon Payments Operations__ :money_with_wings: '
+        description = 'Representation of all available commands available to interact with ***Payments*** Endpoint on ' \
+                      'Stellar Horizon Server. All commands return last 3 transactions done on account, and explorer' \
+                      ' link to access older transactions.'
+        list_of_commands = [
+            {"name": f':map: Get payments by public address :map: ',
+             "value": f'`{self.command_string}horizon account payments address <address>`'},
+            {"name": f':ledger:  Get payments based on ledger sequence :ledger:   ',
+             "value": f'`{self.command_string}horizon account payments ledger <ledger sequence>``'},
+            {"name": f':hash:  Get payments based on transaction hash :hash:',
+             "value": f'`{self.command_string}horizon account payments transaction <hash of transaction>``'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @payments.command()
+    async def address(self, address: str, limit: int = None, pagging_token: int = None):
+        """
+        {'_embedded': {'records': [{'_links': {'effects': {'href': 'https://horizon-testnet.stellar.org/operations/5592159088562177/effects'},
+                                   'precedes': {'href': 'https://horizon-testnet.stellar.org/effects?order=asc&cursor=5592159088562177'},
+                                   'self': {'href': 'https://horizon-testnet.stellar.org/operations/5592159088562177'},
+                                   'succeeds': {'href': 'https://horizon-testnet.stellar.org/effects?order=desc&cursor=5592159088562177'},
+                                   'transaction': {'href': 'https://horizon-testnet.stellar.org/transactions/e903c3191252d87996563cd7e16f2abffda20a15945b84e9b27e783ce15b8da2'}},
+                        'amount': '100.0000000',
+                        'asset_code': 'CLT',
+                        'asset_issuer': 'GAFYI3RFYQHCEUI73OOY5AO7CIODZ4ZEXON72THANN5M3L5CUNK24E3G',
+                        'asset_type': 'credit_alphanum4',
+                        'created_at': '2020-10-19T12:31:22Z',
+                        'from': 'GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO',
+                        'id': '5592159088562177',
+                        'paging_token': '5592159088562177',
+                        'source_account': 'GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO',
+                        'to': 'GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7',
+                        'transaction_hash': 'e903c3191252d87996563cd7e16f2abffda20a15945b84e9b27e783ce15b8da2',
+                        'transaction_successful': True,
+                        'type': 'payment',
+                        'type_i': 1}]},
+'_links': {'next': {'href': 'https://horizon-testnet.stellar.org/accounts/GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO/payments?cursor=5592159088562177&include_failed=false&limit=1&order=desc'},
+        'prev': {'href': 'https://horizon-testnet.stellar.org/accounts/GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO/payments?cursor=5592159088562177&include_failed=false&limit=1&order=asc'},
+        'self': {'href': 'https://horizon-testnet.stellar.org/accounts/GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO/payments?cursor=&include_failed=false&limit=1&order=desc'}}}
+        """
+
+        pass
+
+    @payments.command()
+    async def ledger(self, address: str, ledger: int):
+        pass
+
+    @payments.command()
+    async def transaction(self, address: str, limit: int = None, transaction_hash: int = None):
+        pass
 
     @horizon.error
     async def asset_error(self, ctx, error):
