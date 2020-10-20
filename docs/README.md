@@ -55,6 +55,7 @@ experience.
 - [Initiate Merchant as Guild owner](MERCHANTCOMMANDS.md)
 - [Crypto Link Uplink Setup as Guild owner](MERCHANTCOMMANDS.md)
 - [Help Commands](HELPCMDS.md)
+- [Horizon Queries from Discord](HORIZON.md)
 - [Complete System Command list](COMMANDMAP.md)
 
 ## :loudspeaker: Running ICO or Promotion with Crypto Link :loudspeaker:
