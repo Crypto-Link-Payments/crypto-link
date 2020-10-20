@@ -39,7 +39,7 @@ Once role is purchased, Crypto Link will handle micro management tasks (role man
 role monitoring and its removal uppon expiration) on its own, saving owners a lot of time.
 
 
-### :satellite_orbital: Crypto Link Up-Link system :satellite_orbital:
+### :satellite: Crypto Link Up-Link system :satellite:
 
 Owners can as well set-up Up-Link which provides opportunity to monitor Crypto Link System activities. 
 Serving as an 'Network Explorer' users are able to see activities happening across other guilds who have integrated 
