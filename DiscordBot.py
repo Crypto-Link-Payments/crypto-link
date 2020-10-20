@@ -11,7 +11,8 @@ extensions = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
               'cogs.system', 'cogs.withdrawals',
               'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.licensing', 'cogs.guildOwners',
               'horizonCommands.horizonMain',
-              'horizonCommands.accounts']
+              'horizonCommands.accounts',
+              'horizonCommands.payments']
 
 
 class DiscordBot(commands.Bot):
