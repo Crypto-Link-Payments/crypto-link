@@ -10,6 +10,8 @@ from discord import Embed, Colour
 from cogs.utils.customCogChecks import has_wallet
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
+
+from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
 
 custom_messages = CustomMessages()
@@ -56,6 +58,8 @@ class HorizonAccessCommands(commands.Cog):
                       'Stellar Horizon Server'
         list_of_commands = [
             {"name": f':new: Create New Account :new: ',
+             "value": f'`{self.command_string}horizon account create`'},
+            {"name": f':mag_right:  Query Account Details :mag_right:  ',
              "value": f'`{self.command_string}horizon account create`'}
         ]
 
@@ -95,8 +99,64 @@ class HorizonAccessCommands(commands.Cog):
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
     @account.command()
-    async def details(self, ctx):
-        pass
+    async def details(self, ctx, address: str):
+        """
+        Query details for specific public address
+        """
+
+        if check_stellar_address(address=address):
+            data = self.backoffice.stellar_wallet.get_account_details(address=address)
+            signers_data = ', '.join(
+                [f':map:: {sig["key"]}\n:key::{sig["type"]}\n:scales::{sig["weight"]}\n=========\n' for sig in
+                 data["signers"]])
+
+            acc_details = Embed(title=':mag_right: Details for Stellar Account :mag_right: ',
+                                description=f'Last Activity {data["last_modified_time"]}',
+                                colour=Colour.lighter_gray())
+            acc_details.add_field(name=':map: Account Address :map: ',
+                                  value=f'```{data["account_id"]}```',
+                                  inline=False)
+            acc_details.add_field(name=':pen_fountain: Account Signers :pen_fountain: ',
+                                  value=signers_data,
+                                  inline=False)
+            acc_details.add_field(name=':pen_fountain:Sponsorship Activity :pen_fountain: ',
+                                  value=f':money_mouth: {data["num_sponsored"]} (sponsored)\n'
+                                        f':money_with_wings: {data["num_sponsoring"]} (sponsoring) ',
+                                  inline=False)
+
+            for coin in data["balances"]:
+                if not coin.get('asset_code'):
+                    acc_details.add_field(name=f' :moneybag: Balance :moneybag:',
+                                          value=f'{coin["balance"]} {CONST_STELLAR_EMOJI}',
+                                          inline=False)
+                    acc_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
+                                          value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
+                                                f'Selling Liabilities: {coin["selling_liabilities"]}',
+                                          inline=False)
+                else:
+                    asset_details = Embed(title=f':coin: Details for asset {coin["asset_code"]} :coin:',
+                                          description=f'Last Activity on {data["last_modified_time"]}'
+                                                      f' (Ledger:{data["last_modified_ledger"]}',
+                                          colour=Colour.lighter_gray())
+                    asset_details.add_field(name=f':map: Issuer Address :map: ',
+                                            value=f'```{coin["asset_issuer"]}```',
+                                            inline=False)
+                    asset_details.add_field(name=f' :moneybag: Balance :moneybag:',
+                                            value=f'`{coin["balance"]} {coin["asset_code"]}`',
+                                            inline=False)
+                    asset_details.add_field(name=f':handshake: Trustline Status :handshake: ',
+                                            value=f'Authorizer: {coin["is_authorized"]}\n'
+                                                  f'Maintain Liabilities: {coin["is_authorized_to_maintain_liabilities"]}',
+                                            inline=False)
+                    acc_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
+                                          value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
+                                                f'Selling Liabilities: {coin["selling_liabilities"]}',
+                                          inline=False)
+                await ctx.author.send(embed=acc_details)
+        else:
+            message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
 
     @horizon.error
     async def asset_error(self, ctx, error):
