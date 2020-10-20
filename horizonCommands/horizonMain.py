@@ -49,13 +49,13 @@ class HorizonAccessCommands(commands.Cog):
             {"name": f':money_with_wings: Payments :money_with_wings:',
              "value": f'`{self.command_string}horizon payments`'},
 
-            {"name": f':gem:  Assets :gem: ',
+            {"name": f':gem: Assets :gem: ',
              "value": f'`{self.command_string}horizon assets`'},
 
-            {"name": f':fireworks:  Effects :fireworks: ',
+            {"name": f':fireworks: Effects :fireworks: ',
              "value": f'`{self.command_string}horizon effects`'},
 
-            {"name": f':ledger:  Ledger :ledger: ',
+            {"name": f':ledger: Ledger :ledger: ',
              "value": f'`{self.command_string}horizon ledger`'},
 
             {"name": f':clipboard: Offers :clipboard: ',
