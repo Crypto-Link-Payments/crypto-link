@@ -181,7 +181,7 @@ class HelpCommands(commands.Cog):
         description = "Bellow are presented all currencies available for P2P transactions"
         list_of_values = [
             {"name": ":credit_card: Get balance information :credit_card: ",
-             "value": f"`{self.command_string}acc`"},
+             "value": f"`{self.command_string}me`"},
             {"name": ":moneybag: Access wallet commands :moneybag: ",
              "value": f"`{self.command_string}wallet`"},
             {"name": " :woman_technologist: Get full account balance report :woman_technologist:  ",
