@@ -51,7 +51,7 @@ class HorizonAccessCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @horizon.group()
+    @horizon.group(aliases=['acc'])
     async def account(self, ctx):
         title = ':office_worker: __Horizon Account Operations__ :office_worker:'
         description = 'Representation of all available commands available to interact with ***Account*** Endpoint on ' \
@@ -98,7 +98,7 @@ class HorizonAccessCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
-    @account.command()
+    @account.command(aliases=["get"])
     async def details(self, ctx, address: str):
         """
         Query details for specific public address
@@ -106,33 +106,34 @@ class HorizonAccessCommands(commands.Cog):
 
         if check_stellar_address(address=address):
             data = self.backoffice.stellar_wallet.get_account_details(address=address)
-            signers_data = ', '.join(
-                [f':map:: {sig["key"]}\n:key::{sig["type"]}\n:scales::{sig["weight"]}\n=========\n' for sig in
-                 data["signers"]])
 
-            acc_details = Embed(title=':mag_right: Details for Stellar Account :mag_right: ',
-                                description=f'Last Activity {data["last_modified_time"]}',
-                                colour=Colour.lighter_gray())
-            acc_details.add_field(name=':map: Account Address :map: ',
-                                  value=f'```{data["account_id"]}```',
-                                  inline=False)
-            acc_details.add_field(name=':pen_fountain: Account Signers :pen_fountain: ',
-                                  value=signers_data,
-                                  inline=False)
-            acc_details.add_field(name=':pen_fountain:Sponsorship Activity :pen_fountain: ',
-                                  value=f':money_mouth: {data["num_sponsored"]} (sponsored)\n'
-                                        f':money_with_wings: {data["num_sponsoring"]} (sponsoring) ',
-                                  inline=False)
-
-            for coin in data["balances"]:
+            for coin in reversed(data["balances"]):
                 if not coin.get('asset_code'):
+                    signers_data = ', '.join(
+                        [f'`{sig["key"]}`' for sig in
+                         data["signers"]])
+
+                    acc_details = Embed(title=':mag_right: Details for Stellar Account :mag_right: ',
+                                        description=f'Last Activity {data["last_modified_time"]}',
+                                        colour=Colour.lighter_gray())
+                    acc_details.add_field(name=':map: Account Address :map: ',
+                                          value=f'```{data["account_id"]}```',
+                                          inline=False)
+                    acc_details.add_field(name=':pen_fountain: Account Signers :pen_fountain: ',
+                                          value=signers_data,
+                                          inline=False)
+                    acc_details.add_field(name=' :genie: Sponsorship Activity :genie:',
+                                          value=f':money_mouth: {data["num_sponsored"]} (sponsored)\n'
+                                                f':money_with_wings: {data["num_sponsoring"]} (sponsoring) ',
+                                          inline=False)
                     acc_details.add_field(name=f' :moneybag: Balance :moneybag:',
-                                          value=f'{coin["balance"]} {CONST_STELLAR_EMOJI}',
+                                          value=f'{coin["balance"]} XLM',
                                           inline=False)
                     acc_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
                                           value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
                                                 f'Selling Liabilities: {coin["selling_liabilities"]}',
                                           inline=False)
+                    await ctx.author.send(embed=acc_details)
                 else:
                     asset_details = Embed(title=f':coin: Details for asset {coin["asset_code"]} :coin:',
                                           description=f'Last Activity on {data["last_modified_time"]}'
@@ -148,11 +149,14 @@ class HorizonAccessCommands(commands.Cog):
                                             value=f'Authorizer: {coin["is_authorized"]}\n'
                                                   f'Maintain Liabilities: {coin["is_authorized_to_maintain_liabilities"]}',
                                             inline=False)
-                    acc_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
-                                          value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
-                                                f'Selling Liabilities: {coin["selling_liabilities"]}',
-                                          inline=False)
-                await ctx.author.send(embed=acc_details)
+                    asset_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
+                                            value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
+                                                  f'Selling Liabilities: {coin["selling_liabilities"]}',
+                                            inline=False)
+                    asset_details.add_field(name=':chains: Trustline links :chains: ',
+                                            value=f'[Issuer Details](https://stellar.expert/explorer/testnet/account/{coin["asset_issuer"]}?order=desc)\n'
+                                                  f'[Asset Details](https://stellar.expert/explorer/testnet/asset/{coin["asset_code"]}-{coin["asset_issuer"]}?order=desc)')
+                    await ctx.author.send(embed=asset_details)
         else:
             message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
