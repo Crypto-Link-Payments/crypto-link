@@ -173,7 +173,7 @@ class HorizonAccessCommands(commands.Cog):
         title = ':money_with_wings:  __Horizon Payments Operations__ :money_with_wings: '
         description = 'Representation of all available commands available to interact with ***Payments*** Endpoint on ' \
                       'Stellar Horizon Server. All commands return last 3 transactions done on account, and explorer' \
-                      ' link to access older transactions.'
+                      ' link to access older transactions. All transactions are returned in descending order.'
         list_of_commands = [
             {"name": f':map: Get payments by public address :map: ',
              "value": f'`{self.command_string}horizon account payments address <address>`'},
@@ -188,33 +188,66 @@ class HorizonAccessCommands(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @payments.command()
-    async def address(self, address: str, limit: int = None, pagging_token: int = None):
-        """
-        {'_embedded': {'records': [{'_links': {'effects': {'href': 'https://horizon-testnet.stellar.org/operations/5592159088562177/effects'},
-                                   'precedes': {'href': 'https://horizon-testnet.stellar.org/effects?order=asc&cursor=5592159088562177'},
-                                   'self': {'href': 'https://horizon-testnet.stellar.org/operations/5592159088562177'},
-                                   'succeeds': {'href': 'https://horizon-testnet.stellar.org/effects?order=desc&cursor=5592159088562177'},
-                                   'transaction': {'href': 'https://horizon-testnet.stellar.org/transactions/e903c3191252d87996563cd7e16f2abffda20a15945b84e9b27e783ce15b8da2'}},
-                        'amount': '100.0000000',
-                        'asset_code': 'CLT',
-                        'asset_issuer': 'GAFYI3RFYQHCEUI73OOY5AO7CIODZ4ZEXON72THANN5M3L5CUNK24E3G',
-                        'asset_type': 'credit_alphanum4',
-                        'created_at': '2020-10-19T12:31:22Z',
-                        'from': 'GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO',
-                        'id': '5592159088562177',
-                        'paging_token': '5592159088562177',
-                        'source_account': 'GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO',
-                        'to': 'GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7',
-                        'transaction_hash': 'e903c3191252d87996563cd7e16f2abffda20a15945b84e9b27e783ce15b8da2',
-                        'transaction_successful': True,
-                        'type': 'payment',
-                        'type_i': 1}]},
-'_links': {'next': {'href': 'https://horizon-testnet.stellar.org/accounts/GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO/payments?cursor=5592159088562177&include_failed=false&limit=1&order=desc'},
-        'prev': {'href': 'https://horizon-testnet.stellar.org/accounts/GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO/payments?cursor=5592159088562177&include_failed=false&limit=1&order=asc'},
-        'self': {'href': 'https://horizon-testnet.stellar.org/accounts/GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO/payments?cursor=&include_failed=false&limit=1&order=desc'}}}
-        """
+    async def address(self, ctx, address: str):
+        if check_stellar_address(address=address):
+            data = self.backoffice.stellar_wallet.get_payments_account(address=address)
 
-        pass
+            payment_details = Embed(title=':mag_right: Payments for Stellar Account :mag_right: ',
+                                    colour=Colour.lighter_gray())
+            payment_details.add_field(name=':map: Account Address :map: ',
+                                      value=f'```{data["account_id"]}```',
+                                      inline=False)
+            payment_details.add_field(name=f'Complete List of Payments',
+                                      value=f'{data["_links"]["self"]}')
+            await ctx.author.send(embed=payment_details)
+
+            payments = data["_embedded"]["records"]
+
+            for p in payments:
+                if p['to'] == address:
+                    c = Colour.green()
+                else:
+                    c = Colour.red()
+
+                payment_info = Embed(title=f'Operation Details',
+                                     colour=c)
+                payment_info.set_author(name=f':id: {p["id"]}')
+                payment_info.add_field(name=f'Operation Type',
+                                       value=f'`{p["type"]}`')
+                payment_info.add_field(name=f'Date and time',
+                                       value=f'`{p["created_at"]}`')
+                payment_info.add_field(name=f'Paging Token',
+                                       value=f'{p["paging_token"]}',
+                                       inline=False)
+                payment_info.add_field(name='From',
+                                       value=f'```{p["from"]}```',
+                                       inline=False)
+                payment_info.add_field(name='To',
+                                       value=f'```{p["to"]}```',
+                                       inline=False)
+                payment_info.add_field(name=f'Transaction Hash',
+                                       value=f'`{p["transaction_hash"]}`')
+                payment_info.add_field(name=f'Explorer Link',
+                                       value=f'{p["_links"]["transaction"]["href"]}')
+
+                if not p.get('asset_code'):
+                    payment_info.add_field(name='Amount',
+                                           value=f'```{p["amount"]} XLM```',
+                                           inline=False)
+
+                else:
+                    payment_info.add_field(name='Asset Issuer',
+                                           value=f'```{p["asset_issuer"]}```',
+                                           inline=False)
+                    payment_info.add_field(name='Amount',
+                                           value=f'```{p["amount"]} {p["asset_code"]}```',
+                                           inline=False)
+
+                await ctx.author.send(embed=payment_info)
+        else:
+            message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
 
     @payments.command()
     async def ledger(self, address: str, ledger: int):
