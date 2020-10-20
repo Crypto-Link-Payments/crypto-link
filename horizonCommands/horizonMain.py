@@ -93,7 +93,7 @@ class HorizonAccessCommands(commands.Cog):
         list_of_commands = [
             {"name": f':new: Create New Account :new: ',
              "value": f'`{self.command_string}accounts create`'},
-            {"name": f':new: Query Account Details :new: ',
+            {"name": f':mag_right: Query Account Details :mag_right:',
              "value": f'`{self.command_string}accounts get <Valid Stellar Address>`'}
         ]
 
