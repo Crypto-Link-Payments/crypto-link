@@ -245,3 +245,27 @@ class StellarWallet:
             return data
         else:
             return {}
+
+    def get_payments_account(self, address: str):
+        """
+        Get payments based on account address
+        """
+        data = self.server.payments().for_account(account_id=address).include_failed(False).order(
+            desc=True).limit(limit=1).call()
+        return data
+
+    def get_payments_ledger(self, ledger_sequence: int):
+        """
+        Get payments based on ledger sequence
+        """
+        data = self.server.payments().for_ledger(sequence=ledger_sequence).include_failed(False).order(
+            desc=True).limit(limit=1).call()
+        return data
+
+    def get_payments_for_tx(self, transaction_hash: str):
+        """
+        Get payments based on ledger sequence
+        """
+        data = self.server.payments().for_transaction(transaction_hash=transaction_hash).include_failed(False).order(
+            desc=True).limit(limit=1).call()
+        return data
