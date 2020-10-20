@@ -47,10 +47,16 @@ class HorizonPayments(commands.Cog):
         payments = data["_embedded"]["records"]
 
         for p in payments:
-            if p['to'] == p["source_account"]:
-                c = Colour.green()
+            # Check if transaction type is payment
+            if p["type"] == 'payment':
+                # Check if transaction was incoming or outgoing
+                if p['to'] == p["source_account"]:
+                    c = Colour.green()
+                else:
+                    c = Colour.red()
             else:
-                c = Colour.red()
+                # Some other account action has been done
+                c = Colour.purple()
 
             payment_info = Embed(title=f'Operation Details',
                                  colour=c)
