@@ -33,6 +33,61 @@ class HorizonPayments(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
+    @staticmethod
+    async def process_server_response(ctx, data):
+        payment_details = Embed(title=':mag_right: Payments for Stellar Account :mag_right: ',
+                                colour=Colour.lighter_gray())
+        payment_details.add_field(name=':map: Account Address :map: ',
+                                  value=f'```{data["account_id"]}```',
+                                  inline=False)
+        payment_details.add_field(name=f'Complete List of Payments',
+                                  value=f'{data["_links"]["self"]}')
+        await ctx.author.send(embed=payment_details)
+
+        payments = data["_embedded"]["records"]
+
+        for p in payments:
+            if p['to'] == address:
+                c = Colour.green()
+            else:
+                c = Colour.red()
+
+            payment_info = Embed(title=f'Operation Details',
+                                 colour=c)
+            payment_info.set_author(name=f':id: {p["id"]}')
+            payment_info.add_field(name=f'Operation Type',
+                                   value=f'`{p["type"]}`')
+            payment_info.add_field(name=f'Date and time',
+                                   value=f'`{p["created_at"]}`')
+            payment_info.add_field(name=f'Paging Token',
+                                   value=f'{p["paging_token"]}',
+                                   inline=False)
+            payment_info.add_field(name='From',
+                                   value=f'```{p["from"]}```',
+                                   inline=False)
+            payment_info.add_field(name='To',
+                                   value=f'```{p["to"]}```',
+                                   inline=False)
+            payment_info.add_field(name=f'Transaction Hash',
+                                   value=f'`{p["transaction_hash"]}`')
+            payment_info.add_field(name=f'Explorer Link',
+                                   value=f'{p["_links"]["transaction"]["href"]}')
+
+            if not p.get('asset_code'):
+                payment_info.add_field(name='Amount',
+                                       value=f'```{p["amount"]} XLM```',
+                                       inline=False)
+
+            else:
+                payment_info.add_field(name='Asset Issuer',
+                                       value=f'```{p["asset_issuer"]}```',
+                                       inline=False)
+                payment_info.add_field(name='Amount',
+                                       value=f'```{p["amount"]} {p["asset_code"]}```',
+                                       inline=False)
+
+            await ctx.author.send(embed=payment_info)
+
     @commands.group()
     @commands.check(has_wallet)
     async def payments(self, ctx):
@@ -59,78 +114,35 @@ class HorizonPayments(commands.Cog):
     @payments.command()
     async def address(self, ctx, address: str):
         if check_stellar_address(address=address):
-            data = self.backoffice.stellar_wallet.get_payments_account(address=address)
-
-            payment_details = Embed(title=':mag_right: Payments for Stellar Account :mag_right: ',
-                                    colour=Colour.lighter_gray())
-            payment_details.add_field(name=':map: Account Address :map: ',
-                                      value=f'```{data["account_id"]}```',
-                                      inline=False)
-            payment_details.add_field(name=f'Complete List of Payments',
-                                      value=f'{data["_links"]["self"]}')
-            await ctx.author.send(embed=payment_details)
-
-            payments = data["_embedded"]["records"]
-
-            for p in payments:
-                if p['to'] == address:
-                    c = Colour.green()
-                else:
-                    c = Colour.red()
-
-                payment_info = Embed(title=f'Operation Details',
-                                     colour=c)
-                payment_info.set_author(name=f':id: {p["id"]}')
-                payment_info.add_field(name=f'Operation Type',
-                                       value=f'`{p["type"]}`')
-                payment_info.add_field(name=f'Date and time',
-                                       value=f'`{p["created_at"]}`')
-                payment_info.add_field(name=f'Paging Token',
-                                       value=f'{p["paging_token"]}',
-                                       inline=False)
-                payment_info.add_field(name='From',
-                                       value=f'```{p["from"]}```',
-                                       inline=False)
-                payment_info.add_field(name='To',
-                                       value=f'```{p["to"]}```',
-                                       inline=False)
-                payment_info.add_field(name=f'Transaction Hash',
-                                       value=f'`{p["transaction_hash"]}`')
-                payment_info.add_field(name=f'Explorer Link',
-                                       value=f'{p["_links"]["transaction"]["href"]}')
-
-                if not p.get('asset_code'):
-                    payment_info.add_field(name='Amount',
-                                           value=f'```{p["amount"]} XLM```',
-                                           inline=False)
-
-                else:
-                    payment_info.add_field(name='Asset Issuer',
-                                           value=f'```{p["asset_issuer"]}```',
-                                           inline=False)
-                    payment_info.add_field(name='Amount',
-                                           value=f'```{p["amount"]} {p["asset_code"]}```',
-                                           inline=False)
-
-                await ctx.author.send(embed=payment_info)
+            data = self.backoffice.stellar_wallet.get_payments_for_account(address=address)
+            await self.process_server_response(ctx, data=data)
         else:
             message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
     @payments.command()
-    async def ledger(self, address: str, ledger: int):
-        pass
+    async def ledger(self, ctx, ledger: int):
+        data = self.backoffice.stellar_wallet.get_payments_for_ledger(ledger_sequence=ledger)
+        await self.process_server_response(ctx, data=data)
 
-    @payments.command()
-    async def transaction(self, address: str, limit: int = None, transaction_hash: int = None):
-        pass
+    @payments.command(aliases=["tx"])
+    async def transaction(self, ctx, transaction_hash: str):
+        data = self.backoffice.stellar_wallet.get_payments_for_tx(transaction_hash=transaction_hash)
+        await self.process_server_response(ctx, data=data)
 
     @payments.error
     async def asset_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to user Stellar Expert Commands you need to have wallet registered in the system!. Use' \
                       f' `{self.command_string}register`'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
+
+    @ledger.error
+    async def ledger_error(self, ctx, error):
+        if isinstance(error,commands.BadArgument):
+            message = f'Ledger ID is constructed only with numbers.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 

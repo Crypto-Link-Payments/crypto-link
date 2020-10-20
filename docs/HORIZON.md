@@ -24,7 +24,11 @@ Returns all available commands to be used by users willing to make queries to th
 !horizon
 ```
 
-## Horizon Accounts endpoint
+## Horizon Accounts Endpoint
+Returns information on available sub-commands
+```text
+!accounts
+```
 
 ### Create on-chain account
 ```text
@@ -32,8 +36,24 @@ Returns all available commands to be used by users willing to make queries to th
 ```
 
 ### Query Accounts
+Returns the details on balances and account settings
 ```text
 !accounts get <Valid Stellar Public Address>
 ```
 Note: In order for account to be found it needs to be activate with XLM.
 
+## Horizon Payments Endpoint
+```text
+!payments
+```
+
+## Horizon Payments Endpoint
+Returns information on available sub-commands
+```text
+!payments
+```
+
+### Query Payments by Address
+```text
+!payments address <Valis Stellar Public Address>
+```
