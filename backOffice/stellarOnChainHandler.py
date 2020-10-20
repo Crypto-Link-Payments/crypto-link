@@ -57,7 +57,6 @@ class StellarWallet:
             return {}
 
     @staticmethod
-    @staticmethod
     def __filter_error(result_code):
         if 'op_no_trust' in result_code:
             return 'no trust'
