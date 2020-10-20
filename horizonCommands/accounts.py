@@ -57,9 +57,11 @@ class HorizonAccounts(commands.Cog):
         """
         details = stellar_chain.create_stellar_account()
         if details:
-            new_account = Embed(title=f':rocket: New Stellar Account Created :rocket:',
-                                description=f'You have successfully created new account on {details["network"]} '
-                                            f'network.',
+            new_account = Embed(title=f':new: Stellar Testnet Account Created :new:',
+                                description=f'You have successfully created new account on {details["network"]}. Do'
+                                            f' not deposit real XLM as this account has been created on testnet. '
+                                            f'Head to [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test)'
+                                            f' and use Friend bot to activate account',
                                 colour=Colour.lighter_gray()
                                 )
             new_account.add_field(name=f':map: Public Address :map: ',
@@ -76,11 +78,11 @@ class HorizonAccounts(commands.Cog):
                                   inline=False)
             await ctx.author.send(embed=new_account, delete_after=360)
         else:
-            message = f'New Stellar Account could not be created at this moment. Please try again later.'
+            message = f'New Stellar Account could not be created. Please try again later'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
-    @accounts.command(aliases=["get"])
+    @accounts.command(aliases=["get", "query"])
     async def details(self, ctx, address: str):
         """
         Query details for specific public address
@@ -88,61 +90,70 @@ class HorizonAccounts(commands.Cog):
 
         if check_stellar_address(address=address):
             data = self.backoffice.stellar_wallet.get_account_details(address=address)
+            if data:
+                for coin in reversed(data["balances"]):
+                    if not coin.get('asset_code'):
+                        signers_data = ', '.join(
+                            [f'`{sig["key"]}`' for sig in
+                             data["signers"]])
 
-            for coin in reversed(data["balances"]):
-                if not coin.get('asset_code'):
-                    signers_data = ', '.join(
-                        [f'`{sig["key"]}`' for sig in
-                         data["signers"]])
+                        acc_details = Embed(title=':mag_right: Details for Stellar Account :mag_right: ',
+                                            description=f'Last Activity {data["last_modified_time"]}',
+                                            colour=Colour.lighter_gray())
+                        acc_details.add_field(name=':map: Account Address :map: ',
+                                              value=f'```{data["account_id"]}```',
+                                              inline=False)
+                        acc_details.add_field(name=':pen_fountain: Account Signers :pen_fountain: ',
+                                              value=signers_data,
+                                              inline=False)
+                        acc_details.add_field(name=' :genie: Sponsorship Activity :genie:',
+                                              value=f':money_mouth: {data["num_sponsored"]} (sponsored)\n'
+                                                    f':money_with_wings: {data["num_sponsoring"]} (sponsoring) ',
+                                              inline=False)
+                        acc_details.add_field(name=f' :moneybag: Balance :moneybag:',
+                                              value=f'{coin["balance"]} XLM',
+                                              inline=False)
+                        acc_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
+                                              value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
+                                                    f'Selling Liabilities: {coin["selling_liabilities"]}',
+                                              inline=False)
+                        acc_details.add_field(name=f':triangular_flag_on_post: Flags :triangular_flag_on_post:',
+                                              value=f'Auth Required: {data["flags"]["auth_required"]}\n'
+                                                    f'Auth Revocable: {data["flags"]["auth_revocable"]}\n'
+                                                    f'Auth Immutable:{data["flags"]["auth_immutable"]}')
+                        await ctx.author.send(embed=acc_details)
+                    else:
+                        asset_details = Embed(title=f':coin: Details for asset {coin["asset_code"]} :coin:',
+                                              description=f'Last Activity on {data["last_modified_time"]}'
+                                                          f' (Ledger:{data["last_modified_ledger"]}',
+                                              colour=Colour.lighter_gray())
+                        asset_details.add_field(name=f':map: Issuer Address :map: ',
+                                                value=f'```{coin["asset_issuer"]}```',
+                                                inline=False)
+                        asset_details.add_field(name=f' :moneybag: Balance :moneybag:',
+                                                value=f'`{coin["balance"]} {coin["asset_code"]}`',
+                                                inline=False)
+                        asset_details.add_field(name=f':handshake: Trustline Status :handshake: ',
+                                                value=f'Authorizer: {coin["is_authorized"]}\n'
+                                                      f'Maintain Liabilities: {coin["is_authorized_to_maintain_liabilities"]}',
+                                                inline=False)
+                        asset_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
+                                                value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
+                                                      f'Selling Liabilities: {coin["selling_liabilities"]}',
+                                                inline=False)
+                        asset_details.add_field(name=':chains: Trustline links :chains: ',
+                                                value=f'[Issuer Details](https://stellar.expert/explorer/testnet/account/{coin["asset_issuer"]}?order=desc)\n'
+                                                      f'[Asset Details](https://stellar.expert/explorer/testnet/asset/{coin["asset_code"]}-{coin["asset_issuer"]}?order=desc)')
+                        await ctx.author.send(embed=asset_details)
 
-                    acc_details = Embed(title=':mag_right: Details for Stellar Account :mag_right: ',
-                                        description=f'Last Activity {data["last_modified_time"]}',
-                                        colour=Colour.lighter_gray())
-                    acc_details.add_field(name=':map: Account Address :map: ',
-                                          value=f'```{data["account_id"]}```',
-                                          inline=False)
-                    acc_details.add_field(name=':pen_fountain: Account Signers :pen_fountain: ',
-                                          value=signers_data,
-                                          inline=False)
-                    acc_details.add_field(name=' :genie: Sponsorship Activity :genie:',
-                                          value=f':money_mouth: {data["num_sponsored"]} (sponsored)\n'
-                                                f':money_with_wings: {data["num_sponsoring"]} (sponsoring) ',
-                                          inline=False)
-                    acc_details.add_field(name=f' :moneybag: Balance :moneybag:',
-                                          value=f'{coin["balance"]} XLM',
-                                          inline=False)
-                    acc_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
-                                          value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
-                                                f'Selling Liabilities: {coin["selling_liabilities"]}',
-                                          inline=False)
-                    acc_details.add_field(name=f':triangular_flag_on_post: Flags :triangular_flag_on_post:',
-                                          value=f'Auth Required: {data["flags"]["auth_required"]}\n'
-                                                f'Auth Revocable: {data["flags"]["auth_revocable"]}\n'
-                                                f'Auth Immutable:{data["flags"]["auth_immutable"]}')
-                    await ctx.author.send(embed=acc_details)
-                else:
-                    asset_details = Embed(title=f':coin: Details for asset {coin["asset_code"]} :coin:',
-                                          description=f'Last Activity on {data["last_modified_time"]}'
-                                                      f' (Ledger:{data["last_modified_ledger"]}',
-                                          colour=Colour.lighter_gray())
-                    asset_details.add_field(name=f':map: Issuer Address :map: ',
-                                            value=f'```{coin["asset_issuer"]}```',
-                                            inline=False)
-                    asset_details.add_field(name=f' :moneybag: Balance :moneybag:',
-                                            value=f'`{coin["balance"]} {coin["asset_code"]}`',
-                                            inline=False)
-                    asset_details.add_field(name=f':handshake: Trustline Status :handshake: ',
-                                            value=f'Authorizer: {coin["is_authorized"]}\n'
-                                                  f'Maintain Liabilities: {coin["is_authorized_to_maintain_liabilities"]}',
-                                            inline=False)
-                    asset_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
-                                            value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
-                                                  f'Selling Liabilities: {coin["selling_liabilities"]}',
-                                            inline=False)
-                    asset_details.add_field(name=':chains: Trustline links :chains: ',
-                                            value=f'[Issuer Details](https://stellar.expert/explorer/testnet/account/{coin["asset_issuer"]}?order=desc)\n'
-                                                  f'[Asset Details](https://stellar.expert/explorer/testnet/asset/{coin["asset_code"]}-{coin["asset_issuer"]}?order=desc)')
-                    await ctx.author.send(embed=asset_details)
+            else:
+                message = f'Account ```{address}``` could not be queried. Either does not exist or has not been activate ' \
+                          f'yet. Please try again later or in later case, ' \
+                          f'use [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test).' \
+                          f'to activate your account with test Lumens.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=CONST_ACCOUNT_ERROR)
+
         else:
             message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
