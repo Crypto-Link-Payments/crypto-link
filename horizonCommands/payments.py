@@ -47,7 +47,7 @@ class HorizonPayments(commands.Cog):
         payments = data["_embedded"]["records"]
 
         for p in payments:
-            if p['to'] == address:
+            if p['to'] == p["source_account"]:
                 c = Colour.green()
             else:
                 c = Colour.red()
