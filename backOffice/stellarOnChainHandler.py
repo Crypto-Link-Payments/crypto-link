@@ -244,8 +244,7 @@ class StellarWallet:
         except NotFoundError:
             return None
 
-
-    def get_payments_account(self, address: str):
+    def get_payments_for_account(self, address: str):
         """
         Get payments based on account address
         """
@@ -253,7 +252,7 @@ class StellarWallet:
             desc=True).limit(limit=200).call()
         return data
 
-    def get_payments_ledger(self, ledger_sequence: int):
+    def get_payments_for_ledger(self, ledger_sequence: int):
         """
         Get payments based on ledger sequence
         """
