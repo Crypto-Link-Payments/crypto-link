@@ -7,12 +7,15 @@ from utils.tools import Helpers
 # init colorama :
 init(autoreset=True)
 
-extensions = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
-              'cogs.system', 'cogs.withdrawals',
-              'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.licensing', 'cogs.guildOwners',
-              'horizonCommands.horizonMain',
-              'horizonCommands.accounts',
-              'horizonCommands.payments']
+cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
+           'cogs.system', 'cogs.withdrawals',
+           'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.licensing', 'cogs.guildOwners']
+
+horizon_cogs = ['horizonCommands.horizonMain',
+                'horizonCommands.accounts',
+                'horizonCommands.payments',
+                'horizonCommands.ledger',
+                'horizonCommands.transactions']
 
 
 class DiscordBot(commands.Bot):
@@ -27,8 +30,8 @@ class DiscordBot(commands.Bot):
 
     def load_cogs(self):
         notification_str = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
-                                        '           LOADING COGS....        \n'
-        for extension in extensions:
+                                        '           LOADING Crypto Link COGS....        \n'
+        for extension in cl_cogs:
             try:
                 self.load_extension(extension)
                 notification_str += f'| {extension} :smile: \n'
@@ -37,6 +40,19 @@ class DiscordBot(commands.Bot):
                 raise
         notification_str += '+++++++++++++++++++++++++++++++++++++++'
         print(notification_str)
+
+        notification_str = Fore.CYAN + '+++++++++++++++++++++++++++++++++++++++\n' \
+                                        '           LOADING Horizon COGS....        \n'
+        for hor in horizon_cogs:
+            try:
+                self.load_extension(hor)
+                notification_str += f'| {hor} :smile: \n'
+            except Exception as error:
+                notification_str += f'| {hor} --> {error}\n'
+                raise
+        notification_str += '+++++++++++++++++++++++++++++++++++++++'
+        print(notification_str)
+
 
     async def on_ready(self):
         """
