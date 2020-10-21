@@ -278,7 +278,7 @@ class HorizonAccessCommands(commands.Cog):
     @horizon.group()
     async def transactions(self, ctx):
         title = ':incoming_envelope: __Horizon Transactions __ :incoming_envelope:'
-        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+        description = 'Representation of all available commands available to interact with ***Transactions*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
             {"name": f':hash: Query by transaction Hash :hash: ',
