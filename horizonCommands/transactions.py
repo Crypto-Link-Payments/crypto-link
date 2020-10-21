@@ -123,8 +123,61 @@ class HorizonTransactions(commands.Cog):
 
     @transactions.command()
     async def account(self, ctx, account_address: str):
+
         data = stellar_chain.get_transactions_account(address=account_address)
-        await self.process_server_response(ctx=ctx, query=str(account_address), data=data, title='account')
+        if data:
+            records = data['_embedded']['records']
+            account_info = Embed(title=f':map: Account Transactions Information :map:',
+                                 colour=Colour.lighter_gray())
+            account_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                   value=f'[Ledger]({data["_links"]["self"]["href"]})')
+            account_info.add_field(name=f'Last :three: entries',
+                                   value=f':arrow_double_down: ',
+                                   inline=False)
+            await ctx.author.send(embed=account_info)
+            counter = 0
+            for record in records:
+                if counter <= 2:
+                    sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
+                    account_record = Embed(title=f':record_button: Account Transaction Record :record_button:',
+                                           colour=Colour.dark_orange())
+                    account_record.add_field(name=':ledger: Ledger :ledger: ',
+                                             value=f'`{record["ledger"]}`')
+                    account_record.add_field(name=':white_circle: Paging Token :white_circle: ',
+                                             value=f'`{record["paging_token"]}`',
+                                             inline=True)
+                    account_record.add_field(name=f':calendar: Created :calendar: ',
+                                             value=f'`{record["created_at"]}`',
+                                             inline=False)
+                    account_record.add_field(name=f' :map: Source account :map: ',
+                                             value=f'`{record["source_account"]}`',
+                                             inline=False)
+                    account_record.add_field(name=f' :pen: Memo :pen: ',
+                                             value=f'`{record["memo"]} (Type: {record["memo_type"]})`',
+                                             inline=False)
+                    account_record.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
+                                             value=sig_str,
+                                             inline=False)
+                    account_record.add_field(name=':hash: Hash :hash: ',
+                                             value=f'`{record["hash"]}`',
+                                             inline=False)
+                    account_record.add_field(name=':money_with_wings: Fee :money_with_wings: ',
+                                             value=f'`{round(int(record["fee_charged"]) / 10000000,7):.7f} XLM`',
+                                             inline=False)
+                    account_record.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                             value=f'[Account]({record["_links"]["account"]["href"]})\n'
+                                                   f'[Ledger]({record["_links"]["ledger"]["href"]})\n'
+                                                   f'[Transactions]({record["_links"]["transaction"]["href"]})\n'
+                                                   f'[Effects]({record["_links"]["effects"]["href"]})\n'
+                                                   f'[Operations]({record["_links"]["succeeds"]["href"]}\n)'
+                                                   f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
+                                                   f'[Precedes]({record["_links"]["precedes"]["href"]})')
+                    await ctx.author.send(embed=account_record)
+                    counter += 1
+        else:
+            message = f'Account ```{account_address}```  does not exist or has not been activated yet.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=':map: Account not found :map:')
 
     @transactions.command()
     async def ledger(self, ctx, ledger_id: int):
