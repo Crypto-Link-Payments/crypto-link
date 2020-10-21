@@ -109,9 +109,9 @@ class HorizonPayments(commands.Cog):
             {"name": f':map: Get payments by public address :map: ',
              "value": f'`{self.command_string}payments address <address>`'},
             {"name": f':ledger:  Get payments based on ledger sequence :ledger:   ',
-             "value": f'`{self.command_string}payments ledger <ledger sequence>``'},
+             "value": f'`{self.command_string}payments ledger <ledger sequence>`'},
             {"name": f':hash:  Get payments based on transaction hash :hash:',
-             "value": f'`{self.command_string}payments transaction <hash of transaction>``'}
+             "value": f'`{self.command_string}payments transaction <hash of transaction>`'}
         ]
 
         if ctx.invoked_subcommand is None:
