@@ -38,7 +38,6 @@ class HorizonLedger(commands.Cog):
     async def ledger(self, ctx, ledger_number: int):
         data = self.backoffice.stellar_wallet.get_ledger_information(ledger_id=ledger_number)
         if data:
-            from pprint import pprint
             operations_count = len(
                 requests.get(f'https://horizon-testnet.stellar.org/ledgers/{ledger_number}/operations').json()[
                     '_embedded'][
