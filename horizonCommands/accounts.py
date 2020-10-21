@@ -96,8 +96,7 @@ class HorizonAccounts(commands.Cog):
                         signers_data = ', '.join(
                             [f'`{sig["key"]}`' for sig in
                              data["signers"]])
-
-                        acc_details = Embed(title=':mag_right: Details for Stellar Account :mag_right: ',
+                        acc_details = Embed(title=':mag_right: Details for Stellar Account :mag:',
                                             description=f'Last Activity {data["last_modified_time"]}',
                                             colour=Colour.lighter_gray())
                         acc_details.add_field(name=':map: Account Address :map: ',
