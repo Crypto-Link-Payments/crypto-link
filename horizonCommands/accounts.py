@@ -35,7 +35,7 @@ class HorizonAccounts(commands.Cog):
 
     @commands.group()
     async def accounts(self, ctx):
-        title = ':office_worker: __Horizon Accounts Queries :office_worker:'
+        title = ':office_worker: __Horizon Accounts Queries__ :office_worker:'
         description = 'Representation of all available commands available to interact with ***Account*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
