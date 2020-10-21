@@ -148,11 +148,14 @@ class HorizonTransactions(commands.Cog):
                                         value=f'`{record["created_at"]}`',
                                         inline=False)
                 ledger_record.add_field(name=f' :map: Source account :map: ',
-                                        value=f'`{record["source_account"]}`')
+                                        value=f'`{record["source_account"]}`',
+                                        inline=False)
                 ledger_record.add_field(name=f' Source account Sequence ',
-                                        value=f'`{record["source_account_sequence"]}`')
+                                        value=f'`{record["source_account_sequence"]}`',
+                                        inline=False)
                 ledger_record.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
-                                        value=sig_str)
+                                        value=sig_str,
+                                        inline=False)
                 ledger_record.add_field(name=':hash: Hash :hash: ',
                                         value=f'`{record["hash"]}`',
                                         inline=False)
