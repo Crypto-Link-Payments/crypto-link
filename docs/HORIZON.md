@@ -67,3 +67,24 @@ Returns information on available sub-commands
 ```text
 !payments transaction <transaction hash>
 ```
+
+## Horizon Transactions Endpoint
+Returns information on available sub-commands
+```text
+!transactions
+```
+
+### Query Transactions by Address
+```text
+!transactions account <Valis Stellar Public Address>
+```
+
+### Query Transactions by Ledger Number
+```text
+!transactions ledger <Ledger Number>
+```
+
+### Query Transactions by Transaction Hash
+```text
+!transactions single <transaction hash>
+```
