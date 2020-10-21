@@ -160,14 +160,12 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def ledger(self, ctx):
-        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        title = ':ledger: __Horizon Ledger Operations__ :ledger:'
         description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
-            {"name": f'',
-             "value": f''},
-            {"name": f'',
-             "value": f'`{self.command_string}horizon account create`'}
+            {"name": f':information_source:  Get information for ledger number :information_source: ',
+             "value": f'`{self.command_string}ledger <ledger number>`'}
         ]
 
         if ctx.invoked_subcommand is None:
