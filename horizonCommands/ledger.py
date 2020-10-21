@@ -58,36 +58,36 @@ class HorizonLedger(commands.Cog):
             ledger_info = Embed(title=f':ledger: Ledger :id: {ledger_number} Information :ledger:',
                                 description='Bellow is represent information for requested ledger.',
                                 colour=Colour.lighter_gray())
-            ledger_info.add_field(name='Paging Token',
+            ledger_info.add_field(name=':white_circle: Paging Token :white_circle: ',
                                   value=f'`{data["paging_token"]}`',
                                   inline=False)
-            ledger_info.add_field(name='Closing time',
+            ledger_info.add_field(name=':timer: Closing Time :timer: ',
                                   value=f'{data["closed_at"]}')
             ledger_info.add_field(name=':hash: Ledger Hash :hash:',
                                   value=f'`{data["hash"]}`',
                                   inline=False)
-            ledger_info.add_field(name='Transaction Count',
+            ledger_info.add_field(name=':abacus: Transaction Count :abacus: ',
                                   value=f'`{data["successful_transaction_count"]}`',
                                   inline=False)
-            ledger_info.add_field(name='Operations Count',
+            ledger_info.add_field(name=':wrench: Operations Count :wrench: ',
                                   value=f'`{data["operation_count"]}`',
                                   inline=False)
-            ledger_info.add_field(name='Failed Transactions',
+            ledger_info.add_field(name=':x: Failed Transactions :x: ',
                                   value=f'`{data["failed_transaction_count"]}`',
                                   inline=False)
-            ledger_info.add_field(name='Total Existing XLM',
+            ledger_info.add_field(name=':moneybag: Total Existing XLM :moneybag: ',
                                   value=f'`{data["total_coins"]} XLM`',
                                   inline=False)
-            ledger_info.add_field(name='Base Fee',
+            ledger_info.add_field(name=':money_mouth: Base Fee :money_mouth: ',
                                   value=f'`{format(round(data["base_fee_in_stroops"] / 10000000, 7),".7f")} XLM`',
                                   inline=False)
-            ledger_info.add_field(name='Fee Pool',
+            ledger_info.add_field(name=':bath: Fee Pool :bath: ',
                                   value=f'`{data["fee_pool"]} XLM`',
                                   inline=False)
-            ledger_info.add_field(name='Protocol Version',
+            ledger_info.add_field(name=':arrow_forward: Protocol Version :arrow_forward: ',
                                   value=f'`{data["protocol_version"]}`',
                                   inline=False)
-            ledger_info.add_field(name=f'Effect For Ledger',
+            ledger_info.add_field(name=f':person_running: Ledger Activity :person_running: ',
                                   value=f'Operations: [{operations_count}]({data["_links"]["operations"]["href"]}) \n'
                                         f'Effects: [{effects_count}]({data["_links"]["effects"]["href"]})\n'
                                         f'Payments: [{payments_count}]({data["_links"]["payments"]["href"]}) \n'
