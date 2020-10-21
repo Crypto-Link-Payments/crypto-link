@@ -277,14 +277,17 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def transactions(self, ctx):
-        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        title = ':incoming_envelope: __Horizon Transactions __ :incoming_envelope:'
         description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
-            {"name": f'',
-             "value": f''},
-            {"name": f'',
-             "value": f'`{self.command_string}horizon account create`'}
+            {"name": f':hash: Query by transaction Hash :hash: ',
+             "value": f'`{self.command_string}transactions single <Transaction Hash>`'},
+            {"name": f':map:  Query by account address :map:  ',
+             "value": f'`{self.command_string}transactions account <Valid Stellar Address>`'},
+            {"name": f':ledger:  Query by ledger :ledger:',
+             "value": f'`{self.command_string}transactions ledger <Ledger Number>`'},
+
         ]
 
         if ctx.invoked_subcommand is None:
