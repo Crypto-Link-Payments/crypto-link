@@ -282,3 +282,8 @@ class StellarWallet:
         data = self.server.transactions().transaction(transaction_hash=tx_hash).include_failed(False).order(
             desc=True).call()
         return data
+
+    def get_ledger_information(self, ledger_id:int):
+        data = self.server.ledgers().ledger(sequence=ledger_id).call()
+        return data
+
