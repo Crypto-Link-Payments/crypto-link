@@ -107,7 +107,7 @@ class HorizonTransactions(commands.Cog):
                               value=f'Charged: {r["fee_charged"]}\n'
                                     f'Max: {r["max_fee"]} ')
             tx_info.add_field(name=f'Signers',
-                              value=f'')
+                              value=f'{signers_data}')
             await ctx.author.send(embed=tx_info)
 
     @transactions.command()
