@@ -38,19 +38,27 @@ class HorizonLedger(commands.Cog):
     async def ledger(self, ctx, ledger_number: int):
         data = self.backoffice.stellar_wallet.get_ledger_information(ledger_id=ledger_number)
         if data:
-            operations_count = len(requests.get(data['_links']["operations"]['href']).json()['_embedded'][
-                                       "records"])
-            effects_count = len(requests.get(data['_links']["effects"]['href']).json()['_embedded'][
-                                    "records"])
-            payments_count = len(requests.get(data['_links']["payments"]['href']).json()['_embedded'][
-                                     "records"])
-            transactions_count = len(requests.get(data['_links']["transactions"]['href']).json()['_embedded'][
-                                         "records"])
+            from pprint import pprint
+            operations_count = len(
+                requests.get(f'https://horizon-testnet.stellar.org/ledgers/{ledger_number}/operations').json()[
+                    '_embedded'][
+                    "records"])
+            effects_count = len(
+                requests.get(f'https://horizon-testnet.stellar.org/ledgers/{ledger_number}/effects').json()[
+                    '_embedded'][
+                    "records"])
+            payments_count = len(
+                requests.get(f'https://horizon-testnet.stellar.org/ledgers/{ledger_number}/payments').json()[
+                    '_embedded'][
+                    "records"])
+            transactions_count = len(
+                requests.get(f'https://horizon-testnet.stellar.org/ledgers/{ledger_number}/transactions').json()[
+                    '_embedded'][
+                    "records"])
 
-            ledger_info = Embed(title=':ledger: Ledger Information :ledger:',
+            ledger_info = Embed(title=f':ledger: Ledger :id: {ledger_number} Information :ledger:',
                                 description='Bellow is represent information for requested ledger.',
                                 colour=Colour.lighter_gray())
-            ledger_info.set_author(name=f':id: {ledger_number}')
             ledger_info.add_field(name='Paging Token',
                                   value=f'`{data["paging_token"]}`',
                                   inline=False)
@@ -72,7 +80,7 @@ class HorizonLedger(commands.Cog):
                                   value=f'`{data["total_coins"]} XLM`',
                                   inline=False)
             ledger_info.add_field(name='Base Fee',
-                                  value=f'`{round(data["base_fee_in_stroops"] / 10000000, 7)} XLM`',
+                                  value=f'`{format(round(data["base_fee_in_stroops"] / 10000000, 7),".7f")} XLM`',
                                   inline=False)
             ledger_info.add_field(name='Fee Pool',
                                   value=f'`{data["fee_pool"]} XLM`',
@@ -82,9 +90,10 @@ class HorizonLedger(commands.Cog):
                                   inline=False)
             ledger_info.add_field(name=f'Effect For Ledger',
                                   value=f'Operations: [{operations_count}]({data["_links"]["operations"]["href"]}) \n'
-                                        f'Effects: [{effects_count}]({data["_links"]["effects"]["href"]})'
+                                        f'Effects: [{effects_count}]({data["_links"]["effects"]["href"]})\n'
                                         f'Payments: [{payments_count}]({data["_links"]["payments"]["href"]}) \n'
                                         f'Transactions: [{transactions_count}]({data["_links"]["transactions"]["href"]})')
+            ledger_info.set_footer(text='Click on number to expand details')
             await ctx.author.send(embed=ledger_info)
 
     @ledger.error
