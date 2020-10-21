@@ -161,7 +161,7 @@ class HorizonAccessCommands(commands.Cog):
     @horizon.group()
     async def ledger(self, ctx):
         title = ':ledger: __Horizon Ledger Operations__ :ledger:'
-        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+        description = 'Representation of all available commands available to interact with ***Ledger*** endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
             {"name": f':information_source:  Get information for ledger number :information_source: ',
