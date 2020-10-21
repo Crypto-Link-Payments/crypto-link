@@ -102,7 +102,7 @@ class HorizonPayments(commands.Cog):
                 payment_info.add_field(name=f':hash: Transaction Hash :hash:',
                                        value=f'`{p["transaction_hash"]}`',
                                        inline=False)
-                payment_info.add_field(name=f':sunrise: Horizon Link :sunrise:  ',
+                payment_info.add_field(name=f':sunrise: Horizon Link :sunrise: ',
                                        value=f'{p["_links"]["transaction"]["href"]}',
                                        inline=False)
 
