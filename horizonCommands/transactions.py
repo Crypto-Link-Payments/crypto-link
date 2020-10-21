@@ -7,7 +7,6 @@ from Merchant wallet to their won upon withdrawal.
 
 from discord.ext import commands
 from discord import Embed, Colour
-from cogs.utils.customCogChecks import has_wallet
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
 
@@ -33,35 +32,16 @@ class HorizonTransactions(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
-    @commands.group()
-    async def transactions(self, ctx):
-        title = ':incoming_envelope: __Horizon Accounts Operations__ :incoming_envelope:'
-        description = 'Representation of all available commands available to interact with ***Account*** Endpoint on ' \
-                      'Stellar Horizon Server'
-        list_of_commands = [
-            {"name": f':hash: Query by transaction Hash :hash: ',
-             "value": f'`{self.command_string}transactions single <Transaction Hash>`'},
-            {"name": f':map:  Query by account address :map:  ',
-             "value": f'`{self.command_string}transactions account <Valid Stellar Address>`'},
-            {"name": f':ledger:  Query by ledger :ledger:',
-             "value": f'`{self.command_string}transactions ledger <Ledger Number>`'},
-
-        ]
-
-        if ctx.invoked_subcommand is None:
-            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
-                                                description=description,
-                                                destination=1, c=Colour.lighter_gray())
-
-    @staticmethod
-    async def process_server_response(ctx, query: str, data, title: str):
+    def get_emoji(self, title):
         if title == 'ledger':
-            emoji = ':ledger'
+            return ':ledger:'
         elif title == 'Transaction Hash':
-            emoji = ':hash:'
+            return ':hash:'
         elif title == "account":
-            emoji = ':map:'
+            return ':map:'
 
+    async def process_server_response(self, ctx, query: str, data, title: str):
+        emoji = self.get_emoji(title=title)
         payment_details = Embed(title=f':mag_right: {title} Transactions Details :mag_right: ',
                                 colour=Colour.lighter_gray())
         payment_details.add_field(name=f'{emoji} {title} {emoji}',
@@ -116,6 +96,25 @@ class HorizonTransactions(commands.Cog):
                 await ctx.author.send(embed=tx_info)
                 counter += 1
 
+    @commands.group()
+    async def transactions(self, ctx):
+        title = ':incoming_envelope: __Horizon Accounts Operations__ :incoming_envelope:'
+        description = 'Representation of all available commands available to interact with ***Account*** Endpoint on ' \
+                      'Stellar Horizon Server'
+        list_of_commands = [
+            {"name": f':hash: Query by transaction Hash :hash: ',
+             "value": f'`{self.command_string}transactions single <Transaction Hash>`'},
+            {"name": f':map:  Query by account address :map:  ',
+             "value": f'`{self.command_string}transactions account <Valid Stellar Address>`'},
+            {"name": f':ledger:  Query by ledger :ledger:',
+             "value": f'`{self.command_string}transactions ledger <Ledger Number>`'},
+
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
 
     @transactions.command()
     async def single(self, ctx, transaction_hash: str):
@@ -130,7 +129,46 @@ class HorizonTransactions(commands.Cog):
     @transactions.command()
     async def ledger(self, ctx, ledger_id: int):
         data = stellar_chain.get_transactions_ledger(ledger_id=ledger_id)
-        await self.process_server_response(ctx=ctx, query=str(ledger_id), data=data, title='Ledger')
+        if data:
+            records = data['_embedded']['records']
+            ledger_info = Embed(title=f':ledger: Ledger {ledger_id} Information :ledger:',
+                                description='Bellow is represent information for requested ledger.',
+                                colour=Colour.lighter_gray())
+            ledger_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                  value=f'[Ledger]({data["_links"]["self"]["href"]})')
+            await ctx.author.send(embed=ledger_info)
+            for record in records:
+                sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
+                ledger_record = Embed(title=f':record_button: Record for {ledger_id} :record_button:',
+                                      colour=Colour.dark_orange())
+                ledger_record.add_field(name=':white_circle: Paging Token :white_circle: ',
+                                        value=f'`{record["paging_token"]}`',
+                                        inline=False)
+                ledger_record.add_field(name=f':calendar: Created :calendar: ',
+                                        value=f'`{record["created_at"]}`',
+                                        inline=False)
+                ledger_record.add_field(name=f' :map: Source account :map: ',
+                                        value=f'`{record["source_account"]}`')
+                ledger_record.add_field(name=f' Source account Sequence ',
+                                        value=f'`{record["source_account_sequence"]}`')
+                ledger_record.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
+                                        value=sig_str)
+                ledger_record.add_field(name=':hash: Hash :hash: ',
+                                        value=f'`{record["hash"]}`',
+                                        inline=False)
+                ledger_record.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                        value=f'[Record]({record["_links"]["self"]["href"]})\n'
+                                              f'[Account]({record["_links"]["account"]["href"]})\n'
+                                              f'[Ledger]({record["_links"]["ledger"]["href"]})\n'
+                                              f'[Transactions]({record["_links"]["transaction"]["href"]})\n'
+                                              f'[Effects]({record["_links"]["effects"]["href"]})\n'
+                                              f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
+                                              f'[Precedes]({record["_links"]["precedes"]["href"]})')
+                await ctx.author.send(embed=ledger_record)
+        else:
+            message = f'Ledger with :id: {ledger_id} could not be found'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=':ledger: Ledger not found :ledger:')
 
 
 def setup(bot):
