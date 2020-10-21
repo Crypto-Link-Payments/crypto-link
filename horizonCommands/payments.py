@@ -43,7 +43,8 @@ class HorizonPayments(commands.Cog):
         elif query_key == "ledger":
             desc = f'Detail for :ledger: {user_query}'
         elif query_key == 'transaction hash':
-            desc = f'Detail for :hash: {user_query}'
+            desc = f'Detail for \n' \
+                   f':hash: `{user_query}`'
 
         payment_details = Embed(title=f':mag_right: Payments for {query_key.capitalize()} :mag_right: ',
                                 description=desc,
