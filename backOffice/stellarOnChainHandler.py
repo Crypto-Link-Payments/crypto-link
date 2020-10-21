@@ -267,3 +267,18 @@ class StellarWallet:
         data = self.server.payments().for_transaction(transaction_hash=transaction_hash).include_failed(False).order(
             desc=True).limit(limit=1).call()
         return data
+
+    def get_transactions_account(self, address: str):
+        data = self.server.transactions().for_account(account_id=address).include_failed(False).order(
+            desc=True).call()
+        return data
+
+    def get_transactions_ledger(self, ledger_id: int):
+        data = self.server.transactions().for_ledger(sequence=ledger_id).include_failed(False).order(
+            desc=True).call()
+        return data
+
+    def get_transactions_hash(self, tx_hash: str):
+        data = self.server.transactions().transaction(transaction_hash=tx_hash).include_failed(False).order(
+            desc=True).call()
+        return data
