@@ -135,7 +135,7 @@ class HorizonPayments(commands.Cog):
     async def address(self, ctx, address: str):
         if check_stellar_address(address=address):
             data = self.backoffice.stellar_wallet.get_payments_for_account(address=address)
-            await self.process_server_response(ctx, data=data,query_key='address', user_query=f'{address}')
+            await self.process_server_response(ctx, data=data, query_key='address', user_query=f'{address}')
         else:
             message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -144,12 +144,49 @@ class HorizonPayments(commands.Cog):
     @payments.command()
     async def ledger(self, ctx, ledger: int):
         data = self.backoffice.stellar_wallet.get_payments_for_ledger(ledger_sequence=ledger)
-        await self.process_server_response(ctx, data=data, query_key='ledger', user_query=f'{ledger}')
+        records = data['_embedded']['records']
+        ledger_info = Embed(title=f':ledger: Ledger {ledger} Information :ledger:',
+                            description='Bellow is represent information for requested ledger.',
+                            colour=Colour.lighter_gray())
+        ledger_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                              value=f'{data["_links"]["self"]["href"]}')
+        await ctx.author.send(embed=ledger_info)
+        for record in records:
+            if record['type'] == 'create_account':
+                action_name = 'Create Account'
+            ledger_record = Embed(title=f':bookmark_tabs: {action_name} :bookmark_tabs: ',
+                                  description=f'`{record["account"]}`',
+                                  colour=Colour.dark_orange())
+            ledger_record.add_field(name=f' Source account',
+                                    value=f'`{record["source_account"]}`')
+            ledger_record.add_field(name=f':calendar: Date and time :calendar: ',
+                                    value=f'`{record["created_at"]}`',
+                                    inline=False)
+            ledger_record.add_field(name=':white_circle: Paging Token :white_circle: ',
+                                    value=f'`{record["paging_token"]}`',
+                                    inline=False)
+            ledger_record.add_field(name=':map: Funder Address :map: ',
+                                    value=f'`{record["funder"]}`',
+                                    inline=False)
+            ledger_record.add_field(name=':moneybag:  Starting Balance :moneybag: ',
+                                    value=f'`{record["starting_balance"]} XLM`',
+                                    inline=False)
+            ledger_record.add_field(name=':hash: Transaction Hash :hash: ',
+                                    value=f'`{record["transaction_hash"]}`',
+                                    inline=False)
+            ledger_record.add_field(name=f':person_running: Ledger Activity :person_running: ',
+                                    value=f'[Self]({data["_links"]["self"]["href"]})\n'
+                                          f'[Transactions]({record["_links"]["transaction"]["href"]})\n'
+                                          f'[Effects]({record["_links"]["effects"]["href"]})\n'
+                                          f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
+                                          f'[Precedes]({record["_links"]["precedes"]["href"]})')
+            await ctx.author.send(embed=ledger_record)
 
     @payments.command(aliases=["tx"])
     async def transaction(self, ctx, transaction_hash: str):
         data = self.backoffice.stellar_wallet.get_payments_for_tx(transaction_hash=transaction_hash)
-        await self.process_server_response(ctx, data=data,query_key='transaction hash', user_query=f'{transaction_hash}')
+        await self.process_server_response(ctx, data=data, query_key='transaction hash',
+                                           user_query=f'{transaction_hash}')
 
     @payments.error
     async def asset_error(self, ctx, error):
