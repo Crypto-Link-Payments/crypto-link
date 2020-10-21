@@ -257,7 +257,7 @@ class StellarWallet:
         Get payments based on ledger sequence
         """
         data = self.server.payments().for_ledger(sequence=ledger_sequence).include_failed(False).order(
-            desc=True).limit(limit=1).call()
+            desc=True).limit(limit=200).call()
         return data
 
     def get_payments_for_tx(self, transaction_hash: str):
@@ -265,7 +265,7 @@ class StellarWallet:
         Get payments based on ledger sequence
         """
         data = self.server.payments().for_transaction(transaction_hash=transaction_hash).include_failed(False).order(
-            desc=True).limit(limit=1).call()
+            desc=True).limit(limit=200).call()
         return data
 
     def get_transactions_account(self, address: str):
