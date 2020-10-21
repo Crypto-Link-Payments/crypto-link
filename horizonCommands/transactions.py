@@ -39,10 +39,13 @@ class HorizonTransactions(commands.Cog):
         description = 'Representation of all available commands available to interact with ***Account*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
-            {"name": f':new: Create New Account :new: ',
-             "value": f'`{self.command_string}accounts create`'},
-            {"name": f':new: Query Account Details :new: ',
-             "value": f'`{self.command_string}accounts get <Valid Stellar Address>`'}
+            {"name": f':hash: Query by transaction Hash :hash: ',
+             "value": f'`{self.command_string}transactions single <Transaction Hash>`'},
+            {"name": f':map:  Query by account address :map:  ',
+             "value": f'`{self.command_string}transactions account <Valid Stellar Address>`'},
+            {"name": f':ledger:  Query by ledger :ledger:',
+             "value": f'`{self.command_string}transactions ledger <Ledger Number>`'},
+
         ]
 
         if ctx.invoked_subcommand is None:
