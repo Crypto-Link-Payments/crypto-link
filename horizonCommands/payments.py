@@ -34,66 +34,79 @@ class HorizonPayments(commands.Cog):
         self.command_string = bot.get_command_str()
 
     @staticmethod
-    async def process_server_response(ctx, data):
-        payment_details = Embed(title=':mag_right: Payments for Stellar Account :mag_right: ',
+    async def process_server_response(ctx, data, query_key: str, user_query: str):
+
+        if query_key == 'address':
+            desc = f'Detail for:\n' \
+                   f':map:`{user_query}`'
+            pass
+        elif query_key == "ledger":
+            desc = f'Detail for :ledger: {user_query}'
+        elif query_key == 'transaction hash':
+            desc = f'Detail for :hash: {user_query}'
+
+        payment_details = Embed(title=f':mag_right: Payments for {query_key.capitalize()} :mag_right: ',
+                                description=desc,
                                 colour=Colour.lighter_gray())
-        payment_details.add_field(name=':map: Account Address :map: ',
-                                  value=f'```{data["account_id"]}```',
-                                  inline=False)
         payment_details.add_field(name=f':file_folder: Complete List of Payments :file_folder: ',
-                                  value=f'{data["_links"]["self"]}')
+                                  value=f'[Explorer Link]({data["_links"]["self"]["href"]})')
+        payment_details.add_field(name=f'Last 3 Payment activities',
+                                  value=f':arrow_double_down:',
+                                  inline=False)
         await ctx.author.send(embed=payment_details)
 
         payments = data["_embedded"]["records"]
+        counter = 0
 
         for p in payments:
-            # Check if transaction type is payment
-            if p["type"] == 'payment':
-                # Check if transaction was incoming or outgoing
-                if p['to'] == p["source_account"]:
-                    c = Colour.green()
+            if counter <= 2:
+                # Check if transaction type is payment
+                if p["type"] == 'payment':
+                    # Check if transaction was incoming or outgoing
+                    if p['to'] == p["source_account"]:
+                        c = Colour.green()
+                    else:
+                        c = Colour.red()
                 else:
-                    c = Colour.red()
-            else:
-                # Some other account action has been done
-                c = Colour.purple()
+                    # Some other account action has been done
+                    c = Colour.purple()
 
-            payment_info = Embed(title=f':wrench: Operation Details :wrench: ',
-                                 colour=c)
-            payment_info.add_field(name=f':id: ID :id:  ',
-                                   value=f':id: {p["id"]}')
-            payment_info.add_field(name=f':eyes: Operation Type :eyes: ',
-                                   value=f'`{p["type"]}`')
-            payment_info.add_field(name=f':calendar: Date and time :calendar: ',
-                                   value=f'`{p["created_at"]}`')
-            payment_info.add_field(name=f':page_facing_up: Paging Token :page_facing_up: ',
-                                   value=f'{p["paging_token"]}',
-                                   inline=False)
-            payment_info.add_field(name=':incoming_envelope: From :incoming_envelope: ',
-                                   value=f'```{p["from"]}```',
-                                   inline=False)
-            payment_info.add_field(name=':map: To :map: ',
-                                   value=f'```{p["to"]}```',
-                                   inline=False)
-            payment_info.add_field(name=f' :hash: Transaction Hash :hash:',
-                                   value=f'`{p["transaction_hash"]}`')
-            payment_info.add_field(name=f':compass: Explorer Link :compass: ',
-                                   value=f'{p["_links"]["transaction"]["href"]}')
+                payment_info = Embed(title=f':money_with_wings: {p["type"].capitalize()} Details :money_with_wings: ',
+                                     description=f':id: `{p["id"]}` ',
+                                     colour=c)
+                payment_info.add_field(name=f':calendar: Date and time :calendar: ',
+                                       value=f'`{p["created_at"]}`')
+                payment_info.add_field(name=f':page_facing_up: Paging Token :page_facing_up: ',
+                                       value=f'`{p["paging_token"]}`',
+                                       inline=True)
+                payment_info.add_field(name=':incoming_envelope: From :incoming_envelope: ',
+                                       value=f'```{p["from"]}```',
+                                       inline=False)
+                payment_info.add_field(name=':map: To :map: ',
+                                       value=f'```{p["to"]}```',
+                                       inline=False)
+                if not p.get('asset_code'):
+                    payment_info.add_field(name=':money_mouth: Amount :money_mouth: ',
+                                           value=f'```{p["amount"]} XLM```',
+                                           inline=False)
 
-            if not p.get('asset_code'):
-                payment_info.add_field(name=':money_mouth: Amount :money_mouth: ',
-                                       value=f'```{p["amount"]} XLM```',
+                else:
+                    payment_info.add_field(name=':bank:  Asset Issuer :bank: ',
+                                           value=f'```{p["asset_issuer"]}```',
+                                           inline=False)
+                    payment_info.add_field(name=':money_mouth: Amount :money_mouth: ',
+                                           value=f'```{p["amount"]} {p["asset_code"]}```',
+                                           inline=False)
+
+                payment_info.add_field(name=f':hash: Transaction Hash :hash:',
+                                       value=f'`{p["transaction_hash"]}`',
+                                       inline=False)
+                payment_info.add_field(name=f':sunrise: Horizon Link :sunrise:  ',
+                                       value=f'{p["_links"]["transaction"]["href"]}',
                                        inline=False)
 
-            else:
-                payment_info.add_field(name=':bank:  Asset Issuer :bank: ',
-                                       value=f'```{p["asset_issuer"]}```',
-                                       inline=False)
-                payment_info.add_field(name=':money_mouth: Amount :money_mouth: ',
-                                       value=f'```{p["amount"]} {p["asset_code"]}```',
-                                       inline=False)
-
-            await ctx.author.send(embed=payment_info)
+                await ctx.author.send(embed=payment_info)
+                counter += 1
 
     @commands.group()
     @commands.check(has_wallet)
@@ -122,7 +135,7 @@ class HorizonPayments(commands.Cog):
     async def address(self, ctx, address: str):
         if check_stellar_address(address=address):
             data = self.backoffice.stellar_wallet.get_payments_for_account(address=address)
-            await self.process_server_response(ctx, data=data)
+            await self.process_server_response(ctx, data=data,query_key='address', user_query=f'{address}')
         else:
             message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -131,12 +144,12 @@ class HorizonPayments(commands.Cog):
     @payments.command()
     async def ledger(self, ctx, ledger: int):
         data = self.backoffice.stellar_wallet.get_payments_for_ledger(ledger_sequence=ledger)
-        await self.process_server_response(ctx, data=data)
+        await self.process_server_response(ctx, data=data, query_key='ledger', user_query=f'{ledger}')
 
     @payments.command(aliases=["tx"])
     async def transaction(self, ctx, transaction_hash: str):
         data = self.backoffice.stellar_wallet.get_payments_for_tx(transaction_hash=transaction_hash)
-        await self.process_server_response(ctx, data=data)
+        await self.process_server_response(ctx, data=data,query_key='transaction hash', user_query=f'{transaction_hash}')
 
     @payments.error
     async def asset_error(self, ctx, error):
