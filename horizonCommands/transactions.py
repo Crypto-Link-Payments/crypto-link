@@ -73,45 +73,49 @@ class HorizonTransactions(commands.Cog):
 
         records = data["_embedded"]["records"]
 
+        counter = 0
         for r in records:
-            signers_data = ', '.join(
-                [f'`{sig}`' for sig in
-                 records["signatures"]])
+            if counter <= 2:
+                signers_data = ', '.join(
+                    [f'`{sig}`' for sig in
+                     records["signatures"]])
 
-            tx_info = Embed(title=f'Transaction Details',
-                            colour=Colour.lighter_gray())
-            tx_info.set_author(name=f':id: `{r["id"]}`')
-            tx_info.add_field(name=f'Height',
-                              value=f'`{r["paging_token"]}`')
-            tx_info.add_field(name=f':ledger:ledger :ledger:',
-                              value=f'`{r["ledger"]}`')
-            tx_info.add_field(name=f':hash: Transaction Hash :hash:',
-                              value=f'`{r["hash"]}`')
-            tx_info.add_field(name=f'Memo Type',
-                              value=f'`{r["memo_type"]}`')
-            tx_info.add_field(name=f':calendar: Date and time :calendar: ',
-                              value=f'`{r["created_at"]}`')
-            tx_info.add_field(name=f'Paging Token',
-                              value=f'{r["paging_token"]}',
-                              inline=False)
-            tx_info.add_field(name='Source account',
-                              value=f'```{r["source_account"]}```',
-                              inline=False)
-            tx_info.add_field(name='Source account Sequence',
-                              value=f'```{r["source_account_sequence"]}```',
-                              inline=False)
-            tx_info.add_field(name='Fee account',
-                              value=f'```{r["fee_account"]}```',
-                              inline=False)
-            tx_info.add_field(name='Sum of operations',
-                              value=f'```{r["operation_count"]}```',
-                              inline=False)
-            tx_info.add_field(name=f'Fees',
-                              value=f'Charged: {r["fee_charged"]}\n'
-                                    f'Max: {r["max_fee"]} ')
-            tx_info.add_field(name=f'Signers',
-                              value=f'{signers_data}')
-            await ctx.author.send(embed=tx_info)
+                tx_info = Embed(title=f'Transaction Details',
+                                colour=Colour.lighter_gray())
+                tx_info.set_author(name=f':id: `{r["id"]}`')
+                tx_info.add_field(name=f'Height',
+                                  value=f'`{r["paging_token"]}`')
+                tx_info.add_field(name=f':ledger:ledger :ledger:',
+                                  value=f'`{r["ledger"]}`')
+                tx_info.add_field(name=f':hash: Transaction Hash :hash:',
+                                  value=f'`{r["hash"]}`')
+                tx_info.add_field(name=f'Memo Type',
+                                  value=f'`{r["memo_type"]}`')
+                tx_info.add_field(name=f':calendar: Date and time :calendar: ',
+                                  value=f'`{r["created_at"]}`')
+                tx_info.add_field(name=f'Paging Token',
+                                  value=f'{r["paging_token"]}',
+                                  inline=False)
+                tx_info.add_field(name='Source account',
+                                  value=f'```{r["source_account"]}```',
+                                  inline=False)
+                tx_info.add_field(name='Source account Sequence',
+                                  value=f'```{r["source_account_sequence"]}```',
+                                  inline=False)
+                tx_info.add_field(name='Fee account',
+                                  value=f'```{r["fee_account"]}```',
+                                  inline=False)
+                tx_info.add_field(name='Sum of operations',
+                                  value=f'```{r["operation_count"]}```',
+                                  inline=False)
+                tx_info.add_field(name=f'Fees',
+                                  value=f'Charged: {r["fee_charged"]}\n'
+                                        f'Max: {r["max_fee"]} ')
+                tx_info.add_field(name=f'Signers',
+                                  value=f'{signers_data}')
+                await ctx.author.send(embed=tx_info)
+                counter += 1
+
 
     @transactions.command()
     async def single(self, ctx, transaction_hash: str):
