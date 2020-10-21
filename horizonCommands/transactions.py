@@ -40,62 +40,6 @@ class HorizonTransactions(commands.Cog):
         elif title == "account":
             return ':map:'
 
-    async def process_server_response(self, ctx, query: str, data, title: str):
-        emoji = self.get_emoji(title=title)
-        payment_details = Embed(title=f':mag_right: {title} Transactions Details :mag_right: ',
-                                colour=Colour.lighter_gray())
-        payment_details.add_field(name=f'{emoji} {title} {emoji}',
-                                  value=f'```{query}```',
-                                  inline=False)
-        payment_details.add_field(name=f'Full list of request',
-                                  value=f'{data["_links"]["self"]}')
-        await ctx.author.send(embed=payment_details)
-
-        records = data["_embedded"]["records"]
-
-        counter = 0
-        for r in records:
-            if counter <= 2:
-                signers_data = ', '.join(
-                    [f'`{sig}`' for sig in
-                     records["signatures"]])
-
-                tx_info = Embed(title=f'Transaction Details',
-                                colour=Colour.lighter_gray())
-                tx_info.set_author(name=f':id: `{r["id"]}`')
-                tx_info.add_field(name=f'Height',
-                                  value=f'`{r["paging_token"]}`')
-                tx_info.add_field(name=f':ledger:ledger :ledger:',
-                                  value=f'`{r["ledger"]}`')
-                tx_info.add_field(name=f':hash: Transaction Hash :hash:',
-                                  value=f'`{r["hash"]}`')
-                tx_info.add_field(name=f'Memo Type',
-                                  value=f'`{r["memo_type"]}`')
-                tx_info.add_field(name=f':calendar: Date and time :calendar: ',
-                                  value=f'`{r["created_at"]}`')
-                tx_info.add_field(name=f'Paging Token',
-                                  value=f'{r["paging_token"]}',
-                                  inline=False)
-                tx_info.add_field(name='Source account',
-                                  value=f'```{r["source_account"]}```',
-                                  inline=False)
-                tx_info.add_field(name='Source account Sequence',
-                                  value=f'```{r["source_account_sequence"]}```',
-                                  inline=False)
-                tx_info.add_field(name='Fee account',
-                                  value=f'```{r["fee_account"]}```',
-                                  inline=False)
-                tx_info.add_field(name='Sum of operations',
-                                  value=f'```{r["operation_count"]}```',
-                                  inline=False)
-                tx_info.add_field(name=f'Fees',
-                                  value=f'Charged: {r["fee_charged"]}\n'
-                                        f'Max: {r["max_fee"]} ')
-                tx_info.add_field(name=f'Signers',
-                                  value=f'{signers_data}')
-                await ctx.author.send(embed=tx_info)
-                counter += 1
-
     @commands.group()
     async def transactions(self, ctx):
         title = ':incoming_envelope: __Horizon Accounts Operations__ :incoming_envelope:'
@@ -119,18 +63,52 @@ class HorizonTransactions(commands.Cog):
     @transactions.command()
     async def single(self, ctx, transaction_hash: str):
         data = stellar_chain.get_transactions_hash(tx_hash=transaction_hash)
-        await self.process_server_response(ctx=ctx, query=str(transaction_hash), data=data, title='Transaction Hash')
+        sig_str = '\n'.join([f'`{sig}`' for sig in data['signatures']])
+        single_info = Embed(title=f':hash: Transaction Hash Details :hash:',
+                            colour=Colour.dark_orange())
+        single_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                              value=f'[Transaction Hash]({data["_links"]["self"]["href"]})')
+        single_info.add_field(name=':ledger: Ledger :ledger: ',
+                              value=f'`{data["ledger"]}`')
+        single_info.add_field(name=':white_circle: Paging Token :white_circle: ',
+                              value=f'`{data["paging_token"]}`',
+                              inline=True)
+        single_info.add_field(name=f':calendar: Created :calendar: ',
+                              value=f'`{data["created_at"]}`',
+                              inline=False)
+        single_info.add_field(name=f' :map: Source account :map: ',
+                              value=f'`{data["source_account"]}`',
+                              inline=False)
+        single_info.add_field(name=f' :pencil:  Memo :pencil: ',
+                              value=f'`{data["memo"]} (Type: {data["memo_type"]})`',
+                              inline=False)
+        single_info.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
+                              value=sig_str,
+                              inline=False)
+        single_info.add_field(name=':hash: Hash :hash: ',
+                              value=f'`{data["hash"]}`',
+                              inline=False)
+        single_info.add_field(name=':money_with_wings: Fee :money_with_wings: ',
+                              value=f'`{round(int(data["fee_charged"]) / 10000000, 7):.7f} XLM`',
+                              inline=False)
+        single_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                              value=f'[Ledger]({data["_links"]["ledger"]["href"]})\n'
+                                    f'[Transactions]({data["_links"]["transaction"]["href"]})\n'
+                                    f'[Effects]({data["_links"]["effects"]["href"]})\n'
+                                    f'[Operations]({data["_links"]["succeeds"]["href"]}\n)'
+                                    f'[Succeeds]({data["_links"]["succeeds"]["href"]})\n'
+                                    f'[Precedes]({data["_links"]["precedes"]["href"]})')
+        await ctx.author.send(embed=single_info)
 
     @transactions.command()
     async def account(self, ctx, account_address: str):
-
         data = stellar_chain.get_transactions_account(address=account_address)
         if data:
             records = data['_embedded']['records']
             account_info = Embed(title=f':map: Account Transactions Information :map:',
                                  colour=Colour.lighter_gray())
             account_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
-                                   value=f'[Ledger]({data["_links"]["self"]["href"]})')
+                                   value=f'[Account Transactions]({data["_links"]["self"]["href"]})')
             account_info.add_field(name=f'Last :three: entries',
                                    value=f':arrow_double_down: ',
                                    inline=False)
@@ -162,7 +140,7 @@ class HorizonTransactions(commands.Cog):
                                              value=f'`{record["hash"]}`',
                                              inline=False)
                     account_record.add_field(name=':money_with_wings: Fee :money_with_wings: ',
-                                             value=f'`{round(int(record["fee_charged"]) / 10000000,7):.7f} XLM`',
+                                             value=f'`{round(int(record["fee_charged"]) / 10000000, 7):.7f} XLM`',
                                              inline=False)
                     account_record.add_field(name=f':sunrise: Horizon Link :sunrise:',
                                              value=f'[Account]({record["_links"]["account"]["href"]})\n'
