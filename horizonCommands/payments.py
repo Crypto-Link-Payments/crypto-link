@@ -40,7 +40,7 @@ class HorizonPayments(commands.Cog):
         payment_details.add_field(name=':map: Account Address :map: ',
                                   value=f'```{data["account_id"]}```',
                                   inline=False)
-        payment_details.add_field(name=f'Complete List of Payments',
+        payment_details.add_field(name=f':file_folder: Complete List of Payments :file_folder: ',
                                   value=f'{data["_links"]["self"]}')
         await ctx.author.send(embed=payment_details)
 
@@ -58,37 +58,38 @@ class HorizonPayments(commands.Cog):
                 # Some other account action has been done
                 c = Colour.purple()
 
-            payment_info = Embed(title=f'Operation Details',
+            payment_info = Embed(title=f':wrench: Operation Details :wrench: ',
                                  colour=c)
-            payment_info.set_author(name=f':id: {p["id"]}')
-            payment_info.add_field(name=f'Operation Type',
+            payment_info.add_field(name=f':id: ID :id:  ',
+                                   value=f':id: {p["id"]}')
+            payment_info.add_field(name=f':eyes: Operation Type :eyes: ',
                                    value=f'`{p["type"]}`')
-            payment_info.add_field(name=f'Date and time',
+            payment_info.add_field(name=f':calendar: Date and time :calendar: ',
                                    value=f'`{p["created_at"]}`')
-            payment_info.add_field(name=f'Paging Token',
+            payment_info.add_field(name=f':page_facing_up: Paging Token :page_facing_up: ',
                                    value=f'{p["paging_token"]}',
                                    inline=False)
-            payment_info.add_field(name='From',
+            payment_info.add_field(name=':incoming_envelope: From :incoming_envelope: ',
                                    value=f'```{p["from"]}```',
                                    inline=False)
-            payment_info.add_field(name='To',
+            payment_info.add_field(name=':map: To :map: ',
                                    value=f'```{p["to"]}```',
                                    inline=False)
-            payment_info.add_field(name=f'Transaction Hash',
+            payment_info.add_field(name=f' :hash: Transaction Hash :hash:',
                                    value=f'`{p["transaction_hash"]}`')
-            payment_info.add_field(name=f'Explorer Link',
+            payment_info.add_field(name=f':compass: Explorer Link :compass: ',
                                    value=f'{p["_links"]["transaction"]["href"]}')
 
             if not p.get('asset_code'):
-                payment_info.add_field(name='Amount',
+                payment_info.add_field(name=':money_mouth: Amount :money_mouth: ',
                                        value=f'```{p["amount"]} XLM```',
                                        inline=False)
 
             else:
-                payment_info.add_field(name='Asset Issuer',
+                payment_info.add_field(name=':bank:  Asset Issuer :bank: ',
                                        value=f'```{p["asset_issuer"]}```',
                                        inline=False)
-                payment_info.add_field(name='Amount',
+                payment_info.add_field(name=':money_mouth: Amount :money_mouth: ',
                                        value=f'```{p["amount"]} {p["asset_code"]}```',
                                        inline=False)
 
@@ -107,9 +108,9 @@ class HorizonPayments(commands.Cog):
         list_of_commands = [
             {"name": f':map: Get payments by public address :map: ',
              "value": f'`{self.command_string}horizon account payments address <address>`'},
-            {"name": f':ledger:  Get payments based on ledger sequence :ledger:   ',
+            {"name": f':ledger: Get payments based on ledger sequence :ledger:   ',
              "value": f'`{self.command_string}horizon account payments ledger <ledger sequence>``'},
-            {"name": f':hash:  Get payments based on transaction hash :hash:',
+            {"name": f':hash: Get payments based on transaction hash :hash:',
              "value": f'`{self.command_string}horizon account payments transaction <hash of transaction>``'}
         ]
 
@@ -147,7 +148,7 @@ class HorizonPayments(commands.Cog):
 
     @ledger.error
     async def ledger_error(self, ctx, error):
-        if isinstance(error,commands.BadArgument):
+        if isinstance(error, commands.BadArgument):
             message = f'Ledger ID is constructed only with numbers.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
