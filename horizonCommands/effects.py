@@ -8,11 +8,10 @@ from Merchant wallet to their won upon withdrawal.
 from discord.ext import commands
 from discord import Embed, Colour
 from re import sub
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
-from discord.ext.commands.errors import CommandInvokeError
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
+from horizonCommands.horizonAccess.horizon import server
 
 custom_messages = CustomMessages()
 helper = Helpers()
@@ -20,7 +19,6 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
-stellar_chain = StellarWallet()
 
 
 class HorizonEffects(commands.Cog):
@@ -32,6 +30,8 @@ class HorizonEffects(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.server = server
+        self.effect = self.server.effects()
 
     @commands.group()
     async def effects(self, ctx):
@@ -100,7 +100,7 @@ class HorizonEffects(commands.Cog):
     @effects.command()
     async def account(self, ctx, address: str):
         if check_stellar_address(address=address):
-            data = stellar_chain.get_effects_account(address=address)
+            data = self.effect.for_account(account_id=address)
             await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{address}', key_query='Account')
 
         else:
@@ -110,17 +110,17 @@ class HorizonEffects(commands.Cog):
 
     @effects.command()
     async def ledger(self, ctx, ledger_id: int):
-        data = stellar_chain.get_effects_ledger(ledger_id=int(ledger_id))
+        data = self.effect.for_ledger(sequence=ledger_id)
         await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{ledger_id}', key_query='Ledger')
 
     @effects.command()
     async def operation(self, ctx, operation_id: int):
-        data = stellar_chain.get_effects_operation(operation_id=operation_id)
+        data = self.effect.for_operation(operation_id=operation_id)
         await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{operation_id}', key_query='Operation')
 
     @effects.command()
     async def transaction(self, ctx, tx_hash: str):
-        data = stellar_chain.get_effects_transaction(transaction_hash=tx_hash)
+        data = self.effect.for_transaction(transaction_hash=tx_hash)
         await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{tx_hash}', key_query='Transaction Hash')
 
 
