@@ -12,6 +12,7 @@ from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
 from discord.ext.commands.errors import CommandInvokeError
 from cogs.utils.securityChecks import check_stellar_address
+from stellar_sdk.asset import Asset
 from utils.tools import Helpers
 
 custom_messages = CustomMessages()
@@ -51,6 +52,24 @@ class HorizonOffers(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
+
+    @offers.command()
+    async def id(self, offer_id: int):
+        pass
+
+    @offers.command()
+    async def account(self, side: str, address: str):
+        if side == 'seller':
+            data = stellar_chain.get_offers_account_seller(address=address)
+            print(data)
+        elif side == 'buyer':
+            pass
+        else:
+            print('wrong param chosen')
+
+    @offers.command()
+    async def asset(self, issuer_id: str):
+        pass
 
 
 def setup(bot):
