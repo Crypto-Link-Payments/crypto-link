@@ -283,7 +283,14 @@ class StellarWallet:
             desc=True).call()
         return data
 
-    def get_ledger_information(self, ledger_id:int):
+    def get_ledger_information(self, ledger_id: int):
         data = self.server.ledgers().ledger(sequence=ledger_id).call()
         return data
 
+    def get_asset_by_code(self, asset_code: str):
+        data = self.server.assets().for_code(asset_code=asset_code).call()
+        return data
+
+    def get_asset_by_issuer(self, issuer: str):
+        data = self.server.assets().for_issuer(asset_issuer=issuer).call()
+        return data
