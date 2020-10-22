@@ -10,8 +10,10 @@ from discord import Embed, Colour
 from cogs.utils.customCogChecks import has_wallet
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
+from horizonCommands.horizonAccess.horizon import server
 
 from cogs.utils.securityChecks import check_stellar_address
+from backOffice.stellarOnChainHandler import StellarWallet
 from utils.tools import Helpers
 
 custom_messages = CustomMessages()
@@ -20,7 +22,7 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
-stellar_chain = StellarWallet()
+stellar_wallet = StellarWallet()
 
 
 class HorizonAccounts(commands.Cog):
@@ -32,6 +34,8 @@ class HorizonAccounts(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.server = server
+        self.accounts = self.server.accounts()
 
     @commands.group()
     async def accounts(self, ctx):
@@ -55,7 +59,7 @@ class HorizonAccounts(commands.Cog):
         """
         Creates new in-active account on Stellar Network
         """
-        details = stellar_chain.create_stellar_account()
+        details = stellar_wallet.create_stellar_account()
         if details:
             new_account = Embed(title=f':new: Stellar Testnet Account Created :new:',
                                 description=f'You have successfully created new account on {details["network"]}. Do'
@@ -89,7 +93,7 @@ class HorizonAccounts(commands.Cog):
         """
 
         if check_stellar_address(address=address):
-            data = self.backoffice.stellar_wallet.get_account_details(address=address)
+            data = self.accounts.account_id(account_id=address)
             if data:
                 for coin in reversed(data["balances"]):
                     if not coin.get('asset_code'):
