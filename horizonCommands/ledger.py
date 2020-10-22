@@ -9,8 +9,8 @@ from discord.ext import commands
 import requests
 from discord import Embed, Colour
 from cogs.utils.customCogChecks import has_wallet
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
+from horizonCommands.horizonAccess.horizon import server
 
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
@@ -21,7 +21,6 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
-stellar_chain = StellarWallet()
 
 
 class HorizonLedger(commands.Cog):
@@ -33,10 +32,12 @@ class HorizonLedger(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.server = server
+        self.ledg = self.server.ledgers()
 
     @commands.command()
     async def ledger(self, ctx, ledger_number: int):
-        data = self.backoffice.stellar_wallet.get_ledger_information(ledger_id=ledger_number)
+        data = self.ledg.ledger(sequence=ledger_number)
         if data:
             operations_count = len(
                 requests.get(f'https://horizon-testnet.stellar.org/ledgers/{ledger_number}/operations').json()[
@@ -79,7 +80,7 @@ class HorizonLedger(commands.Cog):
                                   value=f'`{data["total_coins"]} XLM`',
                                   inline=False)
             ledger_info.add_field(name=':money_mouth: Base Fee :money_mouth: ',
-                                  value=f'`{format(round(data["base_fee_in_stroops"] / 10000000, 7),".7f")} XLM`',
+                                  value=f'`{format(round(data["base_fee_in_stroops"] / 10000000, 7), ".7f")} XLM`',
                                   inline=False)
             ledger_info.add_field(name=':bath: Fee Pool :bath: ',
                                   value=f'`{data["fee_pool"]} XLM`',
