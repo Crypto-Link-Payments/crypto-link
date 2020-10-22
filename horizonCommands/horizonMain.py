@@ -126,14 +126,14 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def assets(self, ctx):
-        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
+        title = ':gem: __Horizon Assets Operations__ :gem:'
         description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
-            {"name": f'',
-             "value": f''},
-            {"name": f'',
-             "value": f'`{self.command_string}horizon account create`'}
+            {"name": f':regional_indicator_c: Query by code :regional_indicator_c: ',
+             "value": f'`{self.command_string}assets code <alphanumeric string>`'},
+            {"name": f':map: Query by Issuer Address :map:',
+             "value": f'`{self.command_string}assets issuer <Issuer address>`'}
         ]
 
         if ctx.invoked_subcommand is None:
