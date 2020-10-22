@@ -313,3 +313,9 @@ class StellarWallet:
     def get_effects_transaction(self, transaction_hash: str):
         data = self.server.effects().for_transaction(transaction_hash=transaction_hash).call()
         return data
+
+    def get_offers_account_seller(self, address: str):
+        data = self.server.offers().for_seller(seller=address).call()
+        return data
+
+
