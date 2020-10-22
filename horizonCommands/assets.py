@@ -141,7 +141,6 @@ class HorizonAssets(commands.Cog):
 
         if data:
             records = data['_embedded']['records']
-            # If only one asset code found
             if len(records) == 1:
                 await self.send_asset_details(ctx=ctx, data=records[0], request='asset code')
 
@@ -164,7 +163,9 @@ class HorizonAssets(commands.Cog):
     @code.error
     async def code_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
-            print('Code is allowed to constructed only from alphanumeric characters')
+            message = f'Wrong Code provided for asset'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title='Asset Could not be found')
 
 
 def setup(bot):
