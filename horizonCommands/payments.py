@@ -8,11 +8,10 @@ from Merchant wallet to their won upon withdrawal.
 from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.customCogChecks import has_wallet
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
-
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
+from horizonCommands.horizonAccess.horizon import server
 
 custom_messages = CustomMessages()
 helper = Helpers()
@@ -20,7 +19,6 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
-stellar_chain = StellarWallet()
 
 
 class HorizonPayments(commands.Cog):
@@ -32,6 +30,8 @@ class HorizonPayments(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.server = server
+        self.payment = self.server.payments()
 
     @staticmethod
     async def process_server_response(ctx, data, query_key: str, user_query: str):
@@ -135,7 +135,8 @@ class HorizonPayments(commands.Cog):
     @payments.command()
     async def address(self, ctx, address: str):
         if check_stellar_address(address=address):
-            data = self.backoffice.stellar_wallet.get_payments_for_account(address=address)
+            data = self.payment.for_account(account_id=address).order(
+                desc=True).limit(limit=200).call()
             await self.process_server_response(ctx, data=data, query_key='address', user_query=f'{address}')
         else:
             message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
@@ -143,10 +144,11 @@ class HorizonPayments(commands.Cog):
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
     @payments.command()
-    async def ledger(self, ctx, ledger: int):
-        data = self.backoffice.stellar_wallet.get_payments_for_ledger(ledger_sequence=ledger)
+    async def ledger(self, ctx, ledger_sequence: int):
+        data = self.payment.for_ledger(sequence=ledger_sequence).order(
+            desc=True).limit(limit=200).call()
         records = data['_embedded']['records']
-        ledger_info = Embed(title=f':ledger: Ledger {ledger} Information :ledger:',
+        ledger_info = Embed(title=f':ledger: Ledger {ledger_sequence} Information :ledger:',
                             description='Bellow is represent information for requested ledger.',
                             colour=Colour.lighter_gray())
         ledger_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
@@ -185,7 +187,8 @@ class HorizonPayments(commands.Cog):
 
     @payments.command(aliases=["tx"])
     async def transaction(self, ctx, transaction_hash: str):
-        data = self.backoffice.stellar_wallet.get_payments_for_tx(transaction_hash=transaction_hash)
+        data = self.payment.for_transaction(transaction_hash=transaction_hash).order(
+            desc=True).limit(limit=200).call()
         await self.process_server_response(ctx, data=data, query_key='transaction hash',
                                            user_query=f'{transaction_hash}')
 
