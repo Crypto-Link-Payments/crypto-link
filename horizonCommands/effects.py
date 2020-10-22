@@ -60,22 +60,23 @@ class HorizonEffects(commands.Cog):
     @staticmethod
     async def send_effects_to_user(ctx, data: dict, usr_query: str, key_query: str):
         effects = data['_embedded']["records"]
-        horizon_query = data['_links']['self']
+        horizon_query = data['_links']['self']['href']
 
-        effects_info = Embed(title=f'{key_query} Effects ',
+        effects_info = Embed(title=f':fireworks: {key_query} Effects :fireworks:  ',
                              description=f'Bellow are last three effects which happened for {key_query}',
                              colour=Colour.lighter_gray())
-        effects_info.add_field(name=f'Horizon Access',
+        effects_info.add_field(name=f':sunrise: Horizon Access :sunrise: ',
                                value=f'[{key_query} Effects]({horizon_query})')
-        effects_info.add_field(name=f'Last Three Effects',
-                               value=f':arrow_double_down: ')
+        effects_info.add_field(name=f':three: Last Three Effects :three: ',
+                               value=f':arrow_double_down: ',
+                               inline=False)
         await ctx.author.send(embed=effects_info)
 
         counter = 0
         for effect in effects:
-            if counter <=2:
+            if counter <= 2:
                 effect_type = sub('[^a-zA-Z0-9\n\.]', ' ', effect["type"])
-                eff_embed = Embed(title=f':fireworks: {effect_type.capitalize()} Effect :fireworks: ',
+                eff_embed = Embed(title=f':fireworks: {effect_type.capitalize()} :fireworks: ',
                                   colour=Colour.lighter_gray())
                 eff_embed.add_field(name=f':calendar:  Created :calendar: ',
                                     value=f'`{effect["created_at"]}`',
@@ -88,7 +89,7 @@ class HorizonEffects(commands.Cog):
                 eff_embed.add_field(name=f':id: ID :id:',
                                     value=f'`{effect["id"]}`',
                                     inline=False)
-                eff_embed.add_field(name=f':sunrise:  Horizon Link :sunrise: ',
+                eff_embed.add_field(name=f':sunrise: Horizon Link :sunrise: ',
                                     value=f'[Effect Link]({effect["_links"]["operation"]["href"]})',
                                     inline=False)
                 await ctx.author.send(embed=eff_embed)
@@ -100,7 +101,7 @@ class HorizonEffects(commands.Cog):
     async def account(self, ctx, address: str):
         if check_stellar_address(address=address):
             data = stellar_chain.get_effects_account(address=address)
-            await self.send_effects_to_user(ctx=ctx,data=data, usr_query=f'{address}', key_query='Account')
+            await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{address}', key_query='Account')
 
         else:
             message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
@@ -109,49 +110,8 @@ class HorizonEffects(commands.Cog):
 
     @effects.command()
     async def ledger(self, ctx, ledger_id: int):
-        """
-        {'_embedded': {'records': [{'_links': {'operation': {'href': 'https://horizon-testnet.stellar.org/operations/2582078503784449'},
-                                       'precedes': {'href': 'https://horizon-testnet.stellar.org/effects?order=asc&cursor=2582078503784449-1'},
-                                       'succeeds': {'href': 'https://horizon-testnet.stellar.org/effects?order=desc&cursor=2582078503784449-1'}},
-                            'account': 'GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO',
-                            'created_at': '2020-09-05T07:01:06Z',
-                            'id': '0002582078503784449-0000000001',
-                            'paging_token': '2582078503784449-1',
-                            'starting_balance': '10000.0000000',
-                            'type': 'account_created',
-                            'type_i': 0},
-                           {'_links': {'operation': {'href': 'https://horizon-testnet.stellar.org/operations/2582078503784449'},
-                                       'precedes': {'href': 'https://horizon-testnet.stellar.org/effects?order=asc&cursor=2582078503784449-2'},
-                                       'succeeds': {'href': 'https://horizon-testnet.stellar.org/effects?order=desc&cursor=2582078503784449-2'}},
-                            'account': 'GAIH3ULLFQ4DGSECF2AR555KZ4KNDGEKN4AFI4SU2M7B43MGK3QJZNSR',
-                            'amount': '10000.0000000',
-                            'asset_type': 'native',
-                            'created_at': '2020-09-05T07:01:06Z',
-                            'id': '0002582078503784449-0000000002',
-                            'paging_token': '2582078503784449-2',
-                            'type': 'account_debited',
-                            'type_i': 3},
-                           {'_links': {'operation': {'href': 'https://horizon-testnet.stellar.org/operations/2582078503784449'},
-                                       'precedes': {'href': 'https://horizon-testnet.stellar.org/effects?order=asc&cursor=2582078503784449-3'},
-                                       'succeeds': {'href': 'https://horizon-testnet.stellar.org/effects?order=desc&cursor=2582078503784449-3'}},
-                            'account': 'GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO',
-                            'created_at': '2020-09-05T07:01:06Z',
-                            'id': '0002582078503784449-0000000003',
-                            'key': '',
-                            'paging_token': '2582078503784449-3',
-                            'public_key': 'GAGJZJPP27DJ6M5T2UVZAMP3CLIZKXDCOXU7UNYWZBAX4XXR5J5DLDZO',
-                            'type': 'signer_created',
-                            'type_i': 10,
-                            'weight': 1}]},
- '_links': {'next': {'href': 'https://horizon-testnet.stellar.org/ledgers/601187/effects?cursor=2582078503784449-3&limit=10&order=asc'},
-            'prev': {'href': 'https://horizon-testnet.stellar.org/ledgers/601187/effects?cursor=2582078503784449-1&limit=10&order=desc'},
-            'self': {'href': 'https://horizon-testnet.stellar.org/ledgers/601187/effects?cursor=&limit=10&order=asc'}}}
-
-        """
-
         data = stellar_chain.get_effects_ledger(ledger_id=int(ledger_id))
-        from pprint import pprint
-        pprint(data)
+        await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{ledger_id}', key_query='Ledger')
 
     @effects.command()
     async def operation(self, operation_id: int):
