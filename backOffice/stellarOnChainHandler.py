@@ -299,17 +299,17 @@ class StellarWallet:
         return data
 
     def get_effects_ledger(self, ledger_id: int):
-        data = self.server.effects().for_ledger(sequence=ledger_id)
+        data = self.server.effects().for_ledger(sequence=ledger_id).call()
         return data
 
     def get_effects_account(self, address: str):
-        data = self.server.effects().for_account(account_id=address)
+        data = self.server.effects().for_account(account_id=address).call()
         return data
 
     def get_effects_operation(self, operation_id: int):
-        data = self.server.effects().for_operation(operation_id=operation_id)
+        data = self.server.effects().for_operation(operation_id=operation_id).call()
         return data
 
     def get_effects_transaction(self, transaction_hash: str):
-        data = self.server.effects().for_operation(operation_id=transaction_hash)
+        data = self.server.effects().for_operation(operation_id=transaction_hash).call()
         return data
