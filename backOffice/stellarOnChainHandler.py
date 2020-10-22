@@ -311,5 +311,5 @@ class StellarWallet:
         return data
 
     def get_effects_transaction(self, transaction_hash: str):
-        data = self.server.effects().for_operation(operation_id=transaction_hash).call()
+        data = self.server.effects().for_transaction(transaction_hash=transaction_hash).call()
         return data
