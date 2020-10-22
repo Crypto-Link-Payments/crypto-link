@@ -318,4 +318,25 @@ class StellarWallet:
         data = self.server.offers().for_seller(seller=address).call()
         return data
 
+    def get_operations_operation(self,operation_id):
+        data = self.server.operations().operation(operation_id=operation_id).call()
+        return data
+
+    def get_operations_account(self,address:str):
+        data = self.server.operations().for_account(account_id=address).call()
+        return data
+
+    def get_operations_ledger(self, ledger: id):
+        data = self.server.operations().for_ledger(sequence=ledger).call()
+        return data
+
+    def get_operations_transaction(self, tx_hash:str):
+        data = self.server.operations().for_transaction(transaction_hash=tx_hash).call()
+        return data
+
+
+
+
+
+
 
