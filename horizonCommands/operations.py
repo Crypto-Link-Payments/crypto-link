@@ -7,13 +7,9 @@ from Merchant wallet to their won upon withdrawal.
 
 from discord.ext import commands
 from discord import Embed, Colour
-from re import sub
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
-from discord.ext.commands.errors import CommandInvokeError
-from cogs.utils.securityChecks import check_stellar_address
-from stellar_sdk.asset import Asset
 from utils.tools import Helpers
+from horizonCommands.horizonAccess.horizon import server
 
 custom_messages = CustomMessages()
 helper = Helpers()
@@ -21,7 +17,6 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
-stellar_chain = StellarWallet()
 
 
 class HorizonOperations(commands.Cog):
@@ -33,6 +28,8 @@ class HorizonOperations(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.server = server
+        self.op = self.server.operations()
 
     @commands.group()
     async def operations(self, ctx):
@@ -60,23 +57,20 @@ class HorizonOperations(commands.Cog):
 
     @operations.command()
     async def operation(self, operation_id):
-        data = stellar_chain.get_operations_operation(operation_id=operation_id)
+        data = self.op.operation(operation_id=operation_id).cal()
         pass
 
     @operations.command()
-    async def account(self, address: str):
-        data = stellar_chain.get_operations_account(address=address)
-        pass
+    async def account(self, ctx, address: str):
+        data = self.op.for_account(account_id=address).call()
 
     @operations.command()
     async def ledger(self, ledger_id: int):
-        data = stellar_chain.get_operations_ledger(ledger=ledger_id)
-        pass
+        data = self.op.for_ledger(sequence=ledger_id).call()
 
     @operations.command()
     async def transaction(self, ctx, tx_hash: str):
-        data = stellar_chain.get_operations_transaction(tx_hash=tx_hash)
-        pass
+        data = self.op.for_transaction(transaction_hash=tx_hash).call()
 
 
 def setup(bot):
