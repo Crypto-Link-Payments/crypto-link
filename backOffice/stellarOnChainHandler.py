@@ -297,3 +297,8 @@ class StellarWallet:
     def get_asset_by_issuer(self, issuer: str):
         data = self.server.assets().for_issuer(asset_issuer=issuer).call()
         return data
+
+
+from pprint import pprint
+
+pprint(StellarWallet().get_asset_by_issuer(issuer='GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY'))
