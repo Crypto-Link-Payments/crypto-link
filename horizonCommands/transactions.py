@@ -7,11 +7,9 @@ from Merchant wallet to their won upon withdrawal.
 
 from discord.ext import commands
 from discord import Embed, Colour
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
-
-from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
+from horizonCommands.horizonAccess.horizon import server
 
 custom_messages = CustomMessages()
 helper = Helpers()
@@ -19,7 +17,6 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
-stellar_chain = StellarWallet()
 
 
 class HorizonTransactions(commands.Cog):
@@ -31,6 +28,8 @@ class HorizonTransactions(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.server = server
+        self.txs = self.server.transactions()
 
     def get_emoji(self, title):
         if title == 'ledger':
@@ -62,7 +61,7 @@ class HorizonTransactions(commands.Cog):
 
     @transactions.command()
     async def single(self, ctx, transaction_hash: str):
-        data = stellar_chain.get_transactions_hash(tx_hash=transaction_hash)
+        data = self.txs.transaction(transaction_hash=transaction_hash).call()
         sig_str = '\n'.join([f'`{sig}`' for sig in data['signatures']])
         single_info = Embed(title=f':hash: Transaction Hash Details :hash:',
                             colour=Colour.dark_orange())
@@ -102,7 +101,7 @@ class HorizonTransactions(commands.Cog):
 
     @transactions.command()
     async def account(self, ctx, account_address: str):
-        data = stellar_chain.get_transactions_account(address=account_address)
+        data = self.txs.for_account(account_id=account_address).call()
         if data:
             records = data['_embedded']['records']
             account_info = Embed(title=f':map: Account Transactions Information :map:',
@@ -159,7 +158,7 @@ class HorizonTransactions(commands.Cog):
 
     @transactions.command()
     async def ledger(self, ctx, ledger_id: int):
-        data = stellar_chain.get_transactions_ledger(ledger_id=ledger_id)
+        data = self.txs.for_ledger(sequence=ledger_id).call()
         if data:
             records = data['_embedded']['records']
             ledger_info = Embed(title=f':ledger: Ledger {ledger_id} Information :ledger:',
