@@ -11,7 +11,7 @@ sys.path.append(project_path)
 from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions, \
     ChangeTrust
 
-from stellar_sdk.exceptions import NotFoundError
+from stellar_sdk.exceptions import NotFoundError, BadRequestError
 
 from utils.tools import Helpers
 
@@ -288,8 +288,11 @@ class StellarWallet:
         return data
 
     def get_asset_by_code(self, asset_code: str):
-        data = self.server.assets().for_code(asset_code=asset_code).call()
-        return data
+        try:
+            data = self.server.assets().for_code(asset_code=asset_code).call()
+            return data
+        except BadRequestError as e:
+            return e
 
     def get_asset_by_issuer(self, issuer: str):
         data = self.server.assets().for_issuer(asset_issuer=issuer).call()
