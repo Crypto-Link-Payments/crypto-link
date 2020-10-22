@@ -298,7 +298,18 @@ class StellarWallet:
         data = self.server.assets().for_issuer(asset_issuer=issuer).call()
         return data
 
+    def get_effects_ledger(self, ledger_id: int):
+        data = self.server.effects().for_ledger(sequence=ledger_id)
+        return data
 
-from pprint import pprint
+    def get_effects_account(self, address: str):
+        data = self.server.effects().for_account(account_id=address)
+        return data
 
-pprint(StellarWallet().get_asset_by_issuer(issuer='GCNY5OXYSY4FKHOPT2SPOQZAOEIGXB5LBYW3HVU3OWSTQITS65M5RCNY'))
+    def get_effects_operation(self, operation_id: int):
+        data = self.server.effects().for_operation(operation_id=operation_id)
+        return data
+
+    def get_effects_transaction(self, transaction_hash: str):
+        data = self.server.effects().for_operation(operation_id=transaction_hash)
+        return data
