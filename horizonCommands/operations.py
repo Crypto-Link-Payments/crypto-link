@@ -60,18 +60,22 @@ class HorizonOperations(commands.Cog):
 
     @operations.command()
     async def operation(self, operation_id):
+        data = stellar_chain.get_operations_operation(operation_id=operation_id)
         pass
 
     @operations.command()
     async def account(self, address: str):
+        data = stellar_chain.get_operations_account(address=address)
         pass
 
     @operations.command()
     async def ledger(self, ledger_id: int):
+        data = stellar_chain.get_operations_ledger(ledger=ledger_id)
         pass
 
     @operations.command()
-    async def transactions(self, ctx, tx_hash: str):
+    async def transaction(self, ctx, tx_hash: str):
+        data = stellar_chain.get_operations_transaction(tx_hash=tx_hash)
         pass
 
 
