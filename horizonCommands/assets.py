@@ -7,9 +7,9 @@ from Merchant wallet to their won upon withdrawal.
 
 from discord.ext import commands
 from discord import Embed, Colour
-from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
 from discord.ext.commands.errors import CommandInvokeError
+from horizonCommands.horizonAccess.horizon import server
 from utils.tools import Helpers
 
 custom_messages = CustomMessages()
@@ -18,8 +18,6 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
-stellar_chain = StellarWallet()
-
 
 class HorizonAssets(commands.Cog):
     """
@@ -30,6 +28,8 @@ class HorizonAssets(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.server = server
+        self.asset = self.server.assets()
 
     @staticmethod
     async def send_asset_details(ctx, data, request: str):
@@ -136,8 +136,8 @@ class HorizonAssets(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @assets.command()
-    async def code(self, ctx, code: str):
-        data = stellar_chain.get_asset_by_code(asset_code=code.upper())
+    async def code(self, ctx, asset_code: str):
+        data = self.asset.for_code(asset_code=asset_code).call()
 
         if data:
             records = data['_embedded']['records']
@@ -147,12 +147,12 @@ class HorizonAssets(commands.Cog):
             else:
                 await self.send_multi_asset_case(ctx=ctx, data=data)
         else:
-            message = f'No Asset with code {code} found. Please try again'
+            message = f'No Asset with code {asset_code} found. Please try again'
             print(message)
 
     @assets.command()
     async def issuer(self, ctx, issuer_addr: str):
-        data = stellar_chain.get_asset_by_issuer(issuer=issuer_addr)
+        data = self.asset.for_issuer(asset_issuer=issuer_addr).call()
         if data:
             await self.send_asset_details(ctx=ctx, data=data, request='issuer')
         else:
