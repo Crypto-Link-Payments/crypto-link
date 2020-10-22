@@ -114,12 +114,14 @@ class HorizonEffects(commands.Cog):
         await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{ledger_id}', key_query='Ledger')
 
     @effects.command()
-    async def operation(self, operation_id: int):
-        pass
+    async def operation(self, ctx, operation_id: int):
+        data = stellar_chain.get_effects_operation(operation_id=operation_id)
+        await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{operation_id}', key_query='Operation')
 
     @effects.command()
-    async def transaction(self, tx_hash: str):
-        pass
+    async def transaction(self, ctx, tx_hash: str):
+        data = stellar_chain.get_effects_transaction(transaction_hash=tx_hash)
+        await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{tx_hash}', key_query='Transaction Hash')
 
 
 def setup(bot):
