@@ -196,14 +196,19 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def operations(self, ctx):
-        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
-        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+        title = ':wrench: __Horizon Operations__ :wrench:'
+        description = 'Representation of all available commands available to interact with ***Operations*** Endpoint on ' \
                       'Stellar Horizon Server'
+
         list_of_commands = [
-            {"name": f'',
-             "value": f''},
-            {"name": f'',
-             "value": f'`{self.command_string}horizon account create`'}
+            {"name": f':tools: Single Operation :tools: ',
+             "value": f'`{self.command_string}operations operation <operation id>`'},
+            {"name": f' :ledger: Operation by Ledger :ledger: ',
+             "value": f'`{self.command_string}operations ledger <ledger id>`'},
+            {"name": f' :map: Operation by Account :map: ',
+             "value": f'`{self.command_string}operations account <Account public address>`'},
+            {"name": f' :hash: Operations for transaction :hash:',
+             "value": f'`{self.command_string}operations transaction <transaction hash>`'}
         ]
 
         if ctx.invoked_subcommand is None:
