@@ -38,13 +38,13 @@ class HorizonOffers(commands.Cog):
         """
         Effects entry point to horizon endpoints
         """
-        title = ':fireworks:  __Horizon Effects Queries__ :fireworks: '
+        title = ':handshake: __Horizon Offers Queries__ :handshake:  '
         description = 'Representation of all available commands available to interact with ***Effects*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
-            {"name": f':map: Single Offer Query :map:',
+            {"name": f':id: Single Offer Query :id:',
              "value": f'`{self.command_string}offers single <offer id>`'},
-            {"name": f' :ledger: Offers by Account:ledger: ',
+            {"name": f' :map: Offers by Account :map: ',
              "value": f'`{self.command_string}offers account <Account public address>`'}
         ]
         if ctx.invoked_subcommand is None:
@@ -53,13 +53,8 @@ class HorizonOffers(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     async def send_offer_info(self, ctx, offer: dict):
-
         offer_details = Embed(title=f':id: {offer["id"]} :id:',
                               colour=Colour.lighter_gray())
-        offer_details.add_field(name=f':sunrise: Horizon Links :sunrise:',
-                                value=f'[Offer]({offer["_links"]["self"]["href"]})\n'
-                                      f'[Maker]({offer["_links"]["offer_maker"]["href"]})',
-                                inline=False)
         offer_details.add_field(name=f':calendar: Last Modified :calendar: ',
                                 value=f'{offer["last_modified_time"]}',
                                 inline=False)
@@ -70,15 +65,15 @@ class HorizonOffers(commands.Cog):
                                 value=f'```{offer["seller"]}```',
                                 inline=False)
 
+        # Processing offer
         selling_string = ''
-
         if offer["selling"]["asset_type"] != 'native':
             selling_string += f'{offer["amount"]} {offer["selling"]["asset_code"]} @ '
         else:
             selling_string += f'{offer["amount"]} XLM @ '
 
         if offer['buying']['asset_type'] != 'native':
-            selling_string += f' {offer["price"]} {offer["buying"]["asset_code"]}/1'
+            selling_string += f' {offer["price"]} {offer["buying"]["asset_code"]}'
 
         else:
             selling_string += f' {offer["price"]}/XLM @'
@@ -87,17 +82,17 @@ class HorizonOffers(commands.Cog):
                                 value=f'`{selling_string}`',
                                 inline=False)
 
-        # Process issuing account
+        # Processing Issuers
         asset_issuers = ''
         if offer['buying']['asset_type'] != 'native':
-            asset_issuers += f':gem: {offer["buying"]["asset_code"]} :gem:\n' \
+            asset_issuers += f':gem: {offer["buying"]["asset_code"]} (Buying) :gem:\n' \
                              f'```{offer["buying"]["asset_issuer"]}```'
         else:
-            asset_issuers += f':coin:  XLM :coin: \n' \
+            asset_issuers += f':coin: XLM :coin: \n' \
                              f'```Native Currency```'
 
         if offer['selling']['asset_type'] != 'native':
-            asset_issuers += f'\n:gem: Selling {offer["selling"]["asset_code"]} :gem:\n' \
+            asset_issuers += f'\n:gem: Selling {offer["selling"]["asset_code"]} (Selling) :gem:\n' \
                              f'```{offer["selling"]["asset_issuer"]}```\n'
         else:
             asset_issuers += f':coin: XLM :coin: \n' \
@@ -105,6 +100,11 @@ class HorizonOffers(commands.Cog):
 
         offer_details.add_field(name=f':bank: Asset Issuers :bank:',
                                 value=asset_issuers,
+                                inline=False)
+
+        offer_details.add_field(name=f':sunrise: Horizon Links :sunrise:',
+                                value=f'[Offer Maker]({offer["_links"]["offer_maker"]["href"]}) \n'
+                                      f'[Offer Link]({offer["_links"]["self"]["href"]})',
                                 inline=False)
 
         await ctx.author.send(embed=offer_details)
@@ -116,7 +116,26 @@ class HorizonOffers(commands.Cog):
 
     @offers.command()
     async def address(self, ctx, address: str):
-        data = self.offer.account(account_id=address).limit(100).order(desc=True)
+        data = self.offer.account(account_id=address).limit(100).order(desc=True).call()
+
+        address_details = Embed(title=f':clipboard: Offers By Address :clipboard: ',
+                                colour=Colour.lighter_gray())
+        address_details.add_field(name=f':map: Address :map:',
+                                  value=f'```{address}```',
+                                  inline=False)
+        address_details.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                  value=f'[Offers for account]({data["_links"]["self"]["href"]})',
+                                  inline=False)
+        address_details.add_field(name=f':three: Last 3 Updated Offers :three:',
+                                  value=f':arrow_double_down:',
+                                  inline=False)
+        await ctx.author.send(embed=address_details)
+
+        counter = 0
+        for offer in data['_embedded']["records"]:
+            if counter <= 2:
+                await self.send_offer_info(ctx=ctx, offer=offer)
+                counter += 1
 
 
 def setup(bot):
