@@ -7,13 +7,10 @@ from Merchant wallet to their won upon withdrawal.
 
 from discord.ext import commands
 from discord import Embed, Colour
-from re import sub
 from backOffice.stellarOnChainHandler import StellarWallet
 from cogs.utils.systemMessaages import CustomMessages
-from discord.ext.commands.errors import CommandInvokeError
-from cogs.utils.securityChecks import check_stellar_address
-from stellar_sdk.asset import Asset
 from utils.tools import Helpers
+from horizonCommands.horizonAccess.horizon import server
 
 custom_messages = CustomMessages()
 helper = Helpers()
@@ -33,6 +30,8 @@ class HorizonOffers(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.server = server
+        self.offer = self.server.offers()
 
     @commands.group()
     async def offers(self, ctx):
@@ -53,23 +52,38 @@ class HorizonOffers(commands.Cog):
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @offers.command()
-    async def id(self, offer_id: int):
-        pass
+    async def offer_info(self, ctx, offer: dict):
+        offer_details = Embed(title=f':id: {offer["id"]} :id:',
+                              colour=Colour.lighter_gray())
+        offer_details.add_field(name=f':sunrise: Horizon Links :sunrise:',
+                                value=f'[Offer]({offer["_links"]["self"]["href"]})\n'
+                                      f'[Maker]({offer["_links"]["offer_maker"]["href"]})',
+                                inline=False)
+        offer_details.add_field(name=f':calendar: Last Modified :calendar: ',
+                                value=f'{offer["last_modified_time"]}',
+                                inline=False)
+        offer_details.add_field(name=f':white_circle: Paging Token :white_circle:',
+                                value=f'{offer["paging_token"]}',
+                                inline=False)
+        offer_details.add_field(name=f':map: Seller Details :map:',
+                                value=f'```{offer["seller"]}```',
+                                inline=False)
+        offer_details.add_field(name=f':gem: Offer :gem:',
+                                value=f'{offer["amount"]} {offer["selling"]["asset_code"]} @ '
+                                      f'{offer["price"]}/{offer["buying"]["asset_code"]}',
+                                inline=False)
+        offer_details.add_field(name=f':bank: Asset Issuers :bank:',
+                                value=f':gem: {offer["selling"]["asset_code"]} :gem:\n'
+                                      f'```{offer["selling"]["asset_issuer"]}```\n'
+                                      f':gem: {offer["selling"]["asset_code"]} :gem:\n'
+                                      f'```{offer["buying"]["asset_issuer"]}```\n',
+                                inline=False)
+        await ctx.author.send(embed=offer_details)
 
     @offers.command()
-    async def account(self, side: str, address: str):
-        if side == 'seller':
-            data = stellar_chain.get_offers_account_seller(address=address)
-            print(data)
-        elif side == 'buyer':
-            pass
-        else:
-            print('wrong param chosen')
-
-    @offers.command()
-    async def asset(self, issuer_id: str):
-        pass
+    async def single(self, ctx, offer_id: int):
+        data = self.offer.offer(offer_id=offer_id)
+        await self.offer_info(ctx=ctx, offer=data)
 
 
 def setup(bot):
