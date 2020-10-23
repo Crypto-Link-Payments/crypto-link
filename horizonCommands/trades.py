@@ -106,7 +106,7 @@ class HorizonTrades(commands.Cog):
         data = self.trade.for_account(account_id=address).limit(100).order(desc=True).call()
         trades = data["_embedded"]["records"]
 
-        address_details = Embed(title=f':currency_exchange: Trades for Account:currency_exchange:',
+        address_details = Embed(title=f':currency_exchange: Trades for Account :currency_exchange:',
                                 colour=Colour.lighter_gray())
         address_details.add_field(name=f':map: Address :map:',
                                   value=f'```{address}```',
@@ -134,8 +134,19 @@ class HorizonTrades(commands.Cog):
     @trades.command()
     async def offer(self, ctx, offer_id: int):
         data = self.trade.for_offer(offer_id=offer_id).limit(100).order(desc=True).call()
-        from pprint import pprint
-        pprint(data)
+
+        offer_details = Embed(title=f':currency_exchange: Trades for Offer :currency_exchange:',
+                              colour=Colour.lighter_gray())
+        offer_details.add_field(name=f':id:',
+                                value=f'```{offer_id}```',
+                                inline=False)
+        offer_details.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                value=f'[Trades for Offer]({data["_links"]["self"]["href"]})',
+                                inline=False)
+        await ctx.author.send(embed=offer_details)
+
+        for t in data["_embedded"]["records"]:
+            await self.send_trade_details(ctx=ctx, trade=t)
 
 
 def setup(bot):
