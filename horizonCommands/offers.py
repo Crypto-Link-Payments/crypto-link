@@ -52,7 +52,8 @@ class HorizonOffers(commands.Cog):
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    async def offer_info(self, ctx, offer: dict):
+    async def send_offer_info(self, ctx, offer: dict):
+
         offer_details = Embed(title=f':id: {offer["id"]} :id:',
                               colour=Colour.lighter_gray())
         offer_details.add_field(name=f':sunrise: Horizon Links :sunrise:',
@@ -68,22 +69,54 @@ class HorizonOffers(commands.Cog):
         offer_details.add_field(name=f':map: Seller Details :map:',
                                 value=f'```{offer["seller"]}```',
                                 inline=False)
-        offer_details.add_field(name=f':gem: Offer :gem:',
-                                value=f'{offer["amount"]} {offer["selling"]["asset_code"]} @ '
-                                      f'{offer["price"]}/{offer["buying"]["asset_code"]}',
+
+        selling_string = ''
+
+        if offer["selling"]["asset_type"] != 'native':
+            selling_string += f'{offer["amount"]} {offer["selling"]["asset_code"]} @ '
+        else:
+            selling_string += f'{offer["amount"]} XLM @ '
+
+        if offer['buying']['asset_type'] != 'native':
+            selling_string += f' {offer["price"]} {offer["buying"]["asset_code"]}/1'
+
+        else:
+            selling_string += f' {offer["price"]}/XLM @'
+
+        offer_details.add_field(name=f':handshake: Offer Details :handshake: ',
+                                value=f'`{selling_string}`',
                                 inline=False)
+
+        # Process issuing account
+        asset_issuers = ''
+        if offer['buying']['asset_type'] != 'native':
+            asset_issuers += f':gem: {offer["buying"]["asset_code"]} :gem:\n' \
+                             f'```{offer["buying"]["asset_issuer"]}```'
+        else:
+            asset_issuers += f':coin:  XLM :coin: \n' \
+                             f'```Native Currency```'
+
+        if offer['selling']['asset_type'] != 'native':
+            asset_issuers += f'\n:gem: Selling {offer["selling"]["asset_code"]} :gem:\n' \
+                             f'```{offer["selling"]["asset_issuer"]}```\n'
+        else:
+            asset_issuers += f':coin: XLM :coin: \n' \
+                             f'```Native Currency```'
+
         offer_details.add_field(name=f':bank: Asset Issuers :bank:',
-                                value=f':gem: {offer["selling"]["asset_code"]} :gem:\n'
-                                      f'```{offer["selling"]["asset_issuer"]}```\n'
-                                      f':gem: {offer["selling"]["asset_code"]} :gem:\n'
-                                      f'```{offer["buying"]["asset_issuer"]}```\n',
+                                value=asset_issuers,
                                 inline=False)
+
         await ctx.author.send(embed=offer_details)
 
     @offers.command()
     async def single(self, ctx, offer_id: int):
-        data = self.offer.offer(offer_id=offer_id)
-        await self.offer_info(ctx=ctx, offer=data)
+        data = self.offer.offer(offer_id=offer_id).call()
+        await self.send_offer_info(ctx=ctx, offer=data)
+
+    @offers.command()
+    async def address(self, ctx, address: str):
+        data = self.offer.account(account_id=address).limit(100).order(desc=True)
 
 
 def setup(bot):
