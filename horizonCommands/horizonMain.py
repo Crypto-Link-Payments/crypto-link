@@ -72,8 +72,7 @@ class HorizonAccessCommands(commands.Cog):
 
             {"name": f':bar_chart: Trade Aggregation :chart_with_upwards_trend: ',
              "value": f'`{self.command_string}horizon aggregations`'},
-
-            {"name": f':chart_with_upwards_trend: Trades :chart_with_upwards_trend:',
+            {"name": f':currency_exchange: Trades :currency_exchange:',
              "value": f'`{self.command_string}horizon trades`'},
 
             {"name": f':incoming_envelope: Transactions :incoming_envelope: ',
@@ -269,14 +268,14 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def trades(self, ctx):
-        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
-        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+        title = ':currency_exchange:  __Horizon Trades Queries__ :currency_exchange:   '
+        description = 'Representation of all available commands available to interact with ***Trades*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
-            {"name": f'',
-             "value": f''},
-            {"name": f'',
-             "value": f'`{self.command_string}horizon account create`'}
+            {"name": f':map: Trades for Account :map:',
+             "value": f'`{self.command_string}trades account <address>`'},
+            {"name": f':id: Trades by Offer ID :id:  ',
+             "value": f'`{self.command_string}trades offer <offer id>`'}
         ]
 
         if ctx.invoked_subcommand is None:
