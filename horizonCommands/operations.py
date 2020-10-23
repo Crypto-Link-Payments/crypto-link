@@ -80,8 +80,6 @@ class HorizonOperations(commands.Cog):
         counter = 0
         for op in operations:
             if counter <= 2:
-                from pprint import pprint
-                pprint(op)
                 effect_type = sub('[^a-zA-Z0-9\n\.]', ' ', op["type"])
                 eff_embed = Embed(title=f':wrench: {effect_type.capitalize()} :wrench: ',
                                   description=f':id: {op["id"]}',
