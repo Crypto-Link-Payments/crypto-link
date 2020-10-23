@@ -43,7 +43,7 @@ class HorizonTrades(commands.Cog):
         list_of_commands = [
             {"name": f':map: Trades for Account :map:',
              "value": f'`{self.command_string}trades account <address>`'},
-            {"name": f':microphone2: Trades by Offer :microphone2:  ',
+            {"name": f':id: Trades by Offer ID :id:  ',
              "value": f'`{self.command_string}trades offer <offer id>`'}
         ]
         if ctx.invoked_subcommand is None:
@@ -124,12 +124,6 @@ class HorizonTrades(commands.Cog):
             if counter <= 2:
                 await self.send_trade_details(ctx=ctx, trade=t)
                 counter += 1
-
-    @trades.command()
-    async def pair(self, ctx, base: str, counter: str):
-        data = self.trade.for_asset_pair(base=base, counter=counter).limit(100).order(desc=True).call()
-        from pprint import pprint
-        pprint(data)
 
     @trades.command()
     async def offer(self, ctx, offer_id: int):
