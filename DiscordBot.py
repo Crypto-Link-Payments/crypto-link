@@ -18,7 +18,8 @@ horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.transactions',
                 'horizonCommands.assets',
                 'horizonCommands.effects',
-                'horizonCommands.operations']
+                'horizonCommands.operations',
+                'horizonCommands.offers']
 
 
 class DiscordBot(commands.Bot):
