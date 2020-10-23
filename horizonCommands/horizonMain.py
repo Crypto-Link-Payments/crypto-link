@@ -179,14 +179,14 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def offers(self, ctx):
-        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
-        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+        title = ':handshake:  __Horizon Offers Queries__ :handshake:  '
+        description = 'Representation of all available commands available to interact with ***Effects*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
-            {"name": f'',
-             "value": f''},
-            {"name": f'',
-             "value": f'`{self.command_string}horizon account create`'}
+            {"name": f':id: Single Offer Query :id:',
+             "value": f'`{self.command_string}offers single <offer id>`'},
+            {"name": f' :map: Offers by Account :map: ',
+             "value": f'`{self.command_string}offers account <Account public address>`'}
         ]
 
         if ctx.invoked_subcommand is None:
