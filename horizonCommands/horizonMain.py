@@ -236,16 +236,20 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def paths(self, ctx):
-        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
-        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+        """
+        Paths entry point to horizon endpoints
+        """
+        title = ':railway_track:  __Horizon Trades Queries__ :railway_track:'
+        description = 'Representation of all available commands available to interact with ***Paths*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
-            {"name": f'',
-             "value": f''},
-            {"name": f'',
-             "value": f'`{self.command_string}horizon account create`'}
+            {"name": f':service_dog: Find Strict Send Payment Paths',
+             "value": f'`{self.command_string}paths send <to address> <amount> <asset> <issuer>`\n'
+                      f'***__Note__***: Issuer can be None if asset is Native'},
+            {"name": f':mag_right:  Find Strict Receive Payment Paths :mag:',
+             "value": f'`{self.command_string}paths find <from address> <amount> <asset_codes> <asset isser>`\n'
+                      f'***__Note__***: Issuer can be None if asset is Native'},
         ]
-
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
