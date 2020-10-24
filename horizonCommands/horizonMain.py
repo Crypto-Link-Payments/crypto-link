@@ -239,7 +239,7 @@ class HorizonAccessCommands(commands.Cog):
         """
         Paths entry point to horizon endpoints
         """
-        title = ':railway_track:  __Horizon Trades Queries__ :railway_track:'
+        title = ':railway_track:  __Horizon Paths Queries__ :railway_track:'
         description = 'Representation of all available commands available to interact with ***Paths*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
@@ -308,15 +308,6 @@ class HorizonAccessCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
-
-    @horizon.error
-    async def asset_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
-            message = f'In order to user Stellar Expert Commands you need to have wallet registered in the system!. Use' \
-                      f' `{self.command_string}register`'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
-
 
 def setup(bot):
     bot.add_cog(HorizonAccessCommands(bot))
