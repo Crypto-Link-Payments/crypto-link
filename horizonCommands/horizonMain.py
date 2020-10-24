@@ -216,15 +216,17 @@ class HorizonAccessCommands(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @horizon.group()
-    async def orderbook(self, ctx):
-        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
-        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
+    async def book(self, ctx):
+
+        title = ':book:  __Horizon Order Book Queries__ :book: '
+        description = 'Representation of all available commands available to interact with ***Order Book' \
+                      '*** Endpoint on ' \
                       'Stellar Horizon Server'
+
         list_of_commands = [
-            {"name": f'',
-             "value": f''},
-            {"name": f'',
-             "value": f'`{self.command_string}horizon account create`'}
+            {"name": f':currency_exchange:  Query Order Book for pair :currency_exchange: ',
+             "value": f'`{self.command_string}book details <selling asset> <buying asset>`\n'
+                      f'__Note__: Assets can be represented as a code or issuer address'},
         ]
 
         if ctx.invoked_subcommand is None:
