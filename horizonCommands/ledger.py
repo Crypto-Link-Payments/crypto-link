@@ -37,7 +37,7 @@ class HorizonLedger(commands.Cog):
 
     @commands.command()
     async def ledger(self, ctx, ledger_number: int):
-        data = self.ledg.ledger(sequence=ledger_number)
+        data = self.ledg.ledger(sequence=ledger_number).call()
         if data:
             operations_count = len(
                 requests.get(f'https://horizon-testnet.stellar.org/ledgers/{ledger_number}/operations').json()[
