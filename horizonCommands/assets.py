@@ -148,8 +148,8 @@ class HorizonAssets(commands.Cog):
                 await self.send_multi_asset_case(ctx=ctx, data=data)
         else:
             message = f'No Asset with code {asset_code} found. Please try again'
-            print(message)
-
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title='Asset Code Error')
     @assets.command()
     async def issuer(self, ctx, issuer_addr: str):
         data = self.asset.for_issuer(asset_issuer=issuer_addr).call()
