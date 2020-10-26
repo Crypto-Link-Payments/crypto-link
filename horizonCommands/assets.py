@@ -19,6 +19,7 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
+
 class HorizonAssets(commands.Cog):
     """
     Discord Commands dealing with Merchant Licensing
@@ -137,8 +138,7 @@ class HorizonAssets(commands.Cog):
 
     @assets.command()
     async def code(self, ctx, asset_code: str):
-        data = self.asset.for_code(asset_code=asset_code).call()
-
+        data = self.asset.for_code(asset_code=asset_code.upper()).call()
         if data:
             records = data['_embedded']['records']
             if len(records) == 1:
