@@ -63,7 +63,7 @@ class HorizonEffects(commands.Cog):
         horizon_query = data['_links']['self']['href']
 
         effects_info = Embed(title=f':fireworks: {key_query} Effects :fireworks:  ',
-                             description=f'Bellow are last three effects which happened for {key_query}',
+                             description=f'Bellow are last three effects which happened for {usr_query}',
                              colour=Colour.lighter_gray())
         effects_info.add_field(name=f':sunrise: Horizon Access :sunrise: ',
                                value=f'[{key_query} Effects]({horizon_query})')
