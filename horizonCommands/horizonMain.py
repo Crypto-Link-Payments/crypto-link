@@ -72,6 +72,7 @@ class HorizonAccessCommands(commands.Cog):
 
             {"name": f':bar_chart: Trade Aggregation :chart_with_upwards_trend: ',
              "value": f'`{self.command_string}horizon aggregations`'},
+
             {"name": f':currency_exchange: Trades :currency_exchange:',
              "value": f'`{self.command_string}horizon trades`'},
 
@@ -256,17 +257,16 @@ class HorizonAccessCommands(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @horizon.group()
-    async def tradeaggregation(self, ctx):
-        title = ':office_worker: __Horizon Assets Operations__ :office_worker:'
-        description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
-                      'Stellar Horizon Server'
-        list_of_commands = [
-            {"name": f'',
-             "value": f''},
-            {"name": f'',
-             "value": f'`{self.command_string}horizon account create`'}
-        ]
+    async def aggregations(self, ctx):
+        title = ':bar_chart: __Horizon Trade Aggregations Queries__ :bar_chart: '
+        description = 'Representation of all available commands available to interact with ***Trade Aggregations*** ' \
+                      'Endpoint on Stellar Horizon Server'
 
+        list_of_commands = [
+            {"name": f':chart_with_upwards_trend: XLM vs Asset Trades :chart_with_upwards_trend:',
+             "value": f'`{self.command_string}trade agg <counter asset> <counter issuer> <resolution> `\n'
+                      f'***__Note__***: Resolutions allowed 1, 5, and 15 minutes'},
+        ]
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
@@ -308,6 +308,7 @@ class HorizonAccessCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
+
 
 def setup(bot):
     bot.add_cog(HorizonAccessCommands(bot))
