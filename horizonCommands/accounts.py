@@ -9,7 +9,7 @@ from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.horizonAccess.horizon import server
-
+from datetime import datetime
 from cogs.utils.securityChecks import check_stellar_address
 from backOffice.stellarOnChainHandler import StellarWallet
 from utils.tools import Helpers
@@ -89,18 +89,18 @@ class HorizonAccounts(commands.Cog):
         """
         Query details for specific public address
         """
-        print(address)
         if check_stellar_address(address=address):
             data = self.hor_accounts.account_id(account_id=address).call()
-
             if data:
                 for coin in reversed(data["balances"]):
+                    dt_format = datetime.strptime(data["last_modified_time"], '%Y-%m-%dT%H:%M:%SZ')
                     if not coin.get('asset_code'):
                         signers_data = ', '.join(
                             [f'`{sig["key"]}`' for sig in
                              data["signers"]])
+
                         acc_details = Embed(title=':mag_right: Details for Stellar Account :mag:',
-                                            description=f'Last Activity {data["last_modified_time"]}',
+                                            description=f'Last Activity {dt_format} (UTC)',
                                             colour=Colour.lighter_gray())
                         acc_details.add_field(name=':map: Account Address :map: ',
                                               value=f'```{data["account_id"]}```',
@@ -113,7 +113,7 @@ class HorizonAccounts(commands.Cog):
                                                     f':money_with_wings: {data["num_sponsoring"]} (sponsoring) ',
                                               inline=False)
                         acc_details.add_field(name=f' :moneybag: Balance :moneybag:',
-                                              value=f'{coin["balance"]} XLM',
+                                              value=f'`{coin["balance"]} XLM`',
                                               inline=False)
                         acc_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
                                               value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
@@ -126,7 +126,7 @@ class HorizonAccounts(commands.Cog):
                         await ctx.author.send(embed=acc_details)
                     else:
                         asset_details = Embed(title=f':coin: Details for asset {coin["asset_code"]} :coin:',
-                                              description=f'Last Activity on {data["last_modified_time"]}'
+                                              description=f'Last Activity on {dt_format} (UTC)'
                                                           f' (Ledger:{data["last_modified_ledger"]}',
                                               colour=Colour.lighter_gray())
                         asset_details.add_field(name=f':map: Issuer Address :map: ',
