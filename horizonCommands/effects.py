@@ -100,7 +100,7 @@ class HorizonEffects(commands.Cog):
     @effects.command()
     async def account(self, ctx, address: str):
         if check_stellar_address(address=address):
-            data = self.effect.for_account(account_id=address)
+            data = self.effect.for_account(account_id=address).call()
             await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{address}', key_query='Account')
 
         else:
@@ -110,17 +110,17 @@ class HorizonEffects(commands.Cog):
 
     @effects.command()
     async def ledger(self, ctx, ledger_id: int):
-        data = self.effect.for_ledger(sequence=ledger_id)
+        data = self.effect.for_ledger(sequence=ledger_id).call()
         await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{ledger_id}', key_query='Ledger')
 
     @effects.command()
     async def operation(self, ctx, operation_id: int):
-        data = self.effect.for_operation(operation_id=operation_id)
+        data = self.effect.for_operation(operation_id=operation_id).call()
         await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{operation_id}', key_query='Operation')
 
     @effects.command()
     async def transaction(self, ctx, tx_hash: str):
-        data = self.effect.for_transaction(transaction_hash=tx_hash)
+        data = self.effect.for_transaction(transaction_hash=tx_hash).call()
         await self.send_effects_to_user(ctx=ctx, data=data, usr_query=f'{tx_hash}', key_query='Transaction Hash')
 
 
