@@ -33,7 +33,7 @@ class HorizonAccounts(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.server = server
-        self.accounts = self.server.accounts()
+        self.hor_accounts = self.server.accounts()
 
     @commands.group()
     async def accounts(self, ctx):
@@ -89,9 +89,10 @@ class HorizonAccounts(commands.Cog):
         """
         Query details for specific public address
         """
-
+        print(address)
         if check_stellar_address(address=address):
-            data = self.accounts.account_id(account_id=address)
+            data = self.hor_accounts.account_id(account_id=address).call()
+
             if data:
                 for coin in reversed(data["balances"]):
                     if not coin.get('asset_code'):
