@@ -26,9 +26,9 @@ class UserAccountCommands(commands.Cog):
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
 
-    @commands.command(aliases=['me', 'account'])
+    @commands.command()
     @commands.check(user_has_wallet)
-    async def acc(self, ctx):
+    async def me(self, ctx):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
 
@@ -238,7 +238,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
-    @acc.error
+    @me.error
     async def quick_acc_check_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__Balance check error__'

@@ -11,6 +11,8 @@ sys.path.append(project_path)
 from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions, \
     ChangeTrust
 
+from stellar_sdk.exceptions import NotFoundError, BadRequestError
+
 from utils.tools import Helpers
 
 
@@ -38,6 +40,21 @@ class StellarWallet:
         """
         fee = self.server.fetch_base_fee()
         return fee
+
+    @staticmethod
+    def create_stellar_account():
+        """
+        Creates inactive stellar account which needs to be activated by depositing lumens
+        """
+        try:
+            key_pair = Keypair.random()
+            public_key = key_pair.public_key
+            private_key = key_pair.secret
+            return {f'address': f'{public_key}',
+                    f'secret': f'{private_key}',
+                    "network": 'testnet'}
+        except NotFoundError:
+            return {}
 
     @staticmethod
     def __filter_error(result_code):

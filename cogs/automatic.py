@@ -41,7 +41,6 @@ class AutoFunctions(commands.Cog):
                                                  sys_msg_title=title)
 
         else:
-            await ctx.message.channel.send(content=error)
             print('=============BUG===========')
             print(ctx.message.author)
             print(error)
