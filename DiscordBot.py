@@ -22,7 +22,8 @@ horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.offers',
                 'horizonCommands.trades',
                 'horizonCommands.orderBook',
-                'horizonCommands.paths']
+                'horizonCommands.paths',
+                'horizonCommands.tradeAggregations']
 
 
 class DiscordBot(commands.Bot):
