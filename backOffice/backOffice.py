@@ -22,9 +22,10 @@ class BackOffice:
         self.connection = MongoClient(bot_data['database']['connection'], maxPoolSize=20)
         self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(bot_data['database']['connection'])
         self.twitter_details = bot_data["twitter"]
+        self.horizon_url = bot_data['horizonServer']
 
         self.backend_check = BotStructureCheck(self.connection)
-        self.stellar_wallet = StellarWallet()
+        self.stellar_wallet = StellarWallet(horizon_url=self.horizon_url)
         self.merchant_manager = MerchantManager(self.connection)
         self.stellar_manager = StellarManager(self.connection, self.as_connection)
         self.stats_manager = StatsManager(self.connection, self.as_connection)
