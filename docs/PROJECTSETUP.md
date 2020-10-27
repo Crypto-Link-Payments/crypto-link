@@ -80,6 +80,7 @@ botSetup.json
   "ownerId": 0,
   "creator": 0,
   "trustedMembers": [],
+ "horizonServer": "https://horizon-testnet.stellar.org",
   "database": {
     "connection": "mongodb://127.0.0.1:27017"},
   "twitter": {
@@ -98,6 +99,7 @@ botSetup.json
 - ***ownerId***: User id of Discord User who owns the bot
 - ***creator***: User id of Discord User who created the bot
 - ***trustedMembers***: all additional user IDs who should have access to system commands
+- ***horizonServer***: Tetstnet vs pubnet
 - ***database***: connection to mongodb database. leave it like this if you run bot locally
 - ***twitter***: api key details from twitter developer account
 
