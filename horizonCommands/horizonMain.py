@@ -41,7 +41,7 @@ class HorizonAccessCommands(commands.Cog):
         """
 
         title = ':sunrise: __Stellar Horizon Access__ :sunrise: '
-        description = 'Available Stellar Laboratory commands over Discord.'
+        description = 'Available commands to access Horizon from Discord'
         list_of_commands = [
             {"name": f':office_worker: Accounts :office_worker:',
              "value": f'`{self.command_string}horizon accounts`'},
