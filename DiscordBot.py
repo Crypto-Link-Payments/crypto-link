@@ -25,6 +25,8 @@ horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.paths',
                 'horizonCommands.tradeAggregations']
 
+non_custodial_layer_cmds = ['nonCustodialLayer.payments']
+
 
 class DiscordBot(commands.Bot):
     def __init__(self, backoffice):
@@ -50,7 +52,7 @@ class DiscordBot(commands.Bot):
         print(notification_str)
 
         notification_str = Fore.CYAN + '+++++++++++++++++++++++++++++++++++++++\n' \
-                                        '           LOADING Horizon COGS....        \n'
+                                       '           LOADING Horizon COGS....        \n'
         for hor in horizon_cogs:
             try:
                 self.load_extension(hor)
@@ -61,6 +63,18 @@ class DiscordBot(commands.Bot):
         notification_str += '+++++++++++++++++++++++++++++++++++++++'
         print(notification_str)
 
+        notification_str = Fore.BLUE + '+++++++++++++++++++++++++++++++++++++++\n' \
+                                       '           LOADING Non Custodial Layer....        \n'
+
+        for cmd in non_custodial_layer_cmds:
+            try:
+                self.load_extension(cmd)
+                notification_str += f'| {cmd} :smile: \n'
+            except Exception as error:
+                notification_str += f'| {cmd} --> {error}\n'
+                raise
+        notification_str += '+++++++++++++++++++++++++++++++++++++++'
+        print(notification_str)
 
     async def on_ready(self):
         """
