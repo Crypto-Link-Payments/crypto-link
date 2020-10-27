@@ -56,7 +56,7 @@ class HorizonOperations(commands.Cog):
             {"name": f' :map: Operation by Account :map: ',
              "value": f'`{self.command_string}operations account <Account public address>`'},
             {"name": f' :hash: Operations for transaction :hash:',
-             "value": f'`{self.command_string}operations transaction <Atransaction hash>`'}
+             "value": f'`{self.command_string}operations transaction <transaction hash>`'}
         ]
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
