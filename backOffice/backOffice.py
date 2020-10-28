@@ -13,7 +13,7 @@ from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.botWallet import BotManager
 from backOffice.corpHistory import CorporateHistoryManager
-from backOffice.custodialServiceManager import CustodialWalletManager
+from backOffice.custodialWalletManager import CustodialWalletManager
 
 
 class BackOffice:
