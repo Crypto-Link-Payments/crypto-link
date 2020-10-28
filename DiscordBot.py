@@ -27,6 +27,8 @@ horizon_cogs = ['horizonCommands.horizonMain',
 
 non_custodial_layer_cmds = ['nonCustodialLayer.payments']
 
+custodial_layer = ['custodialLayer.userAccounts']
+
 
 class DiscordBot(commands.Bot):
     def __init__(self, backoffice):
