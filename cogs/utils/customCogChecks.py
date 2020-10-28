@@ -9,7 +9,7 @@ def is_animus(ctx):
     """
     Check if creator
     """
-    return ctx.bot.is_animus( ctx.message.author.id )
+    return ctx.bot.is_animus(ctx.message.author.id)
 
 
 def is_one_of_gods(ctx):
@@ -77,3 +77,10 @@ def guild_has_stats(ctx):
     Guild registration status check for stats
     """
     return ctx.bot.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id)
+
+
+def user_has_custodial(ctx):
+    """
+    Custom check for custodial wallet
+    """
+    return ctx.bot.backoffice.custodial_manager.second_level_user_reg_status(user_id=ctx.author.id)
