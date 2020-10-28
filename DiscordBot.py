@@ -78,6 +78,19 @@ class DiscordBot(commands.Bot):
         notification_str += '+++++++++++++++++++++++++++++++++++++++'
         print(notification_str)
 
+        notification_str = Fore.WHITE + '+++++++++++++++++++++++++++++++++++++++\n' \
+                                        '           LOADING Custodial Layer 2....        \n'
+
+        for cust_cmd in custodial_layer:
+            try:
+                self.load_extension(cust_cmd)
+                notification_str += f'| {cust_cmd} :smile: \n'
+            except Exception as error:
+                notification_str += f'| {cust_cmd} --> {error}\n'
+                raise
+        notification_str += '+++++++++++++++++++++++++++++++++++++++'
+        print(notification_str)
+
     async def on_ready(self):
         """
             Print out to console once bot logs in
