@@ -25,6 +25,10 @@ def is_public(ctx):
     return ctx.message.channel.type != ChannelType.private
 
 
+def is_dm(ctx):
+    return not ctx.message.guild
+
+
 def has_wallet(ctx):
     """
     Check if user has already registered personal wallet to the system
