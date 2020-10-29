@@ -51,3 +51,15 @@ class CustodialWalletManager:
             return data
         else:
             return {}
+
+    def get_custodial_hot_wallet_addr(self, user_id: int):
+        """
+        Get user hot wallet details for decription in cogs
+        """
+        data = self.hotWallets.find_one({"userId": int(user_id)},
+                                        {"_id": 0,
+                                         "publicAddress": 1})
+        if data:
+            return data["publicAddress"]
+        else:
+            return {}
