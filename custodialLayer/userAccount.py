@@ -40,9 +40,9 @@ class CustodialAccounts(commands.Cog):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Custodial Wallet Commands__ :joystick: '
             description = "All commands to operate with custodial wallet system (Layer 2) in Crypto Link"
-            list_of_values = [{"name": " Create Inactive Custodial Wallet ",
+            list_of_values = [{"name": "Register for In-active Custodial Wallet ",
                                "value": f"`{self.command_string}custodial register`"},
-                              {"name": " Create On-Chain Transactions",
+                              {"name": "Create On-Chain Transactions",
                                "value": f"`{self.command_string}custodial transaction`"}
                               ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -98,6 +98,7 @@ class CustodialAccounts(commands.Cog):
 
     @custodial.group()
     @commands.check(user_has_custodial)
+    @commands.check(is_dm)
     async def account(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Custodial Account Commands__ :joystick: '
@@ -157,9 +158,10 @@ class CustodialAccounts(commands.Cog):
         if isinstance(error, commands.CheckFailure):
             message = f"In order to be able to access commands under command group" \
                       f" `{self.command_string}custodial account` " \
-                      f" you need to first register a custodial wallet into the system with " \
-                      f"`{self.command_string}custodial register"
-            title = f'**__Custodial wallet not registered__** :clipboard:'
+                      f" user is required to:\n" \
+                      f"- have registered custodial wallet into the system\n" \
+                      f"- use command through DM with the Crypto Link"
+            title = f'**__{self.command_string} custodial account error__**'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
