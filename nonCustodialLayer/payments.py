@@ -12,7 +12,7 @@ from horizonCommands.horizonAccess.horizon import server
 from cogs.utils.customCogChecks import user_has_wallet
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
-from stellar_sdk import TransactionBuilder, Network, Server, Account
+from stellar_sdk import TransactionBuilder, Network, Server, Account, TransactionEnvelope, Transaction
 from stellar_sdk.exceptions import NotFoundError
 
 helper = Helpers()
@@ -54,25 +54,39 @@ class Layer3AccountCommands(commands.Cog):
         except NotFoundError:
             return False
 
-    async def send_xdr_info(self, ctx, request_data: dict, ):
+    async def send_xdr_info(self, ctx, request_data: dict, command_type: str):
 
         # Inform user
-        xdr_info = Embed(title=f'Payment as XDR',
+        xdr_info = Embed(title=f'Transaction as XDR',
                          description='Bellow is the XDR envelope of payment with provided details',
                          colour=Colour.magenta())
-        xdr_info.add_field(name="From Address",
-                           value=f'```{request_data["fromAddr"]}```',
-                           inline=False)
-        xdr_info.add_field(name="To Address",
-                           value=f'```{request_data["toAddr"]}```',
-                           inline=False)
-        xdr_info.add_field(name="Token and Amount",
-                           value=f'{request_data["amount"]} {request_data["token"]}',
-                           inline=False)
+        if command_type == 'public':
+            xdr_info.add_field(name="From Address",
+                               value=f'```{request_data["fromAddr"]}```',
+                               inline=False)
+            xdr_info.add_field(name="To Address",
+                               value=f'```{request_data["toAddr"]}```',
+                               inline=False)
+            xdr_info.add_field(name="Token and Amount",
+                               value=f'{request_data["amount"]} {request_data["token"]}',
+                               inline=False)
 
-        if request_data["token"] != 'xlm':
-            xdr_info.add_field(name="Asset Issuer",
-                               value=f'```{request_data["assetIssuer"]}```',
+            if request_data["token"] != 'xlm':
+                xdr_info.add_field(name="Asset Issuer",
+                                   value=f'`{request_data["assetIssuer"]}`',
+                                   inline=False)
+        elif command_type == "discord":
+            pass
+
+        elif command_type == "activate":
+            xdr_info.add_field(name="From Address",
+                               value=f'```{request_data["fromAddr"]}```',
+                               inline=False)
+            xdr_info.add_field(name="Address to be activated",
+                               value=f'```{request_data["toAddr"]}```',
+                               inline=False)
+            xdr_info.add_field(name="Total Amount to be sent",
+                               value=f'`{request_data["amount"]} XLM`',
                                inline=False)
 
         xdr_info.add_field(name="XDR Envelope",
@@ -93,14 +107,19 @@ class Layer3AccountCommands(commands.Cog):
         title = ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r:  ' \
                 '__Transaction Envelope Creator__ ' \
                 ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r: '
-        description = 'Representation of all commands available to create '
+        description = 'Representation of all currently available commands to create and sign Transaction envelopes.'
         list_of_commands = [
             {"name": f':map: Prepare Payment Envelope for external address :map:',
              "value": f'`{self.command_string}xdr payment <amount> <token> <from address> <to address> <memo=optional>`'},
             {"name": f':mag_right: Prepare Payment for Discord User :mag:',
              "value": f'`{self.command_string}xdr discord <<amount> <token> <@discord.User>`'},
             {"name": f':pen_ballpoint: Sign Transaction XDR :pen_ballpoint: ',
-             "value": f'`{self.command_string}xdr sign <<amount> <token> <@discord.User>`'}
+             "value": f'`{self.command_string}xdr sign <Transaction XDR String>`'},
+            {"name": f':arrow_forward: Activate Address XDR :arrow_forward:',
+             "value": f'`{self.command_string}xdr activate <from address> <to address> <@discord.User>`\n'
+                      f'**__Note:__** This command is allowed to be executed only through the public channels of '
+                      f'community as it requires access to the User Tag '}
+
         ]
 
         if ctx.invoked_subcommand is None:
@@ -181,7 +200,7 @@ class Layer3AccountCommands(commands.Cog):
                         "envelope": xdr_envelope
 
                     }
-                    await self.send_xdr_info(ctx=ctx, request_data=request_data)
+                    await self.send_xdr_info(ctx=ctx, request_data=request_data, command_type='public')
 
                 else:
                     pass
@@ -203,8 +222,13 @@ class Layer3AccountCommands(commands.Cog):
         final_amount = float(amount_in_stroops / (10 ** 7))
 
         if final_amount >= 0.0000001:
+            # Check if user has registered Account in system
             if self.backoffice.account_mng.check_user_existence(user_id=user.id):
-                print('check if user has tier 2 level wallet activate and if not than just take memo')
+
+                # TODO Check if user has 2 layer activated
+                pass
+
+
 
             else:
                 message = "User Has not been registered yet into Crypto Link System. If you would still like to send " \
@@ -220,7 +244,46 @@ class Layer3AccountCommands(commands.Cog):
 
     @xdr.command()
     async def sign(self, ctx, xdr_envelope):
-        print()
+
+        tx = Transaction.from_xdr(xdr=xdr_envelope)
+        if isinstance(tx, Transaction):
+            print(Transaction.__dict__)
+        else:
+            print('Not a transaction')
+
+    @xdr.command()
+    async def activate(self, ctx, from_account: str, account_to_activate: str, amount: float = None):
+        """
+        Activate inactive account and optionaly send
+        """
+        if self.check_address_on_server(address=from_account):
+            source_account = self.server.load_account(account_id=from_account)
+            tx = TransactionBuilder(
+                source_account=source_account,
+                network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+                base_fee=self.server.fetch_base_fee()) \
+                .append_create_account_op(destination="1.0", starting_balance="12.25")
+
+            final_amount = str()
+            if amount:
+                amount_in_stroops = int(amount * (10 ** 7))
+                final_amount = str(float(amount_in_stroops / (10 ** 7)))
+                tx.append_payment_op(destination=account_to_activate, amount=final_amount, asset_code='XLM')
+            else:
+
+                total_amount_tx = 1.0 + final_amount
+                xdr_envelope = tx.build().to_xdr()
+
+            requested_data = {
+                "fromAddr": from_account,
+                "toAddr": account_to_activate,
+                "amount": total_amount_tx,
+                "envelope": xdr_envelope
+            }
+            await self.send_xdr_info(ctx=ctx, request_data=requested_data)
+
+        else:
+            print('From account address does not exist on the network')
 
 
 def setup(bot):
