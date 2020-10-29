@@ -38,7 +38,7 @@ def is_owner(ctx):
     """
     Function checks if the user is owner of the community or not
     """
-    return int(ctx.message.author.id) == int(ctx.message.guild.owner.id)
+    return int(ctx.message.author.id) == int(ctx.message.guild.owner_id)
 
 
 def merchant_com_reg_stats(ctx):
