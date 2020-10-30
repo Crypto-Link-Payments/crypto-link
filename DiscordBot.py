@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import Intents
 from colorama import Fore, init
 
 from utils.tools import Helpers
@@ -35,7 +36,9 @@ class DiscordBot(commands.Bot):
         helper = Helpers()
         self.bot_settings = helper.read_json_file(file_name='botSetup.json')
 
-        super().__init__(command_prefix=commands.when_mentioned_or(self.bot_settings['command']))
+        super().__init__(
+            command_prefix=commands.when_mentioned_or(self.bot_settings['command']),
+            intents=Intents.all())
         self.remove_command('help')  # removing the old help command
         self.backoffice = backoffice
         self.load_cogs()
