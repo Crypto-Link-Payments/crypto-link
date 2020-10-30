@@ -38,7 +38,7 @@ async def ask_for_dev_fee_amount(destination):
     pass
 
 
-async def user_account_info(ctx, data, bot_avatar_url):
+async def send_user_account_info(ctx, data, bot_avatar_url):
     """
     Send user account details from network for Layer 2
     """
