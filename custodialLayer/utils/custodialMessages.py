@@ -128,3 +128,23 @@ async def send_user_account_info(ctx, data, bot_avatar_url):
             else:
                 gems_nfo.add_field(name=f':gem: {cn} :gem:',
                                    value=f"{coin['balance']}")
+
+
+async def send_new_account_information(ctx, details: dict):
+    new_account = Embed(title=f':new: Layer 2 Account Registration System :new:',
+                        colour=Colour.lighter_gray()
+                        )
+    new_account.add_field(name=f':map: Public Address :map: ',
+                          value=f'```{details["address"]}```',
+                          inline=False)
+    new_account.add_field(name=f':key: Secret :key: ',
+                          value=f'```{details["secret"]}```',
+                          inline=False)
+    new_account.add_field(name=f':warning: Important Message :warning:',
+                          value=f'Please store/backup account details somewhere safe and delete this embed on'
+                                f' Discord. Exposure of Secret to any other entity or 3rd party application'
+                                f' might result in loss of funds, or funds beeing stolen. In order to complete'
+                                f' registration for Second Layer please proceed to next step '
+                                f':arrow_double_down: ',
+                          inline=False)
+    await ctx.author.send(embed=new_account, delete_after=360)
