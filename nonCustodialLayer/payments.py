@@ -130,7 +130,7 @@ class Layer3AccountCommands(commands.Cog):
     @xdr.command()
     async def payment(self, ctx, amount: float, token: str, from_address: str, to_address: str, memo: str = None):
         """
-        Create XDR payment envelope to be used for signing
+        Create XDR payment envelope to be used for signing to some other users than discord
         """
         amount_in_stroops = int(amount * (10 ** 7))
         final_amount = float(amount_in_stroops / (10 ** 7))
@@ -217,7 +217,10 @@ class Layer3AccountCommands(commands.Cog):
                                                  sys_msg_title=CONST_XDR_ERROR)
 
     @xdr.command()
-    async def discord(self, ctx, amount: float, token: str, user: Member):
+    async def discord(self, ctx, amount: float, token: str, user: Member, layer:int):
+        """
+        Create XDR to send to user on discord
+        """
         amount_in_stroops = int(amount * (10 ** 7))
         final_amount = float(amount_in_stroops / (10 ** 7))
 
@@ -243,8 +246,17 @@ class Layer3AccountCommands(commands.Cog):
                                                  sys_msg_title=CONST_XDR_ERROR)
 
     @xdr.command()
-    async def sign(self, ctx, xdr_envelope):
+    async def dev(self, ctx, xdr_envelope):
+        """
+        Modifies the transaction envelope so that another operation is getting added
+        """
+        pass
 
+    @xdr.command()
+    async def sign(self, ctx, xdr_envelope):
+        """
+        Sign XDR envelope
+        """
         tx = Transaction.from_xdr(xdr=xdr_envelope)
         if isinstance(tx, Transaction):
             print(Transaction.__dict__)
@@ -254,7 +266,7 @@ class Layer3AccountCommands(commands.Cog):
     @xdr.command()
     async def activate(self, ctx, from_account: str, account_to_activate: str, amount: float = None):
         """
-        Activate inactive account and optionaly send
+        Make account activate
         """
         if self.check_address_on_server(address=from_account):
             source_account = self.server.load_account(account_id=from_account)
