@@ -148,3 +148,66 @@ async def send_new_account_information(ctx, details: dict):
                                 f':arrow_double_down: ',
                           inline=False)
     await ctx.author.send(embed=new_account, delete_after=360)
+
+
+async def sign_message_information(destination, recipient,layer, transaction_details:dict):
+    sign_message = Embed(title=f':warning: Check Details and sign :warning:',
+                         color=Colour.orange(),
+                         timestamp=datetime.utcnow())
+    sign_message.set_thumbnail(url=recipient.avatar_url)
+    sign_message.add_field(name=f'Wallet level of recipient',
+                           value=f'f{layer}',
+                           inline=False)
+    sign_message.add_field(name=f'Discord User',
+                           value=f'f{recipient} (ID:{recipient.id}',
+                           inline=False)
+    sign_message.add_field(name=f'User Memo',
+                           value=f'f{transaction_details["memo"]}',
+                           inline=False)
+    sign_message.add_field(name=f'Wallet address',
+                           value=f'{transaction_details["address"]}',
+                           inline=False)
+    sign_message.add_field(name=f':pen_ballpoint: Signature Required :pen_ballpoint:',
+                           value='If you agree with transactions details please answer with ***__sign__*** and'
+                                 ' transaction will be relayed to network. If you would like to cancel transaction'
+                                 ' please write ***__sign__***')
+    sign_message.add_field(name=f':timer: Signature Required :timer: ',
+                           value='You have 120 seconds time to sign transactions, or else it will '
+                                 'be cancelles automatically')
+    await destination.send(embed=sign_message)
+
+
+async def send_transaction_report(destination, response:dict):
+    """
+    Transaction report to sender
+    """
+    signers_data = ', '.join(
+        [f'```{sig["key"]}```' for sig in
+         response["signers"]])
+    tx_report = Embed(
+        title=f':white_check_mark: Transactions Successfully Completed :white_check_mark:',
+        description=f"Paging Token {response['paging_token']}",
+        color=Colour.green(),
+        timestamp=datetime.utcnow())
+    tx_report.add_field(name=f':ledger: Ledger :ledger: ',
+                        value=f'{response["ledger"]}')
+    tx_report.add_field(name=f'Memo Details',
+                        value=f'{response["memo"]} {response["memo_type"]}')
+    tx_report.add_field(name=f':calendar: Created At :calendar: ',
+                        value=f'{response["created_at"]}')
+    tx_report.add_field(name=f':hash: Transaction Hash :hash:',
+                        value=f'```{response["hash"]}```',
+                        inline=False)
+    tx_report.add_field(name=f':wrench: Operation Count :wrench:',
+                        value=f'`{response["operation_count"]}`',
+                        inline=False)
+    tx_report.add_field(name=f':hash: Signers :hash:',
+                        value=signers_data,
+                        inline=False)
+    tx_report.add_field(name=f':sunrise: Horizon Links :sunrise:',
+                        value=f'[Transaction]({response["_links"]["self"]["href"]})\n'
+                              f'[Operations]({response["_links"]["operations"]["href"]})\n'
+                              f'[Effects]({response["_links"]["effects"]["href"]})\n')
+    tx_report.add_field(name=f':sunrise: Network Fee :sunrise:',
+                        value=f"{response['fee_charged'] * (10 ** 7)} XLM")
+    await destination(embed=tx_report)
