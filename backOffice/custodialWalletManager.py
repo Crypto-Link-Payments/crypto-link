@@ -57,3 +57,9 @@ class CustodialWalletManager:
             return data["publicAddress"]
         else:
             return {}
+
+    def get_private_key(self,user_id):
+        data = self.hotWallets.find_one({"userId":int(user_id)},
+                                        {"_id":0,
+                                         "privateKey":1})["privateKey"]
+        return data
