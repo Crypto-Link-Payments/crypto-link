@@ -27,22 +27,28 @@ async def dev_fee_option_notification(destination):
     dev_fee_info = Embed(title=":robot: Optional Dev Fee for Crypto Link Team:robot: ",
                          color=Colour.lighter_gray())
     dev_fee_info.add_field(name=f':money_with_wings: Dev fee :money_with_wings: ',
-                           value=f'If you would like to support us what we are doing please answer with'
+                           value=f'If you would like to support us in what we are doing please answer with'
                                  f'***__Yes__*** and system will ask you for custom amount.'
-                                 f'If you choose **__No__** than step will be skipped.',
+                                 f'If you choose **__No__** than dev fee will be skipped.',
                            inline=False)
     await destination.send(embed=dev_fee_info)
 
 
 async def ask_for_dev_fee_amount(destination):
-    pass
+    dev_fee_info = Embed(title=":robot: Dev Fee Amount/Value :robot: ",
+                         color=Colour.lighter_gray())
+    dev_fee_info.add_field(name=f':money_with_wings: Value :money_with_wings: ',
+                           value=f'Please provide amount in format 0.0000000 you are willing to contribute to '
+                                 f'development. Crypto Link will than automatically append Payment operation to the '
+                                 f'current transactions.',
+                           inline=False)
+    await destination.send(embed=dev_fee_info)
 
 
 async def send_user_account_info(ctx, data, bot_avatar_url):
     """
     Send user account details from network for Layer 2
     """
-    public_key = "GB534PMUKKWBQDCNRAKCAMKTIUHFSUGU4YVO2UNA2ZV3XWGDEKS2J62C"
     signers = " ".join(
         [f':map:`{signer["key"]}`\n:key:`{signer["type"]}` | :scales:`{signer["weight"]}`\n================' for
          signer in data["signers"]])
@@ -56,7 +62,7 @@ async def send_user_account_info(ctx, data, bot_avatar_url):
                             url=data["_links"]["self"]['href'])
     account_info.set_thumbnail(url=ctx.message.author.avatar_url)
     account_info.add_field(name=":map: Account Address :map:",
-                           value=f'```{public_key}```',
+                           value=f'```{data["address"]}```',
                            inline=False)
     account_info.add_field(name=":calendar: Last Updated :calendar: ",
                            value=f'`{dt_format}`',
@@ -140,13 +146,13 @@ async def send_new_account_information(ctx, details: dict):
     new_account.add_field(name=f':key: Secret :key: ',
                           value=f'```{details["secret"]}```',
                           inline=False)
-    new_account.add_field(name=f':robot: Discord Sign Key for level 2 wallet :robot: ',
-                          value=f'{details["userHalf"]}',
+    new_account.add_field(name=f':robot: Discord Sign Key for level 2 wallet to complete the signature :robot: ',
+                          value=f'```{details["userHalf"]}```',
                           inline=False)
     new_account.add_field(name=f':warning: Important Message :warning:',
                           value=f'Please store/backup account details somewhere safe and delete this embed on'
                                 f' Discord. Exposure of Secret to any other entity or 3rd party application'
-                                f' might result in loss of funds, or funds beeing stolen. In order to complete'
+                                f' might result in loss of funds, or funds being stolen. In order to complete'
                                 f' registration for Second Layer please proceed to next step '
                                 f':arrow_double_down: ',
                           inline=False)
@@ -189,6 +195,8 @@ async def second_level_account_reg_info(destination):
                          value='Crypto Link Staff will ***NEVER ASK***  you to provide them private key details. '
                                'if you see such activity please report it immediately to the staff on Crypto Link '
                                'Community so we can user in the system.')
+    intro_info.add_field(name=f'YES/NO',
+                         value="Answer with YES/Y if you have read, and understood instructions")
 
     await destination.send(embed=intro_info)
 
@@ -198,12 +206,12 @@ async def verification_request_explanation(destination):
     Verification instruction
     """
     verify_embed = Embed(title=":warning: Verification Required :warning:",
-                         description="Please verify private key by providing ***Discord Sign Key for level 2 wallet***"
-                                     "provided to you above with the message to the bot.:",
+                         description="Please verify private key by "
+                                     "re-type provided ***Discord Sign Key for level 2 wallet***",
                          color=Colour.orange())
     verify_embed.add_field(name=f':warning: Time limit :warning: ',
                            value=f'You have 60 seconds to provide an answer, otherwise the registration'
-                                 f' will be cancelled and you will be required to repeat the process.')
+                                 f' will be cancelled and you will be required to repeat the process all over again.')
     await destination.send(embed=verify_embed)
 
 
@@ -212,10 +220,10 @@ async def sign_message_information(destination, recipient, layer, transaction_de
                          color=Colour.orange(),
                          timestamp=datetime.utcnow())
     sign_message.set_thumbnail(url=recipient.avatar_url)
-    sign_message.add_field(name=f'Wallet level of recipient',
+    sign_message.add_field(name=f'Chosen Wallet Level',
                            value=f'f{layer}',
                            inline=False)
-    sign_message.add_field(name=f'Discord User',
+    sign_message.add_field(name=f'Recipient',
                            value=f'f{recipient} (ID:{recipient.id}',
                            inline=False)
     sign_message.add_field(name=f'User Memo',
@@ -225,9 +233,10 @@ async def sign_message_information(destination, recipient, layer, transaction_de
                            value=f'{transaction_details["address"]}',
                            inline=False)
     sign_message.add_field(name=f':pen_ballpoint: Signature Required :pen_ballpoint:',
-                           value='If you agree with transactions details please answer with ***__sign__*** and'
-                                 ' transaction will be relayed to network. If you would like to cancel transaction'
-                                 ' please write ***__sign__***')
+                           value='If you agree with transactions details please answer with ***__sign__*** and you '
+                                 'will be asked for 1/2 of private key provided to when you registered for wallet of '
+                                 'level 2. If you would like to cancel transaction'
+                                 ' please write ***__cancel__***')
     sign_message.add_field(name=f':timer: Signature Required :timer: ',
                            value='You have 120 seconds time to sign transactions, or else it will '
                                  'be cancelles automatically')
