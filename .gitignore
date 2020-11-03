@@ -146,7 +146,7 @@ CLEnv/
 lastTweet.json
 masterKey.json
 testScripts.py
-utils/encryption.py
+utils/securityManager.py
 
 
 
