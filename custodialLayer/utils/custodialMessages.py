@@ -140,6 +140,9 @@ async def send_new_account_information(ctx, details: dict):
     new_account.add_field(name=f':key: Secret :key: ',
                           value=f'```{details["secret"]}```',
                           inline=False)
+    new_account.add_field(name=f':robot: Discord Sign Key for level 2 wallet :robot: ',
+                          value=f'{details["userHalf"]}',
+                          inline=False)
     new_account.add_field(name=f':warning: Important Message :warning:',
                           value=f'Please store/backup account details somewhere safe and delete this embed on'
                                 f' Discord. Exposure of Secret to any other entity or 3rd party application'
@@ -150,7 +153,61 @@ async def send_new_account_information(ctx, details: dict):
     await ctx.author.send(embed=new_account, delete_after=360)
 
 
-async def sign_message_information(destination, recipient,layer, transaction_details:dict):
+async def second_level_account_reg_info(destination):
+    """
+    Information for second level account registration. First embed shown to user on command .custodial register
+    """
+    intro_info = Embed(title=f':robot: 2nd level wallet registration procedure :robot:',
+                       description='Welcome to interactive registration procedure to register second level wallet '
+                                   'into Crypto Link system. Please follow the guidelines provided to you, '
+                                   'in order for registration to be successful and **__READ OTHER DETAILS BELLOW__**.',
+                       colour=Colour.orange())
+    intro_info.add_field(name=f':information_source: Layer 2 wallet :information_source: ',
+                         value='Level 2 Discord Wallet commands requires you to sign any wallet on-chain activity '
+                               'which has been initiated from Discord. '
+                               'Upon successful registration, system will securely store encrypted half of the private '
+                               'key into database. '
+                               'Throughout the registration process, full private key will be sent to your DM as well,'
+                               ' which you can utilize to access wallet also through other applications.')
+    intro_info.add_field(name=f':exclamation: Stellar Account Merge :exclamation:  ',
+                         value='Stellar allows as well for account merges. Since you control your private keys, '
+                               'you can merge account through other applications. if Discord level 2 wallet '
+                               ' will be used as a source account in Stellar Account Merge process, level 2 command'
+                               ' over Discord will stop working. ')
+    intro_info.add_field(name=f':exclamation: Inactive Account :exclamation:  ',
+                         value='When you will successfully complete the registration process, account will be inactive'
+                               ' till minimum amount of XLM to activate account is sent to the address either by '
+                               'other Discord user or by you through other application than Crypto Link')
+    intro_info.add_field(name=f':exclamation: Responsibility :exclamation:  ',
+                         value='Crypto Link system does not store private key in full. This means that in order for '
+                               'operation of level 2 to be executed, you will be required to provide details uppon'
+                               ' Crypto Link request through DM only. ***Crypto Link will never ask automatically '
+                               ' for private key from user unless a command has been initiated from the user. '
+                               'Once registration process is successfully completed, store private key somewhere safe'
+                               ' and manually delete messages from the bot from your DM.***')
+    intro_info.add_field(name=f':exclamation: Responsibility :exclamation:  ',
+                         value='Crypto Link Staff will ***NEVER ASK***  you to provide them private key details. '
+                               'if you see such activity please report it immediately to the staff on Crypto Link '
+                               'Community so we can user in the system.')
+
+    await destination.send(embed=intro_info)
+
+
+async def verification_request_explanation(destination):
+    """
+    Verification instruction
+    """
+    verify_embed = Embed(title=":warning: Verification Required :warning:",
+                         description="Please verify private key by providing ***Discord Sign Key for level 2 wallet***"
+                                     "provided to you above with the message to the bot.:",
+                         color=Colour.orange())
+    verify_embed.add_field(name=f':warning: Time limit :warning: ',
+                           value=f'You have 60 seconds to provide an answer, otherwise the registration'
+                                 f' will be cancelled and you will be required to repeat the process.')
+    await destination.send(embed=verify_embed)
+
+
+async def sign_message_information(destination, recipient, layer, transaction_details: dict):
     sign_message = Embed(title=f':warning: Check Details and sign :warning:',
                          color=Colour.orange(),
                          timestamp=datetime.utcnow())
@@ -177,7 +234,7 @@ async def sign_message_information(destination, recipient,layer, transaction_det
     await destination.send(embed=sign_message)
 
 
-async def send_transaction_report(destination, response:dict):
+async def send_transaction_report(destination, response: dict):
     """
     Transaction report to sender
     """
