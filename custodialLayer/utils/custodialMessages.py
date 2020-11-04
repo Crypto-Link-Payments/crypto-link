@@ -216,7 +216,6 @@ async def verification_request_explanation(destination):
 
 
 async def sign_message_information(destination, transaction_details: dict, layer: int = None, recipient=None):
-    # TODO update this to support discord and network tx
     sign_message = Embed(title=f':warning: Check Details and sign :warning:',
                          color=Colour.orange(),
                          timestamp=datetime.utcnow())
