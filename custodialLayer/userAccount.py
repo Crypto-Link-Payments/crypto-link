@@ -7,10 +7,11 @@ from utils.securityManager import SecurityManager
 
 from custodialLayer.utils.custodialMessages import account_layer_selection_message, dev_fee_option_notification, \
     ask_for_dev_fee_amount, send_user_account_info, sign_message_information, send_transaction_report, \
-    send_new_account_information, verification_request_explanation, second_level_account_reg_info
+    send_new_account_information, verification_request_explanation, second_level_account_reg_info,\
+    transaction_report_recipient
 
 from stellar_sdk import Keypair, TransactionBuilder, Network, TransactionEnvelope, Payment, CreateAccount, \
-    Asset, Account, TextMemo, NoneMemo, Memo
+    Asset, Account, TextMemo
 from stellar_sdk.exceptions import ConnectionError, BadRequestError, MemoInvalidException, BadResponseError, \
     UnknownRequestError, NotFoundError, Ed25519SecretSeedInvalidError, Ed25519PublicKeyInvalidError
 
@@ -60,7 +61,7 @@ class CustodialAccounts(commands.Cog):
     @staticmethod
     def check_memo(memo: str):
         try:
-            memo = TextMemo(text=memo)
+            TextMemo(text=memo)
             return True
         except MemoInvalidException:
             return False
@@ -489,7 +490,11 @@ class CustodialAccounts(commands.Cog):
                                     await self.send_operation_details(destination=ctx.message.author,
                                                                       envelope=response['envelope_xdr'])
 
-                                    # TODO send notifcation to recipient as well on Discord Transaction
+                                    await transaction_report_recipient(sender=f'{ctx.author}',
+                                                                       recipient=recipient,
+                                                                       amount=requested_amount,
+                                                                       token='XLM',
+                                                                       response=response)
 
                                 else:
                                     title = f':exclamation: __Transaction Error__ :exclamation: '
@@ -642,7 +647,7 @@ class CustodialAccounts(commands.Cog):
                                                                  dev_fee_amount=dev_fee)
 
                                 if result[0]:
-                                    # If result was successfull than make info
+                                    # If result was successful than make info
                                     response = result[1]
 
                                     # Send notification to user on transaction details
