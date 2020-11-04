@@ -62,7 +62,7 @@ async def send_user_account_info(ctx, data, bot_avatar_url):
                             url=data["_links"]["self"]['href'])
     account_info.set_thumbnail(url=ctx.message.author.avatar_url)
     account_info.add_field(name=":map: Account Address :map:",
-                           value=f'```{data["address"]}```',
+                           value=f'```{data["account_id"]}```',
                            inline=False)
     account_info.add_field(name=":calendar: Last Updated :calendar: ",
                            value=f'`{dt_format}`',
@@ -94,46 +94,45 @@ async def send_user_account_info(ctx, data, bot_avatar_url):
                            inline=False)
     await ctx.author.send(embed=account_info)
 
-    if len(data["balances"]) > 1:
-        gems_nfo = Embed(title=f'Other Balances',
-                         color=Colour.dark_blue())
-        for coin in data["balances"]:
-            if not coin.get('asset_code'):
-                cn = 'XLM'
-            else:
-                cn = coin["asset_code"]
+    gems_nfo = Embed(title=f'Account balances',
+                     color=Colour.dark_blue())
+    for coin in data["balances"]:
+        if not coin.get('asset_code'):
+            cn = 'XLM'
+        else:
+            cn = coin["asset_code"]
 
-            if cn == "XLM":
-                rates = get_rates(coin_name=f'stellar')
-                in_eur = rate_converter(float(coin['balance']), rates["stellar"]["eur"])
-                in_usd = rate_converter(float(coin['balance']), rates["stellar"]["usd"])
-                in_btc = rate_converter(float(coin['balance']), rates["stellar"]["btc"])
-                in_eth = rate_converter(float(coin['balance']), rates["stellar"]["eth"])
-                in_rub = rate_converter(float(coin['balance']), rates["stellar"]["rub"])
-                in_ltc = rate_converter(float(coin['balance']), rates["stellar"]["ltc"])
+        if cn == "XLM":
+            rates = get_rates(coin_name=f'stellar')
+            in_eur = rate_converter(float(coin['balance']), rates["stellar"]["eur"])
+            in_usd = rate_converter(float(coin['balance']), rates["stellar"]["usd"])
+            in_btc = rate_converter(float(coin['balance']), rates["stellar"]["btc"])
+            in_eth = rate_converter(float(coin['balance']), rates["stellar"]["eth"])
+            in_rub = rate_converter(float(coin['balance']), rates["stellar"]["rub"])
+            in_ltc = rate_converter(float(coin['balance']), rates["stellar"]["ltc"])
 
-                xlm_nfo = Embed(title=f'XLM Wallet Balance Details',
-                                description=f'```{coin["balance"]} XLM```',
-                                color=Colour.dark_blue())
-                xlm_nfo.add_field(name=f':flag_us: USA',
-                                  value=f'$ {scientific_conversion(in_usd, 4)}')
-                xlm_nfo.add_field(name=f':flag_eu: EUR',
-                                  value=f'€ {scientific_conversion(in_eur, 4)}')
-                xlm_nfo.add_field(name=f':flag_ru:  RUB',
-                                  value=f'₽ {scientific_conversion(in_rub, 4)}')
-                xlm_nfo.add_field(name=f'BTC',
-                                  value=f'₿ {scientific_conversion(in_btc, 8)}')
-                xlm_nfo.add_field(name=f'ETH',
-                                  value=f'Ξ {scientific_conversion(in_eth, 8)}')
-                xlm_nfo.add_field(name=f'LTC',
-                                  value=f'Ł {scientific_conversion(in_ltc, 8)}')
-                xlm_nfo.set_footer(text='Conversion rates provided by CoinGecko',
-                                   icon_url="https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png")
-                await ctx.author.send(embed=xlm_nfo)
+            xlm_nfo = Embed(title=f'XLM Wallet Balance Details',
+                            description=f'```{coin["balance"]} XLM```',
+                            color=Colour.dark_blue())
+            xlm_nfo.add_field(name=f':flag_us: USA',
+                              value=f'$ {scientific_conversion(in_usd, 4)}')
+            xlm_nfo.add_field(name=f':flag_eu: EUR',
+                              value=f'€ {scientific_conversion(in_eur, 4)}')
+            xlm_nfo.add_field(name=f':flag_ru:  RUB',
+                              value=f'₽ {scientific_conversion(in_rub, 4)}')
+            xlm_nfo.add_field(name=f'BTC',
+                              value=f'₿ {scientific_conversion(in_btc, 8)}')
+            xlm_nfo.add_field(name=f'ETH',
+                              value=f'Ξ {scientific_conversion(in_eth, 8)}')
+            xlm_nfo.add_field(name=f'LTC',
+                              value=f'Ł {scientific_conversion(in_ltc, 8)}')
+            xlm_nfo.set_footer(text='Conversion rates provided by CoinGecko',
+                               icon_url="https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png")
+            await ctx.author.send(embed=xlm_nfo)
 
-            else:
-                gems_nfo.add_field(name=f':gem: {cn} :gem:',
-                                   value=f"{coin['balance']}")
+        else:
+            gems_nfo.add_field(name=f':gem: {cn} :gem:',
+                               value=f"{coin['balance']}")
 
 
 async def send_new_account_information(ctx, details: dict):
@@ -163,7 +162,7 @@ async def second_level_account_reg_info(destination):
     """
     Information for second level account registration. First embed shown to user on command .custodial register
     """
-    intro_info = Embed(title=f':robot: 2nd level wallet registration procedure :robot:',
+    intro_info = Embed(title=f':two: 2nd level wallet registration procedure :two:',
                        description='Welcome to interactive registration procedure to register second level wallet '
                                    'into Crypto Link system. Please follow the guidelines provided to you, '
                                    'in order for registration to be successful and **__READ OTHER DETAILS BELLOW__**.',
@@ -174,12 +173,14 @@ async def second_level_account_reg_info(destination):
                                'Upon successful registration, system will securely store encrypted half of the private '
                                'key into database. '
                                'Throughout the registration process, full private key will be sent to your DM as well,'
-                               ' which you can utilize to access wallet also through other applications.')
+                               ' which you can utilize to access wallet also through other applications.',
+                         inline=False)
     intro_info.add_field(name=f':exclamation: Stellar Account Merge :exclamation:  ',
                          value='Stellar allows as well for account merges. Since you control your private keys, '
                                'you can merge account through other applications. if Discord level 2 wallet '
-                               ' will be used as a source account in Stellar Account Merge process, level 2 command'
-                               ' over Discord will stop working. ')
+                               ' will be used as a source account in Stellar Account Merge process, level 2 commands'
+                               ' over Discord will stop working and become unavailable. ',
+                         inline=False)
     intro_info.add_field(name=f':exclamation: Inactive Account :exclamation:  ',
                          value='When you will successfully complete the registration process, account will be inactive'
                                ' till minimum amount of XLM to activate account is sent to the address either by '
@@ -190,13 +191,16 @@ async def second_level_account_reg_info(destination):
                                ' Crypto Link request through DM only. ***Crypto Link will never ask automatically '
                                ' for private key from user unless a command has been initiated from the user. '
                                'Once registration process is successfully completed, store private key somewhere safe'
-                               ' and manually delete messages from the bot from your DM.***')
+                               ' and manually delete messages from the bot from your DM.***',
+                         inline=False)
     intro_info.add_field(name=f':exclamation: Responsibility :exclamation:  ',
                          value='Crypto Link Staff will ***NEVER ASK***  you to provide them private key details. '
                                'if you see such activity please report it immediately to the staff on Crypto Link '
-                               'Community so we can user in the system.')
+                               'Community so we can user in the system.',
+                         inline=False)
     intro_info.add_field(name=f'YES/NO',
-                         value="Answer with YES/Y if you have read, and understood instructions")
+                         value="Answer with YES/Y if you have read, and understood instructions",
+                         inline=False)
 
     await destination.send(embed=intro_info)
 
