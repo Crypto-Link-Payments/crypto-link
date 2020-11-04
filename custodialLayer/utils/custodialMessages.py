@@ -215,7 +215,8 @@ async def verification_request_explanation(destination):
     await destination.send(embed=verify_embed)
 
 
-async def sign_message_information(destination, recipient, layer, transaction_details: dict):
+async def sign_message_information(destination, transaction_details: dict, layer: int = None, recipient=None):
+    # TODO update this to support discord and network tx
     sign_message = Embed(title=f':warning: Check Details and sign :warning:',
                          color=Colour.orange(),
                          timestamp=datetime.utcnow())
@@ -253,7 +254,7 @@ async def send_transaction_report(destination, response: dict):
     tx_report = Embed(
         title=f':white_check_mark: Transactions Successfully Completed :white_check_mark:',
         description=f"Paging Token {response['paging_token']}",
-        color=Colour.green(),
+        color=Colour.orange(),
         timestamp=datetime.utcnow())
     tx_report.add_field(name=f':ledger: Ledger :ledger: ',
                         value=f'{response["ledger"]}')
@@ -277,3 +278,37 @@ async def send_transaction_report(destination, response: dict):
     tx_report.add_field(name=f':sunrise: Network Fee :sunrise:',
                         value=f"{response['fee_charged'] * (10 ** 7)} XLM")
     await destination(embed=tx_report)
+
+
+async def transaction_report_recipient(sender, recipient, amount, token, response: dict=None):
+    """
+    Transaction report to recipient of second level done to Discord Account
+    """
+    tx_report = Embed(
+        title=f':inbox_tray: Incoming Payment :inbox_tray: ',
+        description=f"You have received this notification because someone sent you payment through Crypto"
+                    f" Link to one of the wallet levels. Please check details bellow.",
+        color=Colour.green(),
+        timestamp=datetime.utcnow())
+    tx_report.add_field(name=f':calendar: Payment Date :calendar: ',
+                        value=f'{response["created_at"]}',
+                        inline=False)
+    tx_report.add_field(name=f':cowboy: Sender Details :cowboy: ',
+                        value=f'{sender} (ID:{sender.id})',
+                        inline=False)
+    tx_report.add_field(name=f':money_mouth: Payment Value :money_mouth:',
+                        value=f'{amount} {token}',
+                        inline=False)
+    tx_report.set_thumbnail(url=sender.avatar_url)
+    tx_report.add_field(name=f'Memo Details',
+                        value=f'{response["memo"]}',
+                        inline=False)
+    tx_report.add_field(name=f':hash: Transaction Hash :hash:',
+                        value=f'```{response["hash"]}```',
+                        inline=False)
+    tx_report.add_field(name=f':sunrise: Horizon Links :sunrise:',
+                        value=f'[Transaction]({response["_links"]["self"]["href"]})\n'
+                              f'[Operations]({response["_links"]["operations"]["href"]})\n'
+                              f'[Effects]({response["_links"]["effects"]["href"]})\n',
+                        inline=False)
+    await recipient.send(embed=tx_report)
