@@ -249,7 +249,7 @@ class CustodialAccounts(commands.Cog):
             welcome_verification = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=180)
 
             # Verify user answer
-            if welcome_verification.contet.upper() in ["YES", "Y"]:
+            if welcome_verification.content.upper() in ["YES", "Y"]:
                 # Get private and public key
                 details = self.backoffice.stellar_wallet.create_stellar_account()
                 # Check if details returned
@@ -339,9 +339,13 @@ class CustodialAccounts(commands.Cog):
     @account.command()
     async def info(self, ctx):
         # Get address from database
-        user_public = self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=ctx.message.author)
+        user_public = self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=ctx.message.author.id)
+        print(user_public)
+        print('2')
         # Getting data from server for account
         data = self.server.accounts().account_id(account_id=user_public).call()
+        from pprint import pprint
+        pprint(data)
         if data and 'status' not in data:
             # Send user account info
             await send_user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
