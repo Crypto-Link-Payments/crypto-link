@@ -228,7 +228,7 @@ class CustodialAccounts(commands.Cog):
                               {"name": "Group of commands to obtain info on Layer two Account",
                                "value": f"`{self.command_string}custodial account`"},
                               {"name": "Group of commands to create various transactions",
-                               "value": f"`{self.command_string}custodial account`"}
+                               "value": f"`{self.command_string}custodial tx`"}
                               ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
@@ -340,8 +340,6 @@ class CustodialAccounts(commands.Cog):
     async def info(self, ctx):
         # Get address from database
         user_public = self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=ctx.message.author.id)
-        print(user_public)
-        print('2')
         # Getting data from server for account
         data = self.server.accounts().account_id(account_id=user_public).call()
         from pprint import pprint
