@@ -34,10 +34,6 @@ class PeriodicTasks:
         self.bot = bot
         self.twitter_acc = self.backoffice.twitter_details
 
-        self.auth = tweepy.OAuthHandler(consumer_key=self.twitter_acc['apiKey']
-                                        , consumer_secret=self.twitter_acc['apiSecret'])
-        self.auth.set_access_token(key=self.twitter_acc['accessToken'], secret=self.twitter_acc['accessSecret'])
-        self.tweeter = tweepy.API(self.auth)
 
     @staticmethod
     def special_character_check(memo):
@@ -349,33 +345,6 @@ class PeriodicTasks:
             print(Fore.CYAN + 'No communities with overdue license\n'
                               ' ===================================')
 
-    async def new_tweet_checker(self):
-        print(Fore.BLUE + 'Checking for new tweet')
-        user = self.tweeter.get_user('CryptoLink8')  # Crypto Link accout
-        tweet_channel_id = self.notification_channels['twitter']
-        last_processed = helper.read_json_file(file_name='lastTweet.json')["tweetId"]
-        new_tweets = list(
-            self.tweeter.user_timeline(id=user, exclude_replies=True, include_rts=False,
-                                       since_id=last_processed))
-        if new_tweets:
-            # Get last tweet ID
-            latest_tweet = new_tweets[0].id
-
-            # Create link from new tweets to be send
-            link_list = [f'https://twitter.com/CryptoLink8/status/{t.id}' for t in new_tweets]
-            tweet_channel = self.bot.get_channel(id=int(tweet_channel_id))
-            print(f'{tweet_channel}')
-            for link in list(reversed(link_list)):
-                await tweet_channel.send(content=link)
-
-            print('All tweets sent')
-            if helper.update_json_file(file_name='lastTweet.json', key='tweetId', value=int(latest_tweet)):
-                pass
-            else:
-                print('Last tweet id could not be stored to file')
-        else:
-            print(Fore.BLUE + 'No new tweets on the timeline')
-
 
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
@@ -387,8 +356,6 @@ def start_scheduler(timed_updater):
         second='00'), misfire_grace_time=10, max_instances=20)
     scheduler.add_job(timed_updater.check_merchant_licences,
                       CronTrigger(minute='00', second='10'), misfire_grace_time=10, max_instances=20)
-    scheduler.add_job(timed_updater.new_tweet_checker, CronTrigger(second='30'), misfire_grace_time=10,
-                      max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
     return scheduler
