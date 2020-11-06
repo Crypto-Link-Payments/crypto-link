@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import Intents
 from colorama import Fore, init
 
 from utils.tools import Helpers
@@ -25,13 +26,19 @@ horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.paths',
                 'horizonCommands.tradeAggregations']
 
+non_custodial_layer_cmds = ['nonCustodialLayer.payments']
+
+custodial_layer = ['custodialLayer.userAccount']
+
 
 class DiscordBot(commands.Bot):
     def __init__(self, backoffice):
         helper = Helpers()
         self.bot_settings = helper.read_json_file(file_name='botSetup.json')
 
-        super().__init__(command_prefix=commands.when_mentioned_or(self.bot_settings['command']))
+        super().__init__(
+            command_prefix=commands.when_mentioned_or(self.bot_settings['command']),
+            intents=Intents.all())
         self.remove_command('help')  # removing the old help command
         self.backoffice = backoffice
         self.load_cogs()
@@ -50,7 +57,7 @@ class DiscordBot(commands.Bot):
         print(notification_str)
 
         notification_str = Fore.CYAN + '+++++++++++++++++++++++++++++++++++++++\n' \
-                                        '           LOADING Horizon COGS....        \n'
+                                       '           LOADING Horizon COGS....        \n'
         for hor in horizon_cogs:
             try:
                 self.load_extension(hor)
@@ -61,6 +68,31 @@ class DiscordBot(commands.Bot):
         notification_str += '+++++++++++++++++++++++++++++++++++++++'
         print(notification_str)
 
+        notification_str = Fore.BLUE + '+++++++++++++++++++++++++++++++++++++++\n' \
+                                       '           LOADING Non Custodial Layer....        \n'
+
+        for cmd in non_custodial_layer_cmds:
+            try:
+                self.load_extension(cmd)
+                notification_str += f'| {cmd} :smile: \n'
+            except Exception as error:
+                notification_str += f'| {cmd} --> {error}\n'
+                raise
+        notification_str += '+++++++++++++++++++++++++++++++++++++++'
+        print(notification_str)
+
+        notification_str = Fore.WHITE + '+++++++++++++++++++++++++++++++++++++++\n' \
+                                        '           LOADING Custodial Layer 2....        \n'
+
+        for cust_cmd in custodial_layer:
+            try:
+                self.load_extension(cust_cmd)
+                notification_str += f'| {cust_cmd} :smile: \n'
+            except Exception as error:
+                notification_str += f'| {cust_cmd} --> {error}\n'
+                raise
+        notification_str += '+++++++++++++++++++++++++++++++++++++++'
+        print(notification_str)
 
     async def on_ready(self):
         """
@@ -74,6 +106,19 @@ class DiscordBot(commands.Bot):
         print(self.user.id)
         print('------')
         print('================================')
+
+        guild = await self.fetch_guild(guild_id=756132394289070102)
+        role = guild.get_role(role_id=773212890269745222)
+        channel = self.get_channel(id=int(773157463628709898))
+        message = f':robot: {role.mention} I am Online and ready to be be tested'
+        await channel.send(content=message)
+
+    async def on_disconnect(self):
+        guild = await self.fetch_guild(guild_id=756132394289070102)
+        role = guild.get_role(role_id=773212890269745222)
+        channel = self.get_channel(id=int(773157463628709898))
+        message = f':robot: {role.mention} I am going Offline for Maintenance'
+        await channel.send(content=message)
 
     def run(self):
         super().run(self.bot_settings['token'], reconnect=True)

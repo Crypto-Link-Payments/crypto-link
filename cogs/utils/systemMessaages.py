@@ -127,7 +127,7 @@ class CustomMessages:
         Custom System Messages
         """
         if isinstance(color_code,Colour):
-            emoji = "robot"
+            emoji = ":robot:"
             c = color_code
         else:
             if color_code == 0:

@@ -256,7 +256,7 @@ class BotManagementCommands(commands.Cog):
 
     #############################  Crypto Link System #############################
 
-    @commands.group()
+    @commands.group(aliases=["sys"])
     @commands.check(is_one_of_gods)
     async def system(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -270,9 +270,13 @@ class BotManagementCommands(commands.Cog):
                                                 description='Available commands under category ***system***',
                                                 data=value)
 
-    @system.command()
+    @system.command(aliases=["stop"])
     async def off(self, ctx):
-        await ctx.channel.send(content='Going Offline!')
+        guild = await self.bot.fetch_guild(guild_id=756132394289070102)
+        role = guild.get_role(role_id=773212890269745222)
+        channel = self.bot.get_channel(id=int(773157463628709898))
+        message = f':robot: {role.mention} I am going Offline for Maintenance'
+        await channel.send(content=message)
         await self.bot.close()
         sys.exit(0)
 

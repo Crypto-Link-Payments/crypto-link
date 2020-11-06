@@ -23,7 +23,7 @@ class StellarWallet:
 
     """
 
-    def __init__(self):
+    def __init__(self, horizon_url:str):
         helpers = Helpers()
         secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
         public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
@@ -32,7 +32,7 @@ class StellarWallet:
         self.private_key = secret_details['stellar']
         self.root_keypair = Keypair.from_secret(self.private_key)
         self.root_account = Account(account_id=self.root_keypair.public_key, sequence=1)
-        self.server = Server(horizon_url="https://horizon-testnet.stellar.org")  # Testnet
+        self.server = Server(horizon_url=horizon_url)  # Testnet
 
     def __base_fee(self):
         """

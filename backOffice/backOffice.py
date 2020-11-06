@@ -13,6 +13,7 @@ from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.botWallet import BotManager
 from backOffice.corpHistory import CorporateHistoryManager
+from backOffice.custodialWalletManager import CustodialWalletManager
 
 
 class BackOffice:
@@ -22,9 +23,11 @@ class BackOffice:
         self.connection = MongoClient(bot_data['database']['connection'], maxPoolSize=20)
         self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(bot_data['database']['connection'])
         self.twitter_details = bot_data["twitter"]
+        self.horizon_url = bot_data['horizonServer']
 
         self.backend_check = BotStructureCheck(self.connection)
-        self.stellar_wallet = StellarWallet()
+        self.custodial_manager = CustodialWalletManager(self.connection)
+        self.stellar_wallet = StellarWallet(horizon_url=self.horizon_url)
         self.merchant_manager = MerchantManager(self.connection)
         self.stellar_manager = StellarManager(self.connection, self.as_connection)
         self.stats_manager = StatsManager(self.connection, self.as_connection)
@@ -38,4 +41,3 @@ class BackOffice:
         self.backend_check.check_collections()
         self.backend_check.checking_stats_documents()
         self.backend_check.checking_bot_wallets()
-

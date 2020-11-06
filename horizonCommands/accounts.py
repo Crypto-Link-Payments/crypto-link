@@ -11,8 +11,8 @@ from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.horizonAccess.horizon import server
 from datetime import datetime
 from cogs.utils.securityChecks import check_stellar_address
-from backOffice.stellarOnChainHandler import StellarWallet
 from utils.tools import Helpers
+from backOffice.backOffice import BackOffice
 
 custom_messages = CustomMessages()
 helper = Helpers()
@@ -20,7 +20,7 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
-stellar_wallet = StellarWallet()
+
 
 
 class HorizonAccounts(commands.Cog):
@@ -34,6 +34,7 @@ class HorizonAccounts(commands.Cog):
         self.command_string = bot.get_command_str()
         self.server = server
         self.hor_accounts = self.server.accounts()
+        self.backoffice = bot.backoffice
 
     @commands.group()
     async def accounts(self, ctx):
@@ -57,7 +58,7 @@ class HorizonAccounts(commands.Cog):
         """
         Creates new in-active account on Stellar Network
         """
-        details = stellar_wallet.create_stellar_account()
+        details = self.backoffice.stellar_wallet.create_stellar_account()
         if details:
             new_account = Embed(title=f':new: Stellar Testnet Account Created :new:',
                                 description=f'You have successfully created new account on {details["network"]}. Do'

@@ -16,10 +16,7 @@ def check_stellar_address(address):
 
 def check_stellar_private(private_key):
     try:
-        user_key_pair = Keypair.from_secret(private_key)
-        root_account = Account(account_id=user_key_pair.public_key, sequence=1)
-        print(root_account)
+        Keypair.from_secret(private_key)
         return True
-    except Ed25519SecretSeedInvalidError as e:
-        print(e)
+    except Ed25519SecretSeedInvalidError:
         return False

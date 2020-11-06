@@ -9,7 +9,7 @@ def is_animus(ctx):
     """
     Check if creator
     """
-    return ctx.bot.is_animus( ctx.message.author.id )
+    return ctx.bot.is_animus(ctx.message.author.id)
 
 
 def is_one_of_gods(ctx):
@@ -25,6 +25,10 @@ def is_public(ctx):
     return ctx.message.channel.type != ChannelType.private
 
 
+def is_dm(ctx):
+    return not ctx.message.guild
+
+
 def has_wallet(ctx):
     """
     Check if user has already registered personal wallet to the system
@@ -38,7 +42,7 @@ def is_owner(ctx):
     """
     Function checks if the user is owner of the community or not
     """
-    return int(ctx.message.author.id) == int(ctx.message.guild.owner.id)
+    return int(ctx.message.author.id) == int(ctx.message.guild.owner_id)
 
 
 def merchant_com_reg_stats(ctx):
@@ -77,3 +81,10 @@ def guild_has_stats(ctx):
     Guild registration status check for stats
     """
     return ctx.bot.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id)
+
+
+def user_has_custodial(ctx):
+    """
+    Custom check for custodial wallet
+    """
+    return ctx.bot.backoffice.custodial_manager.second_level_user_reg_status(user_id=ctx.author.id)

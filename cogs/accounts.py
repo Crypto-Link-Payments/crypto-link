@@ -2,7 +2,6 @@ from datetime import datetime
 import re
 from discord import Embed, Colour
 from discord.ext import commands
-
 from cogs.utils.customCogChecks import is_public, user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal, scientific_conversion
@@ -17,6 +16,19 @@ integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_ACC_REG_STATUS = '__Account registration status__'
 CONST_TRUST_ERROR = ':warning: __Trustline error__ :warning:'
+
+
+def check(author):
+    def inner_check(message):
+        """
+        Check for answering the verification message on withdrawal. Author origin
+        """
+        if message.author.id == author.id:
+            return True
+        else:
+            return False
+
+    return inner_check
 
 
 class UserAccountCommands(commands.Cog):
