@@ -156,6 +156,10 @@ class AccountManager(object):
         else:
             return False
 
+    def count_registrations(self):
+        result = self.user_profiles.count_documents({})
+        return result
+
     def get_user_memo(self, user_id: int):
         """
         Gets whole user profile data based on the ID
