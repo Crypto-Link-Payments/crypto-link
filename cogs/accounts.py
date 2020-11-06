@@ -96,17 +96,17 @@ class UserAccountCommands(commands.Cog):
             if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
                                                          discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
-                          f' Please use {self.command_string}acc or {self.command_string}wallet.'
+                          f' Please use `{self.command_string}wallet` or `{self.command_string}help account` to ' \
+                          f'familiarize yourself with all available functions .'
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
 
                 load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                current_total = self.backoffice.count_registrations()
+                current_total = self.backoffice.account_mng.count_registrations()
                 explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
-                await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                        message=explorer_msg, on_chain=False,
-                                                        tx_type='role_purchase')
+                for chn in load_channels:
+                    await chn.send(content=explorer_msg)
 
             else:
                 message = f'Account could not be registered at this moment please try again later.'
