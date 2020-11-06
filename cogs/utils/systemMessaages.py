@@ -41,6 +41,9 @@ class CustomMessages:
         elif tx_type == 'role_purchase':
             pass
 
+        elif tx_type == 'registration':
+            pass
+
         return msg_streamed
 
     def get_emoji(self, tx_type):
@@ -116,17 +119,20 @@ class CustomMessages:
                             inline=False)
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
-        if destination:
-            await ctx.author.send(embed=embed)
-        else:
-            await ctx.channel.send(embed=embed, delete_after=40)
+        try:
+            if destination:
+                await ctx.author.send(embed=embed)
+            else:
+                await ctx.channel.send(embed=embed, delete_after=40)
+        except Exception:
+            await ctx.channel.send(embed=embed)
 
     @staticmethod
     async def system_message(ctx, message: str, color_code, destination: int, sys_msg_title: str = None):
         """
         Custom System Messages
         """
-        if isinstance(color_code,Colour):
+        if isinstance(color_code, Colour):
             emoji = ":robot:"
             c = color_code
         else:
@@ -435,6 +441,8 @@ class CustomMessages:
         """
         Transactin reports to all explorer applied channels
         """
+        print(applied_channels)
+        print()
         if not on_chain:
             msg_streamed = self.filter_message(message=message, tx_type=tx_type)
             for explorer_channel in applied_channels:
