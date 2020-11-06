@@ -107,6 +107,19 @@ class DiscordBot(commands.Bot):
         print('------')
         print('================================')
 
+        guild = await self.fetch_guild(guild_id=756132394289070102)
+        role = guild.get_role(role_id=773212890269745222)
+        channel = self.get_channel(id=int(773157463628709898))
+        message = f':robot: {role.mention} I am Online and ready to be be tested'
+        await channel.send(content=message)
+
+    async def on_disconnect(self):
+        guild = await self.fetch_guild(guild_id=756132394289070102)
+        role = guild.get_role(role_id=773212890269745222)
+        channel = self.get_channel(id=int(773157463628709898))
+        message = f':robot: {role.mention} I am going Offline for Maintenance'
+        await channel.send(content=message)
+
     def run(self):
         super().run(self.bot_settings['token'], reconnect=True)
 
