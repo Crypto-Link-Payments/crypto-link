@@ -197,7 +197,7 @@ class UserAccountCommands(commands.Cog):
                       f"\nexample:\n"
                       f"`{self.command_string}withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7`"},
             {"name": f" :gem: Withdraw Tokens :gem:",
-             "value": f"{self.command_string}withdraw <ticker> <amount> <destination address>\n"
+             "value": f"`{self.command_string}withdraw <ticker> <amount> <destination address>`\n"
                       f"\nexample:\n"
                       f"`{self.command_string}withdraw clt 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7`"}]
 
