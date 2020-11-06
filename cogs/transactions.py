@@ -7,7 +7,7 @@ from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
 helper = Helpers()
-customMessages = CustomMessages()
+custom_messages = CustomMessages()
 
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
@@ -126,29 +126,29 @@ class TransactionCommands(commands.Cog):
             total_dollar_value = 0
             conversion_rate = 0
 
-        await customMessages.transaction_report_to_channel(ctx=ctx, message=tx_report_msg, tx_type=tx_type)
+        await custom_messages.transaction_report_to_channel(ctx=ctx, message=tx_report_msg, tx_type=tx_type)
 
         tx_details["conversion"] = total_dollar_value
         tx_details["conversionRate"] = conversion_rate
 
         # report to sender
-        await customMessages.transaction_report_to_user(ctx=ctx, user=recipient, transaction_data=tx_details,
-                                                        destination=ctx.message.author,
-                                                        direction=0, tx_type=tx_type,
-                                                        message=msg)
+        await custom_messages.transaction_report_to_user(ctx=ctx, user=recipient, transaction_data=tx_details,
+                                                         destination=ctx.message.author,
+                                                         direction=0, tx_type=tx_type,
+                                                         message=msg)
 
         # report to recipient
-        await customMessages.transaction_report_to_user(ctx=ctx, user=ctx.message.author, transaction_data=tx_details,
-                                                        destination=recipient,
-                                                        direction=1, tx_type=tx_type,
-                                                        message=msg)
+        await custom_messages.transaction_report_to_user(ctx=ctx, user=ctx.message.author, transaction_data=tx_details,
+                                                         destination=recipient,
+                                                         direction=1, tx_type=tx_type,
+                                                         message=msg)
 
         # Send out explorer
         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
-        await customMessages.explorer_messages(applied_channels=load_channels,
-                                               message=explorer_msg, tx_type=tx_type)
+        await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                message=explorer_msg, tx_type=tx_type)
 
     async def send_impl(self, ctx, amount: float, ticker: str, recipient: User, *, tx_type: str, message: str = None):
         coin = ticker.lower()
@@ -165,6 +165,13 @@ class TransactionCommands(commands.Cog):
                         if not self.backoffice.account_mng.check_user_existence(user_id=recipient.id):
                             self.backoffice.account_mng.register_user(discord_id=recipient.id,
                                                                       discord_username=f'{recipient}')
+                            load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                             self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                            current_total = self.backoffice.count_registrations()
+                            explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
+                            await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                                    message=explorer_msg, on_chain=False,
+                                                                    tx_type='role_purchase')
 
                         if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
                                                                               user_id=ctx.message.author.id,
@@ -189,36 +196,36 @@ class TransactionCommands(commands.Cog):
                                                                                    amount=int(atomic_value),
                                                                                    direction=1)
                                 message = f'{amount} XLA could not be sent to the {recipient} please try again later'
-                                await customMessages.system_message(ctx=ctx, color_code=1, message=message,
-                                                                    destination=1,
-                                                                    sys_msg_title=CONST_TX_ERROR_TITLE)
+                                await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                     destination=1,
+                                                                     sys_msg_title=CONST_TX_ERROR_TITLE)
 
                         else:
                             message = f'There has been an error while making P2P transaction please try again later'
-                            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                                sys_msg_title=CONST_TX_ERROR_TITLE)
+                            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
                     else:
 
                         message = f'You have insufficient balance! Your current wallet balance is' \
                                   f' {wallet_value / 10000000} XLM'
-                        await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                            sys_msg_title=CONST_TX_ERROR_TITLE)
+                        await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                             sys_msg_title=CONST_TX_ERROR_TITLE)
                 else:
 
                     message = f'Coin {coin} has not been integrated yet into {self.bot.user}.'
-                    await customMessages.system_message(ctx=ctx, color_code=1, message=message,
-                                                        destination=1,
-                                                        sys_msg_title=CONST_TX_ERROR_TITLE)
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                         destination=1,
+                                                         sys_msg_title=CONST_TX_ERROR_TITLE)
             else:
 
                 message = f'You are not allowed to send {amount} xlm to either yourself or the bot.'
-                await customMessages.system_message(ctx=ctx, color_code=1, message=message,
-                                                    destination=1,
-                                                    sys_msg_title=CONST_TX_ERROR_TITLE)
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                     destination=1,
+                                                     sys_msg_title=CONST_TX_ERROR_TITLE)
         else:
             message = 'Amount needs to be greater than 0.0000000 XLM'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=CONST_TX_ERROR_TITLE)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
 
     @commands.group()
     @commands.check(is_public)
@@ -242,29 +249,29 @@ class TransactionCommands(commands.Cog):
             message = f'In order to execute P2P transaction you need to be registered into the system, and ' \
                       f'transaction request needs to be executed on one of the text public text channels ' \
                       f'on {ctx.message.guild}'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
         elif isinstance(error, commands.BadArgument):
             title = f'__Bad Argument Provided __'
             message = f'You have provided wrong argument either for amount or than for the recipient'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
         elif isinstance(error, AssertionError):
             title = f'__Amount Check failed __'
             message = f'You have provided wrong amount for tx value.'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
         elif isinstance(error, commands.CommandOnCooldown):
             title = f'__Command on cool-down__!'
             message = f'{error}. Please try again after {error.retry_after}s'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
 
         elif isinstance(error, commands.MissingRequiredArgument):
             title = f'__Missing Required Argument Error __'
             message = f'{str(error)}'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title=title)
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
 
 
 def setup(bot):
