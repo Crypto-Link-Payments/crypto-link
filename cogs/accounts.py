@@ -121,7 +121,7 @@ class UserAccountCommands(commands.Cog):
 
     @commands.group()
     @commands.check(user_has_wallet)
-    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Wallet Commands__ :joystick: '
