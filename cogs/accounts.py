@@ -90,7 +90,7 @@ class UserAccountCommands(commands.Cog):
 
     @commands.command(aliases=['reg', 'apply'])
     @commands.check(is_public)
-    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @commands.cooldown(1, 2, commands.BucketType.guild)
     async def register(self, ctx):
         if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
             if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
