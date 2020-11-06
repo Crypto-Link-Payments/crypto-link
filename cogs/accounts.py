@@ -97,7 +97,8 @@ class UserAccountCommands(commands.Cog):
                                                          discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
                           f' Please use `{self.command_string}wallet` or `{self.command_string}help account` to ' \
-                          f'familiarize yourself with all available functions .'
+                          f'familiarize yourself with all available functions. In order to maximize experience, be sure' \
+                          f'to allow DM in your Discord Profile. '
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
 
