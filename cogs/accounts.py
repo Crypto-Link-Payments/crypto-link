@@ -125,7 +125,12 @@ class UserAccountCommands(commands.Cog):
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Wallet Level 1 Commands__ :joystick: '
-            description = "All commands available to operate execute wallet related actions"
+            description = "Wallet Level 1 is custodial wallet maintained for you completely by Crypto Link system." \
+                          " Be aware that in this case you ***DO NOT*** control your private keys, and that the " \
+                          "wallet should not be used for large sums or long term storage." \
+                          " It has been integrated with the reason to allow for easier onboarding of new users " \
+                          "to Crypto Link, as well to be used by users who would like to get familiar" \
+                          " with Stellar Ecosystem, currencies and Crypto Link per se. "
             list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
                                "value": f"`{self.command_string}wallet balance`"},
                               {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
