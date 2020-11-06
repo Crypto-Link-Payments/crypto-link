@@ -124,7 +124,7 @@ class UserAccountCommands(commands.Cog):
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = ':joystick: __Available Wallet Commands__ :joystick: '
+            title = ':joystick: __Available Wallet Level 1 Commands__ :joystick: '
             description = "All commands available to operate execute wallet related actions"
             list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
                                "value": f"`{self.command_string}wallet balance`"},
@@ -133,7 +133,7 @@ class UserAccountCommands(commands.Cog):
                               {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
                                "value": f"`{self.command_string}wallet deposit`"},
                               {"name": ":outbox_tray: Get Withdrawal Instructions :outbox_tray: ",
-                               "value": f"`{self.command_string}withdraw`"}]
+                               "value": f"`{self.command_string}wallet withdraw`"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
@@ -181,6 +181,23 @@ class UserAccountCommands(commands.Cog):
                       f'Please try again later, or contact one of the staff members. '
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
+
+    @wallet.command()
+    async def withdraw(self, ctx):
+        title = ':joystick: __Available withdrawal commands__ :joystick: '
+        description = "All commands available to withdraw funds from Discord Wallet"
+        list_of_values = [
+            {"name": f":outbox_tray: Withdraw Stellar (XLM) from Discord wallet :outbox_tray:",
+             "value": f"`{self.command_string}withdraw xlm <amount> <destination address>`\n"
+                      f"\nexample:\n"
+                      f"`{self.command_string}withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7`"},
+            {"name": f" :gem: Withdraw Tokens :gem:",
+             "value": f"{self.command_string}withdraw <ticker> <amount> <destination address>\n"
+                      f"\nexample:\n"
+                      f"`{self.command_string}withdraw clt 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7`"}]
+
+        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                            destination=1)
 
     @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
