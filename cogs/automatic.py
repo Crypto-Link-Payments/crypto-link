@@ -8,9 +8,11 @@ import sys
 from colorama import Fore
 from discord import Embed, Colour, TextChannel
 from discord.ext import commands
+from datetime import datetime
 
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
+from cogs.utils.customCogChecks import is_dm
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
@@ -27,36 +29,81 @@ ANIMUS_ID = 360367188432912385
 class AutoFunctions(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.channel_id = auto_messaging["bug"]
+        self.animus_id = d["creator"]
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx, exception):
         """
         Global error for on command error
         """
-        if isinstance(error, commands.CommandNotFound):
+        print(exception)
+        if isinstance(exception, commands.CommandNotFound):
             title = 'System Command Error'
             message = f':no_entry: Sorry, this command does not exist! Please' \
                       f'type `{d["command"]}help` to check available commands.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
-
         else:
-            print('=============BUG===========')
-            print(ctx.message.author)
-            print(error)
-            print(ctx.message.content)
-            print('=============BUG===========')
+            if isinstance(exception, commands.CheckFailure):
+                print('****')
+                print(exception)
+                pass
+            else:
+                bug_channel = self.bot.get_channel(id=int(self.channel_id))
+
+                get_bug_count = helpers.read_json_file(file_name="counters.json")["bug"]
+                get_bug_count += 1
+                helpers.update_json_file(file_name="counters.json", key="bug", value=int(get_bug_count))
+
+                animus = await self.bot.fetch_user(user_id=int(self.animus_id))
+                bug_info = Embed(title=f':new: :bug: :warning: ',
+                                 description='New command error found',
+                                 colour=Colour.red(),
+                                 timestamp=datetime.utcnow())
+                bug_info.add_field(name=f'No:',
+                                   value=f'{get_bug_count}')
+                bug_info.add_field(name=f'Command Author',
+                                   value=f'{ctx.message.author}')
+                bug_info.add_field(name=f'Channel',
+                                   value=ctx.message.channel)
+                bug_info.add_field(name=f':joystick: Command Executed :joystick:',
+                                   value=f'```{ctx.message.content}```',
+                                   inline=False)
+                bug_info.add_field(name=f':interrobang: Error Details :interrobang: ',
+                                   value=f'```{exception}```',
+                                   inline=False)
+
+                await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
         """
         global function activated everytime when command is executed
         """
+        crnt = datetime.utcnow()
         if isinstance(ctx.message.channel, TextChannel):
             try:
                 await ctx.message.delete()
             except Exception as e:
                 print(f'Bot could not delete command from channel: {e}')
+                pass
+
+        if ctx.author.id == 360367188432912385:
+            get_count = helpers.read_json_file(file_name="counters.json")["actions"]
+            get_count += 1
+            helpers.update_json_file(file_name="counters.json", key="actions", value=int(get_count))
+
+            if is_dm(ctx):
+                c = 'P'
+            else:
+                c = 'DM'
+
+            channel = self.bot.get_channel(id=int(774181784077991966))
+
+            message = f'Counter: {get_count}\n' \
+                      f':joystick: {crnt} | *{c}* | __{ctx.author}__ | `{ctx.message.content}`'
+            await channel.send(content=message)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -152,12 +199,11 @@ class AutoFunctions(commands.Cog):
                             value=f'{guild.member_count}',
                             inline=False)
 
-        kavic = await self.bot.fetch_user(user_id=int(KAVIC_ID))
         animus = await self.bot.fetch_user(user_id=int(ANIMUS_ID))
 
         channel_id = auto_messaging["sys"]
         dest = self.bot.get_channel(id=int(channel_id))
-        await dest.send(embed=new_guild, content=f'{kavic.mention} {animus.mention}')
+        await dest.send(embed=new_guild, content=f'{animus.mention}')
 
         print(
             Fore.LIGHTYELLOW_EX + '===================================\nGlobal Stats Updated after join...\n========'
