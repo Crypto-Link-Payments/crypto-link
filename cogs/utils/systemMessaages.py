@@ -245,19 +245,19 @@ class CustomMessages:
                          value=str(datetime.utcnow()),
                          inline=False)
         notify.add_field(name=':map: Destination :map: ',
-                         value=withdrawal_data["destination"],
+                         value=f'```{withdrawal_data["destination"]}```',
                          inline=False)
         notify.add_field(name=':hash: Transaction hash :hash: ',
-                         value=withdrawal_data["hash"],
+                         value=f'`{withdrawal_data["hash"]}`',
                          inline=False)
         notify.add_field(name=':receipt: Withdrawal asset details :receipt: ',
-                         value=f'{round(withdrawal_data["amount"] / 10000000, 7)} {withdrawal_data["asset"]}',
+                         value=f'`{round(withdrawal_data["amount"] / 10000000, 7):.7f} {withdrawal_data["asset"]}`',
                          inline=False)
         notify.add_field(name=':money_mouth: Crypto Link Fee :money_mouth: ',
-                         value=fee,
+                         value=f'`{fee}`',
                          inline=False)
-        notify.add_field(name=':compass: Explorer Link :compass: ',
-                         value=withdrawal_data['explorer'],
+        notify.add_field(name=':sunrise: Horizon Access Link :sunrise: ',
+                         value="[Complete Details](withdrawal_data['explorer'])",
                          inline=False)
         notify.set_thumbnail(url=ctx.message.author.avatar_url)
 
