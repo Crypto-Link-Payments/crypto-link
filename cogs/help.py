@@ -303,7 +303,7 @@ class HelpCommands(commands.Cog):
         uplink_nfo.set_thumbnail(url=self.bot.user.avatar_url)
         await ctx.author.send(embed=uplink_nfo, delete_after=500)
 
-    @help.command(aliases=['hor', 'network','explorer'])
+    @help.command(aliases=['hor', 'network', 'explorer'])
     async def horizon(self, ctx):
         """
         Entry point for merchant system
