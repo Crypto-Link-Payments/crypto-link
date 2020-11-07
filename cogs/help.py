@@ -139,7 +139,7 @@ class HelpCommands(commands.Cog):
         """
 
         available = discord.Embed(title=':coin: Integrated coins and tokens :coin: ',
-                                  description='Bellow is a list of all available currencies for making peer 2 peer'
+                                  description='Below is a list of all available currencies for making peer 2 peer'
                                               ' transactions or to be used with merchant system',
                                   colour=Colour.blue())
         await ctx.author.send(embed=available)
@@ -178,7 +178,7 @@ class HelpCommands(commands.Cog):
     @help.command(aliases=['acc', 'user', 'profile', 'wallet'])
     async def account(self, ctx):
         title = ':office_worker: __Obtain information on personal account__:office_worker: '
-        description = "Bellow are presented all currencies available for P2P transactions"
+        description = "Below are presented all currencies available for P2P transactions"
         list_of_values = [
             {"name": ":credit_card: Get balance information :credit_card: ",
              "value": f"`{self.command_string}me`"},
