@@ -24,11 +24,13 @@ currencies are returned.
 ```text
 !acc
 ```
+
 #### Wallet help
 Returns information on all available sub-commands for the wallet command category
 ```text
 !wallet
 ```
+
 #### Wallet statistics
 Statistical data such as total deposits, withdrawals, executed transactions, etc.  per each token 
 are displayed.
@@ -44,25 +46,34 @@ Wallet balance returned for all integrated coins with conversion to fiat.
 !wallet balance
 ```
 
-### Withdrawals and deposits
+### Withdrawals, Deposits, Trust Creation
 
 #### Create trustline for token withdrawal 
 Since Crypto Link has integrated tokens built on Stellar, to be able to withdraw them you are required to 
 create a Trustline between your personal wallet and the Asset Issuer. Once successfully established you will be able 
-to withdraw token 
+to withdraw token.
+
+Note: You can do that either by utilizing any app which allows to create trust or than utilize
+Crypto Link dedicated command. 
 
 ```text
 !wallet trust <ticker>
 ```
 #### Withdraw from Discord to personal wallet
 
-- Withdraw Stellar Lumen from Discord
+##### Withdrawal Instructions
+
+```text
+!wallet withdraw
+```
+
+##### Withdraw XLM from Discord
 
 ```text
 !withdraw xlm <amount> <destination address>
 ```
 
-- Withdraw integrated token on stellar chain 
+##### Withdraw Crypto Link integrated/supported token on stellar chain 
 
 ```text
 !withdraw <ticker> <amount> <destination address>

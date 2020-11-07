@@ -90,15 +90,25 @@ class UserAccountCommands(commands.Cog):
 
     @commands.command(aliases=['reg', 'apply'])
     @commands.check(is_public)
-    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @commands.cooldown(1, 2, commands.BucketType.guild)
     async def register(self, ctx):
         if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
             if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
                                                          discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
-                          f' Please use {self.command_string}acc or {self.command_string}wallet.'
+                          f' Please use `{self.command_string}wallet` or `{self.command_string}help account` to ' \
+                          f'familiarize yourself with all available functions. In order to maximize experience, be sure' \
+                          f'to allow DM in your Discord Profile. '
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
+
+                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                 self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                current_total = self.backoffice.account_mng.count_registrations()
+                explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
+                for chn in load_channels:
+                    await chn.send(content=explorer_msg)
+
             else:
                 message = f'Account could not be registered at this moment please try again later.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -111,11 +121,16 @@ class UserAccountCommands(commands.Cog):
 
     @commands.group()
     @commands.check(user_has_wallet)
-    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = ':joystick: __Available Wallet Commands__ :joystick: '
-            description = "All commands available to operate execute wallet related actions"
+            title = ':joystick: __Available Wallet Level 1 Commands__ :joystick: '
+            description = "Wallet Level 1 is custodial wallet maintained for you completely by Crypto Link system." \
+                          " Be aware that in this case you ***DO NOT*** control your private keys, and that the " \
+                          "wallet should not be used for large sums or long term storage." \
+                          " It has been integrated with the reason to allow for easier onboarding of new users " \
+                          "to Crypto Link, as well to be used by users who would like to get familiar" \
+                          " with Stellar Ecosystem, currencies and Crypto Link per se. "
             list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
                                "value": f"`{self.command_string}wallet balance`"},
                               {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
@@ -123,7 +138,7 @@ class UserAccountCommands(commands.Cog):
                               {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
                                "value": f"`{self.command_string}wallet deposit`"},
                               {"name": ":outbox_tray: Get Withdrawal Instructions :outbox_tray: ",
-                               "value": f"`{self.command_string}withdraw`"}]
+                               "value": f"`{self.command_string}wallet withdraw`"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
@@ -171,6 +186,23 @@ class UserAccountCommands(commands.Cog):
                       f'Please try again later, or contact one of the staff members. '
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
+
+    @wallet.command()
+    async def withdraw(self, ctx):
+        title = ':joystick: __Available withdrawal commands__ :joystick: '
+        description = "All commands available to withdraw funds from Discord Wallet"
+        list_of_values = [
+            {"name": f":outbox_tray: Withdraw Stellar (XLM) from Discord wallet :outbox_tray:",
+             "value": f"`{self.command_string}withdraw xlm <amount> <destination address>`\n"
+                      f"\nexample:\n"
+                      f"`{self.command_string}withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7`"},
+            {"name": f" :gem: Withdraw Tokens :gem:",
+             "value": f"`{self.command_string}withdraw <ticker> <amount> <destination address>`\n"
+                      f"\nexample:\n"
+                      f"`{self.command_string}withdraw clt 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7`"}]
+
+        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                            destination=1)
 
     @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):

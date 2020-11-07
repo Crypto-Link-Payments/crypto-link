@@ -50,6 +50,7 @@ To check the fees implemented and their values use command:
 !wallet --> Information on available sub commands for personal wallet
 !wallet stats --> Statistical details for off-chain and on-chain activities 
 !wallet deposit --> Instructions on how to deposit available cryptocurrencies
+!wallet withdraw --> Instructions on how to withdraw available cryptocurrencies
 !wallet balance --> Additional expansion of the wallets balance
 !wallet trust --> Used to create a trust line between personal account and token issuer for token withdrawal
 ```
