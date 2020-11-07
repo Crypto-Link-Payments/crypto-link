@@ -175,7 +175,7 @@ class HelpCommands(commands.Cog):
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
 
-    @help.command(aliases=['acc', 'user', 'profile'])
+    @help.command(aliases=['acc', 'user', 'profile', 'wallet'])
     async def account(self, ctx):
         title = ':office_worker: __Obtain information on personal account__:office_worker: '
         description = "Bellow are presented all currencies available for P2P transactions"
