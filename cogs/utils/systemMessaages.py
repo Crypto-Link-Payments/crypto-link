@@ -178,6 +178,7 @@ class CustomMessages:
             title = f':outbox_tray: Outgoing {tx_type_emoji} **__{tx_type.title()}__** transaction :outbox_tray: '
             col = discord.Colour.red()
             destination_txt = f'{tx_type_emoji} Recipient {tx_type_emoji} '
+            value_emoji = ":money_with_wings: "
             avatar = user.avatar_url
 
         elif direction == 1:
@@ -185,24 +186,25 @@ class CustomMessages:
             col = discord.Colour.green()
             destination_txt = ':postbox:  Sender :postbox: '
             avatar = destination.avatar_url
+            value_emoji = ":moneybag: "
 
         tx_report = discord.Embed(title=title,
                                   colour=col,
                                   timestamp=datetime.utcnow())
         tx_report.set_thumbnail(url=avatar)
         tx_report.add_field(name=f'{destination_txt}',
-                            value=f'{user}',
+                            value=f'`{user}`',
                             inline=False)
         tx_report.add_field(name=':post_office: Guild Origin :post_office: ',
                             value=f'{ctx.message.guild} ({ctx.message.guild.id})',
                             inline=False)
         tx_report.add_field(name=':love_letter: Note :love_letter: ',
-                            value=message)
-        tx_report.add_field(name='Transaction value',
-                            value=f'{transaction_data["amount"]} {transaction_data["emoji"]} (${transaction_data["conversion"]})',
+                            value=f'`{message}`')
+        tx_report.add_field(name=f'{value_emoji} Transaction value {value_emoji}',
+                            value=f'`{transaction_data["amount"]} {transaction_data["emoji"]} (${transaction_data["conversion"]})`',
                             inline=False)
         if transaction_data["conversion"] != 0:
-            tx_report.add_field(name='Conversion Rate',
+            tx_report.add_field(name=':currency_exchange: Conversion Rate :currency_exchange: ',
                                 value=f'${transaction_data["conversionRate"]}/{transaction_data["ticker"]}',
                                 inline=False)
         tx_report.set_footer(text='Conversion rates provided by CoinGecko',
