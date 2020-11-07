@@ -257,7 +257,7 @@ class CustomMessages:
                          value=f'`{fee}`',
                          inline=False)
         notify.add_field(name=':sunrise: Horizon Access Link :sunrise: ',
-                         value="[Complete Details](withdrawal_data['explorer'])",
+                         value=f"[Complete Details]({withdrawal_data['explorer']})",
                          inline=False)
         notify.set_thumbnail(url=ctx.message.author.avatar_url)
 
