@@ -201,7 +201,7 @@ class CustomMessages:
         tx_report.add_field(name=':love_letter: Note :love_letter: ',
                             value=f'`{message}`')
         tx_report.add_field(name=f'{value_emoji} Transaction value {value_emoji}',
-                            value=f'`{transaction_data["amount"]} {transaction_data["emoji"]} (${transaction_data["conversion"]})`',
+                            value=f'`{transaction_data["amount"]/(10**7):.7f} {transaction_data["emoji"]} (${transaction_data["conversion"]})`',
                             inline=False)
         if transaction_data["conversion"] != 0:
             tx_report.add_field(name=':currency_exchange: Conversion Rate :currency_exchange: ',
