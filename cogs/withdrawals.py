@@ -81,21 +81,21 @@ class WithdrawalCommands(commands.Cog):
 
             token_withdrawal_amount_atomic = int(withdrawal_amount * (10 ** int(token_decimal)))
             token_fee = all_coin_fees[token]
-            token_fee_atomic = (int(token_fee * (10 ** int(token_decimal))))
-            token_major = (int(token_withdrawal_amount_atomic / (10 ** int(token_decimal))))
+            token_fee_atomic = int(token_fee * (10 ** int(token_decimal)))
+            token_major = token_withdrawal_amount_atomic / (10 ** int(token_decimal))
 
             # User balances
             user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
             user_stellar_balance = user_balances['xlm']
-            stellar_balance_major = (int(user_stellar_balance / (10 ** int(token_decimal))))
+            stellar_balance_major = user_stellar_balance / (10 ** int(token_decimal))
             user_token_balance = user_balances[token]
-            user_token_balance_major = (int(user_token_balance / (10 ** int(token_decimal))))
+            user_token_balance_major = int(user_token_balance / (10 ** int(token_decimal)))
 
             # end values
             total_token_to_withdraw = token_fee_atomic + token_withdrawal_amount_atomic
-            total_token_to_withdraw_major = (int(total_token_to_withdraw / (10 ** int(token_decimal))))
+            total_token_to_withdraw_major = total_token_to_withdraw / (10 ** int(token_decimal))
             total_stellar_to_withdraw = int(stellar_fee * (10 ** int(int(stellar_details["decimal"]))))
-            total_stellar_to_withdraw_major = (int(total_stellar_to_withdraw / (10 ** int(token_decimal))))
+            total_stellar_to_withdraw_major = total_stellar_to_withdraw / (10 ** int(token_decimal))
 
             # Check if minimum is met
             if total_token_to_withdraw >= token_minimum:
