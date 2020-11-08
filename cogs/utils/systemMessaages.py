@@ -424,17 +424,17 @@ class CustomMessages:
                                  value=f'Withdrawn ***{v["withdrawalsCount"]}*** withdrawals with '
                                        f'total ***{v["totalWithdrawn"]}*** ')
 
-            coin_stats.add_field(name=f':family_man_woman_boy: Public Tx',
-                                 value=f':incoming_envelope:{v["publicTxSendCount"]}\n'
-                                       f':money_with_wings:  {(int(v["publicSent"] * (10 ** 7))) / (10 ** 7):.7f}\n'
-                                       f':envelope_with_arrow:{v["publicTxReceivedCount"]}\n'
-                                       f':money_mouth: {(int(v["publicReceived"] * (10 ** 7))) / (10 ** 7):.7f} ')
-            coin_stats.add_field(name=f':detective: Private Tx',
-                                 value=f':incoming_envelope:{v["privateTxSendCount"]}\n'
-                                       f':money_with_wings:  {(int(v["privateSent"] * (10 ** 7))) / (10 ** 7):.7f}\n'
-                                       f':envelope_with_arrow: {v["privateTxReceivedCount"]}\n'
-                                       f':money_mouth: {(int(v["privateReceived"] * (10 ** 7))) / (10 ** 7):.7f} ')
-            coin_stats.add_field(name=f'Merchant purchases',
+            coin_stats.add_field(name=f':family_man_woman_boy: Public Tx :family_man_woman_boy:',
+                                 value=f':incoming_envelope: `{v["publicTxSendCount"]}`\n'
+                                       f':money_with_wings: `{(int(v["publicSent"] * (10 ** 7))) / (10 ** 7):.7f}`\n'
+                                       f':envelope_with_arrow: `{v["publicTxReceivedCount"]}`\n'
+                                       f':money_mouth: `{(int(v["publicReceived"] * (10 ** 7))) / (10 ** 7):.7f}`')
+            coin_stats.add_field(name=f':detective: Private Tx :detective:',
+                                 value=f':incoming_envelope: `{v["privateTxSendCount"]}`\n'
+                                       f':money_with_wings: `{(int(v["privateSent"] * (10 ** 7))) / (10 ** 7):.7f}`\n'
+                                       f':envelope_with_arrow: `{v["privateTxReceivedCount"]}`\n'
+                                       f':money_mouth: `{(int(v["privateReceived"] * (10 ** 7))) / (10 ** 7):.7f}` ')
+            coin_stats.add_field(name=f':convenience_store: Merchant purchases :convenience_store: ',
                                  value=f':man_juggling: {v["roleTxCount"]}\n'
                                        f':money_with_wings: {(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}\n',
 
