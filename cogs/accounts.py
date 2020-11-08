@@ -131,6 +131,18 @@ class UserAccountCommands(commands.Cog):
     async def stats(self, ctx):
         utc_now = datetime.utcnow()
         account_details = self.backoffice.account_mng.get_account_stats(discord_id=ctx.message.author.id)
+        stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
+                           description='Below are presented stats which are automatically counted upon successful'
+                                       'execution of the commands dedicated to wallet level :one: ',
+                           colour=Colour.lighter_grey())
+        stats_info.add_field(name=f":symbols: Symbols :symbols: ",
+                             value=f':incoming_envelope: -> `SUM of total incoming transactions` \n'
+                                   f':money_with_wings: -> `SUM of total amount sent per currency` \n'
+                                   f':envelope_with_arrow:  -> `SUM of total outgoing transactions`\n'
+                                   f':money_mouth: -> `SUM of total amount received per currency` \n'
+                                   f':man_juggling: -> `SUM of total roles purchase through merchant system`\n'
+                                   f':money_with_wings: -> `SUM of total amount spent on merchant system` \n')
+        await ctx.author.send(embed=stats_info)
         await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
 
     @wallet.command()
