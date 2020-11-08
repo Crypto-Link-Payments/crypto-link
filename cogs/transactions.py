@@ -152,15 +152,16 @@ class TransactionCommands(commands.Cog):
 
     async def send_impl(self, ctx, amount: float, ticker: str, recipient: User, *, tx_type: str, message: str = None):
         coin = ticker.lower()
-        if amount > 0:
+        atomic = amount * (10**7)
+        normal_amount = atomic/(10**7)
+        if atomic > 0:
             if not ctx.message.author == recipient and not recipient.bot:
                 if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins:
                     coin_data = integrated_coins[ticker]
-                    atomic_value = (int(amount * (10 ** int(coin_data["decimal"]))))
                     # Get user wallet ticker balance
                     wallet_value = self.backoffice.wallet_manager.get_ticker_balance(ticker=ticker,
                                                                                      user_id=ctx.message.author.id)
-                    if wallet_value >= atomic_value:
+                    if wallet_value >= atomic:
                         # Check if recipient has wallet or not
                         if not self.backoffice.account_mng.check_user_existence(user_id=recipient.id):
                             self.backoffice.account_mng.register_user(discord_id=recipient.id,
@@ -168,11 +169,11 @@ class TransactionCommands(commands.Cog):
 
                         if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
                                                                               user_id=ctx.message.author.id,
-                                                                              amount=int(atomic_value), direction=2):
+                                                                              amount=int(atomic), direction=2):
                             if self.backoffice.wallet_manager.update_coin_balance(coin=ticker, user_id=recipient.id,
-                                                                                  amount=int(atomic_value),
+                                                                                  amount=int(atomic),
                                                                                   direction=1):
-                                coin_data["amount"] = (atomic_value / (10 ** 7))
+                                coin_data["amount"] = normal_amount
                                 coin_data["ticker"] = ticker
 
                                 # Produce dict for streamer
@@ -186,9 +187,9 @@ class TransactionCommands(commands.Cog):
                             else:
                                 self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
                                                                                    user_id=ctx.message.author.id,
-                                                                                   amount=int(atomic_value),
+                                                                                   amount=int(atomic),
                                                                                    direction=1)
-                                message = f'{amount} XLA could not be sent to the {recipient} please try again later'
+                                message = f'{normal_amount} XLA could not be sent to the {recipient} please try again later'
                                 await customMessages.system_message(ctx=ctx, color_code=1, message=message,
                                                                     destination=1,
                                                                     sys_msg_title=CONST_TX_ERROR_TITLE)
@@ -200,7 +201,7 @@ class TransactionCommands(commands.Cog):
                     else:
 
                         message = f'You have insufficient balance! Your current wallet balance is' \
-                                  f' {wallet_value / 10000000} XLM'
+                                  f' {wallet_value / 10000000:.7f} XLM'
                         await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                             sys_msg_title=CONST_TX_ERROR_TITLE)
                 else:
@@ -211,7 +212,7 @@ class TransactionCommands(commands.Cog):
                                                         sys_msg_title=CONST_TX_ERROR_TITLE)
             else:
 
-                message = f'You are not allowed to send {amount} xlm to either yourself or the bot.'
+                message = f'You are not allowed to send {normal_amount} xlm to either yourself or the bot.'
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message,
                                                     destination=1,
                                                     sys_msg_title=CONST_TX_ERROR_TITLE)
@@ -223,14 +224,18 @@ class TransactionCommands(commands.Cog):
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def send(self, ctx, amount: float, ticker: str, recipient: User, *, message: str = None):
-        await self.send_impl(ctx, amount, ticker, recipient, tx_type="public", message=message)
-
+        # Check value
+        # to_micro = amount * (10**7)
+        # if to_micro > 0:
+        await self.send_impl(ctx=ctx, amount=amount, ticker=ticker, recipient=recipient, tx_type="public",
+                             message=message)
+        # else:
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def private(self, ctx, amount: float, ticker: str, recipient: User, *, message: str = None):
         await self.send_impl(ctx, amount, ticker, recipient, tx_type="private", message=message)
 
