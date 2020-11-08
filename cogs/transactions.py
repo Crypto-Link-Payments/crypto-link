@@ -152,8 +152,8 @@ class TransactionCommands(commands.Cog):
 
     async def send_impl(self, ctx, amount: float, ticker: str, recipient: User, *, tx_type: str, message: str = None):
         coin = ticker.lower()
-        atomic = amount * (10**7)
-        normal_amount = atomic/(10**7)
+        atomic = amount * (10 ** 7)
+        normal_amount = atomic / (10 ** 7)
         if atomic > 0:
             if not ctx.message.author == recipient and not recipient.bot:
                 if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins:
@@ -226,12 +226,9 @@ class TransactionCommands(commands.Cog):
     @commands.check(has_wallet)
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def send(self, ctx, amount: float, ticker: str, recipient: User, *, message: str = None):
-        # Check value
-        # to_micro = amount * (10**7)
-        # if to_micro > 0:
         await self.send_impl(ctx=ctx, amount=amount, ticker=ticker, recipient=recipient, tx_type="public",
                              message=message)
-        # else:
+
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
