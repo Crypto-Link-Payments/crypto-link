@@ -152,9 +152,10 @@ class TransactionCommands(commands.Cog):
 
     async def send_impl(self, ctx, amount: float, ticker: str, recipient: User, *, tx_type: str, message: str = None):
         coin = ticker.lower()
-        atomic = amount * (10 ** 7)
+        atomic = int(amount * (10 ** 7))
         normal_amount = atomic / (10 ** 7)
         if atomic > 0:
+            print("Greater than one")
             if not ctx.message.author == recipient and not recipient.bot:
                 if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins:
                     coin_data = integrated_coins[ticker]
