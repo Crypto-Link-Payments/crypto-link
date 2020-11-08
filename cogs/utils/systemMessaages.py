@@ -415,15 +415,14 @@ class CustomMessages:
                                            f':bar_chart:',
                                colour=Colour.light_grey(),
                                timestamp=utc_now)
-            coin_stats.add_field(name=f':inbox_tray: Total Deposits',
+            coin_stats.add_field(name=f':inbox_tray: Total Deposits :inbox_tray:',
                                  value=f'Deposited ***{v["depositsCount"]}*** with total '
                                        f'***{v["totalDeposited"]}*** ')
             coin_stats.add_field(name=f'\u200b',
                                  value='\u200b')
-            coin_stats.add_field(name=f':outbox_tray: Total Withdrawals ',
+            coin_stats.add_field(name=f':outbox_tray: Total Withdrawals :outbox_tray: ',
                                  value=f'Withdrawn ***{v["withdrawalsCount"]}*** withdrawals with '
                                        f'total ***{v["totalWithdrawn"]}*** ')
-
             coin_stats.add_field(name=f':family_man_woman_boy: Public Tx :family_man_woman_boy:',
                                  value=f':incoming_envelope: `{v["publicTxSendCount"]}`\n'
                                        f':money_with_wings: `{(int(v["publicSent"] * (10 ** 7))) / (10 ** 7):.7f}`\n'
