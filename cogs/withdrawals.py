@@ -270,7 +270,7 @@ class WithdrawalCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
-    @withdraw.command(aliases = ["x"])
+    @withdraw.command(aliases=["x"])
     @commands.check(user_has_wallet)
     async def xlm(self, ctx, amount: float, address: str):
         """
@@ -412,12 +412,12 @@ class WithdrawalCommands(commands.Cog):
 
                 else:
                     message = f'Amount you are willing to withdraw is greater than your current wallet balance.\n' \
-                              f'Wallet balance: {wallet_details["balance"] / 10000000} {CONST_STELLAR_EMOJI}'
+                              f'Wallet balance: {wallet_details["balance"] / 10000000:.7f} {CONST_STELLAR_EMOJI}'
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                          sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
             else:
-                message = f'Minimum amount to withdraw is set currently to {xlm_minimum} {CONST_STELLAR_EMOJI}'
+                message = f'Minimum amount to withdraw is set currently to {xlm_minimum / (10 ** 7):.7f} {CONST_STELLAR_EMOJI}'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title=CONST_WITHDRAWAL_ERROR)
         else:
