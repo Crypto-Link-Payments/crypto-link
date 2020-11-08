@@ -112,14 +112,14 @@ class TransactionCommands(commands.Cog):
         # Send to channel where tx has been executed
         if tx_details['ticker'] == 'stellar':
             in_dollar = monetaryConversions.convert_to_usd(amount=tx_details["amount"], coin_name='stellar')
-            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']}" \
+            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount'] / (10 ** 7)}" \
                             f" {tx_details['emoji']} (${in_dollar['total']})"
             explorer_msg = f'💵  {tx_details["amount"]} {CONST_STELLAR_EMOJI} (${in_dollar["total"]}) on ' \
                            f'{ctx.message.guild} channel {ctx.message.channel}'
             total_dollar_value = in_dollar['total']
             conversion_rate = in_dollar["usd"]
         else:
-            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']}" \
+            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount'] / (10 ** 7)}" \
                             f" {tx_details['emoji']}"
             explorer_msg = f'💵  {tx_details["amount"]} {tx_details["emoji"]} ({tx_details["ticker"]}) on ' \
                            f'{ctx.message.guild} channel {ctx.message.channel}'
