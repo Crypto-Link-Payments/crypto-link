@@ -64,7 +64,7 @@ class UserAccountCommands(commands.Cog):
                               value=f"```{wallet_data['depositId']}```",
                               inline=False)
         acc_details.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag: ',
-                              value=f'{xlm_balance} {CONST_STELLAR_EMOJI}\n\n',
+                              value=f'{xlm_balance / (10 ** 7):.7f} {CONST_STELLAR_EMOJI}\n\n',
                               inline=False)
         acc_details.add_field(name=f':flag_us: USA',
                               value=f'$ {scientific_conversion(in_usd, 4)}')
