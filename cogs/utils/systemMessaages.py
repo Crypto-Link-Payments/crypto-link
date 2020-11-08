@@ -426,17 +426,18 @@ class CustomMessages:
 
             coin_stats.add_field(name=f':family_man_woman_boy: Public Tx',
                                  value=f':incoming_envelope:{v["publicTxSendCount"]}\n'
-                                       f':money_with_wings:  {v["publicSent"]}\n'
+                                       f':money_with_wings:  {(int(v["publicSent"] * (10 ** 7))) / (10 ** 7):.7f}\n'
                                        f':envelope_with_arrow:{v["publicTxReceivedCount"]}\n'
-                                       f':money_mouth: {v["publicReceived"]} ')
+                                       f':money_mouth: {(int(v["publicReceived"] * (10 ** 7))) / (10 ** 7):.7f} ')
             coin_stats.add_field(name=f':detective: Private Tx',
                                  value=f':incoming_envelope:{v["privateTxSendCount"]}\n'
-                                       f':money_with_wings: {v["privateSent"]}\n'
+                                       f':money_with_wings:  {(int(v["privateSent"] * (10 ** 7))) / (10 ** 7):.7f}\n'
                                        f':envelope_with_arrow: {v["privateTxReceivedCount"]}\n'
-                                       f':money_mouth: {v["privateReceived"]}')
+                                       f':money_mouth: {(int(v["privateReceived"] * (10 ** 7))) / (10 ** 7):.7f} ')
             coin_stats.add_field(name=f'Merchant purchases',
                                  value=f':man_juggling: {v["roleTxCount"]}\n'
-                                       f':money_with_wings: {v["spentOnRoles"]}\n',
+                                       f':money_with_wings: {(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}\n',
+
                                  inline=False)
             await ctx.author.send(embed=coin_stats)
 
