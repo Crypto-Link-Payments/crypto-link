@@ -36,6 +36,7 @@ class WithdrawalCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
+        self.address = self.backoffice.stellar_wallet.public_key
 
     @commands.group()
     @commands.check(user_has_wallet)
@@ -59,9 +60,12 @@ class WithdrawalCommands(commands.Cog):
 
     @withdraw.command(aliases=["t"])
     @commands.check(user_has_wallet)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def token(self, ctx, ticker: str, withdrawal_amount: float, address: str):
+        #TOKEN check for bot hot wallet
         token = ticker.lower()
         # check strings, stellar address and token integration status
+
         if not re.search("[~!#$%^&*()_+{}:;\']", token) and token in self.list_of_coins and check_stellar_address(
                 address=address):
 
@@ -272,6 +276,7 @@ class WithdrawalCommands(commands.Cog):
 
     @withdraw.command(aliases=["x"])
     @commands.check(user_has_wallet)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def xlm(self, ctx, amount: float, address: str):
         """
         Initiates withdrawal on Stellar chain
