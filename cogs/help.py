@@ -28,17 +28,22 @@ class HelpCommands(commands.Cog):
                 {"name": " :mega: About the Crypto Link :mega:",
                  "value": f"`{self.command_string}about`"},
                 {"name": ":coin: Available Currencies :coin:",
-                 "value": f"`{self.command_string}help currencies`"},
+                 "value": f"`{self.command_string}help currencies`\n"
+                          f"`Aliases: tokens, coins`"},
                 {"name": ":rocket: How to get started :rocket:",
-                 "value": f"`{self.command_string}help get_started`"},
+                 "value": f"`{self.command_string}help get_started`\n"
+                          f"`Aliases: start`"},
                 {"name": ":office_worker: Accessing personal account :office_worker:",
-                 "value": f"`{self.command_string}help account`"},
+                 "value": f"`{self.command_string}help account`\n"
+                          f"`Aliases: acc, user, profile, wallet`"},
                 {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
-                 "value": f"`{self.command_string}help transactions`"},
+                 "value": f"`{self.command_string}help transactions`\n"
+                          f"`Aliases: tx, pay`"},
                 {"name": ":crown: Guild Owner Commands :crown:",
                  "value": f"`{self.command_string}help owner`"},
                 {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
-                 "value": f"`{self.command_string}help horizon`"},
+                 "value": f"`{self.command_string}help horizon`\n"
+                          f"`Aliases: hor, network, explorer`"},
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.blue())
@@ -99,7 +104,7 @@ class HelpCommands(commands.Cog):
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
 
-    @help.command()
+    @help.command(aliases=["start"])
     async def get_started(self, ctx):
         """
         How to get started with the payment system
@@ -139,7 +144,7 @@ class HelpCommands(commands.Cog):
         """
 
         available = discord.Embed(title=':coin: Integrated coins and tokens :coin: ',
-                                  description='Bellow is a list of all available currencies for making peer 2 peer'
+                                  description='Below is a list of all available currencies for making peer 2 peer'
                                               ' transactions or to be used with merchant system',
                                   colour=Colour.blue())
         await ctx.author.send(embed=available)
@@ -178,7 +183,7 @@ class HelpCommands(commands.Cog):
     @help.command(aliases=['acc', 'user', 'profile', 'wallet'])
     async def account(self, ctx):
         title = ':office_worker: __Obtain information on personal account__:office_worker: '
-        description = "Bellow are presented all currencies available for P2P transactions"
+        description = "Below are presented all currencies available for P2P transactions"
         list_of_values = [
             {"name": ":credit_card: Get balance information :credit_card: ",
              "value": f"`{self.command_string}me`"},
@@ -298,7 +303,7 @@ class HelpCommands(commands.Cog):
         uplink_nfo.set_thumbnail(url=self.bot.user.avatar_url)
         await ctx.author.send(embed=uplink_nfo, delete_after=500)
 
-    @help.command(aliases=['hor', 'network'])
+    @help.command(aliases=['hor', 'network', 'explorer'])
     async def horizon(self, ctx):
         """
         Entry point for merchant system

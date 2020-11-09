@@ -64,7 +64,7 @@ class UserAccountCommands(commands.Cog):
                               value=f"```{wallet_data['depositId']}```",
                               inline=False)
         acc_details.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag: ',
-                              value=f'{xlm_balance} {CONST_STELLAR_EMOJI}\n\n',
+                              value=f'`{xlm_balance:.7f} {CONST_STELLAR_EMOJI}`',
                               inline=False)
         acc_details.add_field(name=f':flag_us: USA',
                               value=f'$ {scientific_conversion(in_usd, 4)}')
@@ -129,12 +129,28 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def stats(self, ctx):
+        """
+        Command which returns statistical information for the wallet
+        """
         utc_now = datetime.utcnow()
         account_details = self.backoffice.account_mng.get_account_stats(discord_id=ctx.message.author.id)
+        stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
+                           description='Below are presented stats which are automatically counted upon successful'
+                                       'execution of the commands dedicated to wallet level :one: ',
+                           colour=Colour.lighter_grey())
+        stats_info.add_field(name=f":symbols: Symbols :symbols: ",
+                             value=f':incoming_envelope: -> `SUM of total incoming transactions` \n'
+                                   f':money_with_wings: -> `SUM of total amount sent per currency` \n'
+                                   f':envelope_with_arrow:  -> `SUM of total outgoing transactions`\n'
+                                   f':money_mouth: -> `SUM of total amount received per currency` \n'
+                                   f':man_juggling: -> `SUM of total roles purchase through merchant system`\n'
+                                   f':money_with_wings: -> `SUM of total amount spent on merchant system` \n')
+        await ctx.author.send(embed=stats_info)
         await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
 
     @wallet.command()
     async def deposit(self, ctx):
+
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
