@@ -129,6 +129,9 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def stats(self, ctx):
+        """
+        Command which returns statistical information for the wallet
+        """
         utc_now = datetime.utcnow()
         account_details = self.backoffice.account_mng.get_account_stats(discord_id=ctx.message.author.id)
         stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
@@ -147,6 +150,7 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def deposit(self, ctx):
+
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
