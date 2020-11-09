@@ -8,10 +8,9 @@ import sys
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
-from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions, \
-    ChangeTrust
+from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions
 
-from stellar_sdk.exceptions import NotFoundError, BadRequestError
+from stellar_sdk.exceptions import NotFoundError
 
 from utils.tools import Helpers
 
@@ -23,7 +22,7 @@ class StellarWallet:
 
     """
 
-    def __init__(self, horizon_url:str):
+    def __init__(self, horizon_url: str):
         helpers = Helpers()
         secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
         public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details

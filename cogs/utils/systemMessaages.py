@@ -178,6 +178,7 @@ class CustomMessages:
             title = f':outbox_tray: Outgoing {tx_type_emoji} **__{tx_type.title()}__** transaction :outbox_tray: '
             col = discord.Colour.red()
             destination_txt = f'{tx_type_emoji} Recipient {tx_type_emoji} '
+            value_emoji = ":money_with_wings: "
             avatar = user.avatar_url
 
         elif direction == 1:
@@ -185,24 +186,26 @@ class CustomMessages:
             col = discord.Colour.green()
             destination_txt = ':postbox:  Sender :postbox: '
             avatar = destination.avatar_url
+            value_emoji = ":moneybag: "
 
         tx_report = discord.Embed(title=title,
                                   colour=col,
                                   timestamp=datetime.utcnow())
         tx_report.set_thumbnail(url=avatar)
         tx_report.add_field(name=f'{destination_txt}',
-                            value=f'{user}',
+                            value=f'`{user}`',
                             inline=False)
         tx_report.add_field(name=':post_office: Guild Origin :post_office: ',
                             value=f'{ctx.message.guild} ({ctx.message.guild.id})',
                             inline=False)
         tx_report.add_field(name=':love_letter: Note :love_letter: ',
-                            value=message)
-        tx_report.add_field(name='Transaction value',
-                            value=f'{transaction_data["amount"]} {transaction_data["emoji"]} (${transaction_data["conversion"]})',
+                            value=f'`{message}`')
+        tx_report.add_field(name=f'{value_emoji} Transaction value {value_emoji}',
+                            value=f'`{transaction_data["amount"]:.7f} {transaction_data["emoji"]} '
+                                  f'(${transaction_data["conversion"]})`',
                             inline=False)
         if transaction_data["conversion"] != 0:
-            tx_report.add_field(name='Conversion Rate',
+            tx_report.add_field(name=':currency_exchange: Conversion Rate :currency_exchange: ',
                                 value=f'${transaction_data["conversionRate"]}/{transaction_data["ticker"]}',
                                 inline=False)
         tx_report.set_footer(text='Conversion rates provided by CoinGecko',
@@ -245,19 +248,19 @@ class CustomMessages:
                          value=str(datetime.utcnow()),
                          inline=False)
         notify.add_field(name=':map: Destination :map: ',
-                         value=withdrawal_data["destination"],
+                         value=f'```{withdrawal_data["destination"]}```',
                          inline=False)
         notify.add_field(name=':hash: Transaction hash :hash: ',
-                         value=withdrawal_data["hash"],
+                         value=f'`{withdrawal_data["hash"]}`',
                          inline=False)
         notify.add_field(name=':receipt: Withdrawal asset details :receipt: ',
-                         value=f'{round(withdrawal_data["amount"] / 10000000, 7)} {withdrawal_data["asset"]}',
+                         value=f'`{round(withdrawal_data["amount"] / 10000000, 7):.7f} {withdrawal_data["asset"]}`',
                          inline=False)
         notify.add_field(name=':money_mouth: Crypto Link Fee :money_mouth: ',
-                         value=fee,
+                         value=f'`{fee}`',
                          inline=False)
-        notify.add_field(name=':compass: Explorer Link :compass: ',
-                         value=withdrawal_data['explorer'],
+        notify.add_field(name=':sunrise: Horizon Access Link :sunrise: ',
+                         value=f"[Complete Details]({withdrawal_data['explorer']})",
                          inline=False)
         notify.set_thumbnail(url=ctx.message.author.avatar_url)
 
@@ -412,28 +415,28 @@ class CustomMessages:
                                            f':bar_chart:',
                                colour=Colour.light_grey(),
                                timestamp=utc_now)
-            coin_stats.add_field(name=f':inbox_tray: Total Deposits',
+            coin_stats.add_field(name=f':inbox_tray: Total Deposits :inbox_tray:',
                                  value=f'Deposited ***{v["depositsCount"]}*** with total '
                                        f'***{v["totalDeposited"]}*** ')
             coin_stats.add_field(name=f'\u200b',
                                  value='\u200b')
-            coin_stats.add_field(name=f':outbox_tray: Total Withdrawals ',
+            coin_stats.add_field(name=f':outbox_tray: Total Withdrawals :outbox_tray: ',
                                  value=f'Withdrawn ***{v["withdrawalsCount"]}*** withdrawals with '
                                        f'total ***{v["totalWithdrawn"]}*** ')
-
-            coin_stats.add_field(name=f':family_man_woman_boy: Public Tx',
-                                 value=f':incoming_envelope:{v["publicTxSendCount"]}\n'
-                                       f':money_with_wings:  {v["publicSent"]}\n'
-                                       f':envelope_with_arrow:{v["publicTxReceivedCount"]}\n'
-                                       f':money_mouth: {v["publicReceived"]} ')
-            coin_stats.add_field(name=f':detective: Private Tx',
-                                 value=f':incoming_envelope:{v["privateTxSendCount"]}\n'
-                                       f':money_with_wings: {v["privateSent"]}\n'
-                                       f':envelope_with_arrow: {v["privateTxReceivedCount"]}\n'
-                                       f':money_mouth: {v["privateReceived"]}')
-            coin_stats.add_field(name=f'Merchant purchases',
+            coin_stats.add_field(name=f':family_man_woman_boy: Public Tx :family_man_woman_boy:',
+                                 value=f':incoming_envelope: `{v["publicTxSendCount"]}`\n'
+                                       f':money_with_wings: `{(int(v["publicSent"] * (10 ** 7))) / (10 ** 7):.7f}`\n'
+                                       f':envelope_with_arrow: `{v["publicTxReceivedCount"]}`\n'
+                                       f':money_mouth: `{(int(v["publicReceived"] * (10 ** 7))) / (10 ** 7):.7f}`')
+            coin_stats.add_field(name=f':detective: Private Tx :detective:',
+                                 value=f':incoming_envelope: `{v["privateTxSendCount"]}`\n'
+                                       f':money_with_wings: `{(int(v["privateSent"] * (10 ** 7))) / (10 ** 7):.7f}`\n'
+                                       f':envelope_with_arrow: `{v["privateTxReceivedCount"]}`\n'
+                                       f':money_mouth: `{(int(v["privateReceived"] * (10 ** 7))) / (10 ** 7):.7f}` ')
+            coin_stats.add_field(name=f':convenience_store: Merchant purchases :convenience_store: ',
                                  value=f':man_juggling: {v["roleTxCount"]}\n'
-                                       f':money_with_wings: {v["spentOnRoles"]}\n',
+                                       f':money_with_wings: {(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}\n',
+
                                  inline=False)
             await ctx.author.send(embed=coin_stats)
 
