@@ -13,3 +13,12 @@ def get_emoji(title):
         return ':hash:'
     elif title == "account":
         return ':map:'
+
+def process_memo(record: dict):
+    """Filter memo"""
+    if record.get('memo'):
+        memo = f'{record["memo"]} (Type: {record["memo_type"]})'
+    else:
+        memo = None
+
+    return memo
