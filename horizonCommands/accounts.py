@@ -12,6 +12,7 @@ from horizonCommands.utils.horizon import server
 from datetime import datetime
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
+from horizonCommands.utils.customMessages import account_create_msg
 from backOffice.backOffice import BackOffice
 
 custom_messages = CustomMessages()
@@ -61,26 +62,7 @@ class HorizonAccounts(commands.Cog):
         #TODO fix wording before release
         details = self.backoffice.stellar_wallet.create_stellar_account()
         if details:
-            new_account = Embed(title=f':new: Stellar Testnet Account Created :new:',
-                                description=f'You have successfully created new account on {details["network"]}. Do'
-                                            f' not deposit real XLM as this account has been created on testnet. '
-                                            f'Head to [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test)'
-                                            f' and use Friend bot to activate account',
-                                colour=Colour.lighter_gray()
-                                )
-            new_account.add_field(name=f':map: Public Address :map: ',
-                                  value=f'```{details["address"]}```',
-                                  inline=False)
-            new_account.add_field(name=f':key: Secret :key: ',
-                                  value=f'```{details["secret"]}```',
-                                  inline=False)
-            new_account.add_field(name=f':warning: Important Message:warning:',
-                                  value=f'Please store/backup account details somewhere safe and delete this embed on'
-                                        f' Discord. Exposure of Secret to any other entity or 3rd party application '
-                                        f'might result in loss of funds. Crypto Link does not store details of newly'
-                                        f' generate accounts nor can recover them.',
-                                  inline=False)
-            await ctx.author.send(embed=new_account, delete_after=360)
+            await account_create_msg(destination=ctx.message.author,details=details)
         else:
             message = f'New Stellar Account could not be created. Please try again later'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
