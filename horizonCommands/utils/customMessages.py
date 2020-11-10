@@ -76,3 +76,83 @@ async def send_details_for_asset(destination, coin, data, date):
                                   f'[Asset Details](https://stellar.expert/explorer/testnet/asset/{coin["asset_code"]}-{coin["asset_issuer"]}?order=desc)')
     await destination.send(embed=asset_details)
 
+
+async def send_asset_details(destination, data, request,  ):
+    toml_access = data['_embedded']['records'][0]['_links']['toml']['href']
+    record = data['_embedded']['records'][0]
+
+    asset_info = Embed(title=f':bank: Issuer Details :bank:',
+                       description=f'Bellow is represent information for requested {request}.',
+                       colour=Colour.lighter_gray())
+    asset_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                         value=f'[Horizon]({data["_links"]["self"]["href"]})')
+
+    if not toml_access:
+        toml_data = None
+        toml_link = ''
+    else:
+        toml_data = "Access link"
+        toml_link = toml_access
+
+    asset_info = Embed(title=" :bank: __Issuer Details__ :bank:",
+                       description=f'TOML access: [{toml_data}]({toml_link})',
+                       colour=Colour.lighter_gray())
+    asset_info.add_field(name=f':regional_indicator_c: Asset Code :regional_indicator_c:',
+                         value=f'{record["asset_code"]}',
+                         inline=False)
+    asset_info.add_field(name=f':gem: Asset Type :gem:',
+                         value=f'{record["asset_type"]}',
+                         inline=False)
+    asset_info.add_field(name=f':map: Issuing Account :map: ',
+                         value=f'```{record["asset_issuer"]}```',
+                         inline=False)
+    asset_info.add_field(name=f':moneybag: Issued Amount :moneybag: ',
+                         value=f'`{record["amount"]} {record["asset_code"]}`',
+                         inline=False)
+    asset_info.add_field(name=f':cowboy: Account Count :cowboy: ',
+                         value=f'`{record["num_accounts"]}`',
+                         inline=False)
+    asset_info.add_field(name=f':triangular_flag_on_post: Account Flags :triangular_flag_on_post: ',
+                         value=f'Immutable: {record["flags"]["auth_immutable"]} \n'
+                               f'Required:  {record["flags"]["auth_required"]}\n'
+                               f'Revocable:  {record["flags"]["auth_revocable"]}\n',
+                         inline=False)
+    asset_info.add_field(name=f':white_circle: Paging Token :white_circle:',
+                         value=f'```{record["paging_token"]}```',
+                         inline=False)
+    await destination.send(embed=asset_info)
+
+async def send_multi_asset_case(destination, data, command_str):
+    records = data['_embedded']['records']
+
+    asset_info = Embed(title=f':gem: Multiple Assets Found :gem: ',
+                       description=f'Please use `{command_str}assets issuer <issuer address >` to'
+                                   f' obtain full details',
+                       colour=Colour.lighter_gray())
+    asset_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                         value=f'[Horizon]({data["_links"]["self"]["href"]})',
+                         inline=False)
+    asset_info.add_field(name=f' Total Found ',
+                         value=f'{len(records)} assets with code {records[0]["asset_code"]}',
+                         inline=False)
+    asset_count = 1
+    for asset in records:
+
+        if not asset['_links']['toml']['href']:
+            toml_data = None
+            toml_link = ''
+        else:
+            toml_data = "Access link"
+            toml_link = asset['_links']['toml']['href']
+
+        asset_info.add_field(name=f'{asset_count}. Asset',
+                             value=f':map: Issuer :map: \n'
+                                   f'```{asset["asset_issuer"]}```\n'
+                                   f':moneybag: Amount Issued :moneybag: \n'
+                                   f'`{asset["amount"]} {asset["asset_code"]}`\n'
+                                   f':globe_with_meridians: toml access :globe_with_meridians: \n'
+                                   f'[{toml_data}]({toml_link})',
+                             inline=False)
+        asset_count += 1
+
+    await destination.send(embed=asset_info)
