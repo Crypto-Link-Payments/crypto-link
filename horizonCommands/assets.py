@@ -29,10 +29,11 @@ class HorizonAssets(commands.Cog):
         self.asset = self.server.assets()
 
     @commands.group()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def assets(self, ctx):
         title = ':gem: __Horizon Assets Queries__ :gem:'
         description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
-                      'Stellar Horizon Server.'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
         list_of_commands = [{"name": f':gem: Query by exact details :gem: ',
                              "value": f'`{self.command_string}assets get <asset code> <issuer address>`'},
                             {"name": f':regional_indicator_c: Query by code :regional_indicator_c: ',
@@ -47,6 +48,7 @@ class HorizonAssets(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @assets.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def get(self, ctx, asset_code: str, asset_issuer: str):
 
         data = self.asset.for_code(asset_code=asset_code.upper()).for_issuer(asset_issuer=asset_issuer.upper()).call()
@@ -60,6 +62,7 @@ class HorizonAssets(commands.Cog):
                                                  sys_msg_title=':warning: Asset Code Error :warning: ')
 
     @assets.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def code(self, ctx, asset_code: str):
         data = self.asset.for_code(asset_code=asset_code.upper()).call()
         if data['_embedded']['records']:
@@ -75,6 +78,7 @@ class HorizonAssets(commands.Cog):
                                                  sys_msg_title='Asset Code Error')
 
     @assets.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def issuer(self, ctx, issuer: str):
         try:
             data = self.asset.for_issuer(asset_issuer=issuer).call()
