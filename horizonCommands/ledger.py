@@ -36,6 +36,7 @@ class HorizonLedger(commands.Cog):
         self.ledg = self.server.ledgers()
 
     @commands.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def ledger(self, ctx, ledger_number: int):
         data = self.ledg.ledger(sequence=ledger_number).call()
         if data:
