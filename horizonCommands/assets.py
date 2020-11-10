@@ -48,7 +48,6 @@ class HorizonAssets(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @assets.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def get(self, ctx, asset_code: str, asset_issuer: str):
 
         data = self.asset.for_code(asset_code=asset_code.upper()).for_issuer(asset_issuer=asset_issuer.upper()).call()
@@ -62,7 +61,6 @@ class HorizonAssets(commands.Cog):
                                                  sys_msg_title=':warning: Asset Code Error :warning: ')
 
     @assets.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def code(self, ctx, asset_code: str):
         data = self.asset.for_code(asset_code=asset_code.upper()).call()
         if data['_embedded']['records']:
@@ -78,7 +76,6 @@ class HorizonAssets(commands.Cog):
                                                  sys_msg_title='Asset Code Error')
 
     @assets.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def issuer(self, ctx, issuer: str):
         try:
             data = self.asset.for_issuer(asset_issuer=issuer).call()
