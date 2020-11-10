@@ -36,31 +36,49 @@ async def send_details_for_stellar(destination, coin, data, date, signers):
     acc_details = Embed(title=':mag_right: Details for Stellar Account :mag:',
                         description=f'Last Activity {date} (UTC)',
                         colour=Colour.lighter_gray())
+    acc_details.add_field(name=':calendar:  Last Activity :calendar:  ',
+                          value=f'`{date}`',
+                          inline=False)
     acc_details.add_field(name=':map: Account Address :map: ',
                           value=f'```{data["account_id"]}```',
                           inline=False)
     acc_details.add_field(name=':pen_fountain: Account Signers :pen_fountain: ',
                           value=signers,
                           inline=False)
+    acc_details.add_field(name=f' :moneybag: Balance :moneybag:',
+                          value=f'`{coin["balance"]} XLM`',
+                          inline=False)
     acc_details.add_field(name=' :genie: Sponsorship Activity :genie:',
                           value=f':money_mouth: {data["num_sponsored"]} (sponsored)\n'
                                 f':money_with_wings: {data["num_sponsoring"]} (sponsoring) ',
-                          inline=False)
-    acc_details.add_field(name=f' :moneybag: Balance :moneybag:',
-                          value=f'`{coin["balance"]} XLM`',
                           inline=False)
     acc_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
                           value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
                                 f'Selling Liabilities: {coin["selling_liabilities"]}',
                           inline=False)
+    acc_details.add_field(name=f':scales:  Thresholds :scales: ',
+                          value=f'High: {data["thresholds"]["high_threshold"]}\n'
+                                f'Medium: {data["thresholds"]["med_threshold"]}\n'
+                                f'Low: {data["thresholds"]["low_threshold"]}',
+                          inline=False)
     acc_details.add_field(name=f':triangular_flag_on_post: Flags :triangular_flag_on_post:',
                           value=f'Auth Required: {data["flags"]["auth_required"]}\n'
                                 f'Auth Revocable: {data["flags"]["auth_revocable"]}\n'
                                 f'Auth Immutable:{data["flags"]["auth_immutable"]}')
+    acc_details.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                          value=f'[Data]({data["_links"]["data"]["href"]}) | [Offers]({data["_links"]["offers"]["href"]})\n'
+                                f'[Transactions]({data["_links"]["transactions"]["href"]}) | [Effects]({data["_links"]["effects"]["href"]})\n'
+                                f'[Operations]({data["_links"]["operations"]["href"]}) | [Payments]({data["_links"]["payments"]["href"]})\n'
+                                f'[Trades]({data["_links"]["trades"]["href"]})',
+                          inline=False)
     await destination.send(embed=acc_details)
 
 
 async def send_details_for_asset(destination, coin, data, date):
+    """
+    Additional informational embed if account has present assets
+
+    """
     asset_details = Embed(title=f':coin: Details for asset {coin["asset_code"]} :coin:',
                           description=f'Last Activity on {date} (UTC)'
                                       f' (Ledger:{data["last_modified_ledger"]}',
@@ -136,7 +154,7 @@ async def send_multi_asset_case(destination, data, command_str):
 
     asset_info = Embed(title=f':gem: Multiple Assets Found :gem: ',
                        description=f'Please use `{command_str}assets issuer <issuer address >` to'
-                                   f' obtain full details',
+                                   f' obtain additional data on **asset issuer*** or ',
                        colour=Colour.lighter_gray())
     asset_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
                          value=f'[Horizon]({data["_links"]["self"]["href"]})',
@@ -203,7 +221,7 @@ async def account_transaction_records(destination, record: dict, signers: str, m
     await destination.send(embed=account_record)
 
 
-async def tx_details_hash(destination, data: dict, signatures, date:str, memo):
+async def tx_details_hash(destination, data: dict, signatures, date: str, memo):
     single_info = Embed(title=f':hash: Transaction Hash Details :hash:',
                         colour=Colour.dark_orange())
     single_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
