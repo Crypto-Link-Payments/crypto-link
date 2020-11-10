@@ -46,11 +46,15 @@ class AutoFunctions(commands.Cog):
                       f'type `{d["command"]}help` to check available commands.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
+        elif isinstance(exception, commands.BadArgument):
+            pass
+
         elif isinstance(exception, commands.CommandOnCooldown):
             message = f'`{exception}`. In order to prevent abuse and unwanted delays, we have implemented cool down ' \
                       f' into various commands. Thank you for your understanding.'
             await custom_messages.system_message(ctx=ctx, color_code=Colour.blue(), message=message, destination=0,
                                                  sys_msg_title=':sweat_drops: Cool-Down :sweat_drops: ')
+
         elif isinstance(exception, commands.MissingRequiredArgument):
             message = f'{exception}'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
