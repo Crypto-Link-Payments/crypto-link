@@ -11,7 +11,7 @@ from cogs.utils.systemMessaages import CustomMessages
 from re import sub
 from stellar_sdk import Asset
 from utils.tools import Helpers
-from horizonCommands.horizonAccess.horizon import server
+from horizonCommands.utils.horizon import server
 
 custom_messages = CustomMessages()
 helper = Helpers()

@@ -11,7 +11,7 @@ from cogs.utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
-from horizonCommands.horizonAccess.horizon import server
+from horizonCommands.utils.horizon import server
 
 custom_messages = CustomMessages()
 helper = Helpers()

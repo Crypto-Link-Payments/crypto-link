@@ -12,7 +12,7 @@ from utils.tools import Helpers
 from datetime import datetime
 
 from cogs.utils.securityChecks import check_stellar_address
-from horizonCommands.horizonAccess.horizon import server
+from horizonCommands.utils.horizon import server
 from stellar_sdk import Asset, PathPayment
 
 custom_messages = CustomMessages()

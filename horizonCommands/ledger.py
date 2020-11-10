@@ -10,7 +10,7 @@ import requests
 from discord import Embed, Colour
 from cogs.utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-from horizonCommands.horizonAccess.horizon import server
+from horizonCommands.utils.horizon import server
 
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers

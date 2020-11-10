@@ -8,7 +8,7 @@ from Merchant wallet to their won upon withdrawal.
 from discord.ext import commands
 from discord import Embed, Colour, Member
 from cogs.utils.systemMessaages import CustomMessages
-from horizonCommands.horizonAccess.horizon import server
+from horizonCommands.utils.horizon import server
 from cogs.utils.customCogChecks import user_has_wallet
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
