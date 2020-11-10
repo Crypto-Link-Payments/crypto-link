@@ -157,3 +157,39 @@ async def send_multi_asset_case(destination, data, command_str):
         asset_count += 1
 
     await destination.send(embed=asset_info)
+
+
+async def account_transaction_records(destination, record: dict, signers: str, memo, date):
+    account_record = Embed(title=f':record_button: Account Transaction Record :record_button:',
+                           colour=Colour.dark_orange())
+    account_record.add_field(name=':ledger: Ledger :ledger: ',
+                             value=f'`{record["ledger"]}`')
+    account_record.add_field(name=':white_circle: Paging Token :white_circle: ',
+                             value=f'`{record["paging_token"]}`')
+    account_record.add_field(name=f':calendar: Created :calendar: ',
+                             value=f'`{date}`',
+                             inline=True)
+    account_record.add_field(name=f' :map: Source account :map: ',
+                             value=f'```{record["source_account"]}```',
+                             inline=False)
+    account_record.add_field(name=f' :pencil: Memo :pencil:  ',
+                             value=f'`{memo}`',
+                             inline=False)
+    account_record.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
+                             value=signers,
+                             inline=False)
+    account_record.add_field(name=':hash: Hash :hash: ',
+                             value=f'`{record["hash"]}`',
+                             inline=False)
+    account_record.add_field(name=':money_with_wings: Fee :money_with_wings: ',
+                             value=f'`{round(int(record["fee_charged"]) / 10000000, 7):.7f} XLM`',
+                             inline=False)
+    account_record.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                             value=f'[Account]({record["_links"]["account"]["href"]})\n'
+                                   f'[Ledger]({record["_links"]["ledger"]["href"]})\n'
+                                   f'[Transactions]({record["_links"]["transaction"]["href"]})\n'
+                                   f'[Effects]({record["_links"]["effects"]["href"]})\n'
+                                   f'[Operations]({record["_links"]["succeeds"]["href"]})\n'
+                                   f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
+                                   f'[Precedes]({record["_links"]["precedes"]["href"]})')
+    await destination.send(embed=account_record)
