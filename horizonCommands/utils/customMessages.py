@@ -186,7 +186,7 @@ async def send_multi_asset_case(destination, data, command_str):
     await destination.send(embed=asset_info)
 
 
-async def account_transaction_records(destination, record: dict, signers: str, memo, date):
+async def tx_info_for_account(destination, record: dict, signers: str, memo, date):
     account_record = Embed(title=f':record_button: Account Transaction Record :record_button:',
                            colour=Colour.dark_orange())
     account_record.add_field(name=':ledger: Ledger :ledger: ',
@@ -222,7 +222,7 @@ async def account_transaction_records(destination, record: dict, signers: str, m
     await destination.send(embed=account_record)
 
 
-async def tx_details_hash(destination, data: dict, signatures, date: str, memo):
+async def tx_info_for_hash(destination, data: dict, signatures, date: str, memo):
     single_info = Embed(title=f':hash: Transaction Hash Details :hash:',
                         colour=Colour.dark_orange())
     single_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
@@ -254,7 +254,7 @@ async def tx_details_hash(destination, data: dict, signatures, date: str, memo):
                           value=f'[Ledger]({data["_links"]["ledger"]["href"]})\n'
                                 f'[Transactions]({data["_links"]["transaction"]["href"]})\n'
                                 f'[Effects]({data["_links"]["effects"]["href"]})\n'
-                                f'[Operations]({data["_links"]["succeeds"]["href"]}\n)'
+                                f'[Operations]({data["_links"]["succeeds"]["href"]})\n'
                                 f'[Succeeds]({data["_links"]["succeeds"]["href"]})\n'
                                 f'[Precedes]({data["_links"]["precedes"]["href"]})')
     await destination.send(embed=single_info)
@@ -274,7 +274,7 @@ async def send_effects(destination, data, usr_query, key_query):
     await destination.send(embed=effects_info)
 
 
-async def send_effect_details(destination, effect:dict):
+async def send_effect_details(destination, effect: dict):
     effect_type = sub('[^a-zA-Z0-9\n\.]', ' ', effect["type"])
     eff_embed = Embed(title=f':fireworks: {effect_type.capitalize()} :fireworks: ',
                       colour=Colour.lighter_gray())
@@ -293,3 +293,99 @@ async def send_effect_details(destination, effect:dict):
                         value=f'[Effect Link]({effect["_links"]["operation"]["href"]})',
                         inline=False)
     await destination.send(embed=eff_embed)
+
+
+async def tx_info_for_ledger(destination, ledger_id, record: dict, signatures, date):
+    """
+    Send transaction information based on ledger
+    """
+    ledger_record = Embed(title=f':record_button: Record for {ledger_id} :record_button:',
+                          colour=Colour.dark_orange())
+    ledger_record.add_field(name=':white_circle: Paging Token :white_circle: ',
+                            value=f'`{record["paging_token"]}`',
+                            inline=False)
+    ledger_record.add_field(name=f':calendar: Created :calendar: ',
+                            value=f'`{date}`',
+                            inline=False)
+    ledger_record.add_field(name=f' :map: Source account :map: ',
+                            value=f'`{record["source_account"]}`',
+                            inline=False)
+    ledger_record.add_field(name=f' Source account Sequence ',
+                            value=f'`{record["source_account_sequence"]}`',
+                            inline=False)
+    ledger_record.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
+                            value=signatures,
+                            inline=False)
+    ledger_record.add_field(name=':hash: Hash :hash: ',
+                            value=f'`{record["hash"]}`',
+                            inline=False)
+    ledger_record.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                            value=f'[Record]({record["_links"]["self"]["href"]})\n'
+                                  f'[Account]({record["_links"]["account"]["href"]})\n'
+                                  f'[Ledger]({record["_links"]["ledger"]["href"]})\n'
+                                  f'[Transactions]({record["_links"]["transaction"]["href"]})\n'
+                                  f'[Effects]({record["_links"]["effects"]["href"]})\n'
+                                  f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
+                                  f'[Precedes]({record["_links"]["precedes"]["href"]})')
+    await destination.send(embed=ledger_record)
+
+
+async def offer_details(destination, offer: dict):
+    """
+    Send offer details
+    """
+    offer_details = Embed(title=f':id: {offer["id"]} :id:',
+                          colour=Colour.lighter_gray())
+    offer_details.add_field(name=f':calendar: Last Modified :calendar: ',
+                            value=f'{offer["last_modified_time"]}',
+                            inline=False)
+    offer_details.add_field(name=f':white_circle: Paging Token :white_circle:',
+                            value=f'{offer["paging_token"]}',
+                            inline=False)
+    offer_details.add_field(name=f':map: Seller Details :map:',
+                            value=f'```{offer["seller"]}```',
+                            inline=False)
+
+    # Processing offer
+    selling_string = ''
+    if offer["selling"]["asset_type"] != 'native':
+        selling_string += f'{offer["amount"]} {offer["selling"]["asset_code"]} @ '
+    else:
+        selling_string += f'{offer["amount"]} XLM @ '
+
+    if offer['buying']['asset_type'] != 'native':
+        selling_string += f' {offer["price"]} {offer["buying"]["asset_code"]}'
+
+    else:
+        selling_string += f' {offer["price"]}/XLM @'
+
+    offer_details.add_field(name=f':handshake: Offer Details :handshake: ',
+                            value=f'`{selling_string}`',
+                            inline=False)
+
+    # Processing Issuers
+    asset_issuers = ''
+    if offer['buying']['asset_type'] != 'native':
+        asset_issuers += f':gem: {offer["buying"]["asset_code"]} (Buying) :gem:\n' \
+                         f'```{offer["buying"]["asset_issuer"]}```'
+    else:
+        asset_issuers += f':coin: XLM :coin: \n' \
+                         f'```Native Currency```'
+
+    if offer['selling']['asset_type'] != 'native':
+        asset_issuers += f'\n:gem: Selling {offer["selling"]["asset_code"]} (Selling) :gem:\n' \
+                         f'```{offer["selling"]["asset_issuer"]}```\n'
+    else:
+        asset_issuers += f':coin: XLM :coin: \n' \
+                         f'```Native Currency```'
+
+    offer_details.add_field(name=f':bank: Asset Issuers :bank:',
+                            value=asset_issuers,
+                            inline=False)
+
+    offer_details.add_field(name=f':sunrise: Horizon Links :sunrise:',
+                            value=f'[Offer Maker]({offer["_links"]["offer_maker"]["href"]}) \n'
+                                  f'[Offer Link]({offer["_links"]["self"]["href"]})',
+                            inline=False)
+
+    await destination.send(embed=offer_details)
