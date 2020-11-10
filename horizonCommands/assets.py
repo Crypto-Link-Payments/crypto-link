@@ -10,8 +10,8 @@ from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from discord.ext.commands.errors import CommandInvokeError
 from horizonCommands.utils.horizon import server
-from horizonCommands.utils.customMessages import send_asset_details, send_multi_asset_case
-from stellar_sdk import Asset
+from horizonCommands.utils.customMessages import send_asset_details, send_multi_asset_case, horizon_error_msg
+from stellar_sdk.exceptions import BadRequestError
 
 custom_messages = CustomMessages()
 
@@ -62,7 +62,7 @@ class HorizonAssets(commands.Cog):
     @assets.command()
     async def code(self, ctx, asset_code: str):
         data = self.asset.for_code(asset_code=asset_code.upper()).call()
-        if data:
+        if data['_embedded']['records']:
             records = data['_embedded']['records']
             if len(records) == 1:
                 await send_asset_details(destination=ctx.message.author, data=records[0], request='asset code ')
@@ -70,28 +70,31 @@ class HorizonAssets(commands.Cog):
             else:
                 await send_multi_asset_case(destination=ctx.message.author, data=data, command_str=self.command_string)
         else:
-            message = f'No Asset with code {asset_code} found. Please try again'
+            message = f'No Asset with code `{asset_code}` found. Please try again'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title='Asset Code Error')
 
     @assets.command()
     async def issuer(self, ctx, issuer_addr: str):
-        data = self.asset.for_issuer(asset_issuer=issuer_addr).call()
+        try:
+            data = self.asset.for_issuer(asset_issuer=issuer_addr).call()
+            if data['_embedded']['records']:
+                await send_asset_details(destination=ctx.message.author, data=data, request='issuer')
 
-        if data:
-            await send_asset_details(destination=ctx.message.author, data=data, request='issuer')
-
-        else:
-            message = f' Issuer with address `{issuer_addr} does not exist. Please recheck address and try again'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title='Issuer Does Not Exist')
+            else:
+                message = f' Issuer with address `{issuer_addr} does not exist. Please recheck address and try again'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title='Issuer Does Not Exist')
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @code.error
     async def code_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
             message = f'Wrong Code provided for asset'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title='Asset Could not be found')
+                                                 sys_msg_title='```Asset Could not be found```')
 
 
 def setup(bot):
