@@ -6,18 +6,14 @@ from Merchant wallet to their won upon withdrawal.
 """
 
 from discord.ext import commands
-from discord import Embed, Colour
+from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.horizon import server
 from datetime import datetime
 from cogs.utils.securityChecks import check_stellar_address
-from utils.tools import Helpers
 from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset
-from backOffice.backOffice import BackOffice
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
@@ -102,15 +98,7 @@ class HorizonAccounts(commands.Cog):
                                                      sys_msg_title=CONST_ACCOUNT_ERROR)
 
         else:
-            message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
-
-    @accounts.error
-    async def asset_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
-            message = f'In order to user Stellar Expert Commands you need to have wallet registered in the system!. Use' \
-                      f' `{self.command_string}register`'
+            message = f'Address `{address}` is not valid Stellar Address. Please recheck provided data and try again'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
