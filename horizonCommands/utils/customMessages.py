@@ -77,7 +77,7 @@ async def send_details_for_asset(destination, coin, data, date):
     await destination.send(embed=asset_details)
 
 
-async def send_asset_details(destination, data, request, ):
+async def send_asset_details(destination, data, request):
     toml_access = data['_embedded']['records'][0]['_links']['toml']['href']
     record = data['_embedded']['records'][0]
 
