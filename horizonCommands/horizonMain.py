@@ -33,13 +33,15 @@ class HorizonAccessCommands(commands.Cog):
 
     @commands.group()
     @commands.check(has_wallet)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def horizon(self, ctx):
         """
         Entry point for horizon queries
         """
 
         title = ':sunrise: __Stellar Horizon Access__ :sunrise: '
-        description = 'Available commands to access Horizon from Discord'
+        description = 'Available commands to access Horizon from Discord. All commands have implemented a 30 seconds' \
+                      ' cool-down, in order to prevent system-abuse and over-spamming.'
         list_of_commands = [
             {"name": f':office_worker: Accounts :office_worker:',
              "value": f'`{self.command_string}horizon accounts`'},
