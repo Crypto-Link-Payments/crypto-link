@@ -12,7 +12,6 @@ from horizonCommands.utils.horizon import server
 from cogs.utils.securityChecks import check_stellar_address
 from horizonCommands.utils.tools import format_date
 from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset
-
 custom_messages = CustomMessages()
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
@@ -70,6 +69,8 @@ class HorizonAccounts(commands.Cog):
         """
         if check_stellar_address(address=address):
             data = self.hor_accounts.account_id(account_id=address).call()
+            from pprint import pprint
+            pprint(data)
             if data:
                 for coin in reversed(data["balances"]):
                     date_fm = format_date(data["last_modified_time"])
