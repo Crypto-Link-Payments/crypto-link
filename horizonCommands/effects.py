@@ -39,7 +39,8 @@ class HorizonEffects(commands.Cog):
         """
         title = ':fireworks:  __Horizon Effects Queries__ :fireworks: '
         description = 'Representation of all available commands available to interact with ***Effects*** Endpoint on ' \
-                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.\n' \
+                      '`Aliases: ef, effect`'
         list_of_commands = [
             {"name": f':map: Query effects for account :map:',
              "value": f'`{self.command_string}effects account <public account address>`'},
