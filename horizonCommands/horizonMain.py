@@ -127,12 +127,13 @@ class HorizonAccessCommands(commands.Cog):
         title = ':gem: __Horizon Assets Operations__ :gem:'
         description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
                       'Stellar Horizon Server'
-        list_of_commands = [
-            {"name": f':regional_indicator_c: Query by code :regional_indicator_c: ',
-             "value": f'`{self.command_string}assets code <alphanumeric string>`'},
-            {"name": f':map: Query by Issuer Address :map:',
-             "value": f'`{self.command_string}assets issuer <Issuer address>`'}
-        ]
+        list_of_commands = [{"name": f':gem: Query by exact details :gem: ',
+                             "value": f'`{self.command_string}assets get <asset code> <issuer address>`'},
+                            {"name": f':regional_indicator_c: Query by code :regional_indicator_c: ',
+                             "value": f'`{self.command_string}assets code <alphanumeric string>`'},
+                            {"name": f':map: Query by Issuer Address :map:',
+                             "value": f'`{self.command_string}assets issuer <Issuer address>`'}
+                            ]
 
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
