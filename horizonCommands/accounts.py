@@ -58,6 +58,7 @@ class HorizonAccounts(commands.Cog):
         """
         Creates new in-active account on Stellar Network
         """
+        #TODO fix wording before release
         details = self.backoffice.stellar_wallet.create_stellar_account()
         if details:
             new_account = Embed(title=f':new: Stellar Testnet Account Created :new:',
@@ -75,9 +76,9 @@ class HorizonAccounts(commands.Cog):
                                   inline=False)
             new_account.add_field(name=f':warning: Important Message:warning:',
                                   value=f'Please store/backup account details somewhere safe and delete this embed on'
-                                        f' Discord. Exposure of Secret to any other entity or 3rd party application'
+                                        f' Discord. Exposure of Secret to any other entity or 3rd party application '
                                         f'might result in loss of funds. Crypto Link does not store details of newly'
-                                        f' generate accounts nor can recover it.',
+                                        f' generate accounts nor can recover them.',
                                   inline=False)
             await ctx.author.send(embed=new_account, delete_after=360)
         else:
