@@ -75,14 +75,14 @@ class HorizonAssets(commands.Cog):
                                                  sys_msg_title='Asset Code Error')
 
     @assets.command()
-    async def issuer(self, ctx, issuer_addr: str):
+    async def issuer(self, ctx, issuer: str):
         try:
-            data = self.asset.for_issuer(asset_issuer=issuer_addr).call()
+            data = self.asset.for_issuer(asset_issuer=issuer).call()
             if data['_embedded']['records']:
                 await send_asset_details(destination=ctx.message.author, data=data, request='issuer')
 
             else:
-                message = f' Issuer with address `{issuer_addr} does not exist. Please recheck address and try again'
+                message = f' Issuer with address `{issuer} does not exist. Please recheck address and try again'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title='Issuer Does Not Exist')
         except BadRequestError as e:
