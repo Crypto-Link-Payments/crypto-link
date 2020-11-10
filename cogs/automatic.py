@@ -14,6 +14,8 @@ from datetime import datetime
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 from cogs.utils.customCogChecks import is_dm
+from stellar_sdk.exceptions import BadRequestError
+from horizonCommands.utils.customMessages import horizon_error_msg
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
@@ -38,13 +40,17 @@ class AutoFunctions(commands.Cog):
         """
         Global error for on command error
         """
-        print(exception)
         if isinstance(exception, commands.CommandNotFound):
             title = 'System Command Error'
             message = f':no_entry: Sorry, this command does not exist! Please' \
                       f'type `{d["command"]}help` to check available commands.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
+
+        if isinstance(exception, commands.MissingRequiredArgument):
+            message = f'{exception}'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title='Missing argument')
         elif isinstance(exception, HTTPException):
             title = 'Discord API Error'
             message = f'We could not process your command due to the connection error with Discord API server. ' \
