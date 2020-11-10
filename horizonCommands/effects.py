@@ -32,13 +32,14 @@ class HorizonEffects(commands.Cog):
         self.effect = self.server.effects()
 
     @commands.group(aliases=["ef", 'effect'])
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def effects(self, ctx):
         """
         Effects entry point to horizon endpoints
         """
         title = ':fireworks:  __Horizon Effects Queries__ :fireworks: '
         description = 'Representation of all available commands available to interact with ***Effects*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
         list_of_commands = [
             {"name": f':map: Query effects for account :map:',
              "value": f'`{self.command_string}effects account <public account address>`'},
