@@ -101,7 +101,7 @@ class HorizonTransactions(commands.Cog):
 
     @transactions.command()
     async def account(self, ctx, account_address: str):
-        data = self.txs.for_account(account_id=account_address).call()
+        data = self.txs.for_account(account_id=account_address).order(desc=True).call()
         if data:
             records = data['_embedded']['records']
             account_info = Embed(title=f':map: Account Transactions Information :map:',
@@ -115,6 +115,11 @@ class HorizonTransactions(commands.Cog):
             counter = 0
             for record in records:
                 if counter <= 2:
+                    if record.get('memo'):
+                        memo = f'{data["memo"]} (Type: {data["memo_type"]})'
+                    else:
+                        memo = None
+
                     sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
                     account_record = Embed(title=f':record_button: Account Transaction Record :record_button:',
                                            colour=Colour.dark_orange())
@@ -129,9 +134,9 @@ class HorizonTransactions(commands.Cog):
                     account_record.add_field(name=f' :map: Source account :map: ',
                                              value=f'`{record["source_account"]}`',
                                              inline=False)
-                    account_record.add_field(name=f' :pen: Memo :pen: ',
-                                             value=f'`{record["memo"]} (Type: {record["memo_type"]})`',
-                                             inline=False)
+                    account_info.add_field(name=f' :pen: Memo :pen: ',
+                                           value=f'`{memo}`',
+                                           inline=False)
                     account_record.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
                                              value=sig_str,
                                              inline=False)
