@@ -1,7 +1,7 @@
 from discord import Embed, Colour
 
 
-async def horizon_error(destination, error):
+async def horizon_error_msg(destination, error):
     horizon_err = Embed(title=f':exclamation: Horizon API error :exclamation:',
                         colour=Colour.red())
     horizon_err.add_field(name=f'Error Details',
@@ -203,7 +203,7 @@ async def account_transaction_records(destination, record: dict, signers: str, m
     await destination.send(embed=account_record)
 
 
-async def tx_details_hash(destination, data: dict, signatures):
+async def tx_details_hash(destination, data: dict, signatures, date:str, memo):
     single_info = Embed(title=f':hash: Transaction Hash Details :hash:',
                         colour=Colour.dark_orange())
     single_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
@@ -220,7 +220,7 @@ async def tx_details_hash(destination, data: dict, signatures):
                           value=f'`{data["source_account"]}`',
                           inline=False)
     single_info.add_field(name=f' :pencil:  Memo :pencil: ',
-                          value=f'`{data["memo"]} (Type: {data["memo_type"]})`',
+                          value=f'`{memo}`',
                           inline=False)
     single_info.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
                           value=signatures,
