@@ -10,7 +10,8 @@ from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.horizon import server
 from horizonCommands.utils.tools import format_date, process_memo
-from horizonCommands.utils.customMessages import account_transaction_records, horizon_error_msg, tx_details_hash
+from horizonCommands.utils.customMessages import tx_info_for_account, horizon_error_msg, tx_info_for_hash, \
+    tx_info_for_ledger
 from stellar_sdk.exceptions import BadRequestError, NotFoundError
 
 custom_messages = CustomMessages()
@@ -28,7 +29,8 @@ class HorizonTransactions(commands.Cog):
         self.server = server
         self.txs = self.server.transactions()
 
-    @commands.group()
+    @commands.group(aliases=["tx"])
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def transactions(self, ctx):
         title = ':incoming_envelope: __Horizon Transactions Operations__ :incoming_envelope:'
         description = 'Representation of all available commands available to interact with ***Transactions*** Endpoint on ' \
@@ -40,7 +42,6 @@ class HorizonTransactions(commands.Cog):
              "value": f'`{self.command_string}transactions account <Valid Stellar Address>`'},
             {"name": f':ledger:  Query by ledger :ledger:',
              "value": f'`{self.command_string}transactions ledger <Ledger Number>`'},
-
         ]
 
         if ctx.invoked_subcommand is None:
@@ -49,6 +50,7 @@ class HorizonTransactions(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @transactions.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def single(self, ctx, transaction_hash: str):
         try:
             data = self.txs.transaction(transaction_hash=transaction_hash).call()
@@ -57,9 +59,9 @@ class HorizonTransactions(commands.Cog):
             date_fm = format_date(data["created_at"])
             memo = process_memo(record=data)
 
-            await tx_details_hash(destination=ctx.message.author,
-                                  data=data,
-                                  signatures=sig_str, date=date_fm, memo=memo)
+            await tx_info_for_hash(destination=ctx.message.author,
+                                   data=data,
+                                   signatures=sig_str, date=date_fm, memo=memo)
         except NotFoundError:
             await horizon_error_msg(destination=ctx.message.author, error=f"Transaction has you have provided could"
                                                                           f" not be found on the network. Please"
@@ -69,11 +71,13 @@ class HorizonTransactions(commands.Cog):
                                                                           f"lowercase SHA-256 hash")
 
     @transactions.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def account(self, ctx, account_address: str):
         """
         Get last three transactions for the account
         """
         data = self.txs.for_account(account_id=account_address).order(desc=True).call()
+
         if data:
             records = data['_embedded']['records']
             account_info = Embed(title=f':map: Account Transactions Information :map:',
@@ -91,8 +95,8 @@ class HorizonTransactions(commands.Cog):
                     date_fm = format_date(record["created_at"])
                     sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
 
-                    await account_transaction_records(destination=ctx.message.author, record=record, signers=sig_str,
-                                                      memo=memo, date=date_fm)
+                    await tx_info_for_account(destination=ctx.message.author, record=record, signers=sig_str,
+                                              memo=memo, date=date_fm)
                     counter += 1
         else:
             message = f'Account ```{account_address}```  does not exist or has not been activated yet.'
@@ -100,6 +104,7 @@ class HorizonTransactions(commands.Cog):
                                                  sys_msg_title=':map: Account not found :map:')
 
     @transactions.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def ledger(self, ctx, ledger_id: int):
         data = self.txs.for_ledger(sequence=ledger_id).call()
         if data:
@@ -112,35 +117,10 @@ class HorizonTransactions(commands.Cog):
             await ctx.author.send(embed=ledger_info)
             for record in records:
                 sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
-                ledger_record = Embed(title=f':record_button: Record for {ledger_id} :record_button:',
-                                      colour=Colour.dark_orange())
-                ledger_record.add_field(name=':white_circle: Paging Token :white_circle: ',
-                                        value=f'`{record["paging_token"]}`',
-                                        inline=False)
-                ledger_record.add_field(name=f':calendar: Created :calendar: ',
-                                        value=f'`{record["created_at"]}`',
-                                        inline=False)
-                ledger_record.add_field(name=f' :map: Source account :map: ',
-                                        value=f'`{record["source_account"]}`',
-                                        inline=False)
-                ledger_record.add_field(name=f' Source account Sequence ',
-                                        value=f'`{record["source_account_sequence"]}`',
-                                        inline=False)
-                ledger_record.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
-                                        value=sig_str,
-                                        inline=False)
-                ledger_record.add_field(name=':hash: Hash :hash: ',
-                                        value=f'`{record["hash"]}`',
-                                        inline=False)
-                ledger_record.add_field(name=f':sunrise: Horizon Link :sunrise:',
-                                        value=f'[Record]({record["_links"]["self"]["href"]})\n'
-                                              f'[Account]({record["_links"]["account"]["href"]})\n'
-                                              f'[Ledger]({record["_links"]["ledger"]["href"]})\n'
-                                              f'[Transactions]({record["_links"]["transaction"]["href"]})\n'
-                                              f'[Effects]({record["_links"]["effects"]["href"]})\n'
-                                              f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
-                                              f'[Precedes]({record["_links"]["precedes"]["href"]})')
-                await ctx.author.send(embed=ledger_record)
+
+                await tx_info_for_ledger(ledger_id=ledger_id, record=record, signatures=sig_str,
+                                         date=format_date(record["created_at"]))
+
         else:
             message = f'Ledger with :id: {ledger_id} could not be found'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
