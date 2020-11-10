@@ -10,14 +10,9 @@ from discord import Embed, Colour
 from cogs.utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
-from utils.tools import Helpers
 from horizonCommands.utils.horizon import server
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
@@ -110,7 +105,7 @@ class HorizonPayments(commands.Cog):
                 counter += 1
 
     @commands.group()
-    @commands.check(has_wallet)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def payments(self, ctx):
         """
         End points for payments
@@ -133,6 +128,7 @@ class HorizonPayments(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @payments.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def address(self, ctx, address: str):
         if check_stellar_address(address=address):
             data = self.payment.for_account(account_id=address).order(
@@ -144,6 +140,7 @@ class HorizonPayments(commands.Cog):
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
     @payments.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def ledger(self, ctx, ledger_sequence: int):
         data = self.payment.for_ledger(sequence=ledger_sequence).order(
             desc=True).limit(limit=200).call()
@@ -186,9 +183,10 @@ class HorizonPayments(commands.Cog):
             await ctx.author.send(embed=ledger_record)
 
     @payments.command(aliases=["tx"])
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def transaction(self, ctx, transaction_hash: str):
         data = self.payment.for_transaction(transaction_hash=transaction_hash).order(
-            desc=True).limit(limit=200).call()
+            desc=True).limit(limit=20).call()
         await self.process_server_response(ctx, data=data, query_key='transaction hash',
                                            user_query=f'{transaction_hash}')
 
