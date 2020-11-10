@@ -12,7 +12,7 @@ from horizonCommands.utils.horizon import server
 from datetime import datetime
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
-from horizonCommands.utils.customMessages import account_create_msg
+from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset
 from backOffice.backOffice import BackOffice
 
 custom_messages = CustomMessages()
@@ -21,7 +21,6 @@ auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
-
 
 
 class HorizonAccounts(commands.Cog):
@@ -59,10 +58,10 @@ class HorizonAccounts(commands.Cog):
         """
         Creates new in-active account on Stellar Network
         """
-        #TODO fix wording before release
+        # TODO fix wording before release
         details = self.backoffice.stellar_wallet.create_stellar_account()
         if details:
-            await account_create_msg(destination=ctx.message.author,details=details)
+            await account_create_msg(destination=ctx.message.author, details=details)
         else:
             message = f'New Stellar Account could not be created. Please try again later'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -83,58 +82,20 @@ class HorizonAccounts(commands.Cog):
                             [f'`{sig["key"]}`' for sig in
                              data["signers"]])
 
-                        acc_details = Embed(title=':mag_right: Details for Stellar Account :mag:',
-                                            description=f'Last Activity {dt_format} (UTC)',
-                                            colour=Colour.lighter_gray())
-                        acc_details.add_field(name=':map: Account Address :map: ',
-                                              value=f'```{data["account_id"]}```',
-                                              inline=False)
-                        acc_details.add_field(name=':pen_fountain: Account Signers :pen_fountain: ',
-                                              value=signers_data,
-                                              inline=False)
-                        acc_details.add_field(name=' :genie: Sponsorship Activity :genie:',
-                                              value=f':money_mouth: {data["num_sponsored"]} (sponsored)\n'
-                                                    f':money_with_wings: {data["num_sponsoring"]} (sponsoring) ',
-                                              inline=False)
-                        acc_details.add_field(name=f' :moneybag: Balance :moneybag:',
-                                              value=f'`{coin["balance"]} XLM`',
-                                              inline=False)
-                        acc_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
-                                              value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
-                                                    f'Selling Liabilities: {coin["selling_liabilities"]}',
-                                              inline=False)
-                        acc_details.add_field(name=f':triangular_flag_on_post: Flags :triangular_flag_on_post:',
-                                              value=f'Auth Required: {data["flags"]["auth_required"]}\n'
-                                                    f'Auth Revocable: {data["flags"]["auth_revocable"]}\n'
-                                                    f'Auth Immutable:{data["flags"]["auth_immutable"]}')
-                        await ctx.author.send(embed=acc_details)
+                        # Send info to user
+                        await send_details_for_stellar(destination=ctx.message.author,
+                                                       coin=coin,
+                                                       data=data,
+                                                       date=dt_format,
+                                                       signers=signers_data)
+
                     else:
-                        asset_details = Embed(title=f':coin: Details for asset {coin["asset_code"]} :coin:',
-                                              description=f'Last Activity on {dt_format} (UTC)'
-                                                          f' (Ledger:{data["last_modified_ledger"]}',
-                                              colour=Colour.lighter_gray())
-                        asset_details.add_field(name=f':map: Issuer Address :map: ',
-                                                value=f'```{coin["asset_issuer"]}```',
-                                                inline=False)
-                        asset_details.add_field(name=f' :moneybag: Balance :moneybag:',
-                                                value=f'`{coin["balance"]} {coin["asset_code"]}`',
-                                                inline=False)
-                        asset_details.add_field(name=f':handshake: Trustline Status :handshake: ',
-                                                value=f'Authorizer: {coin["is_authorized"]}\n'
-                                                      f'Maintain Liabilities: {coin["is_authorized_to_maintain_liabilities"]}',
-                                                inline=False)
-                        asset_details.add_field(name=f':man_judge: Liabilities :man_judge: ',
-                                                value=f'Buying Liabilities: {coin["buying_liabilities"]}\n'
-                                                      f'Selling Liabilities: {coin["selling_liabilities"]}',
-                                                inline=False)
-                        asset_details.add_field(name=':chains: Trustline links :chains: ',
-                                                value=f'[Issuer Details](https://stellar.expert/explorer/testnet/account/{coin["asset_issuer"]}?order=desc)\n'
-                                                      f'[Asset Details](https://stellar.expert/explorer/testnet/asset/{coin["asset_code"]}-{coin["asset_issuer"]}?order=desc)')
-                        await ctx.author.send(embed=asset_details)
+                        await send_details_for_asset(destination=ctx.message.author, coin=coin, data=data,
+                                                     date=dt_format)
 
             else:
-                message = f'Account ```{address}``` could not be queried. Either does not exist or has not been activate ' \
-                          f'yet. Please try again later or in later case, ' \
+                message = f'Account ```{address}``` could not be queried. Either does not exist or has not been ' \
+                          f'activate yet. Please try again later or in later case, ' \
                           f'use [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test).' \
                           f'to activate your account with test Lumens.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
