@@ -1,6 +1,14 @@
 from discord import Embed, Colour
 
 
+async def horizon_error(destination, error):
+    horizon_err = Embed(title=f':exclamation: Horizon API error :exclamation:',
+                        colour=Colour.red())
+    horizon_err.add_field(name=f'Error Details',
+                          value=f'{error}')
+    await destination.send(embed=horizon_err)
+
+
 async def account_create_msg(destination, details):
     new_account = Embed(title=f':new: Stellar Testnet Account Created :new:',
                         description=f'You have successfully created new account on {details["network"]}. Do'
@@ -193,3 +201,41 @@ async def account_transaction_records(destination, record: dict, signers: str, m
                                    f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
                                    f'[Precedes]({record["_links"]["precedes"]["href"]})')
     await destination.send(embed=account_record)
+
+
+async def tx_details_hash(destination, data: dict, signatures):
+    single_info = Embed(title=f':hash: Transaction Hash Details :hash:',
+                        colour=Colour.dark_orange())
+    single_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                          value=f'[Transaction Hash]({data["_links"]["self"]["href"]})')
+    single_info.add_field(name=':ledger: Ledger :ledger: ',
+                          value=f'`{data["ledger"]}`')
+    single_info.add_field(name=':white_circle: Paging Token :white_circle: ',
+                          value=f'`{data["paging_token"]}`',
+                          inline=True)
+    single_info.add_field(name=f':calendar: Created :calendar: ',
+                          value=f'`{data["created_at"]}`',
+                          inline=False)
+    single_info.add_field(name=f' :map: Source account :map: ',
+                          value=f'`{data["source_account"]}`',
+                          inline=False)
+    single_info.add_field(name=f' :pencil:  Memo :pencil: ',
+                          value=f'`{data["memo"]} (Type: {data["memo_type"]})`',
+                          inline=False)
+    single_info.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
+                          value=signatures,
+                          inline=False)
+    single_info.add_field(name=':hash: Hash :hash: ',
+                          value=f'`{data["hash"]}`',
+                          inline=False)
+    single_info.add_field(name=':money_with_wings: Fee :money_with_wings: ',
+                          value=f'`{round(int(data["fee_charged"]) / 10000000, 7):.7f} XLM`',
+                          inline=False)
+    single_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                          value=f'[Ledger]({data["_links"]["ledger"]["href"]})\n'
+                                f'[Transactions]({data["_links"]["transaction"]["href"]})\n'
+                                f'[Effects]({data["_links"]["effects"]["href"]})\n'
+                                f'[Operations]({data["_links"]["succeeds"]["href"]}\n)'
+                                f'[Succeeds]({data["_links"]["succeeds"]["href"]})\n'
+                                f'[Precedes]({data["_links"]["precedes"]["href"]})')
+    await destination.send(embed=single_info)
