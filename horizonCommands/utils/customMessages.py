@@ -77,7 +77,7 @@ async def send_details_for_asset(destination, coin, data, date):
     await destination.send(embed=asset_details)
 
 
-async def send_asset_details(destination, data, request,  ):
+async def send_asset_details(destination, data, request, ):
     toml_access = data['_embedded']['records'][0]['_links']['toml']['href']
     record = data['_embedded']['records'][0]
 
@@ -121,6 +121,7 @@ async def send_asset_details(destination, data, request,  ):
                          value=f'```{record["paging_token"]}```',
                          inline=False)
     await destination.send(embed=asset_info)
+
 
 async def send_multi_asset_case(destination, data, command_str):
     records = data['_embedded']['records']
