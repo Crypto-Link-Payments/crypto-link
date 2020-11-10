@@ -12,7 +12,7 @@ from re import sub
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
 from horizonCommands.utils.horizon import server
-from horizonCommands.utils.customMessages import send_effects_details
+from horizonCommands.utils.customMessages import send_effects, send_effect_details
 
 custom_messages = CustomMessages()
 
@@ -31,7 +31,7 @@ class HorizonEffects(commands.Cog):
         self.server = server
         self.effect = self.server.effects()
 
-    @commands.group()
+    @commands.group(aliases=["ef", 'effect'])
     async def effects(self, ctx):
         """
         Effects entry point to horizon endpoints
@@ -59,9 +59,17 @@ class HorizonEffects(commands.Cog):
     async def account(self, ctx, address: str):
         if check_stellar_address(address=address):
             data = self.effect.for_account(account_id=address).call()
-            await send_effects_details(destination=ctx.message.author, data=data, usr_query=f'{address}',
-                                       key_query='Account')
+            await send_effects(destination=ctx.message.author, data=data, usr_query=f'{address}',
+                               key_query='Account')
 
+            effects = data['_embedded']["records"]
+            counter = 0
+            for effect in effects:
+                if counter <= 2:
+                    await send_effect_details(destination=ctx.message.author, effect=effect)
+                    counter += 1
+                else:
+                    pass
         else:
             message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -70,20 +78,44 @@ class HorizonEffects(commands.Cog):
     @effects.command()
     async def ledger(self, ctx, ledger_id: int):
         data = self.effect.for_ledger(sequence=ledger_id).call()
-        await send_effects_details(destination=ctx.message.author, data=data, usr_query=f'{ledger_id}',
-                                   key_query='Ledger')
+        await send_effects(destination=ctx.message.author, data=data, usr_query=f'{ledger_id}',
+                           key_query='Ledger')
+        effects = data['_embedded']["records"]
+        counter = 0
+        for effect in effects:
+            if counter <= 2:
+                await send_effect_details(destination=ctx.message.author, effect=effect)
+                counter += 1
+            else:
+                pass
 
     @effects.command()
     async def operation(self, ctx, operation_id: int):
         data = self.effect.for_operation(operation_id=operation_id).call()
-        await send_effects_details(destination=ctx.message.author, data=data, usr_query=f'{operation_id}',
-                                   key_query='Operation')
+        await send_effects(destination=ctx.message.author, data=data, usr_query=f'{operation_id}',
+                           key_query='Operation')
+        effects = data['_embedded']["records"]
+        counter = 0
+        for effect in effects:
+            if counter <= 2:
+                await send_effect_details(destination=ctx.message.author, effect=effect)
+                counter += 1
+            else:
+                pass
 
     @effects.command()
     async def transaction(self, ctx, tx_hash: str):
         data = self.effect.for_transaction(transaction_hash=tx_hash).call()
-        await send_effects_details(destination=ctx.message.author, data=data, usr_query=f'{tx_hash}',
-                                   key_query='Transaction Hash')
+        await send_effects(destination=ctx.message.author, data=data, usr_query=f'{tx_hash}',
+                           key_query='Transaction Hash')
+        effects = data['_embedded']["records"]
+        counter = 0
+        for effect in effects:
+            if counter <= 2:
+                await send_effect_details(destination=ctx.message.author, effect=effect)
+                counter += 1
+            else:
+                pass
 
 
 def setup(bot):

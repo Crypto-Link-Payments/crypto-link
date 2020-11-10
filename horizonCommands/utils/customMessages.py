@@ -1,6 +1,7 @@
 from discord import Embed, Colour
 from re import sub
 
+
 async def horizon_error_msg(destination, error):
     horizon_err = Embed(title=f':exclamation: Horizon API error :exclamation:',
                         colour=Colour.red())
@@ -258,8 +259,8 @@ async def tx_details_hash(destination, data: dict, signatures, date: str, memo):
                                 f'[Precedes]({data["_links"]["precedes"]["href"]})')
     await destination.send(embed=single_info)
 
-async def send_effects_details(destination, data, usr_query, key_query):
-    effects = data['_embedded']["records"]
+
+async def send_effects(destination, data, usr_query, key_query):
     horizon_query = data['_links']['self']['href']
 
     effects_info = Embed(title=f':fireworks: {key_query} Effects :fireworks:  ',
@@ -270,29 +271,25 @@ async def send_effects_details(destination, data, usr_query, key_query):
     effects_info.add_field(name=f':three: Last Three Effects :three: ',
                            value=f':arrow_double_down: ',
                            inline=False)
-    await destination.author.send(embed=effects_info)
+    await destination.send(embed=effects_info)
 
-    counter = 0
-    for effect in effects:
-        if counter <= 2:
-            effect_type = sub('[^a-zA-Z0-9\n\.]', ' ', effect["type"])
-            eff_embed = Embed(title=f':fireworks: {effect_type.capitalize()} :fireworks: ',
-                              colour=Colour.lighter_gray())
-            eff_embed.add_field(name=f':calendar:  Created :calendar: ',
-                                value=f'`{effect["created_at"]}`',
-                                inline=False)
-            eff_embed.add_field(name=f':white_circle: Paging Token :white_circle:',
-                                value=f'`{effect["paging_token"]}`')
-            eff_embed.add_field(name=f':map: Account :map:',
-                                value=f'```{effect["account"]}```',
-                                inline=False)
-            eff_embed.add_field(name=f':id: ID :id:',
-                                value=f'`{effect["id"]}`',
-                                inline=False)
-            eff_embed.add_field(name=f':sunrise: Horizon Link :sunrise: ',
-                                value=f'[Effect Link]({effect["_links"]["operation"]["href"]})',
-                                inline=False)
-            await destination.author.send(embed=eff_embed)
-            counter += 1
-        else:
-            pass
+
+async def send_effect_details(destination, effect:dict):
+    effect_type = sub('[^a-zA-Z0-9\n\.]', ' ', effect["type"])
+    eff_embed = Embed(title=f':fireworks: {effect_type.capitalize()} :fireworks: ',
+                      colour=Colour.lighter_gray())
+    eff_embed.add_field(name=f':calendar:  Created :calendar: ',
+                        value=f'`{effect["created_at"]}`',
+                        inline=False)
+    eff_embed.add_field(name=f':white_circle: Paging Token :white_circle:',
+                        value=f'`{effect["paging_token"]}`')
+    eff_embed.add_field(name=f':map: Account :map:',
+                        value=f'```{effect["account"]}```',
+                        inline=False)
+    eff_embed.add_field(name=f':id: ID :id:',
+                        value=f'`{effect["id"]}`',
+                        inline=False)
+    eff_embed.add_field(name=f':sunrise: Horizon Link :sunrise: ',
+                        value=f'[Effect Link]({effect["_links"]["operation"]["href"]})',
+                        inline=False)
+    await destination.send(embed=eff_embed)
