@@ -8,18 +8,12 @@ from Merchant wallet to their won upon withdrawal.
 from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 from horizonCommands.utils.horizon import server
 from horizonCommands.utils.tools import format_date, process_memo
 from horizonCommands.utils.customMessages import account_transaction_records, horizon_error_msg, tx_details_hash
 from stellar_sdk.exceptions import BadRequestError, NotFoundError
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
-CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
 class HorizonTransactions(commands.Cog):
