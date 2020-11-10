@@ -47,7 +47,7 @@ class HorizonEffects(commands.Cog):
             {"name": f':wrench: Query effects for operations :wrench: ',
              "value": f'`{self.command_string}effects operations <operation id>`'},
             {"name": f':hash: Query effects for transactions :hash: ',
-             "value": f'`{self.command_string}effects transaaction <transaction hash>`'}
+             "value": f'`{self.command_string}effects transaction <transaction hash>`'}
         ]
 
         if ctx.invoked_subcommand is None:
