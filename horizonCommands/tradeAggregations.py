@@ -51,6 +51,7 @@ class HorizonTrdeaAggregations(commands.Cog):
             return None
 
     @commands.group()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def trade(self, ctx):
         """
         Effects entry point to horizon endpoints
