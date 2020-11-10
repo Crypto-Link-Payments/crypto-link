@@ -50,7 +50,6 @@ class HorizonTransactions(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @transactions.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def single(self, ctx, transaction_hash: str):
         try:
             data = self.txs.transaction(transaction_hash=transaction_hash).call()
@@ -71,7 +70,6 @@ class HorizonTransactions(commands.Cog):
                                                                           f"lowercase SHA-256 hash")
 
     @transactions.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def account(self, ctx, account_address: str):
         """
         Get last three transactions for the account
@@ -104,27 +102,30 @@ class HorizonTransactions(commands.Cog):
                                                  sys_msg_title=':map: Account not found :map:')
 
     @transactions.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def ledger(self, ctx, ledger_id: int):
-        data = self.txs.for_ledger(sequence=ledger_id).call()
-        if data:
-            records = data['_embedded']['records']
-            ledger_info = Embed(title=f':ledger: Ledger {ledger_id} Information :ledger:',
-                                description='Bellow is represent information for requested ledger.',
-                                colour=Colour.lighter_gray())
-            ledger_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
-                                  value=f'[Ledger]({data["_links"]["self"]["href"]})')
-            await ctx.author.send(embed=ledger_info)
-            for record in records:
-                sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
+        try:
+            data = self.txs.for_ledger(sequence=ledger_id).call()
+            if data:
+                records = data['_embedded']['records']
+                ledger_info = Embed(title=f':ledger: Ledger {ledger_id} Information :ledger:',
+                                    description='Bellow is represent information for requested ledger.',
+                                    colour=Colour.lighter_gray())
+                ledger_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                      value=f'[Ledger]({data["_links"]["self"]["href"]})')
+                await ctx.author.send(embed=ledger_info)
+                for record in records:
+                    sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
 
-                await tx_info_for_ledger(ledger_id=ledger_id, record=record, signatures=sig_str,
-                                         date=format_date(record["created_at"]))
+                    await tx_info_for_ledger(destination=ctx.message.author,ledger_id=ledger_id, record=record, signatures=sig_str,
+                                             date=format_date(record["created_at"]))
 
-        else:
-            message = f'Ledger with :id: {ledger_id} could not be found'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=':ledger: Ledger not found :ledger:')
+            else:
+                message = f'Ledger with :id: {ledger_id} could not be found'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=':ledger: Ledger not found :ledger:')
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
 
 def setup(bot):
