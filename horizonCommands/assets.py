@@ -6,11 +6,12 @@ from Merchant wallet to their won upon withdrawal.
 """
 
 from discord.ext import commands
-from discord import Embed, Colour
+from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from discord.ext.commands.errors import CommandInvokeError
 from horizonCommands.utils.horizon import server
 from horizonCommands.utils.customMessages import send_asset_details, send_multi_asset_case
+from stellar_sdk import Asset
 
 custom_messages = CustomMessages()
 
@@ -31,18 +32,32 @@ class HorizonAssets(commands.Cog):
     async def assets(self, ctx):
         title = ':gem: __Horizon Assets Queries__ :gem:'
         description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
-                      'Stellar Horizon Server'
-        list_of_commands = [
-            {"name": f':regional_indicator_c: Query by code :regional_indicator_c: ',
-             "value": f'`{self.command_string}assets code <alphanumeric string>`'},
-            {"name": f':map: Query by Issuer Address :map:',
-             "value": f'`{self.command_string}assets issuer <Issuer address>`'}
-        ]
+                      'Stellar Horizon Server.'
+        list_of_commands = [{"name": f':gem: Query by exact details :gem: ',
+                             "value": f'`{self.command_string}assets get <asset code> <issuer address>`'},
+                            {"name": f':regional_indicator_c: Query by code :regional_indicator_c: ',
+                             "value": f'`{self.command_string}assets code <alphanumeric string>`'},
+                            {"name": f':map: Query by Issuer Address :map:',
+                             "value": f'`{self.command_string}assets issuer <Issuer address>`'}
+                            ]
 
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
+
+    @assets.command()
+    async def get(self, ctx, asset_code: str, asset_issuer: str):
+
+        data = self.asset.for_code(asset_code=asset_code.upper()).for_issuer(asset_issuer=asset_issuer.upper()).call()
+        if data['_embedded']["records"]:
+            await send_asset_details(destination=ctx.message.author, data=data, request='***asset***')
+        else:
+            message = f'Asset with details provided does not exist. Please query for asset either ' \
+                      f'by `{self.command_string}assets code {asset_code}` or `{self.command_string}assets issuer` ' \
+                      f'to verify details'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=':warning: Asset Code Error :warning: ')
 
     @assets.command()
     async def code(self, ctx, asset_code: str):
