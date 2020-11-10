@@ -9,8 +9,8 @@ from discord.ext import commands
 from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.horizon import server
-from datetime import datetime
 from cogs.utils.securityChecks import check_stellar_address
+from horizonCommands.utils.tools import format_date
 from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset
 
 custom_messages = CustomMessages()
@@ -72,7 +72,7 @@ class HorizonAccounts(commands.Cog):
             data = self.hor_accounts.account_id(account_id=address).call()
             if data:
                 for coin in reversed(data["balances"]):
-                    dt_format = datetime.strptime(data["last_modified_time"], '%Y-%m-%dT%H:%M:%SZ')
+                    date_fm = format_date(data["last_modified_time"])
                     if not coin.get('asset_code'):
                         signers_data = ', '.join(
                             [f'`{sig["key"]}`' for sig in
@@ -82,12 +82,12 @@ class HorizonAccounts(commands.Cog):
                         await send_details_for_stellar(destination=ctx.message.author,
                                                        coin=coin,
                                                        data=data,
-                                                       date=dt_format,
+                                                       date=date_fm,
                                                        signers=signers_data)
 
                     else:
                         await send_details_for_asset(destination=ctx.message.author, coin=coin, data=data,
-                                                     date=dt_format)
+                                                     date=date_fm)
 
             else:
                 message = f'Account ```{address}``` could not be queried. Either does not exist or has not been ' \
