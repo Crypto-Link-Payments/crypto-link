@@ -49,6 +49,7 @@ class HorizonAccounts(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @accounts.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def create(self, ctx):
         """
         Creates new in-active account on Stellar Network
@@ -63,6 +64,7 @@ class HorizonAccounts(commands.Cog):
                                                  sys_msg_title=CONST_ACCOUNT_ERROR)
 
     @accounts.command(aliases=["get", "query"])
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def details(self, ctx, address: str):
         """
         Query details for specific public address
