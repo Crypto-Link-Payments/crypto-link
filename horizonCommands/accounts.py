@@ -71,8 +71,6 @@ class HorizonAccounts(commands.Cog):
         """
         if check_stellar_address(address=address):
             data = self.hor_accounts.account_id(account_id=address).call()
-            from pprint import pprint
-            pprint(data)
             if data:
                 for coin in reversed(data["balances"]):
                     date_fm = format_date(data["last_modified_time"])

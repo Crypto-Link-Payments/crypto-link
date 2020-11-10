@@ -14,6 +14,7 @@ def get_emoji(title):
     elif title == "account":
         return ':map:'
 
+
 def process_memo(record: dict):
     """Filter memo"""
     if record.get('memo'):
