@@ -528,3 +528,15 @@ async def send_paths_records_details(destination, data):
                           value=path_str,
                           inline=False)
     await destination.send(embed=record_info)
+
+
+async def send_operations_basic_details(destination, key_query: str, hrz_link: str):
+    effects_info = Embed(title=f':wrench: {key_query} Operations :wrench:  ',
+                         description=f'Bellow are last three Operations which happened for {key_query}',
+                         colour=Colour.lighter_gray())
+    effects_info.add_field(name=f':sunrise: Horizon Access :sunrise: ',
+                           value=f'[{key_query} Operations]({hrz_link})')
+    effects_info.add_field(name=f':three: Last Three Effects :three: ',
+                           value=f':arrow_double_down: ',
+                           inline=False)
+    await destination.send(embed=effects_info)
