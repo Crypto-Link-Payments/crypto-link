@@ -14,8 +14,6 @@ from datetime import datetime
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 from cogs.utils.customCogChecks import is_dm
-from stellar_sdk.exceptions import BadRequestError
-from horizonCommands.utils.customMessages import horizon_error_msg
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
@@ -47,6 +45,7 @@ class AutoFunctions(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
         elif isinstance(exception, commands.BadArgument):
+            # Skipped as its handled on lower level
             pass
 
         elif isinstance(exception, commands.CommandOnCooldown):
@@ -56,8 +55,11 @@ class AutoFunctions(commands.Cog):
                                                  sys_msg_title=':sweat_drops: Cool-Down :sweat_drops: ')
 
         elif isinstance(exception, commands.MissingRequiredArgument):
-            message = f'{exception}'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.orange(), message=f'{exception}', destination=0,
+                                                 sys_msg_title=':sweat_drops: Missing Required Argument :sweat_drops: ')
+
+        elif isinstance(exception, commands.MissingRequiredArgument):
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=f'{exception}', destination=0,
                                                  sys_msg_title='Missing argument')
         elif isinstance(exception, HTTPException):
             title = 'Discord API Error'
