@@ -7,10 +7,11 @@ from Merchant wallet to their won upon withdrawal.
 
 from discord.ext import commands
 from discord import Embed, Colour
-from cogs.utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
 from horizonCommands.utils.horizon import server
+from horizonCommands.utils.customMessages import horizon_error_msg, send_payments_details
+from stellar_sdk.exceptions import BadRequestError
 
 custom_messages = CustomMessages()
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
@@ -128,59 +129,49 @@ class HorizonPayments(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @payments.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def address(self, ctx, address: str):
-        if check_stellar_address(address=address):
-            data = self.payment.for_account(account_id=address).order(
-                desc=True).limit(limit=200).call()
-            await self.process_server_response(ctx, data=data, query_key='address', user_query=f'{address}')
-        else:
-            message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
+        try:
+            if check_stellar_address(address=address):
+                data = self.payment.for_account(account_id=address).order(
+                    desc=True).limit(limit=200).call()
+                if data['_embedded']['records']:
+                    await self.process_server_response(ctx, data=data, query_key='address', user_query=f'{address}')
+                else:
+                    message = f'Address `{address}` does not have any payments yet.'
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                         sys_msg_title="No Payments Found")
+            else:
+                message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=CONST_ACCOUNT_ERROR)
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @payments.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
     async def ledger(self, ctx, ledger_sequence: int):
-        data = self.payment.for_ledger(sequence=ledger_sequence).order(
-            desc=True).limit(limit=200).call()
-        records = data['_embedded']['records']
-        ledger_info = Embed(title=f':ledger: Ledger {ledger_sequence} Information :ledger:',
-                            description='Bellow is represent information for requested ledger.',
-                            colour=Colour.lighter_gray())
-        ledger_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
-                              value=f'{data["_links"]["self"]["href"]}')
-        await ctx.author.send(embed=ledger_info)
-        for record in records:
-            if record['type'] == 'create_account':
-                action_name = 'Create Account'
-            ledger_record = Embed(title=f':bookmark_tabs: {action_name} :bookmark_tabs: ',
-                                  description=f'`{record["account"]}`',
-                                  colour=Colour.dark_orange())
-            ledger_record.add_field(name=f' Source account',
-                                    value=f'`{record["source_account"]}`')
-            ledger_record.add_field(name=f':calendar: Date and time :calendar: ',
-                                    value=f'`{record["created_at"]}`',
-                                    inline=False)
-            ledger_record.add_field(name=':white_circle: Paging Token :white_circle: ',
-                                    value=f'`{record["paging_token"]}`',
-                                    inline=False)
-            ledger_record.add_field(name=':map: Funder Address :map: ',
-                                    value=f'`{record["funder"]}`',
-                                    inline=False)
-            ledger_record.add_field(name=':moneybag:  Starting Balance :moneybag: ',
-                                    value=f'`{record["starting_balance"]} XLM`',
-                                    inline=False)
-            ledger_record.add_field(name=':hash: Transaction Hash :hash: ',
-                                    value=f'`{record["transaction_hash"]}`',
-                                    inline=False)
-            ledger_record.add_field(name=f':person_running: Ledger Activity :person_running: ',
-                                    value=f'[Self]({data["_links"]["self"]["href"]})\n'
-                                          f'[Transactions]({record["_links"]["transaction"]["href"]})\n'
-                                          f'[Effects]({record["_links"]["effects"]["href"]})\n'
-                                          f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
-                                          f'[Precedes]({record["_links"]["precedes"]["href"]})')
-            await ctx.author.send(embed=ledger_record)
+        try:
+            data = self.payment.for_ledger(sequence=ledger_sequence).order(
+                desc=True).limit(limit=200).call()
+            records = data['_embedded']['records']
+            if records:
+                ledger_info = Embed(title=f':ledger: Ledger {ledger_sequence} Information :ledger:',
+                                    description='Bellow is represent information for requested ledger.',
+                                    colour=Colour.lighter_gray())
+                ledger_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                      value=f'{data["_links"]["self"]["href"]}')
+                await ctx.author.send(embed=ledger_info)
+
+                for record in records:
+                    if record['type'] == 'payment':
+                        await send_payments_details(destination=ctx.message.author, record=record,
+                                                    action_name='Payment')
+            else:
+                message = f'Ledger `{ledger_sequence}` does not have any payments yet.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=":ledger: No Payments Found :ledger:")
+        except BadRequestError as e:
+            await horizon_error_msg(destination=ctx.message.author, error=e.extras["reason"])
 
     @payments.command(aliases=["tx"])
     @commands.cooldown(1, 30, commands.BucketType.user)
