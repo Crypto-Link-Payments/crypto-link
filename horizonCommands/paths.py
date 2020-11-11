@@ -6,19 +6,15 @@ from Merchant wallet to their won upon withdrawal.
 """
 
 from discord.ext import commands
-from discord import Embed, Colour
+from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 from cogs.utils.securityChecks import check_stellar_address
 from horizonCommands.utils.horizon import server
-from stellar_sdk import Asset, PathPayment
+from stellar_sdk.exceptions import BadRequestError
+from horizonCommands.utils.customMessages import send_paths_records_details, send_paths_entry_details, horizon_error_msg
+from horizonCommands.utils.tools import get_asset
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
-CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
 class HorizonPaths(commands.Cog):
@@ -30,32 +26,6 @@ class HorizonPaths(commands.Cog):
         self.bot = bot
         self.command_string = bot.get_command_str()
         self.server = server
-
-    async def send_record(self, ctx, data: dict):
-        record_info = Embed(title=':record_button: Record Info :record_button: ',
-                            colour=Colour.lighter_gray())
-        record_info.add_field(name=f':gem: Source Asset :gem:',
-                              value=f'`{data["source_asset_code"]}`',
-                              inline=False)
-        record_info.add_field(name=f':gem: Destination Asset :gem:',
-                              value=f'`{data["destination_asset_code"]}`',
-                              inline=False)
-        record_info.add_field(name=f':money_with_wings:  Destination Amount :money_with_wings: ',
-                              value=f'`{data["destination_amount"]} {data["destination_asset_code"]}`')
-
-        counter = 0
-
-        path_str = str()
-        for p in data["path"]:
-            if p["asset_type"] == 'native':
-                path_str += f'***{counter}.*** `XLM`\n========\n'
-            else:
-                path_str += f'***{counter}.*** `{p["asset_code"]}`\n ```{p["asset_issuer"]}```========\n'
-            counter += 1
-        record_info.add_field(name=':railway_track: Paths :railway_track: ',
-                              value=path_str,
-                              inline=False)
-        await ctx.author.send(embed=record_info)
 
     @commands.group()
     async def paths(self, ctx):
@@ -79,75 +49,79 @@ class HorizonPaths(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @paths.command()
-    async def send(self, ctx, to_address: str, source_amount: float, source_asset: str, issuer: str = None):
+    async def send(self, ctx, to_address: str, source_amount: float, asset_code: str, asset_issuer: str):
         atomic_value = (int(source_amount * (10 ** 7)))
         normal = (atomic_value / (10 ** 7))
 
         # Validate stellar address structure
-        if check_stellar_address(address=to_address) and check_stellar_address(issuer):
-            if source_asset.upper() != 'XLM':
-                source_asset = Asset(code=source_asset.upper(), issuer=issuer)
-            else:
-                source_asset = Asset(code='XLM').native()
+        if check_stellar_address(address=to_address) and check_stellar_address(asset_issuer):
+            asset_obj = get_asset(asset_code=asset_code.upper(), asset_issuer=asset_issuer)
+            try:
+                data = self.server.strict_send_paths(source_asset=asset_obj, source_amount=normal,
+                                                     destination=to_address).call()
+                records = data["_embedded"]["records"]
 
-            data = self.server.strict_send_paths(source_asset=source_asset, source_amount=normal,
-                                                 destination=to_address).call()
-            last_three_records = data["_embedded"]["records"][:3]
+                if records:
+                    await send_paths_entry_details(destination=ctx.message.author,
+                                                   details={"direction": "To",
+                                                            "type": "Send",
+                                                            "address": to_address,
+                                                            "amount": normal,
+                                                            "asset": asset_code,
+                                                            "issuer": asset_issuer})
 
-            query_info = Embed(title=f':mag_right: Strict Send Payment Search :mag:',
-                               description='Bellow is information for 3 results returned from network',
-                               colour=Colour.lighter_gray())
-            query_info.add_field(name=f':map: To Address :map:',
-                                 value=f'```{to_address}```',
-                                 inline=False)
-            query_info.add_field(name=f':moneybag: Source Asset :moneybag: ',
-                                 value=f'`{normal} {source_asset}`',
-                                 inline=False)
+                    for r in records[:3]:
+                        await send_paths_records_details(destination=ctx.message.author, data=r)
+                else:
+                    message = f'No records for provided details found:\n' \
+                              f'To address: `{to_address}`\n' \
+                              f'Amount: `{source_amount}`\n' \
+                              f'Source Asset: `{asset_code}`\n' \
+                              f'"Issuer: `{asset_issuer}`'
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                         sys_msg_title=":ledger: No Records for Path found :ledger:")
+            except BadRequestError as e:
+                await horizon_error_msg(destination=ctx.message.author, error=e.extras["reason"])
 
-            if issuer:
-                query_info.add_field(name=f':bank: Issuer :bank:',
-                                     value=f'```{issuer}```',
-                                     inline=False)
-            await ctx.author.send(embed=query_info)
-
-            for r in last_three_records:
-                await self.send_record(ctx, data=r)
+        else:
+            message = f'One of the addresses provided does not match the Stellar Public Address structure.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title="Address error")
 
     @paths.command()
-    async def receive(self, ctx, from_address: str, received_amount: float, asset_code: str, asset_issuer: str = None):
+    async def receive(self, ctx, from_address: str, received_amount: float, asset_code: str, asset_issuer: str):
 
         atomic_value = (int(received_amount * (10 ** 7)))
         normal = (atomic_value / (10 ** 7))
 
         # Validate stellar address structure
         if check_stellar_address(address=from_address) and check_stellar_address(asset_issuer):
-            if asset_code.upper() != 'XLM':
-                destination_asset = Asset(code=asset_code.upper(), issuer=asset_issuer)
-            else:
-                destination_asset = Asset(code='XLM').native()
+            asset_boj = get_asset(asset_code=asset_code, asset_issuer=asset_issuer)
 
-            data = self.server.strict_receive_paths(destination_asset=destination_asset,
-                                                    destination_amount=normal).call()
-            last_three_records = data["_embedded"]["records"][:3]
+            try:
+                data = self.server.strict_receive_paths(destination_asset=asset_boj,
+                                                        destination_amount=normal).call()
+                records = data["_embedded"]["records"][:3]
 
-            query_info = Embed(title=f':mag_right: Strict Send Payment Search :mag:',
-                               description='Bellow is information for 3 results returned from network',
-                               colour=Colour.lighter_gray())
-            query_info.add_field(name=f':map: From Address :map:',
-                                 value=f'```{from_address}```',
-                                 inline=False)
-            query_info.add_field(name=f':moneybag: Source Asset :moneybag: ',
-                                 value=f'`{normal} {asset_code}`',
-                                 inline=False)
+                if records:
 
-            if asset_issuer:
-                query_info.add_field(name=f':bank: Issuer :bank:',
-                                     value=f'```{asset_issuer}```',
-                                     inline=False)
-            await ctx.author.send(embed=query_info)
+                    await send_paths_entry_details(destination=ctx.message.author,
+                                                   details={"direction": "From",
+                                                            "type": "receive",
+                                                            "address": from_address,
+                                                            "amount": normal,
+                                                            "asset": asset_code,
+                                                            "issuer": asset_issuer})
 
-            for r in last_three_records:
-                await self.send_record(ctx, data=r)
+                    for r in records:
+                        await send_paths_records_details(destination=ctx.message.author, data=r)
+
+            except BadRequestError as e:
+                await horizon_error_msg(destination=ctx.message.author, error=e.extras["reason"])
+        else:
+            message = f'One of the addresses provided does not match the Stellar Public Address structure.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title="Address error")
 
 
 def setup(bot):
