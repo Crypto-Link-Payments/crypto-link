@@ -6,17 +6,13 @@ from Merchant wallet to their won upon withdrawal.
 """
 
 from discord.ext import commands
-from discord import Embed, Colour
+from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
+from horizonCommands.utils.customMessages import send_trades_details, send_trades_basic_details, horizon_error_msg
 from horizonCommands.utils.horizon import server
+from stellar_sdk.exceptions import BadRequestError
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
-CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
 class HorizonTrades(commands.Cog):
@@ -31,13 +27,14 @@ class HorizonTrades(commands.Cog):
         self.trade = self.server.trades()
 
     @commands.group()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def trades(self, ctx):
         """
         Effects entry point to horizon endpoints
         """
         title = ':currency_exchange:  __Horizon Trades Queries__ :currency_exchange:   '
         description = 'Representation of all available commands available to interact with ***Trades*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
         list_of_commands = [
             {"name": f':map: Trades for Account :map:',
              "value": f'`{self.command_string}trades account <address>`'},
@@ -49,96 +46,72 @@ class HorizonTrades(commands.Cog):
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    async def send_trade_details(self, ctx, trade: dict):
-        """
-            'base_offer_id': '4611998412873666561',
-            """
-        if trade["base_asset_type"] != 'native':
-            base_asset = f"{trade['base_asset_code']}"
-            base_issuer = f'{trade["base_asset_issuer"]}'
-        else:
-            base_asset = 'XLM'
-            base_issuer = f'Stellar'
-
-        if trade["counter_asset_type"] != 'native':
-            counter_asset = f"{trade['counter_asset_code']}"
-            counter_issuer = f'{trade["counter_asset_issuer"]}'
-        else:
-            counter_asset = 'XLM'
-            counter_issuer = f'Stellar'
-
-        trade_report = Embed(title=f':id: {trade["id"]}',
-                             description=f'__**Base seller**__: {trade["base_is_seller"]}',
-                             colour=Colour.lighter_gray())
-        trade_report.add_field(name=f':calendar: Close Time :calendar: ',
-                               value=f'`{trade["ledger_close_time"]}`')
-        trade_report.add_field(name=f':white_circle: Paging Token :white_circle:',
-                               value=f'`{trade["paging_token"]}`')
-        trade_report.add_field(name=f':map: Offer ID :map:',
-                               value=f'`{trade["offer_id"]}`',
-                               inline=True)
-        trade_report.add_field(name=f':mag_right: Trade Details :mag_right:  ',
-                               value=f'`{trade["base_amount"]} {base_asset}` :currency_exchange: '
-                                     f'`{trade["counter_amount"]} {counter_asset}`',
-                               inline=False)
-        trade_report.add_field(name=f':men_wrestling: Parties :men_wrestling:',
-                               value=f'Base:\n'
-                                     f'```{trade["base_account"]}```\n'
-                                     f'Counter:\n'
-                                     f'```{trade["counter_account"]}```',
-                               inline=False)
-        trade_report.add_field(name=f':gem: Asset Details :gem:',
-                               value=f':bank: **__ (Base) {base_asset} Issuer Details__** :bank:\n'
-                                     f'```{base_issuer}```'
-                                     f':bank: **__ (Counter) {counter_asset} Issuer Details__** :bank:\n'
-                                     f'```{counter_issuer}```',
-                               inline=False)
-        trade_report.add_field(name=f':sunrise: Horizon Links :sunrise:',
-                               value=f'[Base]({trade["_links"]["base"]["href"]})\n'
-                                     f'[Counter]({trade["_links"]["counter"]["href"]})\n'
-                                     f'[Operation]({trade["_links"]["operation"]["href"]})\n')
-        await ctx.author.send(embed=trade_report)
-
     @trades.command()
     async def account(self, ctx, address: str):
-        data = self.trade.for_account(account_id=address).limit(100).order(desc=True).call()
-        trades = data["_embedded"]["records"]
+        try:
+            data = self.trade.for_account(account_id=address).limit(100).order(desc=True).call()
+            records = data["_embedded"]["records"]
+            if records:
+                await send_trades_basic_details(destination=ctx.message.author,
+                                                trades_enpoint="account",
+                                                query_details={
+                                                    "by": ":map: Address :map:",
+                                                    "query": address,
+                                                },
+                                                hrz_link=data["_links"]["self"]["href"])
 
-        address_details = Embed(title=f':currency_exchange: Trades for Account :currency_exchange:',
-                                colour=Colour.lighter_gray())
-        address_details.add_field(name=f':map: Address :map:',
-                                  value=f'```{address}```',
-                                  inline=False)
-        address_details.add_field(name=f':sunrise: Horizon Link :sunrise:',
-                                  value=f'[Trades for Account]({data["_links"]["self"]["href"]})',
-                                  inline=False)
-        address_details.add_field(name=f':three: Last 3 trades for Account :three:',
-                                  value=f':arrow_double_down:',
-                                  inline=False)
-        await ctx.author.send(embed=address_details)
+                # Process records
+                counter = 0
+                for t in records:
+                    if counter <= 2:
+                        await send_trades_details(destination=ctx.message.author, trade_data=t)
+                        counter += 1
+            else:
+                message = f'Account `{address}` doe not have any trades'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=':currency_exchange: No Trades :currency_exchange:')
 
-        counter = 0
-        for t in trades:
-            if counter <= 2:
-                await self.send_trade_details(ctx=ctx, trade=t)
-                counter += 1
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @trades.command()
     async def offer(self, ctx, offer_id: int):
-        data = self.trade.for_offer(offer_id=offer_id).limit(100).order(desc=True).call()
+        print('offer query')
+        try:
+            data = self.trade.for_offer(offer_id=offer_id).limit(100).order(desc=True).call()
+            from pprint import pprint
+            records = data["_embedded"]["records"]
+            pprint(records)
+            if records:
+                pprint('sending message')
+                await send_trades_basic_details(destination=ctx.message.author,
+                                                trades_enpoint="offer id",
+                                                query_details={
+                                                    "by": ":map: Offer ID :id:",
+                                                    "query": offer_id,
+                                                },
+                                                hrz_link=data["_links"]["self"]["href"])
 
-        offer_details = Embed(title=f':currency_exchange: Trades for Offer :currency_exchange:',
-                              colour=Colour.lighter_gray())
-        offer_details.add_field(name=f':id:',
-                                value=f'```{offer_id}```',
-                                inline=False)
-        offer_details.add_field(name=f':sunrise: Horizon Link :sunrise:',
-                                value=f'[Trades for Offer]({data["_links"]["self"]["href"]})',
-                                inline=False)
-        await ctx.author.send(embed=offer_details)
+                counter = 0
+                for t in records:
+                    if counter <= 2:
+                        await send_trades_details(destination=ctx.message.author, trade_data=t)
+                        counter += 1
+            else:
+                message = f'There are no records for offer with ID `{offer_id}`'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=':currency_exchange: No Trades :currency_exchange:')
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
-        for t in data["_embedded"]["records"]:
-            await self.send_trade_details(ctx=ctx, trade=t)
+    @offer.error
+    async def offer_error(self, ctx, error):
+        if isinstance(error, commands.BadArgument):
+            message = f"Offer ID needs to be integer number only"
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title='Query Conversion Error')
 
 
 def setup(bot):
