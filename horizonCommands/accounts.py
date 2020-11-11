@@ -10,8 +10,9 @@ from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.horizon import server
 from cogs.utils.securityChecks import check_stellar_address
+from stellar_sdk.exceptions import BadRequestError
 from horizonCommands.utils.tools import format_date
-from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset
+from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset, horizon_error_msg
 custom_messages = CustomMessages()
 
 CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
@@ -54,14 +55,17 @@ class HorizonAccounts(commands.Cog):
         """
         Creates new in-active account on Stellar Network
         """
-        # TODO fix wording before release
-        details = self.backoffice.stellar_wallet.create_stellar_account()
-        if details:
-            await account_create_msg(destination=ctx.message.author, details=details)
-        else:
-            message = f'New Stellar Account could not be created. Please try again later'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
+        try:
+            details = self.backoffice.stellar_wallet.create_stellar_account()
+            if details:
+                await account_create_msg(destination=ctx.message.author, details=details)
+            else:
+                message = f'New Stellar Account could not be created. Please try again later'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=CONST_ACCOUNT_ERROR)
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @accounts.command(aliases=["get", "query"])
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -70,33 +74,37 @@ class HorizonAccounts(commands.Cog):
         Query details for specific public address
         """
         if check_stellar_address(address=address):
-            data = self.hor_accounts.account_id(account_id=address).call()
-            if data:
-                for coin in reversed(data["balances"]):
-                    date_fm = format_date(data["last_modified_time"])
-                    if not coin.get('asset_code'):
-                        signers_data = ', '.join(
-                            [f'`{sig["key"]}`' for sig in
-                             data["signers"]])
+            try:
+                data = self.hor_accounts.account_id(account_id=address).call()
+                if data:
+                    for coin in reversed(data["balances"]):
+                        date_fm = format_date(data["last_modified_time"])
+                        if not coin.get('asset_code'):
+                            signers_data = ', '.join(
+                                [f'`{sig["key"]}`' for sig in
+                                 data["signers"]])
 
-                        # Send info to user
-                        await send_details_for_stellar(destination=ctx.message.author,
-                                                       coin=coin,
-                                                       data=data,
-                                                       date=date_fm,
-                                                       signers=signers_data)
+                            # Send info to user
+                            await send_details_for_stellar(destination=ctx.message.author,
+                                                           coin=coin,
+                                                           data=data,
+                                                           date=date_fm,
+                                                           signers=signers_data)
 
-                    else:
-                        await send_details_for_asset(destination=ctx.message.author, coin=coin, data=data,
-                                                     date=date_fm)
+                        else:
+                            await send_details_for_asset(destination=ctx.message.author, coin=coin, data=data,
+                                                         date=date_fm)
 
-            else:
-                message = f'Account ```{address}``` could not be queried. Either does not exist or has not been ' \
-                          f'activate yet. Please try again later or in later case, ' \
-                          f'use [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test).' \
-                          f'to activate your account with test Lumens.'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                     sys_msg_title=CONST_ACCOUNT_ERROR)
+                else:
+                    message = f'Account ```{address}``` could not be queried. Either does not exist or has not been ' \
+                              f'activate yet. Please try again later or in later case, ' \
+                              f'use [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test).' \
+                              f'to activate your account with test Lumens.'
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                         sys_msg_title=CONST_ACCOUNT_ERROR)
+            except BadRequestError as e:
+                extras = e.extras
+                await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
         else:
             message = f'Address `{address}` is not valid Stellar Address. Please recheck provided data and try again'
