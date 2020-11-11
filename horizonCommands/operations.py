@@ -9,15 +9,12 @@ from discord.ext import commands
 from discord import Embed, Colour
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
+from stellar_sdk.exceptions import BadRequestError
 from horizonCommands.utils.horizon import server
+from horizonCommands.utils.tools import asset_code
+from horizonCommands.utils.customMessages import horizon_error_msg
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
-CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
 class HorizonOperations(commands.Cog):
@@ -31,14 +28,6 @@ class HorizonOperations(commands.Cog):
         self.command_string = bot.get_command_str()
         self.server = server
         self.op = self.server.operations()
-
-    @staticmethod
-    def asset_code(op):
-        if op["asset_type"] == 'native':
-            return 'XLM'
-
-        else:
-            return op["asset_code"]
 
     @commands.group()
     async def operations(self, ctx):
@@ -109,7 +98,7 @@ class HorizonOperations(commands.Cog):
                                         inline=False)
 
                 elif effect_type == 'payment':
-                    code = self.asset_code(op=op)
+                    code = asset_code(op=op)
                     eff_embed.add_field(name=f':cowboy:  Sender :cowboy: ',
                                         value=f'`{op["from"]}`',
                                         inline=False)
@@ -121,7 +110,7 @@ class HorizonOperations(commands.Cog):
                                         inline=False)
 
                 elif effect_type in ['path payment strict send', 'path payment strict receive']:
-                    code = self.asset_code(op=op)
+                    code = asset_code(op=op)
                     eff_embed.add_field(name=f':cowboy: Sender :cowboy: ',
                                         value=f'`{op["from"]}`',
                                         inline=False)
@@ -164,24 +153,62 @@ class HorizonOperations(commands.Cog):
 
     @operations.command()
     async def operation(self, ctx, operation_id):
-        data = self.op.operation(operation_id=operation_id).call()
-        await self.send_operations_data(ctx=ctx, data=data, key_query='Operation')
+        try:
+            data = self.op.operation(operation_id=operation_id).call()
+            if data['_embedded']["records"]:
+                await self.send_operations_data(ctx=ctx, data=data, key_query='Operation')
+            else:
+                message = f'No operations found under operation ID`{operation_id}`.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="No Operations for operation ID")
+
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @operations.command()
     async def account(self, ctx, address: str):
-        data = self.op.for_account(account_id=address).include_failed(False).order(desc=True).limit(200).call()
-        await self.send_operations_data(ctx=ctx, data=data, key_query='Account')
+        try:
+            data = self.op.for_account(account_id=address).include_failed(False).order(desc=True).limit(200).call()
+            if data['_embedded']["records"]:
+                await self.send_operations_data(ctx=ctx, data=data, key_query='Account')
+            else:
+                message = f'Account `{address}` has not operations.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="No Operations for Address")
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @operations.command()
     async def ledger(self, ctx, ledger_id: int):
-        data = self.op.for_ledger(sequence=ledger_id).include_failed(False).order(desc=True).limit(200).call()
-        await self.send_operations_data(ctx=ctx, data=data, key_query='Ledger')
+        try:
+            data = self.op.for_ledger(sequence=ledger_id).include_failed(False).order(desc=True).limit(200).call()
+            if data['_embedded']["records"]:
+                await self.send_operations_data(ctx=ctx, data=data, key_query='Ledger')
+            else:
+                message = f'No operations for ledger id `{ledger_id}`.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="No Operations for Ledger")
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @operations.command()
     async def transaction(self, ctx, tx_hash: str):
-        data = self.op.for_transaction(transaction_hash=tx_hash).include_failed(False).order(desc=True).limit(
-            200).call()
-        await self.send_operations_data(ctx=ctx, data=data, key_query='Transaction')
+        try:
+
+            data = self.op.for_transaction(transaction_hash=tx_hash).include_failed(False).order(desc=True).limit(
+                200).call()
+            if data['_embedded']["records"]:
+                await self.send_operations_data(ctx=ctx, data=data, key_query='Transaction')
+            else:
+                message = f'No operations for transaction with hash `{tx_hash}`.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="No Operations for Transaction Hash")
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
 
 def setup(bot):
