@@ -389,3 +389,33 @@ async def offer_details(destination, offer: dict):
                             inline=False)
 
     await destination.send(embed=offer_details)
+
+
+async def send_payments_details(destination, record, action_name):
+    """
+    Send payment details on query to user
+    """
+    ledger_record = Embed(title=f':bookmark_tabs: {action_name} :bookmark_tabs: ',
+                          colour=Colour.dark_orange())
+    ledger_record.add_field(name=f':calendar: Date and time :calendar: ',
+                            value=f'`{record["created_at"]}`')
+    ledger_record.add_field(name=':white_circle: Paging Token :white_circle: ',
+                            value=f'`{record["paging_token"]}`')
+    ledger_record.add_field(name=f':map: Source account :map:',
+                            value=f'```{record["source_account"]}```',
+                            inline=False)
+    ledger_record.add_field(name=':cowboy:  Recipient :cowboy:  ',
+                            value=f'```{record["to"]}```',
+                            inline=False)
+    ledger_record.add_field(name=':hash: Transaction Hash :hash: ',
+                            value=f'`{record["transaction_hash"]}`',
+                            inline=False)
+    ledger_record.add_field(name=':moneybag:  Amount :moneybag:  ',
+                            value=f'`{record["amount"]} {record["asset_type"]}`',
+                            inline=False)
+    ledger_record.add_field(name=f':person_running: Ledger Activity :person_running: ',
+                            value=f'[Transactions]({record["_links"]["transaction"]["href"]})\n'
+                                  f'[Effects]({record["_links"]["effects"]["href"]})\n'
+                                  f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
+                                  f'[Precedes]({record["_links"]["precedes"]["href"]})')
+    await destination.send(embed=ledger_record)
