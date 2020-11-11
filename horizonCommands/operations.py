@@ -12,7 +12,7 @@ from cogs.utils.systemMessaages import CustomMessages
 from stellar_sdk.exceptions import BadRequestError
 from horizonCommands.utils.horizon import server
 from horizonCommands.utils.tools import asset_code
-from horizonCommands.utils.customMessages import horizon_error_msg
+from horizonCommands.utils.customMessages import horizon_error_msg, send_operations_basic_details
 
 custom_messages = CustomMessages()
 
@@ -37,7 +37,8 @@ class HorizonOperations(commands.Cog):
         """
         title = ':wrench: __Horizon Operations Queries__ :wrench: '
         description = 'Representation of all available commands available to interact with' \
-                      ' ***Operations*** Endpoint on Stellar Horizon Server'
+                      ' ***Operations*** Endpoint on Stellar Horizon Server.  Commands ' \
+                      'can be used 1/30 seconds/ per user.'
         list_of_commands = [
             {"name": f':tools: Single Operation :tools: ',
              "value": f'`{self.command_string}operations operation <operation id>`'},
@@ -53,20 +54,8 @@ class HorizonOperations(commands.Cog):
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    async def send_operations_data(self, ctx, data, key_query: str):
+    async def send_operations_data(self, ctx, data):
         operations = data['_embedded']["records"]
-        horizon_query = data['_links']['self']['href']
-
-        effects_info = Embed(title=f':wrench: {key_query} Operations :wrench:  ',
-                             description=f'Bellow are last three Operations which happened for {key_query}',
-                             colour=Colour.lighter_gray())
-        effects_info.add_field(name=f':sunrise: Horizon Access :sunrise: ',
-                               value=f'[{key_query} Operations]({horizon_query})')
-        effects_info.add_field(name=f':three: Last Three Effects :three: ',
-                               value=f':arrow_double_down: ',
-                               inline=False)
-        await ctx.author.send(embed=effects_info)
-
         counter = 0
         for op in operations:
             if counter <= 2:
@@ -157,7 +146,10 @@ class HorizonOperations(commands.Cog):
         try:
             data = self.op.operation(operation_id=operation_id).call()
             if data['_embedded']["records"]:
-                await self.send_operations_data(ctx=ctx, data=data, key_query='Operation')
+                await send_operations_basic_details(destination=ctx.message.author, key_query="Operation",
+                                                    hrz_link=data['_links']['self']['href'])
+
+                await self.send_operations_data(ctx=ctx, data=data)
             else:
                 message = f'No operations found under operation ID`{operation_id}`.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -172,7 +164,9 @@ class HorizonOperations(commands.Cog):
         try:
             data = self.op.for_account(account_id=address).include_failed(False).order(desc=True).limit(200).call()
             if data['_embedded']["records"]:
-                await self.send_operations_data(ctx=ctx, data=data, key_query='Account')
+                await send_operations_basic_details(destination=ctx.message.author, key_query="Account",
+                                                    hrz_link=data['_links']['self']['href'])
+                await self.send_operations_data(ctx=ctx, data=data)
             else:
                 message = f'Account `{address}` has not operations.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -186,7 +180,9 @@ class HorizonOperations(commands.Cog):
         try:
             data = self.op.for_ledger(sequence=ledger_id).include_failed(False).order(desc=True).limit(200).call()
             if data['_embedded']["records"]:
-                await self.send_operations_data(ctx=ctx, data=data, key_query='Ledger')
+                await send_operations_basic_details(destination=ctx.message.author, key_query="Ledger",
+                                                    hrz_link=data['_links']['self']['href'])
+                await self.send_operations_data(ctx=ctx, data=data)
             else:
                 message = f'No operations for ledger id `{ledger_id}`.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -202,7 +198,9 @@ class HorizonOperations(commands.Cog):
             data = self.op.for_transaction(transaction_hash=tx_hash).include_failed(False).order(desc=True).limit(
                 200).call()
             if data['_embedded']["records"]:
-                await self.send_operations_data(ctx=ctx, data=data, key_query='Transaction')
+                await send_operations_basic_details(destination=ctx.message.author, key_query="Transaction",
+                                                    hrz_link=data['_links']['self']['href'])
+                await self.send_operations_data(ctx=ctx, data=data)
             else:
                 message = f'No operations for transaction with hash `{tx_hash}`.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
