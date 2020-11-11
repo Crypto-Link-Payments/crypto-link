@@ -33,3 +33,11 @@ def get_asset(asset_code, asset_issuer):
         destination_asset = Asset(code='XLM').native()
 
     return destination_asset
+
+
+def asset_code(op):
+    if op["asset_type"] == 'native':
+        return 'XLM'
+
+    else:
+        return op["asset_code"]
