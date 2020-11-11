@@ -74,32 +74,36 @@ class HorizonTransactions(commands.Cog):
         """
         Get last three transactions for the account
         """
-        data = self.txs.for_account(account_id=account_address).order(desc=True).call()
-
-        if data:
+        try:
+            data = self.txs.for_account(account_id=account_address).order(desc=True).call()
             records = data['_embedded']['records']
-            account_info = Embed(title=f':map: Account Transactions Information :map:',
-                                 colour=Colour.lighter_gray())
-            account_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
-                                   value=f'[Account Transactions]({data["_links"]["self"]["href"]})')
-            account_info.add_field(name=f'Last :three: entries',
-                                   value=f':arrow_double_down: ',
-                                   inline=False)
-            await ctx.author.send(embed=account_info)
-            counter = 0
-            for record in records:
-                if counter <= 2:
-                    memo = process_memo(record=record)
-                    date_fm = format_date(record["created_at"])
-                    sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
+            if records:
+                account_info = Embed(title=f':map: Account Transactions Information :map:',
+                                     colour=Colour.lighter_gray())
+                account_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                       value=f'[Account Transactions]({data["_links"]["self"]["href"]})')
+                account_info.add_field(name=f'Last :three: entries',
+                                       value=f':arrow_double_down: ',
+                                       inline=False)
+                await ctx.author.send(embed=account_info)
 
-                    await tx_info_for_account(destination=ctx.message.author, record=record, signers=sig_str,
-                                              memo=memo, date=date_fm)
-                    counter += 1
-        else:
-            message = f'Account ```{account_address}```  does not exist or has not been activated yet.'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=':map: Account not found :map:')
+                counter = 0
+                for record in records:
+                    if counter <= 2:
+                        memo = process_memo(record=record)
+                        date_fm = format_date(record["created_at"])
+                        sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
+
+                        await tx_info_for_account(destination=ctx.message.author, record=record, signers=sig_str,
+                                                  memo=memo, date=date_fm)
+                        counter += 1
+            else:
+                message = f'Account ```{account_address}```  does not exist or has not been activated yet.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=':map: Account not found :map:')
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @transactions.command()
     async def ledger(self, ctx, ledger_id: int):
@@ -116,7 +120,8 @@ class HorizonTransactions(commands.Cog):
                 for record in records:
                     sig_str = '\n'.join([f'`{sig}`' for sig in record['signatures']])
 
-                    await tx_info_for_ledger(destination=ctx.message.author,ledger_id=ledger_id, record=record, signatures=sig_str,
+                    await tx_info_for_ledger(destination=ctx.message.author, ledger_id=ledger_id, record=record,
+                                             signatures=sig_str,
                                              date=format_date(record["created_at"]))
 
             else:
