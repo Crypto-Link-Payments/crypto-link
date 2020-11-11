@@ -50,30 +50,38 @@ class HorizonAssets(commands.Cog):
     @assets.command()
     async def get(self, ctx, asset_code: str, asset_issuer: str):
 
-        data = self.asset.for_code(asset_code=asset_code.upper()).for_issuer(asset_issuer=asset_issuer.upper()).call()
-        if data['_embedded']["records"]:
-            await send_asset_details(destination=ctx.message.author, data=data, request='***asset***')
-        else:
-            message = f'Asset with details provided does not exist. Please query for asset either ' \
-                      f'by `{self.command_string}assets code {asset_code}` or `{self.command_string}assets issuer` ' \
-                      f'to verify details'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=':warning: Asset Code Error :warning: ')
+        try:
+            data = self.asset.for_code(asset_code=asset_code.upper()).for_issuer(asset_issuer=asset_issuer.upper()).call()
+            if data['_embedded']["records"]:
+                await send_asset_details(destination=ctx.message.author, data=data, request='***asset***')
+            else:
+                message = f'Asset with details provided does not exist. Please query for asset either ' \
+                          f'by `{self.command_string}assets code {asset_code}` or `{self.command_string}assets issuer` ' \
+                          f'to verify details'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=':warning: Asset Code Error :warning: ')
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @assets.command()
     async def code(self, ctx, asset_code: str):
-        data = self.asset.for_code(asset_code=asset_code.upper()).call()
-        if data['_embedded']['records']:
-            records = data['_embedded']['records']
-            if len(records) == 1:
-                await send_asset_details(destination=ctx.message.author, data=records[0], request='asset code ')
+        try:
+            data = self.asset.for_code(asset_code=asset_code.upper()).call()
+            if data['_embedded']['records']:
+                records = data['_embedded']['records']
+                if len(records) == 1:
+                    await send_asset_details(destination=ctx.message.author, data=records[0], request='asset code ')
 
+                else:
+                    await send_multi_asset_case(destination=ctx.message.author, data=data, command_str=self.command_string)
             else:
-                await send_multi_asset_case(destination=ctx.message.author, data=data, command_str=self.command_string)
-        else:
-            message = f'No Asset with code `{asset_code}` found. Please try again'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title='Asset Code Error')
+                message = f'No Asset with code `{asset_code}` found. Please try again'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title='Asset Code Error')
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @assets.command()
     async def issuer(self, ctx, issuer: str):
