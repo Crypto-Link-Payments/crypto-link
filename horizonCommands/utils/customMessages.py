@@ -419,3 +419,69 @@ async def send_payments_details(destination, record, action_name):
                                   f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
                                   f'[Precedes]({record["_links"]["precedes"]["href"]})')
     await destination.send(embed=ledger_record)
+
+
+async def send_trades_basic_details(destination, trades_enpoint: str, query_details: dict, hrz_link: str):
+    address_details = Embed(title=f':currency_exchange: Trades for {trades_enpoint.capitalize()} :currency_exchange:',
+                            colour=Colour.lighter_gray())
+    address_details.add_field(name=query_details["by"],
+                              value=f'```{query_details["query"]}```',
+                              inline=False)
+    address_details.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                              value=f'[Trades for Account]({hrz_link})',
+                              inline=False)
+    address_details.add_field(name=f':three: Last 3 trades for Account :three:',
+                              value=f':arrow_double_down:',
+                              inline=False)
+    await destination.send(embed=address_details)
+
+
+async def send_trades_details(destination, trade_data: dict):
+    """
+    Send Messages for Trades
+    """
+    if trade_data["base_asset_type"] != 'native':
+        base_asset = f"{trade_data['base_asset_code']}"
+        base_issuer = f'{trade_data["base_asset_issuer"]}'
+    else:
+        base_asset = 'XLM'
+        base_issuer = f'Stellar'
+
+    if trade_data["counter_asset_type"] != 'native':
+        counter_asset = f"{trade_data['counter_asset_code']}"
+        counter_issuer = f'{trade_data["counter_asset_issuer"]}'
+    else:
+        counter_asset = 'XLM'
+        counter_issuer = f'Stellar'
+
+    trade_report = Embed(title=f':id: {trade_data["id"]}',
+                         description=f'__**Base seller**__: {trade_data["base_is_seller"]}',
+                         colour=Colour.lighter_gray())
+    trade_report.add_field(name=f':calendar: Close Time :calendar: ',
+                           value=f'`{trade_data["ledger_close_time"]}`')
+    trade_report.add_field(name=f':white_circle: Paging Token :white_circle:',
+                           value=f'`{trade_data["paging_token"]}`')
+    trade_report.add_field(name=f':map: Offer ID :map:',
+                           value=f'`{trade_data["offer_id"]}`',
+                           inline=True)
+    trade_report.add_field(name=f':mag_right: Trade Details :mag_right:  ',
+                           value=f'`{trade_data["base_amount"]} {base_asset}` :currency_exchange: '
+                                 f'`{trade_data["counter_amount"]} {counter_asset}`',
+                           inline=False)
+    trade_report.add_field(name=f':men_wrestling: Parties :men_wrestling:',
+                           value=f'Base:\n'
+                                 f'```{trade_data["base_account"]}```\n'
+                                 f'Counter:\n'
+                                 f'```{trade_data["counter_account"]}```',
+                           inline=False)
+    trade_report.add_field(name=f':gem: Asset Details :gem:',
+                           value=f':bank: **__ (Base) {base_asset} Issuer Details__** :bank:\n'
+                                 f'```{base_issuer}```'
+                                 f':bank: **__ (Counter) {counter_asset} Issuer Details__** :bank:\n'
+                                 f'```{counter_issuer}```',
+                           inline=False)
+    trade_report.add_field(name=f':sunrise: Horizon Links :sunrise:',
+                           value=f'[Base]({trade_data["_links"]["base"]["href"]})\n'
+                                 f'[Counter]({trade_data["_links"]["counter"]["href"]})\n'
+                                 f'[Operation]({trade_data["_links"]["operation"]["href"]})\n')
+    await destination.send(embed=trade_report)
