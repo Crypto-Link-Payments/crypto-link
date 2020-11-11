@@ -8,17 +8,12 @@ from Merchant wallet to their won upon withdrawal.
 from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
-from re import sub
 from stellar_sdk import Asset
-from utils.tools import Helpers
+from stellar_sdk.exceptions import BadRequestError
+from horizonCommands.utils.customMessages import horizon_error_msg
 from horizonCommands.utils.horizon import server
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
-CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
 class HorizonOrderBook(commands.Cog):
@@ -75,8 +70,7 @@ class HorizonOrderBook(commands.Cog):
         """
         title = ':book:  __Horizon Order Book Queries__ :book: '
         description = 'Representation of all available commands available to interact with ***Order Book' \
-                      '*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      '*** Endpoint on Stellar Horizon Server Commands can be used 1/30 seconds/ per user.'
 
         list_of_commands = [
             {"name": f':currency_exchange:  Query Order Book for pair :currency_exchange: ',
@@ -96,60 +90,60 @@ class HorizonOrderBook(commands.Cog):
         if self.is_asset(asset_to_check=selling_asset):
             buying_asset = self.check_asset(asset_query=buying.upper())
             if self.is_asset(asset_to_check=buying_asset):
-                data = self.server.orderbook(selling=selling_asset, buying=buying_asset).call()
-                from pprint import pprint
-                pprint(data)
-                base_asset_details = data["base"]
-                counter_asset_details = data["counter"]
+                try:
+                    data = self.server.orderbook(selling=selling_asset, buying=buying_asset).call()
+                    base_asset_details = data["base"]
+                    counter_asset_details = data["counter"]
 
-                base_details = ''
-                if base_asset_details.get('asset_type') != 'native':
-                    base_details += f'{base_asset_details["asset_code"]}\n' \
-                                    f'```{base_asset_details["asset_issuer"]}```'
-                else:
-                    base_details = 'XLM'
+                    base_details = ''
+                    if base_asset_details.get('asset_type') != 'native':
+                        base_details += f'{base_asset_details["asset_code"]}\n' \
+                                        f'```{base_asset_details["asset_issuer"]}```'
+                    else:
+                        base_details = 'XLM'
 
-                counter_details = ''
-                if counter_asset_details.get('asset_type') != 'native':
-                    counter_details += f'{counter_asset_details["asset_code"]}\n' \
-                                       f'```{counter_asset_details["asset_issuer"]}```'
-                else:
-                    counter_details = 'XLM'
+                    counter_details = ''
+                    if counter_asset_details.get('asset_type') != 'native':
+                        counter_details += f'{counter_asset_details["asset_code"]}\n' \
+                                           f'```{counter_asset_details["asset_issuer"]}```'
+                    else:
+                        counter_details = 'XLM'
 
-                ask_side = data["asks"]
+                    ask_side = data["asks"]
 
-                ask_str = str()
-                for a in ask_side[:3]:
-                    ask_str += f'{a["amount"]} @ {a["price"]}\n'
+                    ask_str = str()
+                    for a in ask_side[:3]:
+                        ask_str += f'{a["amount"]} @ {a["price"]}\n'
 
-                bid_side = data["bids"]
+                    bid_side = data["bids"]
 
-                bid_str = str()
+                    bid_str = str()
 
-                for b in bid_side[:3]:
-                    bid_str += f'{b["amount"]} @ {b["price"]}\n'
+                    for b in bid_side[:3]:
+                        bid_str += f'{b["amount"]} @ {b["price"]}\n'
 
-                orderbook_spread = round(float(ask_side[0]['price']) - float(bid_side[0]["price"]), 7)
+                    orderbook_spread = round(float(ask_side[0]['price']) - float(bid_side[0]["price"]), 7)
 
-                orderbook_embed = Embed(title=f' :book: Order book details :book:',
-                                        colour=Colour.light_grey())
-                orderbook_embed.add_field(name=':gem: Base Asset Details :gem:',
-                                          value=base_details,
-                                          inline=False)
-                orderbook_embed.add_field(name=':gem: Counter Asset Details :gem:',
-                                          value=counter_details,
-                                          inline=False)
-                orderbook_embed.add_field(name=f':bar_chart: Order Book Spread :bar_chart: ',
-                                          value=f'{orderbook_spread}',
-                                          inline=False)
-                orderbook_embed.add_field(name=':green_circle: Buy Offers :green_circle: ',
-                                          value=f'{bid_str}')
-                orderbook_embed.add_field(name=':red_circle: Sell Offers :red_circle: ',
-                                          value=f'{ask_str}')
-                await ctx.author.send(embed=orderbook_embed)
-
+                    orderbook_embed = Embed(title=f' :book: Order book details :book:',
+                                            colour=Colour.light_grey())
+                    orderbook_embed.add_field(name=':gem: Base Asset Details :gem:',
+                                              value=base_details,
+                                              inline=False)
+                    orderbook_embed.add_field(name=':gem: Counter Asset Details :gem:',
+                                              value=counter_details,
+                                              inline=False)
+                    orderbook_embed.add_field(name=f':bar_chart: Order Book Spread :bar_chart: ',
+                                              value=f'{orderbook_spread}',
+                                              inline=False)
+                    orderbook_embed.add_field(name=':green_circle: Buy Offers :green_circle: ',
+                                              value=f'{bid_str}')
+                    orderbook_embed.add_field(name=':red_circle: Sell Offers :red_circle: ',
+                                              value=f'{ask_str}')
+                    await ctx.author.send(embed=orderbook_embed)
+                except BadRequestError as e:
+                    extras = e.extras
+                    await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
             else:
-                print('Not and asset')
                 multi_details = Embed(title=f':robot: Multiple Entries Found :robot:',
                                       description='You have received this message because multiple entries have been found'
                                                   f' for Buying asset parameter `{buying}`. Check the list bellow and'
