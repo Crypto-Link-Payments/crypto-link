@@ -6,13 +6,13 @@ from Merchant wallet to their won upon withdrawal.
 """
 
 from discord.ext import commands
-from discord import Embed, Colour
-from re import sub
+from discord import Colour
 
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
 from horizonCommands.utils.horizon import server
-from horizonCommands.utils.customMessages import send_effects, send_effect_details
+from stellar_sdk.exceptions import BadRequestError
+from horizonCommands.utils.customMessages import send_effects, send_effect_details, horizon_error_msg
 
 custom_messages = CustomMessages()
 
@@ -60,10 +60,34 @@ class HorizonEffects(commands.Cog):
     @effects.command()
     async def account(self, ctx, address: str):
         if check_stellar_address(address=address):
-            data = self.effect.for_account(account_id=address).call()
-            await send_effects(destination=ctx.message.author, data=data, usr_query=f'{address}',
-                               key_query='Account')
+            try:
+                data = self.effect.for_account(account_id=address).call()
+                await send_effects(destination=ctx.message.author, data=data, usr_query=f'{address}',
+                                   key_query='Account')
 
+                effects = data['_embedded']["records"]
+                counter = 0
+                for effect in effects:
+                    if counter <= 2:
+                        await send_effect_details(destination=ctx.message.author, effect=effect)
+                        counter += 1
+                    else:
+                        pass
+            except BadRequestError as e:
+                extras = e.extras
+                await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
+
+        else:
+            message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
+
+    @effects.command()
+    async def ledger(self, ctx, ledger_id: int):
+        try:
+            data = self.effect.for_ledger(sequence=ledger_id).call()
+            await send_effects(destination=ctx.message.author, data=data, usr_query=f'{ledger_id}',
+                               key_query='Ledger')
             effects = data['_embedded']["records"]
             counter = 0
             for effect in effects:
@@ -72,52 +96,45 @@ class HorizonEffects(commands.Cog):
                     counter += 1
                 else:
                     pass
-        else:
-            message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
-
-    @effects.command()
-    async def ledger(self, ctx, ledger_id: int):
-        data = self.effect.for_ledger(sequence=ledger_id).call()
-        await send_effects(destination=ctx.message.author, data=data, usr_query=f'{ledger_id}',
-                           key_query='Ledger')
-        effects = data['_embedded']["records"]
-        counter = 0
-        for effect in effects:
-            if counter <= 2:
-                await send_effect_details(destination=ctx.message.author, effect=effect)
-                counter += 1
-            else:
-                pass
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @effects.command()
     async def operation(self, ctx, operation_id: int):
-        data = self.effect.for_operation(operation_id=operation_id).call()
-        await send_effects(destination=ctx.message.author, data=data, usr_query=f'{operation_id}',
-                           key_query='Operation')
-        effects = data['_embedded']["records"]
-        counter = 0
-        for effect in effects:
-            if counter <= 2:
-                await send_effect_details(destination=ctx.message.author, effect=effect)
-                counter += 1
-            else:
-                pass
+        try:
+            data = self.effect.for_operation(operation_id=operation_id).call()
+            await send_effects(destination=ctx.message.author, data=data, usr_query=f'{operation_id}',
+                               key_query='Operation')
+            effects = data['_embedded']["records"]
+            counter = 0
+            for effect in effects:
+                if counter <= 2:
+                    await send_effect_details(destination=ctx.message.author, effect=effect)
+                    counter += 1
+                else:
+                    pass
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @effects.command()
     async def transaction(self, ctx, tx_hash: str):
-        data = self.effect.for_transaction(transaction_hash=tx_hash).call()
-        await send_effects(destination=ctx.message.author, data=data, usr_query=f'{tx_hash}',
-                           key_query='Transaction Hash')
-        effects = data['_embedded']["records"]
-        counter = 0
-        for effect in effects:
-            if counter <= 2:
-                await send_effect_details(destination=ctx.message.author, effect=effect)
-                counter += 1
-            else:
-                pass
+        try:
+            data = self.effect.for_transaction(transaction_hash=tx_hash).call()
+            await send_effects(destination=ctx.message.author, data=data, usr_query=f'{tx_hash}',
+                               key_query='Transaction Hash')
+            effects = data['_embedded']["records"]
+            counter = 0
+            for effect in effects:
+                if counter <= 2:
+                    await send_effect_details(destination=ctx.message.author, effect=effect)
+                    counter += 1
+                else:
+                    pass
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
 
 def setup(bot):
