@@ -30,6 +30,7 @@ class HorizonOperations(commands.Cog):
         self.op = self.server.operations()
 
     @commands.group()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def operations(self, ctx):
         """
         Effects entry point to horizon endpoints
