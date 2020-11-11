@@ -485,3 +485,46 @@ async def send_trades_details(destination, trade_data: dict):
                                  f'[Counter]({trade_data["_links"]["counter"]["href"]})\n'
                                  f'[Operation]({trade_data["_links"]["operation"]["href"]})\n')
     await destination.send(embed=trade_report)
+
+
+async def send_paths_entry_details(destination, details: dict):
+    query_info = Embed(title=f':mag_right: Strict {details["type"]} Payment Search :mag:',
+                       description='Bellow is information for 3 results returned from network',
+                       colour=Colour.lighter_gray())
+    query_info.add_field(name=f':map: {details["direction"]} Address :map:',
+                         value=f'```{details["address"]}```',
+                         inline=False)
+    query_info.add_field(name=f':moneybag: Source Asset :moneybag: ',
+                         value=f'`{details["amount"]} {details["asset"].upper()}`',
+                         inline=False)
+    query_info.add_field(name=f':bank: Issuer :bank:',
+                         value=f'```{details["issuer"]}```',
+                         inline=False)
+    await destination.send(embed=query_info)
+
+
+async def send_paths_records_details(destination, data):
+    record_info = Embed(title=':record_button: Record Info :record_button: ',
+                        colour=Colour.lighter_gray())
+    record_info.add_field(name=f':gem: Source Asset :gem:',
+                          value=f'`{data["source_asset_code"]}`',
+                          inline=False)
+    record_info.add_field(name=f':gem: Destination Asset :gem:',
+                          value=f'`{data["destination_asset_code"]}`',
+                          inline=False)
+    record_info.add_field(name=f':money_with_wings:  Destination Amount :money_with_wings: ',
+                          value=f'`{data["destination_amount"]} {data["destination_asset_code"]}`')
+
+    counter = 0
+
+    path_str = str()
+    for p in data["path"]:
+        if p["asset_type"] == 'native':
+            path_str += f'***{counter}.*** `XLM`\n========\n'
+        else:
+            path_str += f'***{counter}.*** `{p["asset_code"]}`\n ```{p["asset_issuer"]}```========\n'
+        counter += 1
+    record_info.add_field(name=':railway_track: Paths :railway_track: ',
+                          value=path_str,
+                          inline=False)
+    await destination.send(embed=record_info)
