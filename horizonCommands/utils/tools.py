@@ -1,4 +1,5 @@
 from datetime import datetime
+from stellar_sdk import Asset
 
 
 def format_date(date: str):
@@ -23,3 +24,12 @@ def process_memo(record: dict):
         memo = None
 
     return memo
+
+
+def get_asset(asset_code, asset_issuer):
+    if asset_code.upper() != 'XLM':
+        destination_asset = Asset(code=asset_code.upper(), issuer=asset_issuer)
+    else:
+        destination_asset = Asset(code='XLM').native()
+
+    return destination_asset
