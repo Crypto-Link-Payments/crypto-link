@@ -9,8 +9,6 @@ from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-
-from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
 
 custom_messages = CustomMessages()
@@ -181,7 +179,7 @@ class HorizonAccessCommands(commands.Cog):
     @horizon.group()
     async def offers(self, ctx):
         title = ':handshake:  __Horizon Offers Queries__ :handshake:  '
-        description = 'Representation of all available commands available to interact with ***Effects*** Endpoint on ' \
+        description = 'Representation of all available commands available to interact with ***Offers*** Endpoint on ' \
                       'Stellar Horizon Server'
         list_of_commands = [
             {"name": f':id: Single Offer Query :id:',
@@ -293,8 +291,8 @@ class HorizonAccessCommands(commands.Cog):
     @horizon.group()
     async def transactions(self, ctx):
         title = ':incoming_envelope: __Horizon Transactions __ :incoming_envelope:'
-        description = 'Representation of all available commands available to interact with ***Transactions*** Endpoint on ' \
-                      'Stellar Horizon Server'
+        description = 'Representation of all available commands available to interact with ***Transactions*** ' \
+                      'Endpoint on Stellar Horizon Server'
         list_of_commands = [
             {"name": f':hash: Query by transaction Hash :hash: ',
              "value": f'`{self.command_string}transactions single <Transaction Hash>`'},
