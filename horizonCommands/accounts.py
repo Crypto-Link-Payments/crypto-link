@@ -41,7 +41,8 @@ class HorizonAccounts(commands.Cog):
             {"name": f':new: Create New Account :new: ',
              "value": f'`{self.command_string}accounts create`'},
             {"name": f':mag_right: Query Account Details :mag:',
-             "value": f'`{self.command_string}accounts get <Valid Stellar Address>`'}
+             "value": f'`{self.command_string}accounts get <Valid Stellar Address>`\n'
+                      f'**__Aliases__**: details, query'}
         ]
 
         if ctx.invoked_subcommand is None:
