@@ -9,7 +9,7 @@ from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.horizon import server
-from horizonCommands.utils.customMessages import offer_details, horizon_error_msg
+from horizonCommands.utils.customMessages import offer_details, horizon_error_msg, send_offers
 from stellar_sdk.exceptions import BadRequestError
 
 custom_messages = CustomMessages()
@@ -39,15 +39,17 @@ class HorizonOffers(commands.Cog):
                           ' Endpoint on Stellar Horizon Server.  Commands can be used 1/30 seconds/ per user.'
             list_of_commands = [
                 {"name": f':id: Single Offer Query :id:',
-                 "value": f'`{self.command_string}offers single <offer id>`'},
+                 "value": f'```{self.command_string}offers single <offer id>```\n'
+                          f'`Aliases: id`'},
                 {"name": f' :map: Offers by Account :map: ',
-                 "value": f'`{self.command_string}offers account <Account public address>`'}
+                 "value": f'```{self.command_string}offers account <Account public address>```\n'
+                          f'`Aliases: addr`'}
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @offers.command()
+    @offers.command(aliases=['id'])
     async def single(self, ctx, offer_id: int):
         try:
             data = self.offer.offer(offer_id=offer_id).call()
@@ -56,24 +58,14 @@ class HorizonOffers(commands.Cog):
             extras = e.extras
             await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
-    @offers.command()
+    @offers.command(aliases=["addr"])
     async def address(self, ctx, address: str):
         try:
             data = self.offer.account(account_id=address).limit(100).order(desc=True).call()
 
             if data["_embedded"]["records"]:
-                address_details = Embed(title=f':clipboard: Offers By Address :clipboard: ',
-                                        colour=Colour.lighter_gray())
-                address_details.add_field(name=f':map: Address :map:',
-                                          value=f'```{address}```',
-                                          inline=False)
-                address_details.add_field(name=f':sunrise: Horizon Link :sunrise:',
-                                          value=f'[Offers for account]({data["_links"]["self"]["href"]})',
-                                          inline=False)
-                address_details.add_field(name=f':three: Last 3 Updated Offers :three:',
-                                          value=f':arrow_double_down:',
-                                          inline=False)
-                await ctx.author.send(embed=address_details)
+                await send_offers(destination=ctx.message.author, address=address,
+                                  offers_link=data["_links"]["self"]["href"])
 
                 counter = 0
                 for offer in data['_embedded']["records"]:

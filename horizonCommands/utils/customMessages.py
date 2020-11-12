@@ -328,6 +328,21 @@ async def tx_info_for_ledger(destination, ledger_id, record: dict, signatures, d
     await destination.send(embed=ledger_record)
 
 
+async def send_offers(destination, address, offers_link):
+    address_details = Embed(title=f':clipboard: Offers By Address :clipboard: ',
+                            colour=Colour.lighter_gray())
+    address_details.add_field(name=f':map: Address :map:',
+                              value=f'```{address}```',
+                              inline=False)
+    address_details.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                              value=f'[Offers for account]({offers_link})',
+                              inline=False)
+    address_details.add_field(name=f':three: Last 3 Updated Offers :three:',
+                              value=f':arrow_double_down:',
+                              inline=False)
+    await destination.send(embed=address_details)
+
+
 async def offer_details(destination, offer: dict):
     """
     Send offer details
