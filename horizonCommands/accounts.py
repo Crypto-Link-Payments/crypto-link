@@ -1,8 +1,5 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Horizon Endpoints from Discord
 """
 
 from discord.ext import commands
@@ -12,10 +9,11 @@ from horizonCommands.utils.horizon import server
 from cogs.utils.securityChecks import check_stellar_address
 from stellar_sdk.exceptions import BadRequestError
 from horizonCommands.utils.tools import format_date
-from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset, horizon_error_msg
+from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset, \
+    horizon_error_msg
+
 custom_messages = CustomMessages()
 
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
@@ -32,17 +30,19 @@ class HorizonAccounts(commands.Cog):
         self.hor_accounts = self.server.accounts()
         self.backoffice = bot.backoffice
 
-    @commands.group()
+    @commands.group(aliases=["account", "acc"])
     async def accounts(self, ctx):
         title = ':office_worker: __Horizon Accounts Queries__ :office_worker:'
         description = 'Representation of all available commands available to interact with ***Account*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.\n' \
+                      '`Aliases: account,acc`'
         list_of_commands = [
             {"name": f':new: Create New Account :new: ',
-             "value": f'`{self.command_string}accounts create`'},
+             "value": f'```{self.command_string}accounts create```\n'
+                      f'`aliases: new`'},
             {"name": f':mag_right: Query Account Details :mag:',
-             "value": f'`{self.command_string}accounts get <Valid Stellar Address>`\n'
-                      f'**__Aliases__**: details, query'}
+             "value": f'```{self.command_string}accounts get <Valid Stellar Address>```\n'
+                      f'`aliases: details,query,find`'}
         ]
 
         if ctx.invoked_subcommand is None:
@@ -50,7 +50,7 @@ class HorizonAccounts(commands.Cog):
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @accounts.command()
+    @accounts.command(aliases=['new'])
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def create(self, ctx):
         """
@@ -61,14 +61,14 @@ class HorizonAccounts(commands.Cog):
             if details:
                 await account_create_msg(destination=ctx.message.author, details=details)
             else:
-                message = f'New Stellar Account could not be created. Please try again later'
+                message = f'New Stellar Account could not be created at this moment. Please try again later'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title=CONST_ACCOUNT_ERROR)
         except BadRequestError as e:
             extras = e.extras
             await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
-    @accounts.command(aliases=["get", "query"])
+    @accounts.command(aliases=["get", "query", "find"])
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def details(self, ctx, address: str):
         """

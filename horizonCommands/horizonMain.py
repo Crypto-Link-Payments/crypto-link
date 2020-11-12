@@ -85,14 +85,20 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group(aliases=['acc'])
     async def accounts(self, ctx):
-        title = ':office_worker: __Horizon Account Operations__ :office_worker:'
+        """
+        Return information on available commands to operate with Horizon Accounts endpoint
+        """
+        title = ':office_worker: __Horizon Accounts Queries__ :office_worker:'
         description = 'Representation of all available commands available to interact with ***Account*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.\n' \
+                      '`Aliases: account,acc`'
         list_of_commands = [
             {"name": f':new: Create New Account :new: ',
-             "value": f'`{self.command_string}accounts create`'},
+             "value": f'```{self.command_string}accounts create```\n'
+                      f'`aliases: new`'},
             {"name": f':mag_right: Query Account Details :mag:',
-             "value": f'`{self.command_string}accounts get <Valid Stellar Address>`'}
+             "value": f'```{self.command_string}accounts get <Valid Stellar Address>```\n'
+                      f'`aliases: details,query,find`'}
         ]
 
         if ctx.invoked_subcommand is None:
