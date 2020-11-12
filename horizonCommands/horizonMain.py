@@ -294,12 +294,13 @@ class HorizonAccessCommands(commands.Cog):
     async def trades(self, ctx):
         title = ':currency_exchange:  __Horizon Trades Queries__ :currency_exchange:   '
         description = 'Representation of all available commands available to interact with ***Trades*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
         list_of_commands = [
             {"name": f':map: Trades for Account :map:',
-             "value": f'`{self.command_string}trades account <address>`'},
+             "value": f'```{self.command_string}trades account <address>```\n'
+                      f'`Aliases: acc, addr'},
             {"name": f':id: Trades by Offer ID :id:  ',
-             "value": f'`{self.command_string}trades offer <offer id>`'}
+             "value": f'```{self.command_string}trades offer <offer id>```'}
         ]
 
         if ctx.invoked_subcommand is None:

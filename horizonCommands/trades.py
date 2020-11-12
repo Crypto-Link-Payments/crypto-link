@@ -1,8 +1,5 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Trades Horizon Endpoints from Discord
 """
 
 from discord.ext import commands
@@ -16,9 +13,6 @@ custom_messages = CustomMessages()
 
 
 class HorizonTrades(commands.Cog):
-    """
-    Discord Commands dealing with Merchant Licensing
-    """
 
     def __init__(self, bot):
         self.bot = bot
@@ -30,23 +24,24 @@ class HorizonTrades(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def trades(self, ctx):
         """
-        Effects entry point to horizon endpoints
+        Trades entry point to horizon endpoints
         """
-        title = ':currency_exchange:  __Horizon Trades Queries__ :currency_exchange:   '
-        description = 'Representation of all available commands available to interact with ***Trades*** Endpoint on ' \
-                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
-        list_of_commands = [
-            {"name": f':map: Trades for Account :map:',
-             "value": f'`{self.command_string}trades account <address>`'},
-            {"name": f':id: Trades by Offer ID :id:  ',
-             "value": f'`{self.command_string}trades offer <offer id>`'}
-        ]
         if ctx.invoked_subcommand is None:
+            title = ':currency_exchange:  __Horizon Trades Queries__ :currency_exchange:   '
+            description = 'Representation of all available commands available to interact with ***Trades*** Endpoint on ' \
+                          'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
+            list_of_commands = [
+                {"name": f':map: Trades for Account :map:',
+                 "value": f'```{self.command_string}trades account <address>```\n'
+                          f'`Aliases: acc, addr'},
+                {"name": f':id: Trades by Offer ID :id:  ',
+                 "value": f'```{self.command_string}trades offer <offer id>```'}
+            ]
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @trades.command()
+    @trades.command(aliases=["acc", "addr"])
     async def account(self, ctx, address: str):
         try:
             data = self.trade.for_account(account_id=address).limit(100).order(desc=True).call()
@@ -77,14 +72,10 @@ class HorizonTrades(commands.Cog):
 
     @trades.command()
     async def offer(self, ctx, offer_id: int):
-        print('offer query')
         try:
             data = self.trade.for_offer(offer_id=offer_id).limit(100).order(desc=True).call()
-            from pprint import pprint
             records = data["_embedded"]["records"]
-            pprint(records)
             if records:
-                pprint('sending message')
                 await send_trades_basic_details(destination=ctx.message.author,
                                                 trades_enpoint="offer id",
                                                 query_details={
