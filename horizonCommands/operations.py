@@ -29,7 +29,7 @@ class HorizonOperations(commands.Cog):
         self.server = server
         self.op = self.server.operations()
 
-    @commands.group()
+    @commands.group(aliases=['op'])
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def operations(self, ctx):
         """
@@ -38,16 +38,21 @@ class HorizonOperations(commands.Cog):
         title = ':wrench: __Horizon Operations Queries__ :wrench: '
         description = 'Representation of all available commands available to interact with' \
                       ' ***Operations*** Endpoint on Stellar Horizon Server.  Commands ' \
-                      'can be used 1/30 seconds/ per user.'
+                      'can be used 1/30 seconds/ per user.\n' \
+                      '`Aliases: op`'
         list_of_commands = [
-            {"name": f':tools: Single Operation :tools: ',
-             "value": f'`{self.command_string}operations operation <operation id>`'},
-            {"name": f' :ledger: Operation by Ledger :ledger: ',
-             "value": f'`{self.command_string}operations ledger <ledger id>`'},
             {"name": f' :map: Operation by Account :map: ',
-             "value": f'`{self.command_string}operations account <Account public address>`'},
-            {"name": f' :hash: Operations for transaction :hash:',
-             "value": f'`{self.command_string}operations transaction <transaction hash>`'}
+             "value": f'```{self.command_string}operations account <Account public address>```\n'
+                      f'`Aliases: acc, addr`'},
+
+            {"name": f':tools: Single Operation :tools: ',
+             "value": f'```{self.command_string}operations operation <operation id>```\n'
+                      f'`Aliases: id`'},
+            {"name": f' :hash: Operations for transaction hash :hash:',
+             "value": f'```{self.command_string}operations transaction <transaction hash>```\n'
+                      f'`Aliases: hash, tx`'},
+            {"name": f' :ledger: Operation by Ledger :ledger: ',
+             "value": f'```{self.command_string}operations ledger <ledger id>```'}
         ]
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
@@ -141,7 +146,7 @@ class HorizonOperations(commands.Cog):
             else:
                 pass
 
-    @operations.command()
+    @operations.command(aliases=["id"])
     async def operation(self, ctx, operation_id):
         try:
             data = self.op.operation(operation_id=operation_id).call()
@@ -159,7 +164,7 @@ class HorizonOperations(commands.Cog):
             extras = e.extras
             await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
-    @operations.command()
+    @operations.command(aliases=['acc', 'addr'])
     async def account(self, ctx, address: str):
         try:
             data = self.op.for_account(account_id=address).include_failed(False).order(desc=True).limit(200).call()
@@ -191,7 +196,7 @@ class HorizonOperations(commands.Cog):
             extras = e.extras
             await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
-    @operations.command()
+    @operations.command(aliases=["hash", "tx"])
     async def transaction(self, ctx, tx_hash: str):
         try:
 

@@ -207,19 +207,23 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def operations(self, ctx):
-        title = ':wrench: __Horizon Operations__ :wrench:'
-        description = 'Representation of all available commands available to interact with ***Operations*** Endpoint on ' \
-                      'Stellar Horizon Server'
-
+        title = ':wrench: __Horizon Operations Queries__ :wrench: '
+        description = 'Representation of all available commands available to interact with' \
+                      ' ***Operations*** Endpoint on Stellar Horizon Server.  Commands ' \
+                      'can be used 1/30 seconds/ per user.\n' \
+                      '`Aliases: op`'
         list_of_commands = [
-            {"name": f':tools: Single Operation :tools: ',
-             "value": f'`{self.command_string}operations operation <operation id>`'},
-            {"name": f' :ledger: Operation by Ledger :ledger: ',
-             "value": f'`{self.command_string}operations ledger <ledger id>`'},
             {"name": f' :map: Operation by Account :map: ',
-             "value": f'`{self.command_string}operations account <Account public address>`'},
-            {"name": f' :hash: Operations for transaction :hash:',
-             "value": f'`{self.command_string}operations transaction <transaction hash>`'}
+             "value": f'```{self.command_string}operations account <Account public address>```\n'
+                      f'`Aliases: acc, addr`'},
+            {"name": f':tools: Single Operation :tools: ',
+             "value": f'```{self.command_string}operations operation <operation id>```\n'
+                      f'`Aliases: id`'},
+            {"name": f' :hash: Operations for transaction hash :hash:',
+             "value": f'```{self.command_string}operations transaction <transaction hash>```\n'
+                      f'`Aliases: hash, tx`'},
+            {"name": f' :ledger: Operation by Ledger :ledger: ',
+             "value": f'```{self.command_string}operations ledger <ledger id>```'}
         ]
 
         if ctx.invoked_subcommand is None:
