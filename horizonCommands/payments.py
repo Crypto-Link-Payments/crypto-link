@@ -6,7 +6,6 @@ from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
-from horizonCommands.utils.horizon import server
 from horizonCommands.utils.customMessages import horizon_error_msg, send_payments_details
 from stellar_sdk.exceptions import BadRequestError
 
@@ -17,10 +16,8 @@ CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 class HorizonPayments(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.payment = self.server.payments()
+        self.hor_payments = self.bot.backoffice.stellar_wallet.server.payments()
 
     @staticmethod
     async def process_server_response(ctx, data, query_key: str, user_query: str):
@@ -128,7 +125,7 @@ class HorizonPayments(commands.Cog):
     async def address(self, ctx, address: str):
         try:
             if check_stellar_address(address=address):
-                data = self.payment.for_account(account_id=address).order(
+                data = self.hor_payments.for_account(account_id=address).order(
                     desc=True).limit(limit=200).call()
                 if data['_embedded']['records']:
                     await self.process_server_response(ctx, data=data, query_key='address', user_query=f'{address}')
@@ -147,7 +144,7 @@ class HorizonPayments(commands.Cog):
     @payments.command()
     async def ledger(self, ctx, ledger_sequence: int):
         try:
-            data = self.payment.for_ledger(sequence=ledger_sequence).order(
+            data = self.hor_payments.for_ledger(sequence=ledger_sequence).order(
                 desc=True).limit(limit=200).call()
             records = data['_embedded']['records']
             if records:
@@ -173,7 +170,7 @@ class HorizonPayments(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def transaction(self, ctx, transaction_hash: str):
         try:
-            data = self.payment.for_transaction(transaction_hash=transaction_hash).order(
+            data = self.hor_payments.for_transaction(transaction_hash=transaction_hash).order(
                 desc=True).limit(limit=20).call()
             if data['_embedded']['records']:
                 await self.process_server_response(ctx, data=data, query_key='transaction hash',

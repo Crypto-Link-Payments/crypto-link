@@ -6,7 +6,6 @@ from discord.ext import commands
 from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.customMessages import send_trades_details, send_trades_basic_details, horizon_error_msg
-from horizonCommands.utils.horizon import server
 from stellar_sdk.exceptions import BadRequestError
 
 custom_messages = CustomMessages()
@@ -17,8 +16,7 @@ class HorizonTrades(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.trade = self.server.trades()
+        self.hor_trades = self.bot.backoffice.stellar_wallet.server.trades()
 
     @commands.group()
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -44,7 +42,7 @@ class HorizonTrades(commands.Cog):
     @trades.command(aliases=["acc", "addr"])
     async def account(self, ctx, address: str):
         try:
-            data = self.trade.for_account(account_id=address).limit(100).order(desc=True).call()
+            data = self.hor_trades.for_account(account_id=address).limit(100).order(desc=True).call()
             records = data["_embedded"]["records"]
             if records:
                 await send_trades_basic_details(destination=ctx.message.author,
@@ -73,7 +71,7 @@ class HorizonTrades(commands.Cog):
     @trades.command()
     async def offer(self, ctx, offer_id: int):
         try:
-            data = self.trade.for_offer(offer_id=offer_id).limit(100).order(desc=True).call()
+            data = self.hor_trades.for_offer(offer_id=offer_id).limit(100).order(desc=True).call()
             records = data["_embedded"]["records"]
             if records:
                 await send_trades_basic_details(destination=ctx.message.author,

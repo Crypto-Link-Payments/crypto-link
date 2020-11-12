@@ -6,7 +6,6 @@ COGS which handle explanation  on commands available to communicate with the Off
 from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
-from horizonCommands.utils.horizon import server
 from horizonCommands.utils.customMessages import offer_details, horizon_error_msg, send_offers
 from stellar_sdk.exceptions import BadRequestError
 
@@ -15,15 +14,14 @@ custom_messages = CustomMessages()
 
 class HorizonOffers(commands.Cog):
     """
-    Discord Commands dealing with Merchant Licensing
+    Discord Commands to access Offers
     """
 
     def __init__(self, bot):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.offer = self.server.offers()
+        self.hor_offers = self.bot.backoffice.stellar_wallet.server.offers()
 
     @commands.group()
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -50,7 +48,7 @@ class HorizonOffers(commands.Cog):
     @offers.command(aliases=['id'])
     async def single(self, ctx, offer_id: int):
         try:
-            data = self.offer.offer(offer_id=offer_id).call()
+            data = self.hor_offers.offer(offer_id=offer_id).call()
             await offer_details(destination=ctx.message.author, offer=data)
         except BadRequestError as e:
             extras = e.extras
@@ -59,7 +57,7 @@ class HorizonOffers(commands.Cog):
     @offers.command(aliases=["addr"])
     async def address(self, ctx, address: str):
         try:
-            data = self.offer.account(account_id=address).limit(100).order(desc=True).call()
+            data = self.hor_offers.account(account_id=address).limit(100).order(desc=True).call()
 
             if data["_embedded"]["records"]:
                 await send_offers(destination=ctx.message.author, address=address,

@@ -7,7 +7,6 @@ from discord import Colour
 
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
-from horizonCommands.utils.horizon import server
 from stellar_sdk.exceptions import BadRequestError
 from horizonCommands.utils.customMessages import send_effects, send_effect_details, horizon_error_msg
 
@@ -18,15 +17,13 @@ CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 class HorizonEffects(commands.Cog):
     """
-    Discord Commands dealing with Merchant Licensing
+    Discord Commands to access Effects endpoints
     """
 
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.effect = self.server.effects()
+        self.hor_effects = self.bot.backoffice.stellar_wallet.server.effects()
 
     @commands.group(aliases=["ef", 'effect'])
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -61,7 +58,7 @@ class HorizonEffects(commands.Cog):
     async def account(self, ctx, address: str):
         if check_stellar_address(address=address):
             try:
-                data = self.effect.for_account(account_id=address).call()
+                data = self.hor_effects.for_account(account_id=address).call()
                 await send_effects(destination=ctx.message.author, data=data, usr_query=f'{address}',
                                    key_query='Account')
 
@@ -85,7 +82,7 @@ class HorizonEffects(commands.Cog):
     @effects.command()
     async def ledger(self, ctx, ledger_id: int):
         try:
-            data = self.effect.for_ledger(sequence=ledger_id).call()
+            data = self.hor_effects.for_ledger(sequence=ledger_id).call()
             await send_effects(destination=ctx.message.author, data=data, usr_query=f'{ledger_id}',
                                key_query='Ledger')
             effects = data['_embedded']["records"]
@@ -103,7 +100,7 @@ class HorizonEffects(commands.Cog):
     @effects.command(aliases=['op'])
     async def operation(self, ctx, operation_id: int):
         try:
-            data = self.effect.for_operation(operation_id=operation_id).call()
+            data = self.hor_effects.for_operation(operation_id=operation_id).call()
             await send_effects(destination=ctx.message.author, data=data, usr_query=f'{operation_id}',
                                key_query='Operation')
             effects = data['_embedded']["records"]
@@ -121,7 +118,7 @@ class HorizonEffects(commands.Cog):
     @effects.command(aliases=["tx", "hash"])
     async def transaction(self, ctx, tx_hash: str):
         try:
-            data = self.effect.for_transaction(transaction_hash=tx_hash).call()
+            data = self.hor_effects.for_transaction(transaction_hash=tx_hash).call()
             await send_effects(destination=ctx.message.author, data=data, usr_query=f'{tx_hash}',
                                key_query='Transaction Hash')
             effects = data['_embedded']["records"]

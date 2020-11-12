@@ -6,7 +6,6 @@ from discord.ext import commands
 from discord import Colour
 from cogs.utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 
 custom_messages = CustomMessages()
 
@@ -18,7 +17,6 @@ class HorizonAccessCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
     @commands.group()

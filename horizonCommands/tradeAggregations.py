@@ -6,7 +6,6 @@ from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from datetime import datetime
-from horizonCommands.utils.horizon import server
 from stellar_sdk import Asset
 
 custom_messages = CustomMessages()
@@ -16,7 +15,7 @@ class HorizonTradeAggregations(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.command_string = bot.get_command_str()
-        self.server = server
+        self.server = self.bot.backoffice.stellar_wallet.server
 
     @staticmethod
     def process_resolution(resolution: int):

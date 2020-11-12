@@ -2,14 +2,12 @@
 COGS which handle explanation  on commands available to communicate with the Orderbook Horizon Endpoints from Discord
 """
 
-
 from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from stellar_sdk import Asset
 from stellar_sdk.exceptions import BadRequestError
 from horizonCommands.utils.customMessages import horizon_error_msg
-from horizonCommands.utils.horizon import server
 
 custom_messages = CustomMessages()
 
@@ -22,7 +20,7 @@ class HorizonOrderBook(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.command_string = bot.get_command_str()
-        self.server = server
+        self.server = self.bot.backoffice.stellar_wallet.server
 
     def check_asset(self, asset_query):
 

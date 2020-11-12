@@ -4,7 +4,6 @@ COGS which handle explanation  on commands available to communicate with the Tra
 from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
-from horizonCommands.utils.horizon import server
 from horizonCommands.utils.tools import format_date, process_memo
 from horizonCommands.utils.customMessages import tx_info_for_account, horizon_error_msg, tx_info_for_hash, \
     tx_info_for_ledger
@@ -20,10 +19,8 @@ class HorizonTransactions(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.txs = self.server.transactions()
+        self.hor_transactions = self.bot.backoffice.stellar_wallet.server.transactions()
 
     @commands.group(aliases=["tx"])
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -50,7 +47,7 @@ class HorizonTransactions(commands.Cog):
     @transactions.command(aliases=["hash"])
     async def single(self, ctx, transaction_hash: str):
         try:
-            data = self.txs.transaction(transaction_hash=transaction_hash).call()
+            data = self.hor_transactions.transaction(transaction_hash=transaction_hash).call()
 
             sig_str = '\n'.join([f'`{sig}`' for sig in data['signatures']])
             date_fm = format_date(data["created_at"])
@@ -73,7 +70,7 @@ class HorizonTransactions(commands.Cog):
         Get last three transactions for the account
         """
         try:
-            data = self.txs.for_account(account_id=account_address).order(desc=True).call()
+            data = self.hor_transactions.for_account(account_id=account_address).order(desc=True).call()
             records = data['_embedded']['records']
             if records:
                 account_info = Embed(title=f':map: Account Transactions Information :map:',
@@ -106,7 +103,7 @@ class HorizonTransactions(commands.Cog):
     @transactions.command()
     async def ledger(self, ctx, ledger_id: int):
         try:
-            data = self.txs.for_ledger(sequence=ledger_id).call()
+            data = self.hor_transactions.for_ledger(sequence=ledger_id).call()
             if data:
                 records = data['_embedded']['records']
                 ledger_info = Embed(title=f':ledger: Ledger {ledger_id} Information :ledger:',

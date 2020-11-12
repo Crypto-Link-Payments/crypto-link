@@ -5,7 +5,6 @@ from discord.ext import commands
 from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from discord.ext.commands.errors import CommandInvokeError
-from horizonCommands.utils.horizon import server
 from horizonCommands.utils.customMessages import send_asset_details, send_multi_asset_case, horizon_error_msg
 from stellar_sdk.exceptions import BadRequestError
 
@@ -19,10 +18,8 @@ class HorizonAssets(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.asset = self.server.assets()
+        self.hor_assets = self.bot.backoffice.stellar_wallet.server.assets()
 
     @commands.group()
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -47,7 +44,8 @@ class HorizonAssets(commands.Cog):
     async def get(self, ctx, asset_code: str, asset_issuer: str):
 
         try:
-            data = self.asset.for_code(asset_code=asset_code.upper()).for_issuer(asset_issuer=asset_issuer.upper()).call()
+            data = self.hor_assets.for_code(asset_code=asset_code.upper()).for_issuer(
+                asset_issuer=asset_issuer.upper()).call()
             if data['_embedded']["records"]:
                 await send_asset_details(destination=ctx.message.author, data=data, request='***asset***')
             else:
@@ -63,14 +61,15 @@ class HorizonAssets(commands.Cog):
     @assets.command()
     async def code(self, ctx, asset_code: str):
         try:
-            data = self.asset.for_code(asset_code=asset_code.upper()).call()
+            data = self.hor_assets.for_code(asset_code=asset_code.upper()).call()
             if data['_embedded']['records']:
                 records = data['_embedded']['records']
                 if len(records) == 1:
                     await send_asset_details(destination=ctx.message.author, data=records[0], request='asset code ')
 
                 else:
-                    await send_multi_asset_case(destination=ctx.message.author, data=data, command_str=self.command_string)
+                    await send_multi_asset_case(destination=ctx.message.author, data=data,
+                                                command_str=self.command_string)
             else:
                 message = f'No Asset with code `{asset_code}` found. Please try again'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -82,7 +81,7 @@ class HorizonAssets(commands.Cog):
     @assets.command()
     async def issuer(self, ctx, issuer: str):
         try:
-            data = self.asset.for_issuer(asset_issuer=issuer).call()
+            data = self.hor_assets.for_issuer(asset_issuer=issuer).call()
             if data['_embedded']['records']:
                 await send_asset_details(destination=ctx.message.author, data=data, request='issuer')
 

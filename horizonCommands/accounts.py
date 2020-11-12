@@ -5,7 +5,6 @@ COGS which handle explanation  on commands available to communicate with the Hor
 from discord.ext import commands
 from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
-from horizonCommands.utils.horizon import server
 from cogs.utils.securityChecks import check_stellar_address
 from stellar_sdk.exceptions import BadRequestError, NotFoundError
 from horizonCommands.utils.tools import format_date
@@ -24,11 +23,8 @@ class HorizonAccounts(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.hor_accounts = self.server.accounts()
-        self.backoffice = bot.backoffice
+        self.hor_accounts = self.bot.backoffice.stellar_wallet.server.accounts()
 
     @commands.group(aliases=["account", "acc"])
     async def accounts(self, ctx):
@@ -57,7 +53,7 @@ class HorizonAccounts(commands.Cog):
         Creates new in-active account on Stellar Network
         """
         try:
-            details = self.backoffice.stellar_wallet.create_stellar_account()
+            details = self.bot.backoffice.stellar_wallet.create_stellar_account()
             if details:
                 await account_create_msg(destination=ctx.message.author, details=details)
             else:

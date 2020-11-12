@@ -8,7 +8,6 @@ import requests
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.customMessages import horizon_error_msg
-from horizonCommands.utils.horizon import server
 from stellar_sdk.exceptions import BadRequestError
 
 custom_messages = CustomMessages()
@@ -22,16 +21,14 @@ class HorizonLedger(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.ledg = self.server.ledgers()
+        self.hor_ledgers = self.bot.backoffice.stellar_wallet.server.ledgers()
 
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def ledger(self, ctx, ledger_number: int):
         try:
-            data = self.ledg.ledger(sequence=ledger_number).call()
+            data = self.hor_ledgers.ledger(sequence=ledger_number).call()
             if data:
                 operations_count = len(
                     requests.get(f'https://horizon-testnet.stellar.org/ledgers/{ledger_number}/operations').json()[

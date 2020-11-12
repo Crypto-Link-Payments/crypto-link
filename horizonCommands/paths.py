@@ -6,7 +6,6 @@ from discord.ext import commands
 from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
-from horizonCommands.utils.horizon import server
 from stellar_sdk.exceptions import BadRequestError
 from horizonCommands.utils.customMessages import send_paths_records_details, send_paths_entry_details, horizon_error_msg
 from horizonCommands.utils.tools import get_asset
@@ -18,7 +17,7 @@ class HorizonPaths(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.command_string = bot.get_command_str()
-        self.server = server
+        self.server = self.bot.backoffice.stellar_wallet.server
 
     @commands.group()
     async def paths(self, ctx):

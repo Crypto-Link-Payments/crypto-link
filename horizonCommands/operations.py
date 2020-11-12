@@ -7,7 +7,6 @@ from discord import Embed, Colour
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
 from stellar_sdk.exceptions import BadRequestError
-from horizonCommands.utils.horizon import server
 from horizonCommands.utils.tools import asset_code
 from horizonCommands.utils.customMessages import horizon_error_msg, send_operations_basic_details
 
@@ -21,10 +20,8 @@ class HorizonOperations(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.op = self.server.operations()
+        self.hor_operations =self.bot.backoffice.stellar_wallet.server.operations()
 
     @commands.group(aliases=['op'])
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -146,7 +143,7 @@ class HorizonOperations(commands.Cog):
     @operations.command(aliases=["id"])
     async def operation(self, ctx, operation_id):
         try:
-            data = self.op.operation(operation_id=operation_id).call()
+            data = self.hor_operations.operation(operation_id=operation_id).call()
             if data['_embedded']["records"]:
                 await send_operations_basic_details(destination=ctx.message.author, key_query="Operation",
                                                     hrz_link=data['_links']['self']['href'])
@@ -164,7 +161,7 @@ class HorizonOperations(commands.Cog):
     @operations.command(aliases=['acc', 'addr'])
     async def account(self, ctx, address: str):
         try:
-            data = self.op.for_account(account_id=address).include_failed(False).order(desc=True).limit(200).call()
+            data = self.hor_operations.for_account(account_id=address).include_failed(False).order(desc=True).limit(200).call()
             if data['_embedded']["records"]:
                 await send_operations_basic_details(destination=ctx.message.author, key_query="Account",
                                                     hrz_link=data['_links']['self']['href'])
@@ -180,7 +177,7 @@ class HorizonOperations(commands.Cog):
     @operations.command()
     async def ledger(self, ctx, ledger_id: int):
         try:
-            data = self.op.for_ledger(sequence=ledger_id).include_failed(False).order(desc=True).limit(200).call()
+            data = self.hor_operations.for_ledger(sequence=ledger_id).include_failed(False).order(desc=True).limit(200).call()
             if data['_embedded']["records"]:
                 await send_operations_basic_details(destination=ctx.message.author, key_query="Ledger",
                                                     hrz_link=data['_links']['self']['href'])
@@ -197,7 +194,7 @@ class HorizonOperations(commands.Cog):
     async def transaction(self, ctx, tx_hash: str):
         try:
 
-            data = self.op.for_transaction(transaction_hash=tx_hash).include_failed(False).order(desc=True).limit(
+            data = self.hor_operations.for_transaction(transaction_hash=tx_hash).include_failed(False).order(desc=True).limit(
                 200).call()
             if data['_embedded']["records"]:
                 await send_operations_basic_details(destination=ctx.message.author, key_query="Transaction",
