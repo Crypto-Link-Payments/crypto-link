@@ -1,10 +1,6 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Transactions Horizon Endpoints from Discord
 """
-
 from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
@@ -32,24 +28,26 @@ class HorizonTransactions(commands.Cog):
     @commands.group(aliases=["tx"])
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def transactions(self, ctx):
-        title = ':incoming_envelope: __Horizon Transactions Operations__ :incoming_envelope:'
-        description = 'Representation of all available commands available to interact with ***Transactions*** Endpoint on ' \
-                      'Stellar Horizon Server'
-        list_of_commands = [
-            {"name": f':hash: Query by transaction Hash :hash: ',
-             "value": f'`{self.command_string}transactions single <Transaction Hash>`'},
-            {"name": f':map:  Query by account address :map:  ',
-             "value": f'`{self.command_string}transactions account <Valid Stellar Address>`'},
-            {"name": f':ledger:  Query by ledger :ledger:',
-             "value": f'`{self.command_string}transactions ledger <Ledger Number>`'},
-        ]
-
         if ctx.invoked_subcommand is None:
+            title = ':incoming_envelope: __Horizon Transactions Operations__ :incoming_envelope:'
+            description = 'Representation of all available commands available to interact with ***Transactions*** ' \
+                          'Endpoint on Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.\n' \
+                          '`Aliases: tx`'
+            list_of_commands = [
+                {"name": f':hash: Query by transaction Hash :hash:',
+                 "value": f'```{self.command_string}transactions single <Transaction Hash>```\n'
+                          f'`Aliases: hash`'},
+                {"name": f':map:  Query by account address :map:',
+                 "value": f'```{self.command_string}transactions account <Valid Stellar Address>```\n'
+                          f'`Aliases: addr, acc'},
+                {"name": f':ledger:  Query by ledger :ledger:',
+                 "value": f'`{self.command_string}transactions ledger <Ledger Number>`'},
+            ]
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @transactions.command()
+    @transactions.command(aliases=["hash"])
     async def single(self, ctx, transaction_hash: str):
         try:
             data = self.txs.transaction(transaction_hash=transaction_hash).call()
@@ -69,7 +67,7 @@ class HorizonTransactions(commands.Cog):
             await horizon_error_msg(destination=ctx.message.author, error=f"A transaction hash must be a hex-encoded, "
                                                                           f"lowercase SHA-256 hash")
 
-    @transactions.command()
+    @transactions.command(aliases=["addr", "acc"])
     async def account(self, ctx, account_address: str):
         """
         Get last three transactions for the account
