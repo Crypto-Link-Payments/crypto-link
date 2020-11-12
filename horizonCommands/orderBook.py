@@ -68,22 +68,23 @@ class HorizonOrderBook(commands.Cog):
         """
         Effects entry point to horizon endpoints
         """
-        title = ':book:  __Horizon Order Book Queries__ :book: '
-        description = 'Representation of all available commands available to interact with ***Order Book' \
-                      '*** Endpoint on Stellar Horizon Server Commands can be used 1/30 seconds/ per user.'
-
-        list_of_commands = [
-            {"name": f':currency_exchange:  Query Order Book for pair :currency_exchange: ',
-             "value": f'`{self.command_string}book details <selling asset> <buying asset>`\n'
-                      f'__Note__: Assets can be represented as a code or issuer address'},
-        ]
-
         if ctx.invoked_subcommand is None:
+            title = ':book:  __Horizon Order Book Queries__ :book: '
+            description = 'Representation of all available commands available to interact with ***Order Book' \
+                          '*** Endpoint on Stellar Horizon Server Commands can be used 1/30 seconds/ per user.'
+
+            list_of_commands = [
+                {"name": f':currency_exchange:  Query Order Book for pair :currency_exchange: ',
+                 "value": f'```{self.command_string}book details <selling asset> <buying asset>```\n'
+                          f'__Note__: Assets can be represented as a code or issuer address,'
+                          f'`Aliases: get`'},
+            ]
+
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @book.command()
+    @book.command(aliases=['get'])
     async def details(self, ctx, selling: str, buying: str):
         selling_asset = self.check_asset(asset_query=selling.upper())
 
@@ -144,7 +145,7 @@ class HorizonOrderBook(commands.Cog):
                     extras = e.extras
                     await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
             else:
-                multi_details = Embed(title=f':robot: Multiple Entries Found :robot:',
+                multi_details = Embed(title=f':exclamation:  Multiple Entries Found :exclamation: ',
                                       description='You have received this message because multiple entries have been found'
                                                   f' for Buying asset parameter `{buying}`. Check the list bellow and'
                                                   f' repeat the call however provide issuer address for Selling Asset',
@@ -157,7 +158,7 @@ class HorizonOrderBook(commands.Cog):
                 await ctx.author.send(embed=multi_details)
 
         else:
-            multi_details = Embed(title=f':robot: Multiple Entries Found :robot:',
+            multi_details = Embed(title=f':exclamation:  Multiple Entries Found :exclamation: ',
                                   description='You have received this message because multiple entries have been found'
                                               f' for Selling asset parameter `{selling}`. Check the list bellow and'
                                               f' repeat the call however provide issuer address for Selling Asset',

@@ -233,16 +233,15 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def book(self, ctx):
-
         title = ':book:  __Horizon Order Book Queries__ :book: '
         description = 'Representation of all available commands available to interact with ***Order Book' \
-                      '*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      '*** Endpoint on Stellar Horizon Server Commands can be used 1/30 seconds/ per user.'
 
         list_of_commands = [
             {"name": f':currency_exchange:  Query Order Book for pair :currency_exchange: ',
-             "value": f'`{self.command_string}book details <selling asset> <buying asset>`\n'
-                      f'__Note__: Assets can be represented as a code or issuer address'},
+             "value": f'```{self.command_string}book details <selling asset> <buying asset>```\n'
+                      f'__Note__: Assets can be represented as a code or issuer address,'
+                      f'`Aliases: get`'},
         ]
 
         if ctx.invoked_subcommand is None:
