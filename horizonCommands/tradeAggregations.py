@@ -1,8 +1,5 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Payments Horizon Endpoints from Discord
 """
 
 from discord.ext import commands
@@ -15,11 +12,7 @@ from stellar_sdk import Asset
 custom_messages = CustomMessages()
 
 
-class HorizonTrdeaAggregations(commands.Cog):
-    """
-    Discord Commands dealing with Merchant Licensing
-    """
-
+class HorizonTradeAggregations(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.command_string = bot.get_command_str()
@@ -56,7 +49,7 @@ class HorizonTrdeaAggregations(commands.Cog):
             {"name": f':chart_with_upwards_trend: XLM vs Asset Trades',
              "value": f'`{self.command_string}trade aggregations <counter asset> <counter issuer> <resolution> `\n'
                       f'***__Note__***: Resolutions allowed 1, 5, and 15 minutes\n'
-                      f'***__Aliases__***: agg'},
+                      f'`Aliases: agg`'},
         ]
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
@@ -113,4 +106,4 @@ class HorizonTrdeaAggregations(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(HorizonTrdeaAggregations(bot))
+    bot.add_cog(HorizonTradeAggregations(bot))
