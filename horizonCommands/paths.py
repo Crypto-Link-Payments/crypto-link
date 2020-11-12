@@ -1,9 +1,3 @@
-"""
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
-"""
 
 from discord.ext import commands
 from discord import Colour
