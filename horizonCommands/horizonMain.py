@@ -175,10 +175,10 @@ class HorizonAccessCommands(commands.Cog):
     async def ledger(self, ctx):
         title = ':ledger: __Horizon Ledger Operations__ :ledger:'
         description = 'Representation of all available commands available to interact with ***Ledger*** endpoint on ' \
-                      'Stellar Horizon Server'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
         list_of_commands = [
             {"name": f':information_source:  Get information for ledger number :information_source: ',
-             "value": f'`{self.command_string}ledger <ledger number>`'}
+             "value": f'```{self.command_string}ledger <ledger number>```'}
         ]
 
         if ctx.invoked_subcommand is None:

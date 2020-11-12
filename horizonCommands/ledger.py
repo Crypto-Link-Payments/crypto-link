@@ -1,3 +1,8 @@
+"""
+COGS which handle explanation  on commands available to communicate with the Ledger Horizon Endpoints from Discord
+"""
+
+
 from discord.ext import commands
 import requests
 from discord import Embed, Colour
