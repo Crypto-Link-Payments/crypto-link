@@ -7,7 +7,7 @@ from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.horizon import server
 from cogs.utils.securityChecks import check_stellar_address
-from stellar_sdk.exceptions import BadRequestError
+from stellar_sdk.exceptions import BadRequestError, NotFoundError
 from horizonCommands.utils.tools import format_date
 from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset, \
     horizon_error_msg
@@ -106,6 +106,10 @@ class HorizonAccounts(commands.Cog):
             except BadRequestError as e:
                 extras = e.extras
                 await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
+
+            except NotFoundError:
+                message = f'Account with address `{address}` could not be found/does not exist.'
+                await horizon_error_msg(destination=ctx.message.author, error=message)
 
         else:
             message = f'Address `{address}` is not valid Stellar Address. Please recheck provided data and try again'
