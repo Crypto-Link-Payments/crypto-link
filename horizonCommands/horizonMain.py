@@ -148,18 +148,22 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def effects(self, ctx):
-        title = ':fireworks: __Horizon Effects Operations__ :fireworks: '
+        title = ':fireworks:  __Horizon Effects Queries__ :fireworks: '
         description = 'Representation of all available commands available to interact with ***Effects*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.\n' \
+                      '`Aliases: ef, effect`'
         list_of_commands = [
             {"name": f':map: Query effects for account :map:',
-             "value": f'`{self.command_string}effects account <public account address>`'},
+             "value": f'```{self.command_string}effects account <public account address>```\n'
+                      f'`aliases: acc, addr, address`'},
             {"name": f' :ledger: Query effects for ledger :ledger: ',
-             "value": f'`{self.command_string}effects ledger <ledger id>`'},
+             "value": f'```{self.command_string}effects ledger <ledger id>```'},
             {"name": f':wrench: Query effects for operations :wrench: ',
-             "value": f'`{self.command_string}effects operations <operation id>`'},
+             "value": f'```{self.command_string}effects operations <operation id>```\n'
+                      f'`aliases: op`'},
             {"name": f':hash: Query effects for transactions :hash: ',
-             "value": f'`{self.command_string}effects transaction <transaction hash>`'}
+             "value": f'```{self.command_string}effects transaction <transaction hash>```\n'
+                      f'`aliases: tx, hash`'}
         ]
 
         if ctx.invoked_subcommand is None:

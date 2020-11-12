@@ -1,8 +1,5 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Effects Horizon Endpoints from Discord
 """
 
 from discord.ext import commands
@@ -43,13 +40,16 @@ class HorizonEffects(commands.Cog):
                       '`Aliases: ef, effect`'
         list_of_commands = [
             {"name": f':map: Query effects for account :map:',
-             "value": f'`{self.command_string}effects account <public account address>`'},
+             "value": f'```{self.command_string}effects account <public account address>```\n'
+                      f'`aliases: acc, addr, address`'},
             {"name": f' :ledger: Query effects for ledger :ledger: ',
-             "value": f'`{self.command_string}effects ledger <ledger id>`'},
+             "value": f'```{self.command_string}effects ledger <ledger id>```'},
             {"name": f':wrench: Query effects for operations :wrench: ',
-             "value": f'`{self.command_string}effects operations <operation id>`'},
+             "value": f'```{self.command_string}effects operations <operation id>```\n'
+                      f'`aliases: op`'},
             {"name": f':hash: Query effects for transactions :hash: ',
-             "value": f'`{self.command_string}effects transaction <transaction hash>`'}
+             "value": f'```{self.command_string}effects transaction <transaction hash>```\n'
+                      f'`aliases: tx, hash`'}
         ]
 
         if ctx.invoked_subcommand is None:
@@ -57,7 +57,7 @@ class HorizonEffects(commands.Cog):
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @effects.command()
+    @effects.command(aliases=["acc", "addr", "address"])
     async def account(self, ctx, address: str):
         if check_stellar_address(address=address):
             try:
@@ -100,7 +100,7 @@ class HorizonEffects(commands.Cog):
             extras = e.extras
             await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
-    @effects.command()
+    @effects.command(aliases=['op'])
     async def operation(self, ctx, operation_id: int):
         try:
             data = self.effect.for_operation(operation_id=operation_id).call()
@@ -118,7 +118,7 @@ class HorizonEffects(commands.Cog):
             extras = e.extras
             await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
-    @effects.command()
+    @effects.command(aliases=["tx", "hash"])
     async def transaction(self, ctx, tx_hash: str):
         try:
             data = self.effect.for_transaction(transaction_hash=tx_hash).call()
