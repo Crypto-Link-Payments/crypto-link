@@ -112,16 +112,19 @@ class HorizonAccessCommands(commands.Cog):
         End points for payments
         """
         title = ':money_with_wings:  __Horizon Payments Operations__ :money_with_wings: '
-        description = 'Representation of all available commands available to interact with ***Payments*** Endpoint on ' \
-                      'Stellar Horizon Server. All commands return last 3 transactions done on account, and explorer' \
-                      ' link to access older transactions. All transactions are returned in descending order.'
+        description = 'Representation of all available commands available to interact with ***Payments*** Endpoint on' \
+                      ' Stellar Horizon Server. All commands return last 3 payments done based on query criteria,' \
+                      ' and Horizon link is returned with the rest. All payments are returned in descending order.' \
+                      ' Commands can be used 1/30 seconds/ per user.'
         list_of_commands = [
             {"name": f':map: Get payments by public address :map: ',
-             "value": f'`{self.command_string}payments address <address>`'},
-            {"name": f':ledger:  Get payments based on ledger sequence :ledger:',
-             "value": f'`{self.command_string}payments ledger <ledger sequence>`'},
+             "value": f'```{self.command_string}payments address <address>```\n'
+                      f'`Aliases: addr`'},
+            {"name": f':ledger:  Get payments based on ledger sequence :ledger:   ',
+             "value": f'```{self.command_string}payments ledger <ledger sequence>```'},
             {"name": f':hash:  Get payments based on transaction hash :hash:',
-             "value": f'`{self.command_string}payments transaction <hash of transaction>`'}
+             "value": f'```{self.command_string}payments transaction <hash of transaction>```\n'
+                      f'`Aliases: tx, hash'}
         ]
 
         if ctx.invoked_subcommand is None:

@@ -1,8 +1,5 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Payments Horizon Endpoints from Discord
 """
 
 from discord.ext import commands
@@ -18,10 +15,6 @@ CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
 class HorizonPayments(commands.Cog):
-    """
-    Discord Commands dealing with Merchant Licensing
-    """
-
     def __init__(self, bot):
         self.bot = bot
         self.backoffice = bot.backoffice
@@ -111,25 +104,27 @@ class HorizonPayments(commands.Cog):
         """
         End points for payments
         """
-        title = ':money_with_wings:  __Horizon Payments Operations__ :money_with_wings: '
-        description = 'Representation of all available commands available to interact with ***Payments*** Endpoint on' \
-                      ' Stellar Horizon Server. All commands return last 3 payments done based on query criteria,' \
-                      ' and Horizon link is returned with the rest. All payments are returned in descending order.'
-        list_of_commands = [
-            {"name": f':map: Get payments by public address :map: ',
-             "value": f'`{self.command_string}payments address <address>`'},
-            {"name": f':ledger:  Get payments based on ledger sequence :ledger:   ',
-             "value": f'`{self.command_string}payments ledger <ledger sequence>`'},
-            {"name": f':hash:  Get payments based on transaction hash :hash:',
-             "value": f'`{self.command_string}payments transaction <hash of transaction>`\n'
-                      f'__Aliases: tx__'}
-        ]
-
         if ctx.invoked_subcommand is None:
+            title = ':money_with_wings:  __Horizon Payments Operations__ :money_with_wings: '
+            description = 'Representation of all available commands available to interact with ***Payments*** Endpoint on' \
+                          ' Stellar Horizon Server. All commands return last 3 payments done based on query criteria,' \
+                          ' and Horizon link is returned with the rest. All payments are returned in descending order.' \
+                          ' Commands can be used 1/30 seconds/ per user.'
+            list_of_commands = [
+                {"name": f':map: Get payments by public address :map: ',
+                 "value": f'```{self.command_string}payments address <address>```\n'
+                          f'`Aliases: addr`'},
+                {"name": f':ledger:  Get payments based on ledger sequence :ledger:   ',
+                 "value": f'```{self.command_string}payments ledger <ledger sequence>```'},
+                {"name": f':hash:  Get payments based on transaction hash :hash:',
+                 "value": f'```{self.command_string}payments transaction <hash of transaction>```\n'
+                          f'`Aliases: tx, hash'}
+            ]
+
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @payments.command()
+    @payments.command(aliases=['addr'])
     async def address(self, ctx, address: str):
         try:
             if check_stellar_address(address=address):
@@ -174,7 +169,7 @@ class HorizonPayments(commands.Cog):
         except BadRequestError as e:
             await horizon_error_msg(destination=ctx.message.author, error=e.extras["reason"])
 
-    @payments.command(aliases=["tx"])
+    @payments.command(aliases=["tx", "hash"])
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def transaction(self, ctx, transaction_hash: str):
         try:
