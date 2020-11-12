@@ -256,13 +256,13 @@ class HorizonAccessCommands(commands.Cog):
         """
         title = ':railway_track:  __Horizon Paths Queries__ :railway_track:'
         description = 'Representation of all available commands available to interact with ***Paths*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      'Stellar Horizon Server.Commands can be used 1/30 seconds/ per user.'
         list_of_commands = [
             {"name": f':service_dog: Find Strict Send Payment Paths',
-             "value": f'`{self.command_string}paths send <to address> <amount> <asset> <issuer>`\n'
+             "value": f'```{self.command_string}paths send <to address> <amount> <asset> <issuer>```\n'
                       f'***__Note__***: Issuer can be None if asset is Native'},
-            {"name": f':mag_right:  Find Strict Receive Payment Paths :mag:',
-             "value": f'`{self.command_string}paths find <from address> <amount> <asset_codes> <asset isser>`\n'
+            {"name": f':mag_right: Find Strict Receive Payment Paths :mag:',
+             "value": f'```{self.command_string}paths find <from address> <amount> <asset_codes> <asset issuer>```\n'
                       f'***__Note__***: Issuer can be None if asset is Native'},
         ]
         if ctx.invoked_subcommand is None:

@@ -1,3 +1,6 @@
+"""
+COGS which handle explanation  on commands available to communicate with the Paths Horizon Endpoints from Discord
+"""
 
 from discord.ext import commands
 from discord import Colour
@@ -12,10 +15,6 @@ custom_messages = CustomMessages()
 
 
 class HorizonPaths(commands.Cog):
-    """
-    Discord Commands dealing with Merchant Licensing
-    """
-
     def __init__(self, bot):
         self.bot = bot
         self.command_string = bot.get_command_str()
@@ -26,18 +25,18 @@ class HorizonPaths(commands.Cog):
         """
         Effects entry point to horizon endpoints
         """
-        title = ':railway_track:  __Horizon Paths Queries__ :railway_track:'
-        description = 'Representation of all available commands available to interact with ***Paths*** Endpoint on ' \
-                      'Stellar Horizon Server'
-        list_of_commands = [
-            {"name": f':service_dog: Find Strict Send Payment Paths',
-             "value": f'`{self.command_string}paths send <to address> <amount> <asset> <issuer>`\n'
-                      f'***__Note__***: Issuer can be None if asset is Native'},
-            {"name": f':mag_right:  Find Strict Receive Payment Paths :mag:',
-             "value": f'`{self.command_string}paths find <from address> <amount> <asset_codes> <asset isser>`\n'
-                      f'***__Note__***: Issuer can be None if asset is Native'},
-        ]
         if ctx.invoked_subcommand is None:
+            title = ':railway_track:  __Horizon Paths Queries__ :railway_track:'
+            description = 'Representation of all available commands available to interact with ***Paths*** Endpoint on ' \
+                          'Stellar Horizon Server.Commands can be used 1/30 seconds/ per user.'
+            list_of_commands = [
+                {"name": f':service_dog: Find Strict Send Payment Paths',
+                 "value": f'```{self.command_string}paths send <to address> <amount> <asset code> <asset issuer>```\n'
+                          f'***__Note__***: Issuer can be None if asset is Native'},
+                {"name": f':mag_right: Find Strict Receive Payment Paths :mag:',
+                 "value": f'```{self.command_string}paths find <from address> <amount> <asset code> <asset issuer>```\n'
+                          f'***__Note__***: Issuer can be None if asset is Native'},
+            ]
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
