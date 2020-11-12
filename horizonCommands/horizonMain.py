@@ -277,12 +277,13 @@ class HorizonAccessCommands(commands.Cog):
     async def aggregations(self, ctx):
         title = ':bar_chart: __Horizon Trade Aggregations Queries__ :bar_chart: '
         description = 'Representation of all available commands available to interact with ***Trade Aggregations*** ' \
-                      'Endpoint on Stellar Horizon Server'
+                      'Endpoint on Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
 
         list_of_commands = [
-            {"name": f':chart_with_upwards_trend: XLM vs Asset Trades :chart_with_upwards_trend:',
-             "value": f'`{self.command_string}trade agg <counter asset> <counter issuer> <resolution> `\n'
-                      f'***__Note__***: Resolutions allowed 1, 5, and 15 minutes'},
+            {"name": f':chart_with_upwards_trend: XLM vs Asset Trades',
+             "value": f'`{self.command_string}trade aggregations <counter asset> <counter issuer> <resolution> `\n'
+                      f'***__Note__***: Resolutions allowed 1, 5, and 15 minutes\n'
+                      f'`Aliases: agg`'},
         ]
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
