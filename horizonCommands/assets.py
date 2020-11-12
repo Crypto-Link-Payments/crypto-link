@@ -1,10 +1,6 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Assets Horizon Endpoints from Discord
 """
-
 from discord.ext import commands
 from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages

@@ -130,9 +130,9 @@ class HorizonAccessCommands(commands.Cog):
 
     @horizon.group()
     async def assets(self, ctx):
-        title = ':gem: __Horizon Assets Operations__ :gem:'
+        title = ':gem: __Horizon Assets Queries__ :gem:'
         description = 'Representation of all available commands available to interact with ***Assets*** Endpoint on ' \
-                      'Stellar Horizon Server'
+                      'Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
         list_of_commands = [{"name": f':gem: Query by exact details :gem: ',
                              "value": f'`{self.command_string}assets get <asset code> <issuer address>`'},
                             {"name": f':regional_indicator_c: Query by code :regional_indicator_c: ',

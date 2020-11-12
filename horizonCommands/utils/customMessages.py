@@ -116,34 +116,32 @@ async def send_asset_details(destination, data, request):
 
     if not toml_access:
         toml_data = None
-        toml_link = ''
+        toml_link = 'None'
     else:
         toml_data = "Access link"
         toml_link = toml_access
 
     asset_info = Embed(title=" :bank: __Issuer Details__ :bank:",
-                       description=f'TOML access: [{toml_data}]({toml_link})',
+                       description='Here are the details for specified Asset Query',
                        colour=Colour.lighter_gray())
     asset_info.add_field(name=f':regional_indicator_c: Asset Code :regional_indicator_c:',
-                         value=f'{record["asset_code"]}',
-                         inline=False)
+                         value=f'{record["asset_code"]}')
     asset_info.add_field(name=f':gem: Asset Type :gem:',
-                         value=f'{record["asset_type"]}',
-                         inline=False)
-    asset_info.add_field(name=f':map: Issuing Account :map: ',
+                         value=f'{record["asset_type"]}')
+    asset_info.add_field(name=f':scroll: TOML :scroll: ',
+                         value=f'[{toml_data}]({toml_link})')
+    asset_info.add_field(name=f':map: Asset Issuer :map: ',
                          value=f'```{record["asset_issuer"]}```',
                          inline=False)
     asset_info.add_field(name=f':moneybag: Issued Amount :moneybag: ',
                          value=f'`{record["amount"]} {record["asset_code"]}`',
-                         inline=False)
+                         inline=True)
     asset_info.add_field(name=f':cowboy: Account Count :cowboy: ',
-                         value=f'`{record["num_accounts"]}`',
-                         inline=False)
+                         value=f'`{record["num_accounts"]}`')
     asset_info.add_field(name=f':triangular_flag_on_post: Account Flags :triangular_flag_on_post: ',
                          value=f'Immutable: {record["flags"]["auth_immutable"]} \n'
                                f'Required:  {record["flags"]["auth_required"]}\n'
-                               f'Revocable:  {record["flags"]["auth_revocable"]}\n',
-                         inline=False)
+                               f'Revocable:  {record["flags"]["auth_revocable"]}\n')
     asset_info.add_field(name=f':white_circle: Paging Token :white_circle:',
                          value=f'```{record["paging_token"]}```',
                          inline=False)
