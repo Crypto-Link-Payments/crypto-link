@@ -1,37 +1,23 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Payments Horizon Endpoints from Discord
 """
 
 from discord.ext import commands
 from discord import Embed, Colour
-from cogs.utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
-from utils.tools import Helpers
-from horizonCommands.horizonAccess.horizon import server
+from horizonCommands.utils.customMessages import horizon_error_msg, send_payments_details
+from stellar_sdk.exceptions import BadRequestError
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
 class HorizonPayments(commands.Cog):
-    """
-    Discord Commands dealing with Merchant Licensing
-    """
-
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.payment = self.server.payments()
+        self.hor_payments = self.bot.backoffice.stellar_wallet.server.payments()
 
     @staticmethod
     async def process_server_response(ctx, data, query_key: str, user_query: str):
@@ -110,95 +96,93 @@ class HorizonPayments(commands.Cog):
                 counter += 1
 
     @commands.group()
-    @commands.check(has_wallet)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def payments(self, ctx):
         """
         End points for payments
         """
-        title = ':money_with_wings:  __Horizon Payments Operations__ :money_with_wings: '
-        description = 'Representation of all available commands available to interact with ***Payments*** Endpoint on ' \
-                      'Stellar Horizon Server. All commands return last 3 transactions done on account, and explorer' \
-                      ' link to access older transactions. All transactions are returned in descending order.'
-        list_of_commands = [
-            {"name": f':map: Get payments by public address :map: ',
-             "value": f'`{self.command_string}payments address <address>`'},
-            {"name": f':ledger:  Get payments based on ledger sequence :ledger:   ',
-             "value": f'`{self.command_string}payments ledger <ledger sequence>`'},
-            {"name": f':hash:  Get payments based on transaction hash :hash:',
-             "value": f'`{self.command_string}payments transaction <hash of transaction>`'}
-        ]
-
         if ctx.invoked_subcommand is None:
+            title = ':money_with_wings:  __Horizon Payments Operations__ :money_with_wings: '
+            description = 'Representation of all available commands available to interact with ***Payments*** Endpoint on' \
+                          ' Stellar Horizon Server. All commands return last 3 payments done based on query criteria,' \
+                          ' and Horizon link is returned with the rest. All payments are returned in descending order.' \
+                          ' Commands can be used 1/30 seconds/ per user.'
+            list_of_commands = [
+                {"name": f':map: Get payments by public address :map: ',
+                 "value": f'```{self.command_string}payments address <address>```\n'
+                          f'`Aliases: addr`'},
+                {"name": f':ledger:  Get payments based on ledger sequence :ledger:   ',
+                 "value": f'```{self.command_string}payments ledger <ledger sequence>```'},
+                {"name": f':hash:  Get payments based on transaction hash :hash:',
+                 "value": f'```{self.command_string}payments transaction <hash of transaction>```\n'
+                          f'`Aliases: tx, hash'}
+            ]
+
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @payments.command()
+    @payments.command(aliases=['addr'])
     async def address(self, ctx, address: str):
-        if check_stellar_address(address=address):
-            data = self.payment.for_account(account_id=address).order(
-                desc=True).limit(limit=200).call()
-            await self.process_server_response(ctx, data=data, query_key='address', user_query=f'{address}')
-        else:
-            message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
+        try:
+            if check_stellar_address(address=address):
+                data = self.hor_payments.for_account(account_id=address).order(
+                    desc=True).limit(limit=200).call()
+                if data['_embedded']['records']:
+                    await self.process_server_response(ctx, data=data, query_key='address', user_query=f'{address}')
+                else:
+                    message = f'Address `{address}` does not have any payments yet.'
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                         sys_msg_title="No Payments Found")
+            else:
+                message = f'Address you have provided is not a valid Stellar Lumen Address. Please try again'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=CONST_ACCOUNT_ERROR)
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @payments.command()
     async def ledger(self, ctx, ledger_sequence: int):
-        data = self.payment.for_ledger(sequence=ledger_sequence).order(
-            desc=True).limit(limit=200).call()
-        records = data['_embedded']['records']
-        ledger_info = Embed(title=f':ledger: Ledger {ledger_sequence} Information :ledger:',
-                            description='Bellow is represent information for requested ledger.',
-                            colour=Colour.lighter_gray())
-        ledger_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
-                              value=f'{data["_links"]["self"]["href"]}')
-        await ctx.author.send(embed=ledger_info)
-        for record in records:
-            if record['type'] == 'create_account':
-                action_name = 'Create Account'
-            ledger_record = Embed(title=f':bookmark_tabs: {action_name} :bookmark_tabs: ',
-                                  description=f'`{record["account"]}`',
-                                  colour=Colour.dark_orange())
-            ledger_record.add_field(name=f' Source account',
-                                    value=f'`{record["source_account"]}`')
-            ledger_record.add_field(name=f':calendar: Date and time :calendar: ',
-                                    value=f'`{record["created_at"]}`',
-                                    inline=False)
-            ledger_record.add_field(name=':white_circle: Paging Token :white_circle: ',
-                                    value=f'`{record["paging_token"]}`',
-                                    inline=False)
-            ledger_record.add_field(name=':map: Funder Address :map: ',
-                                    value=f'`{record["funder"]}`',
-                                    inline=False)
-            ledger_record.add_field(name=':moneybag:  Starting Balance :moneybag: ',
-                                    value=f'`{record["starting_balance"]} XLM`',
-                                    inline=False)
-            ledger_record.add_field(name=':hash: Transaction Hash :hash: ',
-                                    value=f'`{record["transaction_hash"]}`',
-                                    inline=False)
-            ledger_record.add_field(name=f':person_running: Ledger Activity :person_running: ',
-                                    value=f'[Self]({data["_links"]["self"]["href"]})\n'
-                                          f'[Transactions]({record["_links"]["transaction"]["href"]})\n'
-                                          f'[Effects]({record["_links"]["effects"]["href"]})\n'
-                                          f'[Succeeds]({record["_links"]["succeeds"]["href"]})\n'
-                                          f'[Precedes]({record["_links"]["precedes"]["href"]})')
-            await ctx.author.send(embed=ledger_record)
+        try:
+            data = self.hor_payments.for_ledger(sequence=ledger_sequence).order(
+                desc=True).limit(limit=200).call()
+            records = data['_embedded']['records']
+            if records:
+                ledger_info = Embed(title=f':ledger: Ledger {ledger_sequence} Information :ledger:',
+                                    description='Bellow is represent information for requested ledger.',
+                                    colour=Colour.lighter_gray())
+                ledger_info.add_field(name=f':sunrise: Horizon Link :sunrise:',
+                                      value=f'{data["_links"]["self"]["href"]}')
+                await ctx.author.send(embed=ledger_info)
 
-    @payments.command(aliases=["tx"])
+                for record in records:
+                    if record['type'] == 'payment':
+                        await send_payments_details(destination=ctx.message.author, record=record,
+                                                    action_name='Payment')
+            else:
+                message = f'Ledger `{ledger_sequence}` does not have any payments yet.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=":ledger: No Payments Found :ledger:")
+        except BadRequestError as e:
+            await horizon_error_msg(destination=ctx.message.author, error=e.extras["reason"])
+
+    @payments.command(aliases=["tx", "hash"])
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def transaction(self, ctx, transaction_hash: str):
-        data = self.payment.for_transaction(transaction_hash=transaction_hash).order(
-            desc=True).limit(limit=200).call()
-        await self.process_server_response(ctx, data=data, query_key='transaction hash',
-                                           user_query=f'{transaction_hash}')
+        try:
+            data = self.hor_payments.for_transaction(transaction_hash=transaction_hash).order(
+                desc=True).limit(limit=20).call()
+            if data['_embedded']['records']:
+                await self.process_server_response(ctx, data=data, query_key='transaction hash',
+                                                   user_query=f'{transaction_hash}')
 
-    @payments.error
-    async def asset_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
-            message = f'In order to user Stellar Expert Commands you need to have wallet registered in the system!. Use' \
-                      f' `{self.command_string}register`'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_ACCOUNT_ERROR)
+            else:
+                message = f'No Payments for Transaction with :hash:  `{transaction_hash}` found.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=":hash: No Payments Found :hash:")
+
+        except BadRequestError as e:
+            await horizon_error_msg(destination=ctx.message.author, error=e.extras["reason"])
 
     @ledger.error
     async def ledger_error(self, ctx, error):

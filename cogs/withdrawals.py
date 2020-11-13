@@ -58,7 +58,7 @@ class WithdrawalCommands(commands.Cog):
 
     @withdraw.command(aliases=["t"])
     @commands.check(user_has_wallet)
-    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 45, commands.BucketType.user)
     async def token(self, ctx, ticker: str, withdrawal_amount: float, address: str):
         # TOKEN check for bot hot wallet
         token = ticker.lower()
@@ -292,7 +292,7 @@ class WithdrawalCommands(commands.Cog):
 
     @withdraw.command(aliases=["x"])
     @commands.check(user_has_wallet)
-    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 45, commands.BucketType.user)
     async def xlm(self, ctx, amount: float, address: str):
         """
         Initiates withdrawal on Stellar chain

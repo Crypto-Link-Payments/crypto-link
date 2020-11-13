@@ -1,23 +1,16 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Operations Horizon Endpoints from Discord
 """
 
 from discord.ext import commands
 from discord import Embed, Colour
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
-from horizonCommands.horizonAccess.horizon import server
+from stellar_sdk.exceptions import BadRequestError
+from horizonCommands.utils.tools import asset_code
+from horizonCommands.utils.customMessages import horizon_error_msg, send_operations_basic_details
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
-CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
 class HorizonOperations(commands.Cog):
@@ -27,56 +20,41 @@ class HorizonOperations(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = server
-        self.op = self.server.operations()
+        self.hor_operations =self.bot.backoffice.stellar_wallet.server.operations()
 
-    @staticmethod
-    def asset_code(op):
-        if op["asset_type"] == 'native':
-            return 'XLM'
-
-        else:
-            return op["asset_code"]
-
-    @commands.group()
+    @commands.group(aliases=['op'])
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def operations(self, ctx):
         """
         Effects entry point to horizon endpoints
         """
         title = ':wrench: __Horizon Operations Queries__ :wrench: '
         description = 'Representation of all available commands available to interact with' \
-                      ' ***Operations*** Endpoint on Stellar Horizon Server'
+                      ' ***Operations*** Endpoint on Stellar Horizon Server.  Commands ' \
+                      'can be used 1/30 seconds/ per user.\n' \
+                      '`Aliases: op`'
         list_of_commands = [
-            {"name": f':tools: Single Operation :tools: ',
-             "value": f'`{self.command_string}operations operation <operation id>`'},
-            {"name": f' :ledger: Operation by Ledger :ledger: ',
-             "value": f'`{self.command_string}operations ledger <ledger id>`'},
             {"name": f' :map: Operation by Account :map: ',
-             "value": f'`{self.command_string}operations account <Account public address>`'},
-            {"name": f' :hash: Operations for transaction :hash:',
-             "value": f'`{self.command_string}operations transaction <transaction hash>`'}
+             "value": f'```{self.command_string}operations account <Account public address>```\n'
+                      f'`Aliases: acc, addr`'},
+
+            {"name": f':tools: Single Operation :tools: ',
+             "value": f'```{self.command_string}operations operation <operation id>```\n'
+                      f'`Aliases: id`'},
+            {"name": f' :hash: Operations for transaction hash :hash:',
+             "value": f'```{self.command_string}operations transaction <transaction hash>```\n'
+                      f'`Aliases: hash, tx`'},
+            {"name": f' :ledger: Operation by Ledger :ledger: ',
+             "value": f'```{self.command_string}operations ledger <ledger id>```'}
         ]
         if ctx.invoked_subcommand is None:
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    async def send_operations_data(self, ctx, data, key_query: str):
+    async def send_operations_data(self, ctx, data):
         operations = data['_embedded']["records"]
-        horizon_query = data['_links']['self']['href']
-
-        effects_info = Embed(title=f':wrench: {key_query} Operations :wrench:  ',
-                             description=f'Bellow are last three Operations which happened for {key_query}',
-                             colour=Colour.lighter_gray())
-        effects_info.add_field(name=f':sunrise: Horizon Access :sunrise: ',
-                               value=f'[{key_query} Operations]({horizon_query})')
-        effects_info.add_field(name=f':three: Last Three Effects :three: ',
-                               value=f':arrow_double_down: ',
-                               inline=False)
-        await ctx.author.send(embed=effects_info)
-
         counter = 0
         for op in operations:
             if counter <= 2:
@@ -109,7 +87,7 @@ class HorizonOperations(commands.Cog):
                                         inline=False)
 
                 elif effect_type == 'payment':
-                    code = self.asset_code(op=op)
+                    code = asset_code(op=op)
                     eff_embed.add_field(name=f':cowboy:  Sender :cowboy: ',
                                         value=f'`{op["from"]}`',
                                         inline=False)
@@ -121,7 +99,7 @@ class HorizonOperations(commands.Cog):
                                         inline=False)
 
                 elif effect_type in ['path payment strict send', 'path payment strict receive']:
-                    code = self.asset_code(op=op)
+                    code = asset_code(op=op)
                     eff_embed.add_field(name=f':cowboy: Sender :cowboy: ',
                                         value=f'`{op["from"]}`',
                                         inline=False)
@@ -162,26 +140,73 @@ class HorizonOperations(commands.Cog):
             else:
                 pass
 
-    @operations.command()
+    @operations.command(aliases=["id"])
     async def operation(self, ctx, operation_id):
-        data = self.op.operation(operation_id=operation_id).call()
-        await self.send_operations_data(ctx=ctx, data=data, key_query='Operation')
+        try:
+            data = self.hor_operations.operation(operation_id=operation_id).call()
+            if data['_embedded']["records"]:
+                await send_operations_basic_details(destination=ctx.message.author, key_query="Operation",
+                                                    hrz_link=data['_links']['self']['href'])
 
-    @operations.command()
+                await self.send_operations_data(ctx=ctx, data=data)
+            else:
+                message = f'No operations found under operation ID`{operation_id}`.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="No Operations for operation ID")
+
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
+
+    @operations.command(aliases=['acc', 'addr'])
     async def account(self, ctx, address: str):
-        data = self.op.for_account(account_id=address).include_failed(False).order(desc=True).limit(200).call()
-        await self.send_operations_data(ctx=ctx, data=data, key_query='Account')
+        try:
+            data = self.hor_operations.for_account(account_id=address).include_failed(False).order(desc=True).limit(200).call()
+            if data['_embedded']["records"]:
+                await send_operations_basic_details(destination=ctx.message.author, key_query="Account",
+                                                    hrz_link=data['_links']['self']['href'])
+                await self.send_operations_data(ctx=ctx, data=data)
+            else:
+                message = f'Account `{address}` has not operations.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="No Operations for Address")
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
     @operations.command()
     async def ledger(self, ctx, ledger_id: int):
-        data = self.op.for_ledger(sequence=ledger_id).include_failed(False).order(desc=True).limit(200).call()
-        await self.send_operations_data(ctx=ctx, data=data, key_query='Ledger')
+        try:
+            data = self.hor_operations.for_ledger(sequence=ledger_id).include_failed(False).order(desc=True).limit(200).call()
+            if data['_embedded']["records"]:
+                await send_operations_basic_details(destination=ctx.message.author, key_query="Ledger",
+                                                    hrz_link=data['_links']['self']['href'])
+                await self.send_operations_data(ctx=ctx, data=data)
+            else:
+                message = f'No operations for ledger id `{ledger_id}`.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="No Operations for Ledger")
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
-    @operations.command()
+    @operations.command(aliases=["hash", "tx"])
     async def transaction(self, ctx, tx_hash: str):
-        data = self.op.for_transaction(transaction_hash=tx_hash).include_failed(False).order(desc=True).limit(
-            200).call()
-        await self.send_operations_data(ctx=ctx, data=data, key_query='Transaction')
+        try:
+
+            data = self.hor_operations.for_transaction(transaction_hash=tx_hash).include_failed(False).order(desc=True).limit(
+                200).call()
+            if data['_embedded']["records"]:
+                await send_operations_basic_details(destination=ctx.message.author, key_query="Transaction",
+                                                    hrz_link=data['_links']['self']['href'])
+                await self.send_operations_data(ctx=ctx, data=data)
+            else:
+                message = f'No operations for transaction with hash `{tx_hash}`.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="No Operations for Transaction Hash")
+        except BadRequestError as e:
+            extras = e.extras
+            await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
 
 
 def setup(bot):

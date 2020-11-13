@@ -1,37 +1,21 @@
 """
-Cogs to handle commands for licensing with the bot
-
-Owners of the community can pay a one time monthly fee which allows them to make unlimited transfers
-from Merchant wallet to their won upon withdrawal.
+COGS which handle explanation  on commands available to communicate with the Payments Horizon Endpoints from Discord
 """
 
 from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 from datetime import datetime
-
-from cogs.utils.securityChecks import check_stellar_address
-from horizonCommands.horizonAccess.horizon import server
-from stellar_sdk import Asset, PathPayment
+from stellar_sdk import Asset
 
 custom_messages = CustomMessages()
-helper = Helpers()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
-
-CONST_STELLAR_EMOJI = "<:stelaremoji:684676687425961994>"
-CONST_ACCOUNT_ERROR = '__Account Not Registered__'
 
 
-class HorizonTrdeaAggregations(commands.Cog):
-    """
-    Discord Commands dealing with Merchant Licensing
-    """
-
+class HorizonTradeAggregations(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.command_string = bot.get_command_str()
-        self.server = server
+        self.server = self.bot.backoffice.stellar_wallet.server
 
     @staticmethod
     def process_resolution(resolution: int):
@@ -51,20 +35,22 @@ class HorizonTrdeaAggregations(commands.Cog):
             return None
 
     @commands.group()
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def trade(self, ctx):
         """
         Effects entry point to horizon endpoints
         """
-        title = ':bar_chart: __Horizon Trade Aggregations Queries__ :bar_chart: '
-        description = 'Representation of all available commands available to interact with ***Trade Aggregations*** ' \
-                      'Endpoint on Stellar Horizon Server'
-
-        list_of_commands = [
-            {"name": f':chart_with_upwards_trend: XLM vs Asset Trades',
-             "value": f'`{self.command_string}trade agg <counter asset> <counter issuer> <resolution> `\n'
-                      f'***__Note__***: Resolutions allowed 1, 5, and 15 minutes'},
-        ]
         if ctx.invoked_subcommand is None:
+            title = ':bar_chart: __Horizon Trade Aggregations Queries__ :bar_chart: '
+            description = 'Representation of all available commands available to interact with ***Trade Aggregations*** ' \
+                          'Endpoint on Stellar Horizon Server. Commands can be used 1/30 seconds/ per user.'
+
+            list_of_commands = [
+                {"name": f':chart_with_upwards_trend: XLM vs Asset Trades',
+                 "value": f'`{self.command_string}trade aggregations <counter asset> <counter issuer> <resolution> `\n'
+                          f'***__Note__***: Resolutions allowed 1, 5, and 15 minutes\n'
+                          f'`Aliases: agg`'},
+            ]
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
@@ -119,4 +105,4 @@ class HorizonTrdeaAggregations(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(HorizonTrdeaAggregations(bot))
+    bot.add_cog(HorizonTradeAggregations(bot))
