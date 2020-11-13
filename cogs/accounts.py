@@ -278,8 +278,8 @@ class UserAccountCommands(commands.Cog):
     async def register_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__{self.command_string}register error__'
-            message = f'You can not register over DM with the bot. Please head to one of the channel on Launch Pad ' \
-                      f'Investment community and execute command  {self.command_string}register'
+            message = f'You can not register over DM with the bot. Please head to one of the channels on Discord ' \
+                      f' server where Crypto Link is present and execute command  {self.command_string}register'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
