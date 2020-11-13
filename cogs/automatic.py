@@ -55,12 +55,9 @@ class AutoFunctions(commands.Cog):
                                                  sys_msg_title=':sweat_drops: Cool-Down :sweat_drops: ')
 
         elif isinstance(exception, commands.MissingRequiredArgument):
-            await custom_messages.system_message(ctx=ctx, color_code=Colour.orange(), message=f'{exception}', destination=0,
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.orange(), message=f'{exception}',
+                                                 destination=0,
                                                  sys_msg_title=':sweat_drops: Missing Required Argument :sweat_drops: ')
-
-        elif isinstance(exception, commands.MissingRequiredArgument):
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=f'{exception}', destination=0,
-                                                 sys_msg_title='Missing argument')
         elif isinstance(exception, HTTPException):
             title = 'Discord API Error'
             message = f'We could not process your command due to the connection error with Discord API server. ' \
