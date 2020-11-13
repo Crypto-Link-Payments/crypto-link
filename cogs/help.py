@@ -321,11 +321,15 @@ class HelpCommands(commands.Cog):
                                      '[Stellar Laboratory](https://laboratory.stellar.org/#?network=public) and '
                                      'bring them to Discord Users.',
                                inline=False)
-        horizon_info.add_field(name=':joystick:  Sections of commands :joystick: ',
-                               value=f'`{self.command_string}horizon` serving as an entry point has been '
-                                     f'broken down in multiple sub categories:\n'
-                                     f':one: `{self.command_string}horizon account`\n'
-                                     f':two: `{self.command_string}horizon payments`',
+        horizon_info.add_field(name=':joystick: How to access Horizon :joystick: ',
+                               value=f'`{self.command_string}horizon` is the entry point to navigate '
+                                     f'through available options and endpoints which you can access from Discord.',
+                               inline=False)
+        horizon_info.add_field(name=':joystick: Horizon Synonyms :joystick: ',
+                               value=f'Synonyms are "nicknames" for `{self.command_string}horizon`:\n'
+                                     f'`{self.command_string}hor`:\n'
+                                     f'`{self.command_string}network`:\n'
+                                     f'`{self.command_string}explorer`:\n',
                                inline=False)
 
         await ctx.author.send(embed=horizon_info, delete_after=500)
