@@ -320,7 +320,7 @@ async def send_operation_details(destination, envelope: str, network_type):
                               inline=False)
             if isinstance(op.asset, Asset):
                 op_info.add_field(name=f'Payment Value',
-                                  value=f'`{op.amount} {op.asset.code}`')
+                                  value=f'`{op.amount:.7f} {op.asset.code}`')
 
         elif isinstance(op, CreateAccount):
             op_info.add_field(name=f'Create Account for',
