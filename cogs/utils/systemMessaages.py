@@ -184,7 +184,7 @@ class CustomMessages:
         elif direction == 1:
             title = f':inbox_tray: Incoming {tx_type_emoji} {tx_type.title()} transaction :inbox_tray: '
             col = discord.Colour.green()
-            destination_txt = ':postbox:  Sender :postbox: '
+            destination_txt = ':postbox: Sender :postbox: '
             avatar = destination.avatar_url
             value_emoji = ":moneybag: "
 
