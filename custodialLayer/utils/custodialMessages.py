@@ -250,7 +250,7 @@ async def sign_message_information(destination, transaction_details: dict, layer
                            value=f'```{transaction_details["memo"]}```',
                            inline=False)
     sign_message.add_field(name=f'Wallet address',
-                           value=f'```{transaction_details["address"]}```',
+                           value=f'```{transaction_details["toAddress"]}```',
                            inline=False)
     sign_message.add_field(name=f':money_with_wings: Transaction Values :money_with_wings: ',
                            value=f'```Total: {transaction_details["txTotal"]:.7f} XLM\n'
@@ -315,12 +315,12 @@ async def send_operation_details(destination, envelope: str, network_type):
                         colour=Colour.green())
         if isinstance(op, Payment):
             print("++++++++++++++++++++++")
-            op_info.add_field(name=f'To',
+            op_info.add_field(name=f'Payment To:',
                               value=f'```{op.destination}```',
                               inline=False)
             if isinstance(op.asset, Asset):
                 op_info.add_field(name=f'Payment Value',
-                                  value=f'`{op.amount:.7f} {op.asset.code}`')
+                                  value=f'`{op.amount} {op.asset.code}`')
 
         elif isinstance(op, CreateAccount):
             op_info.add_field(name=f'Create Account for',
@@ -353,18 +353,18 @@ async def recipient_incoming_notification(recipient, sender, wallet_level, data:
                                inline=False)
     recipient_notify.add_field(name=f'Payment Value',
                                value=f'{data["netValue"]} {data["token"]}')
-    recipient.add_field(name=":mega: Note :mega:",
-                        value=f'If wallet level 1 was used as destination, Crypto Link '
-                              f'will notify you once deposit has been successfully processed.'
-                              f' For level wallet 2 you can use commands dedicated to ***Horizon***'
-                              f' queries. Be sure to say __Thank You___ to sender.')
-    recipient.add_field(name=f':sunrise: Horizon Links :sunrise:',
-                        value=f'[Transaction]({response["_links"]["self"]["href"]})\n'
-                              f'[Operations]({response["_links"]["operations"]["href"]})\n'
-                              f'[Effects]({response["_links"]["effects"]["href"]})')
+    recipient_notify.add_field(name=":mega: Note :mega:",
+                               value=f'If wallet level 1 was used as destination, Crypto Link '
+                                     f'will notify you once deposit has been successfully processed.'
+                                     f' For level wallet 2 you can use commands dedicated to ***Horizon***'
+                                     f' queries. Be sure to say __Thank You___ to sender.')
+    recipient_notify.add_field(name=f':sunrise: Horizon Links :sunrise:',
+                               value=f'[Transaction]({response["_links"]["self"]["href"]})\n'
+                                     f'[Operations]({response["_links"]["operations"]["href"]})\n'
+                                     f'[Effects]({response["_links"]["effects"]["href"]})')
 
     try:
-        recipient.send(embed=recipient_notify)
+        await recipient.send(embed=recipient_notify)
     except Exception:
         pass
 
