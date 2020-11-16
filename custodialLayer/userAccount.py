@@ -482,12 +482,11 @@ class CustodialAccounts(commands.Cog):
                                     await self.transaction_report_dispatcher(ctx=ctx, result=result[1])
 
                                 else:
-                                    # Reject due to transfer not being successfull
+                                    hor_error = self.process_error(error=result[1])
                                     title = f':exclamation: __Transaction Dispatch Error__ :exclamation: '
-                                    message = f'Transaction could not be completed. Please try again later.' \
-                                              f'Error: ```{result[1]}```'
+                                    message = f'There has been an error in transaction: ```{hor_error}```'
                                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
-                                                                         destination=1,
+                                                                         destination=0,
                                                                          sys_msg_title=title)
                             else:
                                 title = f':exclamation: __Private Key Error__ :exclamation: '
