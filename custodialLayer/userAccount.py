@@ -698,6 +698,12 @@ class CustodialAccounts(commands.Cog):
             title = f'**__Wrong Channel Type__**'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
+        elif TimeoutError:
+            title = f'__Transaction Request Expired__'
+            message = f'It took you to long to provide requested answer. Please try again or follow ' \
+                      f'guidelines further from the Crypto Link. '
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
 
     @user.error
     async def user_tx_error(self, ctx, error):
