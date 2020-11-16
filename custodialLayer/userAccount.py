@@ -12,9 +12,9 @@ from custodialLayer.utils.custodialMessages import account_layer_selection_messa
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
     server_error_response, send_operation_details, recipient_incoming_notification
 
-from stellar_sdk import Keypair, TransactionBuilder, Network, Account, TextMemo, Payment, Asset
+from stellar_sdk import Keypair, TransactionBuilder, Network, Account, TextMemo, Payment, Asset, TransactionEnvelope
 from stellar_sdk.exceptions import ConnectionError, BadRequestError, MemoInvalidException, BadResponseError, \
-    UnknownRequestError, NotFoundError, Ed25519SecretSeedInvalidError, Ed25519PublicKeyInvalidError
+    UnknownRequestError, NotFoundError, Ed25519SecretSeedInvalidError, Ed25519PublicKeyInvalidError, BaseRequestError
 
 helper = Helpers()
 security_manager = SecurityManager()
@@ -94,6 +94,21 @@ class CustodialAccounts(commands.Cog):
         except UnknownRequestError:
             return 0.0000001
 
+    @staticmethod
+    def process_error(error):
+        """
+        Process errors
+        """
+        err = ''
+        if isinstance(error, BadRequestError):
+            # error
+            for error in error.extras["result_codes"]["operations"]:
+                if error == "op_underfunded":
+                    err += "Insufficient Funds\n"
+        else:
+            pass
+        return err
+
     def check_user_wallet_layer_level(self, layer, user_id):
         """
         Check if user has activate layer level
@@ -159,12 +174,15 @@ class CustodialAccounts(commands.Cog):
         try:
             # Sign Submit transaction to server
             result = self.server.submit_transaction(new_tx)
+
             return True, result
         except BadRequestError as e:
             return False, e
         except BadResponseError as e:
             return False, e
         except MemoInvalidException as e:
+            return False, e
+        except Exception as e:
             return False, e
 
     @commands.group(aliases=['cust', 'c', '2'])
@@ -601,13 +619,13 @@ class CustodialAccounts(commands.Cog):
                         if result[0]:
                             await self.transaction_report_dispatcher(ctx=ctx, result=result[1])
                         else:
+                            hor_error = self.process_error(error=result[1])
+
                             title = f':exclamation: __Transaction Dispatch Error__ :exclamation: '
-                            message = f'There has been an error in transaction: {result[1]}'
+                            message = f'There has been an error in transaction: ```{hor_error}```'
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                  destination=0,
                                                                  sys_msg_title=title)
-
-
                     else:
                         title = f':exclamation: __Private Key Error__ :exclamation: '
                         message = f'Invalid Ed25519 Secret Seed provided. Please try again fromm scratch'
@@ -721,6 +739,7 @@ class CustodialAccounts(commands.Cog):
                       f'`{error}`'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
+
         elif TimeoutError:
             title = f':timer: __Transaction Request Expired__ :timer: '
             message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
