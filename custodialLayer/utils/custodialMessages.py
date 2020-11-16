@@ -218,6 +218,7 @@ async def second_level_account_reg_info(destination):
     intro_info.add_field(name=f':bellhop: YES/NO :bellhop: ',
                          value="Answer with ***YES/Y*** if you have read and understood instructions.",
                          inline=False)
+    intro_info.set_footer(text='Timer= 180 seconds')
 
     await destination.send(embed=intro_info)
 
@@ -233,6 +234,7 @@ async def verification_request_explanation(destination):
     verify_embed.add_field(name=f':warning: Time limit :warning: ',
                            value=f'You have 60 seconds to provide an answer, otherwise the registration'
                                  f' will be cancelled and you will be required to repeat the process all over again.')
+    verify_embed.set_footer(text="Timer: 60 Seconds")
     await destination.send(embed=verify_embed)
 
 
