@@ -94,17 +94,6 @@ class CustodialAccounts(commands.Cog):
         except UnknownRequestError:
             return 0.0000001
 
-    def get_network_acc_balance(self, data: dict):
-        """
-        Get balance of the account from network
-        """
-        if data:
-            for coin in data["balances"]:
-                if not coin.get('asset_code'):
-                    return float(coin["balance"])
-        else:
-            return None
-
     def check_user_wallet_layer_level(self, layer, user_id):
         """
         Check if user has activate layer level
@@ -284,7 +273,6 @@ class CustodialAccounts(commands.Cog):
                                                  sys_msg_title=':exclamation: Registration Cancelled'
                                                                ' :exclamation: ',
                                                  message=message)
-
 
     @custodial.group(aliases=["acc", "a"])
     @commands.check(user_has_custodial)
