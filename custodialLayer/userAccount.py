@@ -105,20 +105,6 @@ class CustodialAccounts(commands.Cog):
         else:
             return None
 
-    def check_if_sufficient_balance(self, total_for_tx: int, sender_addr: str):
-        """
-        Check the balance of the account from server
-        """
-        try:
-            sender_data = self.server.accounts.account_id(account_id=sender_addr).call()
-            sender_balance = self.get_network_acc_balance(data=sender_data)
-            if sender_balance and sender_balance >= total_for_tx:
-                return True
-            else:
-                return False
-        except Exception:
-            return False
-
     def check_user_wallet_layer_level(self, layer, user_id):
         """
         Check if user has activate layer level
@@ -174,7 +160,7 @@ class CustodialAccounts(commands.Cog):
 
         # additional Payment if selected
         if dev_fee_status:
-            p = Payment(destination="GA65U4YUSZKYBDZUYZBB2RMUO4ALPH33CQCUNXDWKRBCSL4L2ZXDYIUZ", asset=Asset.native(),
+            p = Payment(destination=self.bot_hot_wallet, asset=Asset.native(),
                         amount=Decimal(tx_data["devFee"]))
             tx.append_operation(operation=p)
 
@@ -249,7 +235,7 @@ class CustodialAccounts(commands.Cog):
 
                     # Wait for user response
                     verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=60)
-                    print("got verification 2")
+
                     if verification_msg.content.upper() == details["userHalf"]:
                         system_half = details["secret"][len(details["secret"]) // 2:]  # Second half of private key
 
