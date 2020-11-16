@@ -385,3 +385,8 @@ async def server_error_response(destination, error, title):
     horizon_err.add_field(name=f'Error Details',
                           value=f'{error}')
     await destination.send(embed=horizon_err)
+
+
+async def send_uplink_message(destinations:list, message):
+    for dest in destinations:
+        await dest.send(content=message)

@@ -10,7 +10,7 @@ from decimal import Decimal
 from custodialLayer.utils.custodialMessages import account_layer_selection_message, dev_fee_option_notification, \
     ask_for_dev_fee_amount, send_user_account_info, sign_message_information, send_transaction_report, \
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
-    server_error_response, send_operation_details, recipient_incoming_notification
+    server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
 
 from stellar_sdk import Keypair, TransactionBuilder, Network, Account, TextMemo, Payment, Asset, TransactionEnvelope
 from stellar_sdk.exceptions import ConnectionError, BadRequestError, MemoInvalidException, BadResponseError, \
@@ -64,13 +64,21 @@ class CustodialAccounts(commands.Cog):
         except MemoInvalidException:
             return False
 
-    async def transaction_report_dispatcher(self, ctx, result: dict):
+    async def transaction_report_dispatcher(self, ctx, result: dict, data:dict = None):
         # Send notification to user on transaction details
         await send_transaction_report(destination=ctx.message.author, response=result)
         # Send notification to user on types of operations in transaction
         await send_operation_details(destination=ctx.message.author,
                                      envelope=result['envelope_xdr'],
                                      network_type=self.network_type)
+
+        # Send out explorer
+        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                         self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+
+        message = f":two::dollar: {data['netValue']} {data['token']} sent to ***{data['walletLevel']}***"
+        await send_uplink_message(destinations=load_channels, message=message)
+
 
     @staticmethod
     async def show_typing(ctx):
@@ -266,6 +274,11 @@ class CustodialAccounts(commands.Cog):
                                                                            ' Create :white_check_mark:',
                                                              message=message)
 
+                        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                         self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                        msg=':new: User register for wallet level 2. :rocket: '
+                        await send_uplink_message(destinations=load_channels, message=msg)
+
                     else:
                         message = 'There has been an issue while storing data into the system. Please re-initiate '
                         await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
@@ -427,7 +440,8 @@ class CustodialAccounts(commands.Cog):
                                              f"User ID: {recipient.id}\n"
                                              f"Wallet Level: {wallet_level}",
                                 "toAddress": recipient_details["address"],
-                                "memo": recipient_details["memo"]
+                                "memo": recipient_details["memo"],
+                                "walletLevel": f"Level {wallet_level} wallet"
                                 }
 
                         await sign_message_information(destination=ctx.author,
@@ -479,7 +493,7 @@ class CustodialAccounts(commands.Cog):
                                                                               wallet_level=wallet_level, data=data,
                                                                               response=result[1])
 
-                                    await self.transaction_report_dispatcher(ctx=ctx, result=result[1])
+                                    await self.transaction_report_dispatcher(ctx=ctx, result=result[1], data=data)
 
                                 else:
                                     hor_error = self.process_error(error=result[1])
@@ -581,6 +595,7 @@ class CustodialAccounts(commands.Cog):
                         "recipient": f"{to_address}",
                         "toAddress": to_address,
                         "memo": memo,
+                        "walletLevel":"External Wallet"
                         }
 
                 await sign_message_information(destination=ctx.author,
@@ -609,14 +624,14 @@ class CustodialAccounts(commands.Cog):
                                                       'Please wait few moments till its '
                                                       'completed')
                         await self.show_typing(
-                            ctx=ctx)  # Showws the typing on discord so user knows that something is going on
+                            ctx=ctx)  # Shows the typing on discord so user knows that something is going on
                         result = self.stream_transaction_to_network(private_key=private_full,
                                                                     amount=net_amount,
                                                                     dev_fee_status=dev_fee_activated,
                                                                     tx_data=data)
 
                         if result[0]:
-                            await self.transaction_report_dispatcher(ctx=ctx, result=result[1])
+                            await self.transaction_report_dispatcher(ctx=ctx, result=result[1], data=data)
                         else:
                             hor_error = self.process_error(error=result[1])
 
