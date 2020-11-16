@@ -174,7 +174,7 @@ async def second_level_account_reg_info(destination):
     """
     Registration message info on entry when user wants to register for the second level wallet
     """
-    intro_info = Embed(title=f':two: 2nd level wallet registration procedure :two:',
+    intro_info = Embed(title=f':two: 2nd Level Wallet Registration Procedure :two:',
                        description='Welcome to interactive registration procedure to register second level wallet '
                                    'into Crypto Link system. Please follow the guidelines provided to you, '
                                    'in order for registration to be successful and **__READ OTHER DETAILS BELLOW__**.',
@@ -183,9 +183,9 @@ async def second_level_account_reg_info(destination):
                          value='Level 2 Discord Wallet commands requires you to sign any wallet on-chain activity '
                                'which has been initiated from Discord. '
                                'Upon successful registration, system will securely store encrypted half of the private '
-                               'key into database. '
-                               'Throughout the registration process, full private key will be sent to your DM as well,'
-                               ' which you can utilize to access wallet also through other applications.',
+                               'key into database. Throughout the registration process, full private key will be sent '
+                               'to your DM as well,  which you can utilize to access wallet also through other'
+                               ' applications.',
                          inline=False)
     intro_info.add_field(name=f':exclamation: Stellar Account Merge :exclamation:  ',
                          value='Stellar allows as well for account merges. Since you control your private keys, '
@@ -205,13 +205,18 @@ async def second_level_account_reg_info(destination):
                                'Once registration process is successfully completed, store private key somewhere safe'
                                ' and manually delete messages from the bot from your DM.***',
                          inline=False)
-    intro_info.add_field(name=f':exclamation: Responsibility :exclamation:  ',
+    intro_info.add_field(name=f':timer:  Responsibility  :timer: ',
+                         value='Wallet level 2 commands are timed, which means that you have certain amount of seconds'
+                               'in which you are required to respond to the prompt. Crypto Link will let you know when'
+                               ' time expires.',
+                         inline=False)
+    intro_info.add_field(name=f':exclamation: Private Key and CL Staff :exclamation:  ',
                          value='Crypto Link Staff will ***NEVER ASK***  you to provide them private key details. '
                                'if you see such activity please report it immediately to the staff on Crypto Link '
                                'Community so we can user in the system.',
                          inline=False)
-    intro_info.add_field(name=f'YES/NO',
-                         value="Answer with YES/Y if you have read, and understood instructions",
+    intro_info.add_field(name=f':bellhop: YES/NO :bellhop: ',
+                         value="Answer with ***YES/Y*** if you have read and understood instructions.",
                          inline=False)
 
     await destination.send(embed=intro_info)
