@@ -444,8 +444,6 @@ class CustomMessages:
         """
         Transactin reports to all explorer applied channels
         """
-        print(applied_channels)
-        print()
         if not on_chain:
             msg_streamed = self.filter_message(message=message, tx_type=tx_type)
             for explorer_channel in applied_channels:
