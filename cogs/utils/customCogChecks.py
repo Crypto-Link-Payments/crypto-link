@@ -88,3 +88,7 @@ def user_has_custodial(ctx):
     Custom check for custodial wallet
     """
     return ctx.bot.backoffice.custodial_manager.second_level_user_reg_status(user_id=ctx.author.id)
+
+
+def user_has_no_custodial(ctx):
+    return not ctx.bot.backoffice.custodial_manager.second_level_user_reg_status(user_id=ctx.author.id)

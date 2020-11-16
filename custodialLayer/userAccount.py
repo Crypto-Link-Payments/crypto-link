@@ -1,6 +1,6 @@
 from discord import Embed, Colour, Member
 from discord.ext import commands
-from cogs.utils.customCogChecks import user_has_wallet, user_has_custodial, is_dm, is_public
+from cogs.utils.customCogChecks import user_has_wallet, user_has_custodial, is_dm, is_public, user_has_no_custodial
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 from utils.securityManager import SecurityManager
@@ -206,93 +206,85 @@ class CustodialAccounts(commands.Cog):
 
     @custodial.command(aliases=["reg", "new", 'get'])
     @commands.check(is_dm)
+    @commands.check(user_has_no_custodial)
     async def register(self, ctx):
         """
         Interactive registration procedure for second wallet level
         """
-        # Check if custodial level is not registered yet
-        if not self.backoffice.custodial_manager.second_level_user_reg_status(user_id=ctx.author.id):
+        # Get public and private key from the sdk
+        await second_level_account_reg_info(destination=ctx.author)
 
-            # Get public and private key from the sdk
-            await second_level_account_reg_info(destination=ctx.author)
+        # Wait for answer
+        welcome_verification = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=180)
+        # Verify user answer
+        if welcome_verification.content.upper() in ["YES", "Y"]:
+            # Get private and public key
+            details = self.backoffice.stellar_wallet.create_stellar_account()
+            # Check if details returned
+            if details:
+                # User half of the key
+                details["userHalf"] = details["secret"][:len(details["secret"]) // 2]
 
-            # Wait for answer
-            welcome_verification = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=180)
-            # Verify user answer
-            if welcome_verification.content.upper() in ["YES", "Y"]:
-                # Get private and public key
-                details = self.backoffice.stellar_wallet.create_stellar_account()
-                # Check if details returned
-                if details:
-                    # User half of the key
-                    details["userHalf"] = details["secret"][:len(details["secret"]) // 2]
+                # Send information with details of new account
+                await send_new_account_information(ctx=ctx, details=details)
 
-                    # Send information with details of new account
-                    await send_new_account_information(ctx=ctx, details=details)
+                # Message on explanation about verification
+                await verification_request_explanation(destination=ctx.message.author)
 
-                    # Message on explanation about verification
-                    await verification_request_explanation(destination=ctx.message.author)
+                # Wait for user response
+                verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=60)
 
-                    # Wait for user response
-                    verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=60)
+                if verification_msg.content.upper() == details["userHalf"]:
+                    system_half = details["secret"][len(details["secret"]) // 2:]  # Second half of private key
 
-                    if verification_msg.content.upper() == details["userHalf"]:
-                        system_half = details["secret"][len(details["secret"]) // 2:]  # Second half of private key
+                    # getting encrypted version of the key
+                    encrypted_key = security_manager.encrypt(private_key=bytes(system_half, 'utf-8'))
 
-                        # getting encrypted version of the key
-                        encrypted_key = security_manager.encrypt(private_key=bytes(system_half, 'utf-8'))
+                    # Producing data to be stored
+                    data_to_store = {
+                        "userId": int(ctx.author.id),
+                        "publicAddress": details["address"],
+                        "privateKey": encrypted_key
+                    }
 
-                        # Producing data to be stored
-                        data_to_store = {
-                            "userId": int(ctx.author.id),
-                            "publicAddress": details["address"],
-                            "privateKey": encrypted_key
-                        }
+                    # Storing data
+                    if self.backoffice.custodial_manager.create_user_wallet(data_to_store=data_to_store):
+                        message = "You have successfully verified your secret key and registered level 2 account" \
+                                  " into Crypto Link System. Public address and 1/2 of private" \
+                                  " key have been stored. In order for account to become " \
+                                  "active, you are required to activate it through on-chain deposit to address " \
+                                  "provided to you in previous steps"
+                        await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green(), destination=0,
+                                                             sys_msg_title=':white_check_mark: Second Layer Account'
+                                                                           ' Create :white_check_mark:',
+                                                             message=message)
 
-                        # Storing data
-                        if self.backoffice.custodial_manager.create_user_wallet(data_to_store=data_to_store):
-                            message = "You have successfully verified your secret key and registered level 2 account" \
-                                      " into Crypto Link System. Public address and 1/2 of private" \
-                                      " key have been stored. In order for account to become " \
-                                      "active, you are required to activate it through on-chain deposit to address " \
-                                      "provided to you in previous steps"
-                            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green(), destination=0,
-                                                                 sys_msg_title=':white_check_mark: Second Layer Account'
-                                                                               ' Create :white_check_mark:',
-                                                                 message=message)
-
-                        else:
-                            message = 'There has been an issue while storing data into the system. Please re-initiate '
-                            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                                 sys_msg_title=':white_check_mark: Second Layer '
-                                                                               'Account Created :white_check_mark:',
-                                                                 message=message)
                     else:
-                        message = 'Account could not be verified as the Signature key provided for Discord activity is' \
-                                  ' not the same as provided to you above. Please initiate registration process again.'
+                        message = 'There has been an issue while storing data into the system. Please re-initiate '
                         await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                             sys_msg_title=':exclamation: Key verification error'
-                                                                           ' :exclamation: ',
+                                                             sys_msg_title=':white_check_mark: Second Layer '
+                                                                           'Account Created :white_check_mark:',
                                                              message=message)
                 else:
-                    message = 'There has been an issue while trying to create in-active account. Please try again later.'
+                    message = 'Account could not be verified as the Signature key provided for Discord activity is' \
+                              ' not the same as provided to you above. Please initiate registration process again.'
                     await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                         sys_msg_title=':exclamation: Account Creation Error'
+                                                         sys_msg_title=':exclamation: Key verification error'
                                                                        ' :exclamation: ',
                                                          message=message)
             else:
-                message = 'You have successfully cancelled second level wallet registration system.'
+                message = 'There has been an issue while trying to create in-active account. Please try again later.'
                 await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                     sys_msg_title=':exclamation: Registration Cancelled'
+                                                     sys_msg_title=':exclamation: Account Creation Error'
                                                                    ' :exclamation: ',
                                                      message=message)
         else:
-            message = f'You have already registered your 2 Level wallet. To check account details please use ' \
-                      f'`{self.command_string}custodial account`.'
+            message = 'You have successfully cancelled second level wallet registration system.'
             await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                 sys_msg_title=':exclamation: Second Level Account Already Registered'
+                                                 sys_msg_title=':exclamation: Registration Cancelled'
                                                                ' :exclamation: ',
                                                  message=message)
+
 
     @custodial.group(aliases=["acc", "a"])
     @commands.check(user_has_custodial)
@@ -658,7 +650,7 @@ class CustodialAccounts(commands.Cog):
     @custodial.error
     async def cust_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            message = f"In order to be able to use wallet of level 2,  please register first into the " \
+            message = f"{error},In order to be able to use wallet of level 2,  please register first into the " \
                       f"Crypto Link wallet level 1 system with  `{self.command_string}register`"
             title = f'**__User not found__** :clipboard:'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -679,9 +671,11 @@ class CustodialAccounts(commands.Cog):
     @register.error
     async def reg_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            message = f"You are allowed to register for Second Layer account only through the **direct message**" \
-                      f" with Crypto Link."
-            title = f'**__Wrong Channel Type__**'
+            message = f"In order to be able to register, command needs to be executed over DM. If you have executed it" \
+                      f" over DM and this error still pops up, than it mostlikelly means that you have already " \
+                      f"successfully registered 2 level account into Crypto Link system. Proceed with " \
+                      f"`{self.command_string}custodial account`"
+            title = f'**__Command check errors__**'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
         elif TimeoutError:
