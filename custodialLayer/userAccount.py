@@ -64,7 +64,7 @@ class CustodialAccounts(commands.Cog):
         except MemoInvalidException:
             return False
 
-    async def transaction_report_dispatcher(self, ctx, result: dict, data:dict = None):
+    async def transaction_report_dispatcher(self, ctx, result: dict, data: dict = None):
         # Send notification to user on transaction details
         await send_transaction_report(destination=ctx.message.author, response=result)
         # Send notification to user on types of operations in transaction
@@ -78,7 +78,6 @@ class CustodialAccounts(commands.Cog):
 
         message = f":two::dollar: {data['netValue']} {data['token']} sent to ***{data['walletLevel']}***"
         await send_uplink_message(destinations=load_channels, message=message)
-
 
     @staticmethod
     async def show_typing(ctx):
@@ -113,6 +112,8 @@ class CustodialAccounts(commands.Cog):
             for error in error.extras["result_codes"]["operations"]:
                 if error == "op_underfunded":
                     err += "Insufficient Funds\n"
+                elif error == "op_no_destination":
+                    err += "Destination address does not exist or has not been activate yet"
         else:
             pass
         return err
@@ -124,7 +125,7 @@ class CustodialAccounts(commands.Cog):
         if layer == 1:
             return self.backoffice.account_mng.check_user_existence(user_id=user_id)
         elif layer == 2:
-            self.backoffice.custodial_manager.second_level_user_reg_status(user_id=user_id)
+            return self.backoffice.custodial_manager.second_level_user_reg_status(user_id=user_id)
 
     def check_private_key(self, private_key: str):
         """
@@ -152,7 +153,7 @@ class CustodialAccounts(commands.Cog):
             # Details for transaction to level 2 wallet
             user_data = {
                 "address": self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=user_id),
-                "memo": self.backoffice.account_mng.get_user_memo
+                "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
 
@@ -276,7 +277,7 @@ class CustodialAccounts(commands.Cog):
 
                         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                        msg=':new: User register for wallet level 2. :rocket: '
+                        msg = ':new: User register for wallet level 2. :rocket: '
                         await send_uplink_message(destinations=load_channels, message=msg)
 
                     else:
@@ -350,16 +351,18 @@ class CustodialAccounts(commands.Cog):
                                         f"<wallet level:int>```\n"
                                         f"**__Wallet Levels__**\n"
                                         f":one: => Transaction to 1st level Discord wallet based on MEMO\n"
-                                        f":two: => Transaction to 2nd level Discord wallet owned by user over Discord"},
+                                        f":two: => Transaction to 2nd level Discord wallet owned by user over Discord\n"
+                                        f"`Aliases: usr, u"},
                               {"name": ":map: Non-Discord related recipients :map:",
                                "value": f"```{self.command_string}custodial tx address <public key> <amount>"
-                                        f" <memo=optional>```"}
+                                        f" <memo=optional>```\n"
+                                        f"`Aliases: addr, a, add"}
                               ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @tx.command()
+    @tx.command(aliases=["usr", "u"])
     @commands.check(is_public)
     # @commands.cooldown(1, 30, commands.BucketType.user)
     async def user(self, ctx, recipient: Member, amount: float, wallet_level: int):
@@ -430,7 +433,6 @@ class CustodialAccounts(commands.Cog):
                         # 3. Send information to the user to verify transaction with an answer with request to sign
                         recipient_details = self.get_recipient_details_based_on_layer(layer=wallet_level,
                                                                                       user_id=recipient.id)
-
                         data = {"txTotal": requested_amount,
                                 "netValue": net_amount,
                                 "devFee": dev_fee_normal,
@@ -531,7 +533,7 @@ class CustodialAccounts(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @tx.command(aliases=['addr'])
+    @tx.command(aliases=['addr', 'a', 'add'])
     async def address(self, ctx, to_address: str, amount: float, memo: str = None):
         """
         Send to external Address from second level wallet
@@ -595,7 +597,7 @@ class CustodialAccounts(commands.Cog):
                         "recipient": f"{to_address}",
                         "toAddress": to_address,
                         "memo": memo,
-                        "walletLevel":"External Wallet"
+                        "walletLevel": "External Wallet"
                         }
 
                 await sign_message_information(destination=ctx.author,
