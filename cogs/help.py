@@ -120,7 +120,7 @@ class HelpCommands(commands.Cog):
         """
         start_embed = discord.Embed(title=f':rocket: Launch {self.bot.user.name} Experience :rocket:',
                                     colour=Colour.blue())
-        start_embed.add_field(name=':one: Register your account :one:',
+        start_embed.add_field(name=':one: Register yourself wallet level 1 :one:',
                               value=f'In order for you to be able to make peer to peer transactions and use merchant'
                                     f' system, you must have registered at least wallet level 1.\n'
                                     f'You can do that by executing command on any public Discord channel, where system'
@@ -140,6 +140,7 @@ class HelpCommands(commands.Cog):
         start_embed.add_field(name=':sos: Explore Crypto Link :sos: ',
                               value=f'```{self.command_string}help```',
                               inline=False)
+
         await ctx.author.send(embed=start_embed)
 
     @help.command(aliases=['tokens', 'coins'])
