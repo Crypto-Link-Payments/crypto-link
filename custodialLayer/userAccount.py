@@ -81,7 +81,7 @@ class CustodialAccounts(commands.Cog):
 
     @staticmethod
     async def show_typing(ctx):
-        async with ctx.typing():
+        async with ctx.author.typing():
             await asyncio.sleep(5)
 
     def get_network_base_fee(self):
@@ -541,10 +541,13 @@ class CustodialAccounts(commands.Cog):
         fee_atomic = 0
         atomic_amount = int(amount * (10 ** 7))
         dev_fee_activated = False
+
         if not memo:
             memo = 'None'
+
         if atomic_amount >= 100:
             if self.check_memo(memo) and self.check_public_key(address=to_address):
+
                 ############################### DEV FEE ADDITION #############################
                 # Send notification to user about dev fee
                 await dev_fee_option_notification(destination=ctx.message.author)
@@ -627,6 +630,8 @@ class CustodialAccounts(commands.Cog):
                                                       'completed')
                         await self.show_typing(
                             ctx=ctx)  # Shows the typing on discord so user knows that something is going on
+
+                        # Stream tx and return tuple (Boolean , dict response)
                         result = self.stream_transaction_to_network(private_key=private_full,
                                                                     amount=net_amount,
                                                                     dev_fee_status=dev_fee_activated,
