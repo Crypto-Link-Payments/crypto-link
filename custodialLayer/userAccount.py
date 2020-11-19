@@ -1,4 +1,4 @@
-from discord import Embed, Colour, Member
+from discord import Colour, Member
 from discord.ext import commands
 from cogs.utils.customCogChecks import user_has_wallet, user_has_custodial, is_dm, is_public, user_has_no_custodial
 from cogs.utils.systemMessaages import CustomMessages
@@ -12,9 +12,10 @@ from custodialLayer.utils.custodialMessages import account_layer_selection_messa
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
     server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
 
-from stellar_sdk import Keypair, TransactionBuilder, Network, Account, TextMemo, Payment, Asset, TransactionEnvelope
-from stellar_sdk.exceptions import ConnectionError, BadRequestError, MemoInvalidException, BadResponseError, \
-    UnknownRequestError, NotFoundError, Ed25519SecretSeedInvalidError, Ed25519PublicKeyInvalidError, BaseRequestError
+from custodialLayer.utils.tools import check_memo, check_public_key, check_private_key
+from stellar_sdk import Keypair, TransactionBuilder, Network, Payment, Asset
+from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadResponseError, \
+    NotFoundError
 
 helper = Helpers()
 security_manager = SecurityManager()
@@ -48,22 +49,6 @@ class CustodialAccounts(commands.Cog):
         self.available_layers = [1, 2]
         self.network_type = Network.TESTNET_NETWORK_PASSPHRASE
 
-    @staticmethod
-    def check_public_key(address: str):
-        try:
-            Account(account_id=address, sequence=0)
-            return True
-        except Ed25519PublicKeyInvalidError:
-            return False
-
-    @staticmethod
-    def check_memo(memo):
-        try:
-            TextMemo(text=memo)
-            return True
-        except MemoInvalidException:
-            return False
-
     async def transaction_report_dispatcher(self, ctx, result: dict, data: dict = None):
         # Send notification to user on transaction details
         await send_transaction_report(destination=ctx.message.author, response=result)
@@ -83,23 +68,6 @@ class CustodialAccounts(commands.Cog):
     async def show_typing(ctx):
         async with ctx.author.typing():
             await asyncio.sleep(5)
-
-    def get_network_base_fee(self):
-        """
-        Get network fee and handle error if error
-        """
-        try:
-            return self.server.fetch_base_fee()
-        except ConnectionError:
-            return 0.0000001
-        except NotFoundError:
-            return 0.0000001
-        except BadRequestError:
-            return 0.0000001
-        except BadResponseError:
-            return 0.0000001
-        except UnknownRequestError:
-            return 0.0000001
 
     @staticmethod
     def process_error(error):
@@ -126,17 +94,6 @@ class CustodialAccounts(commands.Cog):
             return self.backoffice.account_mng.check_user_existence(user_id=user_id)
         elif layer == 2:
             return self.backoffice.custodial_manager.second_level_user_reg_status(user_id=user_id)
-
-    def check_private_key(self, private_key: str):
-        """
-        Check if private key constructed matches criteria
-        """
-        try:
-            Keypair.from_secret(private_key)
-            return True
-        except Ed25519SecretSeedInvalidError:
-            return False
-        pass
 
     def get_recipient_details_based_on_layer(self, layer: int, user_id: int):
         """
@@ -384,7 +341,7 @@ class CustodialAccounts(commands.Cog):
                 if atomic_amount >= 100:
                     # 3. Check if user has registered wallet level where user is planning to send funds
                     if self.check_user_wallet_layer_level(layer=wallet_level, user_id=recipient.id):
-                        ############################### DEV FEE ADDITION #############################
+                        # DEV FEE Procedure
                         # Send notification to user about dev fee
                         await dev_fee_option_notification(destination=ctx.message.author)
 
@@ -410,9 +367,11 @@ class CustodialAccounts(commands.Cog):
                                     message = f'Dev fee is not allowed to be less than 0 or 0. It will be skipped.'
                                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                          destination=0,
-                                                                         sys_msg_title=':warning: Dev Fee Error :warning:')
+                                                                         sys_msg_title=':warning: Dev Fee Error '
+                                                                                       ':warning:')
                             except ValueError:
-                                message = f'{dev_fee_answ} could not be converted to number and will therefore be skipped'
+                                message = f'{dev_fee_answ} could not be converted to number and will therefore be ' \
+                                          f'skipped'
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                      destination=0,
                                                                      sys_msg_title=':warning: Dev Fee Error :warning:')
@@ -421,15 +380,14 @@ class CustodialAccounts(commands.Cog):
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                                  sys_msg_title=':robot:  Dev Fee Status :robot: ')
 
-                        # ############################## MAKE CALCULATIONS ###############################
-                        network_fee = self.get_network_base_fee()
-                        total_for_transaction = atomic_amount + network_fee + dev_fee_atomic  # Dev fee based on selected
+                        # Calculations
+                        network_fee = 100
+                        total_for_transaction = atomic_amount + network_fee + dev_fee_atomic
                         requested_amount = total_for_transaction / (10 ** 7)
                         dev_fee_normal = dev_fee_atomic / (10 ** 7)
                         fee_normal = network_fee / (10 ** 7)
                         net_amount = atomic_amount / (10 ** 7)
 
-                        ############################ START MAKING TRANSACTION ##############################
                         # 3. Send information to the user to verify transaction with an answer with request to sign
                         recipient_details = self.get_recipient_details_based_on_layer(layer=wallet_level,
                                                                                       user_id=recipient.id)
@@ -468,7 +426,7 @@ class CustodialAccounts(commands.Cog):
                                 'utf-8')
                             private_full = first_half_of_key.content + second_half_of_key
 
-                            if self.check_private_key(private_key=private_full):
+                            if check_private_key(private_key=private_full):
                                 await ctx.author.send(content='Transactions is being sent to network. '
                                                               'Please wait few moments till its '
                                                               'completed')
@@ -513,8 +471,8 @@ class CustodialAccounts(commands.Cog):
 
                     else:
                         title = f':exclamation: __Transaction Cancelled __ :exclamation: '
-                        message = f'User {recipient} does not have active ***{wallet_level}. Layer wallet***. Therefore transaction' \
-                                  f' has been cancelled '
+                        message = f'User {recipient} does not have active ***{wallet_level}. ' \
+                                  f'Layer wallet***. Therefore transaction has been cancelled '
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                              sys_msg_title=title)
                 else:
@@ -546,9 +504,9 @@ class CustodialAccounts(commands.Cog):
             memo = 'None'
 
         if atomic_amount >= 100:
-            if self.check_memo(memo) and self.check_public_key(address=to_address):
+            if check_memo(memo) and check_public_key(address=to_address):
 
-                ############################### DEV FEE ADDITION #############################
+                # DEV FEE INTEGRATION PROCESS
                 # Send notification to user about dev fee
                 await dev_fee_option_notification(destination=ctx.message.author)
 
@@ -583,14 +541,14 @@ class CustodialAccounts(commands.Cog):
                                                          sys_msg_title=':robot:  Dev Fee Status :robot: ')
 
                 # ############################## MAKE CALCULATIONS ###############################
-                network_fee = self.get_network_base_fee()
+                network_fee = 100  # Stroops
                 total_for_transaction = atomic_amount + network_fee + fee_atomic  # Dev fee based on selected
                 requested_amount = total_for_transaction / (10 ** 7)
                 dev_fee_normal = fee_atomic / (10 ** 7)
                 fee_normal = network_fee / (10 ** 7)
                 net_amount = atomic_amount / (10 ** 7)
 
-                ############################ START MAKING TRANSACTION ##############################
+                # MAKING TRANSACTIONS
                 # 3. Send information to the user to verify transaction with an answer with request to sign
                 data = {"txTotal": requested_amount,
                         "netValue": net_amount,
@@ -624,7 +582,7 @@ class CustodialAccounts(commands.Cog):
                     second_half_of_key = security_manager.decrypt(token=private_encrypted["privateKey"]).decode('utf-8')
                     private_full = first_half_of_key.content + second_half_of_key
 
-                    if self.check_private_key(private_key=private_full):
+                    if check_private_key(private_key=private_full):
                         await ctx.author.send(content='Transactions is being sent to network. '
                                                       'Please wait few moments till its '
                                                       'completed')
@@ -698,8 +656,8 @@ class CustodialAccounts(commands.Cog):
     @register.error
     async def reg_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            message = f"In order to be able to register, command needs to be executed over DM. If you have executed it" \
-                      f" over DM and this error still pops up, than it mostlikelly means that you have already " \
+            message = f"In order to be able to register, command needs to be executed over DM. If you have executed" \
+                      f" it over DM and this error still pops up, than it most likely means that you have already " \
                       f"successfully registered 2 level account into Crypto Link system. Proceed with " \
                       f"`{self.command_string}custodial account`"
             title = f'**__Command check errors__**'
@@ -743,7 +701,7 @@ class CustodialAccounts(commands.Cog):
         elif TimeoutError:
             title = f'__Transaction Request Expired__'
             message = f'It took you to long to provide requested answer. Please try again or follow ' \
-                      f'guidliness further from the Crypto Link. '
+                      f'guidelines further from the Crypto Link. '
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
