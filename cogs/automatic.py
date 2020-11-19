@@ -66,8 +66,6 @@ class AutoFunctions(commands.Cog):
                                                  sys_msg_title=title)
         else:
             if isinstance(exception, commands.CheckFailure):
-                print('****')
-                print(exception)
                 pass
             else:
                 bug_channel = self.bot.get_channel(id=int(self.channel_id))
