@@ -20,7 +20,6 @@ from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadRes
 helper = Helpers()
 security_manager = SecurityManager()
 custom_messages = CustomMessages()
-hot_wallets = helper.read_json_file(file_name='hotWallets.json')
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
 
@@ -45,7 +44,6 @@ class CustodialAccounts(commands.Cog):
         self.list_of_coins = list(integrated_coins.keys())
         self.backoffice = bot.backoffice
         self.server = self.backoffice.stellar_wallet.server
-        self.bot_hot_wallet = hot_wallets["xlm"]
         self.available_layers = [1, 2]
         self.network_type = Network.TESTNET_NETWORK_PASSPHRASE
 
@@ -102,7 +100,7 @@ class CustodialAccounts(commands.Cog):
         if layer == 1:
             # Details for transaction to level 1 wallet
             user_data = {
-                "address": self.bot_hot_wallet,
+                "address": self.backoffice.stellar_wallet.public_key,
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
@@ -130,7 +128,7 @@ class CustodialAccounts(commands.Cog):
 
         # additional Payment if selected
         if dev_fee_status:
-            p = Payment(destination=self.bot_hot_wallet, asset=Asset.native(),
+            p = Payment(destination=self.backoffice.stellar_wallet.dev_key, asset=Asset.native(),
                         amount=Decimal(tx_data["devFee"]))
             tx.append_operation(operation=p)
 
@@ -321,7 +319,7 @@ class CustodialAccounts(commands.Cog):
 
     @tx.command(aliases=["usr", "u"])
     @commands.check(is_public)
-    # @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def user(self, ctx, recipient: Member, amount: float, wallet_level: int):
         """
         Create Transaction To User on Discord
@@ -492,6 +490,7 @@ class CustodialAccounts(commands.Cog):
                                                  sys_msg_title=title)
 
     @tx.command(aliases=['addr', 'a', 'add'])
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def address(self, ctx, to_address: str, amount: float, memo: str = None):
         """
         Send to external Address from second level wallet

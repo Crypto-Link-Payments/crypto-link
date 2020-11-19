@@ -29,6 +29,7 @@ class StellarWallet:
         public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
         self.integrated_coins = helpers.read_json_file(file_name='integratedCoins.json')
         self.public_key = public_details["xlm"]
+        self.dev_key = public_details["xlmDev"]
         self.private_key = secret_details['stellar']
         self.root_keypair = Keypair.from_secret(self.private_key)
         self.root_account = Account(account_id=self.root_keypair.public_key, sequence=1)
