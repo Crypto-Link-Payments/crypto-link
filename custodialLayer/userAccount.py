@@ -474,7 +474,7 @@ class CustodialAccounts(commands.Cog):
                     title = f':exclamation: __Transaction Amount Error __ :exclamation: '
                     message = f'Amount you are able to send needs to be greater than 0.0000001 XLM. You have selected' \
                               f' {atomic_amount / (10 ** 7):.7f} XLM'
-                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                          sys_msg_title=title)
             else:
                 await account_layer_selection_message(destination=ctx.message.author, level=wallet_level)
