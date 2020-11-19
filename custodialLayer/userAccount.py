@@ -1,11 +1,14 @@
+import asyncio
+from decimal import Decimal
+
+from stellar_sdk import Keypair, TransactionBuilder, Network, Payment, Asset
+from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadResponseError, \
+    NotFoundError
 from discord import Colour, Member
 from discord.ext import commands
 from cogs.utils.customCogChecks import user_has_wallet, user_has_custodial, is_dm, is_public, user_has_no_custodial
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 from utils.securityManager import SecurityManager
-import asyncio
-from decimal import Decimal
 
 from custodialLayer.utils.custodialMessages import account_layer_selection_message, dev_fee_option_notification, \
     ask_for_dev_fee_amount, send_user_account_info, sign_message_information, send_transaction_report, \
@@ -13,14 +16,9 @@ from custodialLayer.utils.custodialMessages import account_layer_selection_messa
     server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
 
 from custodialLayer.utils.tools import check_memo, check_public_key, check_private_key
-from stellar_sdk import Keypair, TransactionBuilder, Network, Payment, Asset
-from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadResponseError, \
-    NotFoundError
 
-helper = Helpers()
 security_manager = SecurityManager()
 custom_messages = CustomMessages()
-integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
 
 def check(author):
@@ -41,7 +39,6 @@ class CustodialAccounts(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.list_of_coins = list(integrated_coins.keys())
         self.backoffice = bot.backoffice
         self.server = self.backoffice.stellar_wallet.server
         self.available_layers = [1, 2]
