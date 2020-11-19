@@ -35,7 +35,8 @@ class DiscordBot(commands.Bot):
     def __init__(self, backoffice):
         helper = Helpers()
         self.bot_settings = helper.read_json_file(file_name='botSetup.json')
-
+        self.integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
+        self.list_of_coins = list(self.integrated_coins.keys())
         super().__init__(
             command_prefix=commands.when_mentioned_or(self.bot_settings['command']),
             intents=Intents.all())
