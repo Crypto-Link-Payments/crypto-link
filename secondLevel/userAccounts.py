@@ -13,12 +13,12 @@ from cogs.utils.customCogChecks import user_has_wallet, user_has_custodial, is_d
 from cogs.utils.systemMessaages import CustomMessages
 from utils.securityManager import SecurityManager
 
-from custodialLayer.utils.custodialMessages import account_layer_selection_message, dev_fee_option_notification, \
+from secondLevel.utils.custodialMessages import account_layer_selection_message, dev_fee_option_notification, \
     ask_for_dev_fee_amount, send_user_account_info, sign_message_information, send_transaction_report, \
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
     server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
 
-from custodialLayer.utils.tools import check_memo, check_public_key, check_private_key
+from secondLevel.utils.tools import check_memo, check_public_key, check_private_key
 
 security_manager = SecurityManager()
 custom_messages = CustomMessages()
@@ -41,7 +41,7 @@ def check(author):
     return inner_check
 
 
-class CustodialAccounts(commands.Cog):
+class LevelTwoAccountCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.backoffice = bot.backoffice
@@ -749,4 +749,4 @@ class CustodialAccounts(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(CustodialAccounts(bot))
+    bot.add_cog(LevelTwoAccountCommands(bot))

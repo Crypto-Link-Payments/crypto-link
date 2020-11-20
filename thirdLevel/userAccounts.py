@@ -10,7 +10,7 @@ from discord import Embed, Colour, Member
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
-from stellar_sdk import TransactionBuilder, Network, Server, Account, TransactionEnvelope, Transaction
+from stellar_sdk import TransactionBuilder, Network, Server,Transaction
 from stellar_sdk.exceptions import NotFoundError
 
 helper = Helpers()
@@ -33,7 +33,7 @@ def check(author):
     return inner_check
 
 
-class Layer3AccountCommands(commands.Cog):
+class LevelThreeAccountCommands(commands.Cog):
     """
     Discord Commands dealing with Merchant Licensing
     """
@@ -297,4 +297,4 @@ class Layer3AccountCommands(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Layer3AccountCommands(bot))
+    bot.add_cog(LevelThreeAccountCommands(bot))
