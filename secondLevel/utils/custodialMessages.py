@@ -1,3 +1,7 @@
+"""
+Custom messages for second level wallets
+"""
+
 from discord import Embed, Colour
 from datetime import datetime
 from cogs.utils.monetaryConversions import scientific_conversion, get_rates, rate_converter
