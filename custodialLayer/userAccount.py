@@ -1,3 +1,6 @@
+"""
+Discord Commands dedicated to 2 wallet level system
+"""
 import asyncio
 from decimal import Decimal
 
@@ -22,6 +25,10 @@ custom_messages = CustomMessages()
 
 
 def check(author):
+    """
+    Check for author
+    """
+
     def inner_check(message):
         """
         Check for answering the verification message on withdrawal. Author origin
@@ -45,6 +52,9 @@ class CustodialAccounts(commands.Cog):
         self.network_type = Network.TESTNET_NETWORK_PASSPHRASE
 
     async def transaction_report_dispatcher(self, ctx, result: dict, data: dict = None):
+        """
+        Dispatch informational embeds to sender and Crypto Link Upling
+        """
         # Send notification to user on transaction details
         await send_transaction_report(destination=ctx.message.author, response=result)
         # Send notification to user on types of operations in transaction
@@ -52,7 +62,7 @@ class CustodialAccounts(commands.Cog):
                                      envelope=result['envelope_xdr'],
                                      network_type=self.network_type)
 
-        # Send out explorer
+        # Send notification on transaciton to Crypto Link Uplink
         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
@@ -61,17 +71,20 @@ class CustodialAccounts(commands.Cog):
 
     @staticmethod
     async def show_typing(ctx):
+        """
+        Shows typing on Discord so user knows that something is happening in the background
+        """
         async with ctx.author.typing():
             await asyncio.sleep(5)
 
     @staticmethod
     def process_error(error):
         """
-        Process errors
+        Convert error to user understandable string
         """
         err = ''
         if isinstance(error, BadRequestError):
-            # error
+            # Process errors
             for error in error.extras["result_codes"]["operations"]:
                 if error == "op_underfunded":
                     err += "Insufficient Funds\n"
@@ -83,7 +96,7 @@ class CustodialAccounts(commands.Cog):
 
     def check_user_wallet_layer_level(self, layer, user_id):
         """
-        Check if user has activate layer level
+        Check if user has registered account under selected wallet level
         """
         if layer == 1:
             return self.backoffice.account_mng.check_user_existence(user_id=user_id)
@@ -92,7 +105,7 @@ class CustodialAccounts(commands.Cog):
 
     def get_recipient_details_based_on_layer(self, layer: int, user_id: int):
         """
-        Get recipient details based on layer selected from database
+        Produce destination from the database
         """
         if layer == 1:
             # Details for transaction to level 1 wallet
@@ -111,6 +124,9 @@ class CustodialAccounts(commands.Cog):
 
     def stream_transaction_to_network(self, private_key: str, amount: str, tx_data: dict,
                                       dev_fee_status: bool = None):
+        """
+        Place Transaction on the network
+        """
         key_pair = Keypair.from_secret(private_key)
         source_account = self.backoffice.stellar_wallet.server.load_account(key_pair.public_key)
         tx = TransactionBuilder(
@@ -123,7 +139,7 @@ class CustodialAccounts(commands.Cog):
             asset_code="XLM",
             amount=Decimal(amount)).add_text_memo(memo_text=tx_data["memo"])
 
-        # additional Payment if selected
+        # Append Dev fee if selected
         if dev_fee_status:
             p = Payment(destination=self.backoffice.stellar_wallet.dev_key, asset=Asset.native(),
                         amount=Decimal(tx_data["devFee"]))
@@ -152,12 +168,13 @@ class CustodialAccounts(commands.Cog):
         if ctx.invoked_subcommand is None:
             title = ':wave:  __Welcome to Level 2 wallet system__ :wave:  '
             description = "Unlike Wallet __Level 1 system__, ***Level 2*** allows for full control of your" \
-                          " ***private keys*** and with it, ability to use Discord wallet as well with other " \
-                          "mediums. Upon successful registration and key verification, Crypto Link Stores and safely " \
-                          "encrypts part of your private key. When making on-chain actions, user is required to " \
-                          "provide second part of the private key before actions can be completed.\n" \
+                          " ***private keys*** and with it, ability to import Discord wallet into other applications." \
+                          " Upon successful registration and key verification, Crypto Link Stores and safely " \
+                          "encrypts part of your private key. When executing on-chain actions for wallet over Discord," \
+                          " you will be required to provide second part of the private key (sign) before action can be " \
+                          " streamed to the Stellar network\n" \
                           "`Aliases: cust, c, 2`"
-            list_of_values = [{"name": ":new: Register for In-active Custodial Wallet :new: ",
+            list_of_values = [{"name": ":new: Register for in-active wallet :new: ",
                                "value": f"```{self.command_string}custodial register```\n"
                                         f"`Aliases: get, new`"},
                               {"name": ":joystick: Group of commands to obtain info on Layer two Account :joystick: ",
@@ -217,14 +234,15 @@ class CustodialAccounts(commands.Cog):
 
                     # Storing data
                     if self.backoffice.custodial_manager.create_user_wallet(data_to_store=data_to_store):
-                        message = "You have successfully verified your secret key and registered level 2 account" \
-                                  " into Crypto Link System. Public address and 1/2 of private" \
-                                  " key have been stored. In order for account to become " \
-                                  "active, you are required to activate it through on-chain deposit to address " \
-                                  "provided to you in previous steps"
+                        message = f"You have successfully verified your secret key and registered level 2 account" \
+                                  f" into Crypto Link system. Public address and 1/2 of private" \
+                                  f" key have been securely stored under your Discord User ID {ctx.author.id}. I" \
+                                  f"n order for account to become active, you are required to activate it through " \
+                                  f"on-chain deposit to address provided to you in previous steps"
+
                         await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green(), destination=0,
-                                                             sys_msg_title=':white_check_mark: Second Layer Account'
-                                                                           ' Create :white_check_mark:',
+                                                             sys_msg_title=':white_check_mark: Second Level Account'
+                                                                           ' Created :white_check_mark:',
                                                              message=message)
 
                         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
@@ -233,26 +251,28 @@ class CustodialAccounts(commands.Cog):
                         await send_uplink_message(destinations=load_channels, message=msg)
 
                     else:
-                        message = 'There has been an issue while storing data into the system. Please re-initiate '
+                        message = 'There has been an issue while storing data into the system. Please re-initiate the' \
+                                  ' whole process. If issue persists, contact Crypto Link Staff'
                         await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                             sys_msg_title=':white_check_mark: Second Layer '
-                                                                           'Account Created :white_check_mark:',
+                                                             sys_msg_title=':exclamation: Second level wallet '
+                                                                           'registration error :exclamation: ',
                                                              message=message)
                 else:
-                    message = 'Account could not be verified as the Signature key provided for Discord activity is' \
-                              ' not the same as provided to you above. Please initiate registration process again.'
+                    message = 'You have provided wrong 1/2 of the key which resulted in private key mismatch.' \
+                              ' Please re-initiate the registration process again'
                     await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                         sys_msg_title=':exclamation: Key verification error'
+                                                         sys_msg_title=':exclamation: Key verification Error'
                                                                        ' :exclamation: ',
                                                          message=message)
             else:
-                message = 'There has been an issue while trying to create in-active account. Please try again later.'
+                message = 'There has been an issue while trying to create 2 level wallet. Please try again later.' \
+                          ' If the issue persists please contact staff of the Crypto Link team.'
                 await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
                                                      sys_msg_title=':exclamation: Account Creation Error'
                                                                    ' :exclamation: ',
                                                      message=message)
         else:
-            message = 'You have successfully cancelled second level wallet registration system.'
+            message = 'You have successfully cancelled second level wallet registration procedure.'
             await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
                                                  sys_msg_title=':exclamation: Registration Cancelled'
                                                                ' :exclamation: ',
@@ -260,17 +280,17 @@ class CustodialAccounts(commands.Cog):
 
     @custodial.group(aliases=["acc", "a"])
     @commands.check(user_has_custodial)
-    @commands.check(is_dm)
     async def account(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Custodial Account Commands__ :joystick: '
-            description = "All commands to operate with custodial wallet system (Layer 2) in Crypto Link"
-            list_of_values = [{"name": "Get Account Details",
-                               "value": f"`{self.command_string}custodial account info`"}]
+            description = "All commands available to operate with wallet level 2"
+            list_of_values = [{"name": ":information_source: Get Account Details :information_source: ",
+                               "value": f"```{self.command_string}custodial account info```\n"
+                                        f"`Aliases: nfo`"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=0, c=Colour.dark_orange())
 
-    @account.command()
+    @account.command(aliases=['nfo'])
     async def info(self, ctx):
         # Get address from database
         user_public = self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=ctx.message.author.id)
@@ -286,29 +306,33 @@ class CustodialAccounts(commands.Cog):
                 message = 'Status of the wallet could not be obtained at this moment'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                      sys_msg_title=sys_msg_title)
+
         except NotFoundError:
-            await server_error_response(destination=ctx.message.author, title="Account Not Active",
+            await server_error_response(destination=ctx.message.author,
+                                        title=":exclamation: Account Not Activated :exclamation: ",
                                         error=f'Account has not been activated yet'
-                                              f' by depositing minimum amount of XLM '
-                                              f'to the address ```{user_public}```')
+                                              f' Please activate it by depositing at least 2 XLM to '
+                                              f'```{user_public}```')
 
     @custodial.group(aliases=["transactions"])
     @commands.check(user_has_custodial)
     async def tx(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = ':joystick: __Available Transaction Commands__ :joystick: '
-            description = "All commands to operate with custodial wallet system (Layer 2) in Crypto Link"
+            title = ':incoming_envelope:  __Available Transaction Commands__ :incoming_envelope:  '
+            description = "Commands dedicated to execution of transactions/payments"
             list_of_values = [{"name": ":cowboy: Discord related payments :cowboy:",
                                "value": f"```{self.command_string}custodial tx user <@discord.Member> <amount> "
                                         f"<wallet level:int>```\n"
                                         f"**__Wallet Levels__**\n"
                                         f":one: => Transaction to 1st level Discord wallet based on MEMO\n"
                                         f":two: => Transaction to 2nd level Discord wallet owned by user over Discord\n"
-                                        f"`Aliases: usr, u"},
+                                        f"***Note***: All data is automatically obtained from the CL system once "
+                                        f"recipient selected."
+                                        f"\n`Aliases: usr, u`"},
                               {"name": ":map: Non-Discord related recipients :map:",
                                "value": f"```{self.command_string}custodial tx address <public key> <amount>"
                                         f" <memo=optional>```\n"
-                                        f"`Aliases: addr, a, add"}
+                                        f"`Aliases: addr, a, add`"}
                               ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -366,7 +390,7 @@ class CustodialAccounts(commands.Cog):
                                                                                        ':warning:')
                             except ValueError:
                                 message = f'{dev_fee_answ} could not be converted to number and will therefore be ' \
-                                          f'skipped'
+                                          f'skipped.'
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                      destination=0,
                                                                      sys_msg_title=':warning: Dev Fee Error :warning:')
@@ -422,19 +446,18 @@ class CustodialAccounts(commands.Cog):
                             private_full = first_half_of_key.content + second_half_of_key
 
                             if check_private_key(private_key=private_full):
-                                await ctx.author.send(content='Transactions is being sent to network. '
+                                await ctx.author.send(content='Transactions is being streamed to network. '
                                                               'Please wait few moments till its '
-                                                              'completed')
+                                                              'completed and response received from Crypto Link')
                                 await self.show_typing(ctx=ctx)
 
-                                # Transaction based on dev fee
-
+                                # Initiate transaction stream
                                 result = self.stream_transaction_to_network(private_key=private_full,
                                                                             amount=net_amount,
                                                                             dev_fee_status=dev_fee_activated,
                                                                             tx_data=data)
 
-                                # Process result returned from Stellar Network and send user message
+                                # Process result returned from stream
                                 if result[0]:
                                     if wallet_level == 1 and ctx.message.author.id != recipient:
                                         await recipient_incoming_notification(recipient=recipient,
@@ -448,18 +471,20 @@ class CustodialAccounts(commands.Cog):
                                                                               wallet_level=wallet_level, data=data,
                                                                               response=result[1])
 
+                                    # Dispatch reports to recipient, sender and uplink
                                     await self.transaction_report_dispatcher(ctx=ctx, result=result[1], data=data)
 
                                 else:
                                     hor_error = self.process_error(error=result[1])
-                                    title = f':exclamation: __Transaction Dispatch Error__ :exclamation: '
+                                    title = f':exclamation: __Transaction Stream Error__ :exclamation: '
                                     message = f'There has been an error in transaction: ```{hor_error}```'
                                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                          destination=0,
                                                                          sys_msg_title=title)
                             else:
                                 title = f':exclamation: __Private Key Error__ :exclamation: '
-                                message = f'Invalid Ed25519 Secret Seed provided. Please try again fromm scratch'
+                                message = f'Invalid Ed25519 Secret Seed provided. Please re-initiate the transaction' \
+                                          f' request'
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                      destination=1,
                                                                      sys_msg_title=title)
@@ -631,7 +656,7 @@ class CustodialAccounts(commands.Cog):
     @custodial.error
     async def cust_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            message = f"{error},In order to be able to use wallet of level 2,  please register first into the " \
+            message = f"{error},In order to be able to use wallet of level 2, please register first into the " \
                       f"Crypto Link wallet level 1 system with  `{self.command_string}register`"
             title = f'**__User not found__** :clipboard:'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
