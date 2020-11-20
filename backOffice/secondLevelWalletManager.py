@@ -5,7 +5,7 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 
-class CustodialWalletManager:
+class SecondLevelWalletManager:
     """Class dealing with the Layer two wallets"""
 
     def __init__(self, connection):
