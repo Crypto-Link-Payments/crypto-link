@@ -215,7 +215,7 @@ class Layer3AccountCommands(commands.Cog):
                                                  sys_msg_title=CONST_XDR_ERROR)
 
     @xdr.command()
-    async def discord(self, ctx, amount: float, token: str, user: Member, layer:int):
+    async def discord(self, ctx, amount: float, token: str, user: Member, layer: int):
         """
         Create XDR to send to user on discord
         """

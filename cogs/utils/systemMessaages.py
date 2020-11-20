@@ -184,7 +184,7 @@ class CustomMessages:
         elif direction == 1:
             title = f':inbox_tray: Incoming {tx_type_emoji} {tx_type.title()} transaction :inbox_tray: '
             col = discord.Colour.green()
-            destination_txt = ':postbox:  Sender :postbox: '
+            destination_txt = ':postbox: Sender :postbox: '
             avatar = destination.avatar_url
             value_emoji = ":moneybag: "
 
@@ -444,8 +444,6 @@ class CustomMessages:
         """
         Transactin reports to all explorer applied channels
         """
-        print(applied_channels)
-        print()
         if not on_chain:
             msg_streamed = self.filter_message(message=message, tx_type=tx_type)
             for explorer_channel in applied_channels:

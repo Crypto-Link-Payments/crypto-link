@@ -1,31 +1,34 @@
-from discord import Embed, Colour, Member
+"""
+Discord Commands dedicated to 2 wallet level system
+"""
+import asyncio
+from decimal import Decimal
+
+from stellar_sdk import Keypair, TransactionBuilder, Network, Payment, Asset
+from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadResponseError, \
+    NotFoundError
+from discord import Colour, Member
 from discord.ext import commands
-from cogs.utils.customCogChecks import user_has_wallet, user_has_custodial, is_dm
+from cogs.utils.customCogChecks import user_has_wallet, user_has_custodial, is_dm, is_public, user_has_no_custodial
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 from utils.securityManager import SecurityManager
 
 from custodialLayer.utils.custodialMessages import account_layer_selection_message, dev_fee_option_notification, \
     ask_for_dev_fee_amount, send_user_account_info, sign_message_information, send_transaction_report, \
-    send_new_account_information, verification_request_explanation, second_level_account_reg_info,\
-    transaction_report_recipient
+    send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
+    server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
 
-from stellar_sdk import Keypair, TransactionBuilder, Network, TransactionEnvelope, Payment, CreateAccount, \
-    Asset, Account, TextMemo
-from stellar_sdk.exceptions import ConnectionError, BadRequestError, MemoInvalidException, BadResponseError, \
-    UnknownRequestError, NotFoundError, Ed25519SecretSeedInvalidError, Ed25519PublicKeyInvalidError
+from custodialLayer.utils.tools import check_memo, check_public_key, check_private_key
 
-helper = Helpers()
 security_manager = SecurityManager()
 custom_messages = CustomMessages()
-hot_wallets = helper.read_json_file(file_name='hotWallets.json')
-integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
-CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
-CONST_ACC_REG_STATUS = '__Account registration status__'
-ACCOUNT_MINIMUM_ATOMIC = 1
 
 
 def check(author):
+    """
+    Check for author
+    """
+
     def inner_check(message):
         """
         Check for answering the verification message on withdrawal. Author origin
@@ -43,580 +46,383 @@ class CustodialAccounts(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.list_of_coins = list(integrated_coins.keys())
         self.backoffice = bot.backoffice
         self.server = self.backoffice.stellar_wallet.server
-        self.bot_hot_wallet = hot_wallets["xlm"]
         self.available_layers = [1, 2]
         self.network_type = Network.TESTNET_NETWORK_PASSPHRASE
 
+    async def transaction_report_dispatcher(self, ctx, result: dict, data: dict = None):
+        """
+        Dispatch informational embeds to sender and Crypto Link Upling
+        """
+        # Send notification to user on transaction details
+        await send_transaction_report(destination=ctx.message.author, response=result)
+        # Send notification to user on types of operations in transaction
+        await send_operation_details(destination=ctx.message.author,
+                                     envelope=result['envelope_xdr'],
+                                     network_type=self.network_type)
+
+        # Send notification on transaciton to Crypto Link Uplink
+        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                         self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+
+        message = f":two::dollar: {data['netValue']} {data['token']} sent to ***{data['walletLevel']}***"
+        await send_uplink_message(destinations=load_channels, message=message)
+
     @staticmethod
-    def check_public_key(address: str):
-        try:
-            Account(account_id=address, sequence=0)
-            return True
-        except Ed25519PublicKeyInvalidError:
-            return False
+    async def show_typing(ctx):
+        """
+        Shows typing on Discord so user knows that something is happening in the background
+        """
+        async with ctx.author.typing():
+            await asyncio.sleep(5)
 
     @staticmethod
-    def check_memo(memo: str):
-        try:
-            TextMemo(text=memo)
-            return True
-        except MemoInvalidException:
-            return False
-
-    @staticmethod
-    def build_key(first_half: str, second_half: str):
-
-        pass
-
-    def get_network_base_fee(self):
+    def process_error(error):
         """
-        Get network fee and handle error if error
+        Convert error to user understandable string
         """
-        try:
-            return self.server.fetch_base_fee()
-        except ConnectionError:
-            return 0.0000001
-        except NotFoundError:
-            return 0.0000001
-        except BadRequestError:
-            return 0.0000001
-        except BadResponseError:
-            return 0.0000001
-        except UnknownRequestError:
-            return 0.0000001
-
-    def get_network_acc_balance(self, data: dict):
-        """
-        Get balance of the account from network
-        """
-        if data:
-            for coin in data["balances"]:
-                if not coin.get('asset_code'):
-                    return float(coin["balance"])
+        err = ''
+        if isinstance(error, BadRequestError):
+            # Process errors
+            for error in error.extras["result_codes"]["operations"]:
+                if error == "op_underfunded":
+                    err += "Insufficient Funds\n"
+                elif error == "op_no_destination":
+                    err += "Destination address does not exist or has not been activate yet"
         else:
-            return None
-
-    def check_if_sufficient_balance(self, total_for_tx: int, sender_addr: str):
-        """
-        Check the balance of the account from server
-        """
-        try:
-            sender_data = self.server.accounts.account_id(account_id=sender_addr).call()
-            sender_balance = self.get_network_acc_balance(data=sender_data)
-            if sender_balance and sender_balance >= total_for_tx:
-                return True
-            else:
-                return False
-        except Exception:
-            return False
+            pass
+        return err
 
     def check_user_wallet_layer_level(self, layer, user_id):
         """
-        Check if user has activate layer level
+        Check if user has registered account under selected wallet level
         """
         if layer == 1:
             return self.backoffice.account_mng.check_user_existence(user_id=user_id)
         elif layer == 2:
-            self.backoffice.custodial_manager.second_level_user_reg_status(user_id=user_id)
-
-    def check_private_key(self, private_key: str):
-        """
-        Check if private key constructed matches criteria
-        """
-        try:
-            Keypair.from_secret(private_key)
-            return True
-        except Ed25519SecretSeedInvalidError:
-            return False
-        pass
+            return self.backoffice.custodial_manager.second_level_user_reg_status(user_id=user_id)
 
     def get_recipient_details_based_on_layer(self, layer: int, user_id: int):
         """
-        Get recipient details based on layer selected from database
+        Produce destination from the database
         """
         if layer == 1:
-            # Transaction will be done to user on custodial wallet where ID of wallet is based on MEMO
+            # Details for transaction to level 1 wallet
             user_data = {
-                "address": self.bot_hot_wallet,
+                "address": self.backoffice.stellar_wallet.public_key,
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
         elif layer == 2:
-            # Transaction will be done to user hot wallet address where memo is represented from the one from DB
+            # Details for transaction to level 2 wallet
             user_data = {
                 "address": self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=user_id),
-                "memo": self.backoffice.account_mng.get_user_memo
+                "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
 
-    def stream_transaction(self, token: str, private_key: str, from_address, amount, recipient: dict,
-                           dev_fee_status: bool = None,
-                           dev_fee_amount: float = None):
+    def stream_transaction_to_network(self, private_key: str, amount: str, tx_data: dict,
+                                      dev_fee_status: bool = None):
         """
-        Initiate transaction on the network and try to sign it
+        Place Transaction on the network
         """
-
-        source_account = self.server.load_account(from_address)
+        key_pair = Keypair.from_secret(private_key)
+        source_account = self.backoffice.stellar_wallet.server.load_account(key_pair.public_key)
         tx = TransactionBuilder(
             source_account=source_account,
-            network_passphrase=self.network_type,
-            base_fee=self.server.fetch_base_fee()).append_payment_op(destination=recipient["address"],
-                                                                     asset_code=token,
-                                                                     amount=amount).add_text_memo(
-            memo_text=recipient["memo"])
+            network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+            base_fee=self.server.fetch_base_fee()
 
+        ).append_payment_op(
+            destination=tx_data["toAddress"],
+            asset_code="XLM",
+            amount=Decimal(amount)).add_text_memo(memo_text=tx_data["memo"])
+
+        # Append Dev fee if selected
         if dev_fee_status:
-            tx.append_payment_op(destination=self.bot_hot_wallet,
-                                 asset_code=token,
-                                 amount=str(dev_fee_amount))
+            p = Payment(destination=self.backoffice.stellar_wallet.dev_key, asset=Asset.native(),
+                        amount=Decimal(tx_data["devFee"]))
+            tx.append_operation(operation=p)
 
-        # Build and sign
-        tx.set_timeout(360).build().sign(signer=private_key)
+        new_tx = tx.set_timeout(10).build()
+        new_tx.sign(signer=private_key)
 
         try:
             # Sign Submit transaction to server
-            result = self.server.submit_transaction(tx)
+            result = self.server.submit_transaction(new_tx)
+
             return True, result
-        except MemoInvalidException:
-            error = {
-                "error": "Invalid Memo Provided"
-            }
-            return False, error
+        except BadRequestError as e:
+            return False, e
+        except BadResponseError as e:
+            return False, e
+        except MemoInvalidException as e:
+            return False, e
+        except Exception as e:
+            return False, e
 
-    async def send_operation_details(self, destination, envelope: str):
-        """
-        Breaks down all operations from envelope and send information
-        """
-        data = TransactionEnvelope.from_xdr(envelope, self.network_type)
-        operations = data.transaction.operations
-
-        count = 1
-        for op in operations:
-            op_info = Embed(title=f'Operation No.{count}',
-                            colour=Colour.green())
-            if isinstance(op, Payment):
-                op_info.add_field(name=f'From',
-                                  value=f'```{op.source}```',
-                                  inline=False)
-                op_info.add_field(name=f'To',
-                                  value=f'```{op.destination}```',
-                                  inline=False)
-                if isinstance(op.asset, Asset):
-                    op_info.add_field(name=f'Payment Value',
-                                      value=f'{op.amount} {op.asset.code}')
-
-            elif isinstance(op, CreateAccount):
-                op_info.add_field(name=f'Create Account for',
-                                  value=f'{op.destination}')
-                op_info.add_field(name=f'Starting Balance',
-                                  value=f'{op.starting_balance}')
-
-            await destination.send(embed=op_info)
-            count += 1
-
-    @commands.group(aliases=['cust', 'c'])
+    @commands.group(aliases=['cust', 'c', '2'])
     @commands.check(user_has_wallet)
     async def custodial(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = ':joystick: __Available Custodial Wallet Commands__ :joystick: '
-            description = "All commands to operate with custodial wallet system (Layer 2) in Crypto Link"
-            list_of_values = [{"name": "Register for In-active Custodial Wallet ",
-                               "value": f"`{self.command_string}custodial register`"},
-                              {"name": "Group of commands to obtain info on Layer two Account",
-                               "value": f"`{self.command_string}custodial account`"},
-                              {"name": "Group of commands to create various transactions",
-                               "value": f"`{self.command_string}custodial tx`"}
+            title = ':wave:  __Welcome to Level 2 wallet system__ :wave:  '
+            description = "Unlike Wallet __Level 1 system__, ***Level 2*** allows for full control of your" \
+                          " ***private keys*** and with it, ability to import Discord wallet into other applications." \
+                          " Upon successful registration and key verification, Crypto Link Stores and safely " \
+                          "encrypts part of your private key. When executing on-chain actions for wallet over Discord," \
+                          " you will be required to provide second part of the private key (sign) before action can be " \
+                          " streamed to the Stellar network\n" \
+                          "`Aliases: cust, c, 2`"
+            list_of_values = [{"name": ":new: Register for in-active wallet :new: ",
+                               "value": f"```{self.command_string}custodial register```\n"
+                                        f"`Aliases: get, new`"},
+                              {"name": ":joystick: Group of commands to obtain info on Layer two Account :joystick: ",
+                               "value": f"```{self.command_string}custodial account```\n"
+                                        f"`Aliases: acc, a`"},
+                              {
+                                  "name": ":money_with_wings: Group of commands to create various transactions "
+                                          ":money_with_wings:",
+                                  "value": f"```{self.command_string}custodial tx```\n"
+                                           f"`Aliases: transactions`"}
                               ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @custodial.command()
+    @custodial.command(aliases=["reg", "new", 'get'])
     @commands.check(is_dm)
+    @commands.check(user_has_no_custodial)
     async def register(self, ctx):
         """
         Interactive registration procedure for second wallet level
         """
-        # Check if custodial level is not registered yet
-        if not self.backoffice.custodial_manager.second_level_user_reg_status(user_id=ctx.author.id):
+        # Get public and private key from the sdk
+        await second_level_account_reg_info(destination=ctx.author)
 
-            # Get public and private key from the sdk
-            await second_level_account_reg_info(destination=ctx.author)
+        # Wait for answer
+        welcome_verification = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=180)
+        # Verify user answer
+        if welcome_verification.content.upper() in ["YES", "Y"]:
+            # Get private and public key
+            details = self.backoffice.stellar_wallet.create_stellar_account()
+            # Check if details returned
+            if details:
+                # User half of the key
+                details["userHalf"] = details["secret"][:len(details["secret"]) // 2]
 
-            # Wait for answer
-            welcome_verification = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=180)
+                # Send information with details of new account
+                await send_new_account_information(ctx=ctx, details=details)
 
-            # Verify user answer
-            if welcome_verification.content.upper() in ["YES", "Y"]:
-                # Get private and public key
-                details = self.backoffice.stellar_wallet.create_stellar_account()
-                # Check if details returned
-                if details:
-                    # User half of the key
-                    details["userHalf"] = details["secret"][:len(details["secret"]) // 2]
+                # Message on explanation about verification
+                await verification_request_explanation(destination=ctx.message.author)
 
-                    # Send information with details of new account
-                    await send_new_account_information(ctx=ctx, details=details)
+                # Wait for user response
+                verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=60)
 
-                    # Message on explanation about verification
-                    await verification_request_explanation(destination=ctx.message.author)
+                if verification_msg.content.upper() == details["userHalf"]:
+                    system_half = details["secret"][len(details["secret"]) // 2:]  # Second half of private key
 
-                    # Wait for user response
-                    verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=60)
+                    # getting encrypted version of the key
+                    encrypted_key = security_manager.encrypt(private_key=bytes(system_half, 'utf-8'))
 
-                    if verification_msg.content.upper() == details["userHalf"]:
-                        system_half = details["secret"][len(details["secret"]) // 2:]  # Second half of private key
+                    # Producing data to be stored
+                    data_to_store = {
+                        "userId": int(ctx.author.id),
+                        "publicAddress": details["address"],
+                        "privateKey": encrypted_key
+                    }
 
-                        # getting encrypted version of the key
-                        encrypted_key = security_manager.encrypt(private_key=bytes(system_half, 'utf-8'))
+                    # Storing data
+                    if self.backoffice.custodial_manager.create_user_wallet(data_to_store=data_to_store):
+                        message = f"You have successfully verified your secret key and registered level 2 account" \
+                                  f" into Crypto Link system. Public address and 1/2 of private" \
+                                  f" key have been securely stored under your Discord User ID {ctx.author.id}. I" \
+                                  f"n order for account to become active, you are required to activate it through " \
+                                  f"on-chain deposit to address provided to you in previous steps"
 
-                        # Producing data to be stored
-                        data_to_store = {
-                            "userId": int(ctx.author.id),
-                            "publicAddress": details["address"],
-                            "privateKey": encrypted_key
-                        }
+                        await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green(), destination=0,
+                                                             sys_msg_title=':white_check_mark: Second Level Account'
+                                                                           ' Created :white_check_mark:',
+                                                             message=message)
 
-                        # Storing data
-                        if self.backoffice.custodial_manager.create_user_wallet(data_to_store=data_to_store):
-                            message = "You have successfully verified your secret key and registered level 2 account" \
-                                      " into Crypto Link System. Public address and 1/2 of private" \
-                                      " key have been stored. In order for account to become " \
-                                      "active, you are required to activate it through on-chain deposit to address " \
-                                      "provided to you in previous steps"
-                            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green(), destination=0,
-                                                                 sys_msg_title=':white_check_mark: Second Layer Account'
-                                                                               ' Create :white_check_mark:',
-                                                                 message=message)
+                        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                         self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                        msg = ':new: User register for wallet level 2. :rocket: '
+                        await send_uplink_message(destinations=load_channels, message=msg)
 
-                        else:
-                            message = 'There has been an issue while storing data into the system. Please re-initiate '
-                            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                                 sys_msg_title=':white_check_mark: Second Layer '
-                                                                               'Account Created :white_check_mark:',
-                                                                 message=message)
                     else:
-                        message = 'Account could not be verified as the Signature key provided for Discord activity is' \
-                                  ' not the same as provided to you above. Please initiate registration process again.'
+                        message = 'There has been an issue while storing data into the system. Please re-initiate the' \
+                                  ' whole process. If issue persists, contact Crypto Link Staff'
                         await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                             sys_msg_title=':exclamation: Key verification error'
-                                                                           ' :exclamation: ',
+                                                             sys_msg_title=':exclamation: Second level wallet '
+                                                                           'registration error :exclamation: ',
                                                              message=message)
                 else:
-                    message = 'There has been an issue while trying to create in-active account. Please try again later.'
+                    message = 'You have provided wrong 1/2 of the key which resulted in private key mismatch.' \
+                              ' Please re-initiate the registration process again'
                     await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                         sys_msg_title=':exclamation: Account Creation Error'
+                                                         sys_msg_title=':exclamation: Key verification Error'
                                                                        ' :exclamation: ',
                                                          message=message)
             else:
-                message = 'You have successfully cancelled second level wallet registration system.'
+                message = 'There has been an issue while trying to create 2 level wallet. Please try again later.' \
+                          ' If the issue persists please contact staff of the Crypto Link team.'
                 await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                     sys_msg_title=':exclamation: Registration Cancelled'
+                                                     sys_msg_title=':exclamation: Account Creation Error'
                                                                    ' :exclamation: ',
                                                      message=message)
         else:
-            message = f'You have already registered your second level account. To check account details please use ' \
-                      f'`{self.command_string}custodial account`.'
+            message = 'You have successfully cancelled second level wallet registration procedure.'
             await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_red(), destination=0,
-                                                 sys_msg_title=':exclamation: Second Level Account Already Registered'
+                                                 sys_msg_title=':exclamation: Registration Cancelled'
                                                                ' :exclamation: ',
                                                  message=message)
 
-    @custodial.group()
+    @custodial.group(aliases=["acc", "a"])
     @commands.check(user_has_custodial)
-    @commands.check(is_dm)
     async def account(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Custodial Account Commands__ :joystick: '
-            description = "All commands to operate with custodial wallet system (Layer 2) in Crypto Link"
-            list_of_values = [{"name": "Get Account Details",
-                               "value": f"`{self.command_string}custodial account info`"}]
+            description = "All commands available to operate with wallet level 2"
+            list_of_values = [{"name": ":information_source: Get Account Details :information_source: ",
+                               "value": f"```{self.command_string}custodial account info```\n"
+                                        f"`Aliases: nfo`"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                destination=1, c=Colour.dark_orange())
+                                                destination=0, c=Colour.dark_orange())
 
-    @account.command()
+    @account.command(aliases=['nfo'])
     async def info(self, ctx):
         # Get address from database
         user_public = self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=ctx.message.author.id)
         # Getting data from server for account
-        data = self.server.accounts().account_id(account_id=user_public).call()
-        from pprint import pprint
-        pprint(data)
-        if data and 'status' not in data:
-            # Send user account info
-            await send_user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
+        try:
+            data = self.server.accounts().account_id(account_id=user_public).call()
+            if data and 'status' not in data:
+                # Send user account info
+                await send_user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
 
-        else:
-            sys_msg_title = 'Stellar Wallet Query Server error'
-            message = 'Status of the wallet could not be obtained at this moment'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=sys_msg_title)
+            else:
+                sys_msg_title = 'Stellar Wallet Query Server error'
+                message = 'Status of the wallet could not be obtained at this moment'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                     sys_msg_title=sys_msg_title)
 
-    @custodial.group()
+        except NotFoundError:
+            await server_error_response(destination=ctx.message.author,
+                                        title=":exclamation: Account Not Activated :exclamation: ",
+                                        error=f'Account has not been activated yet'
+                                              f' Please activate it by depositing at least 2 XLM to '
+                                              f'```{user_public}```')
+
+    @custodial.group(aliases=["transactions"])
     @commands.check(user_has_custodial)
     async def tx(self, ctx):
         if ctx.invoked_subcommand is None:
-            title = ':joystick: __Available Transaction Commands__ :joystick: '
-            description = "All commands to operate with custodial wallet system (Layer 2) in Crypto Link"
-            list_of_values = [{"name": "Discord related payments",
-                               "value": f"`{self.command_string}custodial tx user <amount> <@discord.Member> <wallet level:int>`\n"
+            title = ':incoming_envelope:  __Available Transaction Commands__ :incoming_envelope:  '
+            description = "Commands dedicated to execution of transactions/payments"
+            list_of_values = [{"name": ":cowboy: Discord related payments :cowboy:",
+                               "value": f"```{self.command_string}custodial tx user <@discord.Member> <amount> "
+                                        f"<wallet level:int>```\n"
                                         f"**__Wallet Levels__**\n"
-                                        f":one: => tx to custodial wallet based on MEMO\n"
-                                        f":two: => tx to non custodial wallet owned by user over Discord"},
-                              {"name": "Non-Discord related payments",
-                               "value": f"`{self.command_string}custodial tx address <amount> <token> "
-                                        f"<to_address> <memo = Optional>`"}
+                                        f":one: => Transaction to 1st level Discord wallet based on MEMO\n"
+                                        f":two: => Transaction to 2nd level Discord wallet owned by user over Discord\n"
+                                        f"***Note***: All data is automatically obtained from the CL system once "
+                                        f"recipient selected."
+                                        f"\n`Aliases: usr, u`"},
+                              {"name": ":map: Non-Discord related recipients :map:",
+                               "value": f"```{self.command_string}custodial tx address <public key> <amount>"
+                                        f" <memo=optional>```\n"
+                                        f"`Aliases: addr, a, add`"}
                               ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @tx.command()
-    @commands.cooldown(1, 60, commands.BucketType.user)
-    async def user(self, ctx, amount: float, recipient: Member, layer: int):
+    @tx.command(aliases=["usr", "u"])
+    @commands.check(is_public)
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def user(self, ctx, recipient: Member, amount: float, wallet_level: int):
         """
         Create Transaction To User on Discord
         """
-        dev_fee = 0
-        atomic = amount * (10 ** 7)
+        dev_fee_atomic = 0
+        atomic_amount = int(amount * (10 ** 7))
         dev_fee_activated = False
 
-        # 1. Check if layer where user wants to send money exists
-        if layer in self.available_layers:
-            # 2. Check if amount selected is greater than 0.0000100 XLM
-            if atomic >= 100:
-                # 3. Check if user has registered layer and layer in available options
-                if self.check_user_wallet_layer_level(layer=layer, user_id=recipient.id):
+        recipient_check = ctx.message.author.id != recipient.id  # Boolean
+        wallet_level_check = ctx.message.author.id == recipient.id and wallet_level != 2
 
-                    ############################### DEV FEE ADDITION #############################
-                    # Send notification to user about dev fee
-                    await dev_fee_option_notification(destination=ctx.message.author)
+        # Check for allowed transaction channels
+        if recipient_check or wallet_level_check:
+            # Check if wallet level available
+            if wallet_level in self.available_layers:
+                # Check for minimum requirements to be met
+                if atomic_amount >= 100:
+                    # 3. Check if user has registered wallet level where user is planning to send funds
+                    if self.check_user_wallet_layer_level(layer=wallet_level, user_id=recipient.id):
+                        # DEV FEE Procedure
+                        # Send notification to user about dev fee
+                        await dev_fee_option_notification(destination=ctx.message.author)
 
-                    # Ask for response
-                    verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=30)
+                        # Ask for response
+                        verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                   timeout=30)
 
-                    # Check verification whats going on
-                    if verification_msg.content.upper() in ["YES", "Y"]:
-                        # Ask user with embed
-                        await ask_for_dev_fee_amount(destination=ctx.message.author)
+                        # Check verification whats going on
+                        if verification_msg.content.upper() in ["YES", "Y"]:
+                            # Ask user with embed
+                            await ask_for_dev_fee_amount(destination=ctx.message.author)
 
-                        try:
-                            dev_fee_answ = float(
-                                await self.bot.wait_for('message', check=check(ctx.message.author), timeout=30))
-                            if isinstance(dev_fee_answ, float):
-                                if dev_fee_answ > 0:
+                            try:
+                                dev_fee_answ = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                       timeout=30)
+                                fee_selected = dev_fee_answ.content
+                                fee_number = float(fee_selected)
+                                dev_fee_atomic = int(fee_number * (10 ** 7))
+                                if dev_fee_atomic > 0:
                                     # Convert to atomic
-                                    dev_fee = dev_fee_answ * (10 ** 7)
                                     dev_fee_activated = True
-                            else:
-                                message = f'Dev fee is not allowed to be less than 0 or 0. It will be skipped.'
-                                await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
-                                                                     destination=0,
-                                                                     sys_msg_title=':warning: Dev Fee Error :warning:')
-                        except ValueError:
-                            message = f'{dev_fee_answ} could not be converted to number and will therefore be skipped'
-                            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                                 sys_msg_title=':warning: Dev Fee Error :warning:')
-                    else:
-                        print('Dev fee not Selected skipp')
-
-                    ############################ CALCULATE TOTAL ##############################
-                    # Calculate Totals
-                    total_for_transaction = atomic + dev_fee
-                    total_with_minimum = total_for_transaction + ACCOUNT_MINIMUM_ATOMIC
-                    fee = self.get_network_base_fee()
-                    total_with_network_fee = total_with_minimum + fee
-
-                    requested_amount = atomic / (10 ** 7)
-                    dev_fee_normal = dev_fee / (10 ** 7)
-                    account_minimum = ACCOUNT_MINIMUM_ATOMIC / (10 ** 7)
-                    fee_normal = self.get_network_base_fee() / (10 ** 7)
-
-                    ############################ START MAKING TRANSACTION ##############################
-
-                    # 1. Check if user has sufficient balance
-                    user_public = self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(
-                        user_id=ctx.message.author)
-
-                    if self.check_if_sufficient_balance(sender_addr=user_public,
-                                                        total_for_tx=total_with_network_fee):
-
-                        # 2. Returned memo and address
-                        recipient_data = self.get_recipient_details_based_on_layer(layer=layer, user_id=recipient.id)
-
-                        # 3. Send information to the user to verify transaction with an answer with request to sign
-                        recipient_data["transaction_details"] = {"requested": requested_amount,
-                                                                 "devFee": dev_fee_normal,
-                                                                 "networkFee": fee_normal}
-                        await sign_message_information(destination=ctx.author,
-                                                       transaction_details=recipient_data,
-                                                       recipient=recipient, layer=layer)
-
-                        sign_transaction_answer = await self.bot.wait_for('message', check=check(ctx.message.author),
-                                                                          timeout=10)
-
-                        if sign_transaction_answer.upper() == "SIGN":
-                            await ctx.author.send(
-                                content=':robot: Please provide partial (1/2) private key bellow to sign '
-                                        'transaction request.')
-
-                            first_half_of_key = await self.bot.wait_for('message', check=check(ctx.message.author),
-                                                                        timeout=80)
-
-                            # DB 1/2 Private key
-                            private_encrypted = self.backoffice.custodial_manager.get_private_key(
-                                user_id=int(ctx.author.id))
-
-                            # decypher secret key and use it for transaction stream
-
-                            second_half_of_key = security_manager.decrypt(token=private_encrypted)
-                            private_full = first_half_of_key + second_half_of_key
-
-                            if self.check_private_key(private_key=private_full):
-                                result = self.stream_transaction(token='XLM', private_key=private_full,
-                                                                 from_address=user_public,
-                                                                 amount="total to send",
-                                                                 recipient=recipient_data,
-                                                                 dev_fee_status=dev_fee_activated,
-                                                                 dev_fee_amount=dev_fee)
-
-                                if result[0]:
-                                    # If result was successfull than make info
-                                    response = result[1]
-
-                                    # Send notification to user on transaction details
-                                    await send_transaction_report(destination=ctx.message.author, response=response)
-                                    # Send notification to user on types of operations in transaction
-                                    await self.send_operation_details(destination=ctx.message.author,
-                                                                      envelope=response['envelope_xdr'])
-
-                                    await transaction_report_recipient(sender=f'{ctx.author}',
-                                                                       recipient=recipient,
-                                                                       amount=requested_amount,
-                                                                       token='XLM',
-                                                                       response=response)
-
                                 else:
-                                    title = f':exclamation: __Transaction Error__ :exclamation: '
-                                    message = f'Transaction could not be completed. Please try again later.' \
-                                              f'Error: ```{result[1]["error"]}```'
+                                    message = f'Dev fee is not allowed to be less than 0 or 0. It will be skipped.'
                                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
-                                                                         destination=1,
-                                                                         sys_msg_title=title)
-                            else:
-                                title = f':exclamation: __Private Key Error__ :exclamation: '
-                                message = f'Invalid Ed25519 Secret Seed provided. Please try again fromm scratch'
-                                await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
-                                                                     destination=1,
-                                                                     sys_msg_title=title)
-                        else:
-                            title = f':exclamation: __Transaction Cancelled __ :exclamation: '
-                            message = f'You have successfully cancelled transaction.'
-                            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                                 sys_msg_title=title)
-
-                    else:
-                        title = f':exclamation: Insufficient Amount __ :exclamation: '
-                        message = f' You have insufficient balance in your hot wallet ' \
-                                  f'({total_with_network_fee / (10 ** 7)} XLM) or there has been network error while' \
-                                  f'trying to check your balance.\n' \
-                                  f'===============================\n' \
-                                  f'Transaction Value Breakdown:\n' \
-                                  f'===============================\n' \
-                                  f'For Transfer: `{requested_amount} XLM`\n' \
-                                  f'Dev Fee:`{dev_fee_normal}XLM`\n' \
-                                  f'Network Fee: `{fee_normal} XLM`\n' \
-                                  f'Account Min: `{account_minimum} XLM'
-                        await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                             sys_msg_title=title)
-                else:
-                    title = f':exclamation: __Transaction Cancelled __ :exclamation: '
-                    message = f'User {recipient} does not have active ***{layer}. Layer wallet***. Therefore transaction' \
-                              f' has been cancelled '
-                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                         sys_msg_title=title)
-            else:
-                title = f':exclamation: __Transaction Amount Error __ :exclamation: '
-                message = f'Amount you are able to send needs to be greater than 0.0000001 XLM. You have selected' \
-                          f' {atomic / (10 ** 7):.7f} XLM'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                     sys_msg_title=title)
-        else:
-            await account_layer_selection_message(destination=ctx.message.author, layer=layer)
-
-    @tx.command(aliases=['addr'])
-    async def address(self, ctx, amount: float, to_address: str, memo: str = None):
-        """
-        Send to external Address from second level wallet
-        """
-        dev_fee = 0
-        atomic_amount = amount * (10 ** 7)
-        dev_fee_activated = False
-
-        if atomic_amount >= 100:
-            if self.check_memo(memo):
-                if self.check_public_key(address=to_address):
-
-                    ############################### DEV FEE ADDITION #############################
-                    # Send notification to user about dev fee
-                    await dev_fee_option_notification(destination=ctx.message.author)
-
-                    # Ask for response
-                    verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=30)
-
-                    # Check verification whats going on
-                    if verification_msg.content.upper() in ["YES", "Y"]:
-                        # Ask user with embed
-                        await ask_for_dev_fee_amount(destination=ctx.message.author)
-
-                        try:
-                            dev_fee_answ = float(
-                                await self.bot.wait_for('message', check=check(ctx.message.author), timeout=30))
-                            if isinstance(dev_fee_answ, float):
-                                if dev_fee_answ > 0:
-                                    # Convert to atomic
-                                    dev_fee = dev_fee_answ * (10 ** 7)
-                                    dev_fee_activated = True
-                            else:
-                                message = f'Dev fee is not allowed to be less than 0 or 0. It will be skipped.'
+                                                                         destination=0,
+                                                                         sys_msg_title=':warning: Dev Fee Error '
+                                                                                       ':warning:')
+                            except ValueError:
+                                message = f'{dev_fee_answ} could not be converted to number and will therefore be ' \
+                                          f'skipped.'
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                      destination=0,
                                                                      sys_msg_title=':warning: Dev Fee Error :warning:')
-                        except ValueError:
-                            message = f'{dev_fee_answ} could not be converted to number and will therefore be skipped'
+                        else:
+                            message = f'Dev Fee will not be appended to transaction. '
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                                 sys_msg_title=':warning: Dev Fee Error :warning:')
-                    else:
-                        print('Dev fee not Selected skipp')
+                                                                 sys_msg_title=':robot:  Dev Fee Status :robot: ')
 
-                    ############################## MAKE CALCULATIONS ###############################
-                    total_for_transaction = atomic_amount + dev_fee
-                    total_with_minimum = total_for_transaction + ACCOUNT_MINIMUM_ATOMIC
-                    fee = self.get_network_base_fee()
-                    total_with_network_fee = total_with_minimum + fee
+                        # Calculations
+                        network_fee = 100
+                        total_for_transaction = atomic_amount + network_fee + dev_fee_atomic
+                        requested_amount = total_for_transaction / (10 ** 7)
+                        dev_fee_normal = dev_fee_atomic / (10 ** 7)
+                        fee_normal = network_fee / (10 ** 7)
+                        net_amount = atomic_amount / (10 ** 7)
 
-                    requested_amount = atomic_amount / (10 ** 7)
-                    dev_fee_normal = dev_fee / (10 ** 7)
-                    account_minimum = ACCOUNT_MINIMUM_ATOMIC / (10 ** 7)
-                    fee_normal = self.get_network_base_fee() / (10 ** 7)
-
-                    ############################ START MAKING TRANSACTION ##############################
-
-                    user_public = self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(
-                        user_id=ctx.message.author)
-                    if self.check_if_sufficient_balance(total_for_tx=total_with_network_fee, sender_addr=user_public):
-                        # 2. Returned memo and address
                         # 3. Send information to the user to verify transaction with an answer with request to sign
-                        data = {"requested": requested_amount,
+                        recipient_details = self.get_recipient_details_based_on_layer(layer=wallet_level,
+                                                                                      user_id=recipient.id)
+                        data = {"txTotal": requested_amount,
+                                "netValue": net_amount,
                                 "devFee": dev_fee_normal,
+                                "token": "XLM",
                                 "networkFee": fee_normal,
-                                "address": to_address,
-                                "memo": memo,
+                                "recipient": f"Discord User: {recipient}\n"
+                                             f"User ID: {recipient.id}\n"
+                                             f"Wallet Level: {wallet_level}",
+                                "toAddress": recipient_details["address"],
+                                "memo": recipient_details["memo"],
+                                "walletLevel": f"Level {wallet_level} wallet"
                                 }
 
-                        # TODO rewrite this for external notifcation
                         await sign_message_information(destination=ctx.author,
                                                        transaction_details=data,
                                                        recipient=ctx.message.author, layer=None)
@@ -624,81 +430,234 @@ class CustodialAccounts(commands.Cog):
                         sign_transaction_answer = await self.bot.wait_for('message', check=check(ctx.message.author),
                                                                           timeout=10)
 
-                        if sign_transaction_answer.upper() == "SIGN":
+                        if sign_transaction_answer.content.upper() == "SIGN":
                             await ctx.author.send(
                                 content=':robot: Please provide partial (1/2) private key bellow to sign '
                                         'transaction request.')
 
                             first_half_of_key = await self.bot.wait_for('message', check=check(ctx.message.author),
                                                                         timeout=80)
-
                             # DB 1/2 Private key
                             private_encrypted = self.backoffice.custodial_manager.get_private_key(
                                 user_id=int(ctx.author.id))
 
-                            # decipher secret key and use it for transaction stream
-                            second_half_of_key = security_manager.decrypt(token=private_encrypted)
-                            private_full = first_half_of_key + second_half_of_key
+                            second_half_of_key = security_manager.decrypt(token=private_encrypted["privateKey"]).decode(
+                                'utf-8')
+                            private_full = first_half_of_key.content + second_half_of_key
 
-                            if self.check_private_key(private_key=private_full):
-                                result = self.stream_transaction(token='XLM', private_key=private_full,
-                                                                 from_address=user_public,
-                                                                 amount="total to send",
-                                                                 recipient=data,
-                                                                 dev_fee_status=dev_fee_activated,
-                                                                 dev_fee_amount=dev_fee)
+                            if check_private_key(private_key=private_full):
+                                await ctx.author.send(content='Transactions is being streamed to network. '
+                                                              'Please wait few moments till its '
+                                                              'completed and response received from Crypto Link')
+                                await self.show_typing(ctx=ctx)
 
+                                # Initiate transaction stream
+                                result = self.stream_transaction_to_network(private_key=private_full,
+                                                                            amount=net_amount,
+                                                                            dev_fee_status=dev_fee_activated,
+                                                                            tx_data=data)
+
+                                # Process result returned from stream
                                 if result[0]:
-                                    # If result was successful than make info
-                                    response = result[1]
+                                    if wallet_level == 1 and ctx.message.author.id != recipient:
+                                        await recipient_incoming_notification(recipient=recipient,
+                                                                              sender=ctx.message.author,
+                                                                              wallet_level=wallet_level, data=data,
+                                                                              response=result[1])
 
-                                    # Send notification to user on transaction details
-                                    await send_transaction_report(destination=ctx.message.author, response=response)
-                                    # Send notification to user on types of operations in transaction
-                                    await self.send_operation_details(destination=ctx.message.author,
-                                                                      envelope=response['envelope_xdr'])
+                                    elif wallet_level == 2 and ctx.message.author.id != recipient:
+                                        await recipient_incoming_notification(recipient=recipient,
+                                                                              sender=ctx.message.author,
+                                                                              wallet_level=wallet_level, data=data,
+                                                                              response=result[1])
+
+                                    # Dispatch reports to recipient, sender and uplink
+                                    await self.transaction_report_dispatcher(ctx=ctx, result=result[1], data=data)
 
                                 else:
-                                    title = f':exclamation: __Transaction Error__ :exclamation: '
-                                    message = f'Transaction could not be completed. Please try again later.' \
-                                              f'Error: ```{result[1]["error"]}```'
+                                    hor_error = self.process_error(error=result[1])
+                                    title = f':exclamation: __Transaction Stream Error__ :exclamation: '
+                                    message = f'There has been an error in transaction: ```{hor_error}```'
                                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
-                                                                         destination=1,
+                                                                         destination=0,
                                                                          sys_msg_title=title)
                             else:
                                 title = f':exclamation: __Private Key Error__ :exclamation: '
-                                message = f'Invalid Ed25519 Secret Seed provided. Please try again fromm scratch'
+                                message = f'Invalid Ed25519 Secret Seed provided. Please re-initiate the transaction' \
+                                          f' request'
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                      destination=1,
                                                                      sys_msg_title=title)
-                        else:
-                            title = f':exclamation: __Transaction Cancelled __ :exclamation: '
-                            message = f'You have successfully cancelled transaction.'
-                            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                                 sys_msg_title=title)
+
+                    else:
+                        title = f':exclamation: __Transaction Cancelled __ :exclamation: '
+                        message = f'User {recipient} does not have active ***{wallet_level}. ' \
+                                  f'Layer wallet***. Therefore transaction has been cancelled '
+                        await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                             sys_msg_title=title)
                 else:
-                    title = f':exclamation: __Wrong Destination Address __ :exclamation: '
-                    message = f'the Address `{to_address}` is invalid. Please re-check it. '
-                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                    title = f':exclamation: __Transaction Amount Error __ :exclamation: '
+                    message = f'Amount you are able to send needs to be greater than 0.0000001 XLM. You have selected' \
+                              f' {atomic_amount / (10 ** 7):.7f} XLM'
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                          sys_msg_title=title)
             else:
-                title = f':exclamation: __Invalid Memo Provided __ :exclamation: '
-                message = f'Memo `{memo}` is not a string encoded using either ASCII or UTF-8, up to 28-bytes long.'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                     sys_msg_title=title)
+                await account_layer_selection_message(destination=ctx.message.author, level=wallet_level)
+        else:
+            title = f':exclamation: Destination error :exclamation: '
+            message = f'There would be no point of sending yourself funds from wallet level 2 to wallet ' \
+                      f'level 2. Only routes which are possible are: send funds to your wallet level 1' \
+                      f' or than to another user wallet level 1 or 2'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
 
+    @tx.command(aliases=['addr', 'a', 'add'])
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def address(self, ctx, to_address: str, amount: float, memo: str = None):
+        """
+        Send to external Address from second level wallet
+        """
+        fee_atomic = 0
+        atomic_amount = int(amount * (10 ** 7))
+        dev_fee_activated = False
+
+        if not memo:
+            memo = 'None'
+
+        if atomic_amount >= 100:
+            if check_memo(memo) and check_public_key(address=to_address):
+
+                # DEV FEE INTEGRATION PROCESS
+                # Send notification to user about dev fee
+                await dev_fee_option_notification(destination=ctx.message.author)
+
+                # Ask for response
+                verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=30)
+
+                # Check verification whats going on
+                if verification_msg.content.upper() in ["YES", "Y"]:
+                    # Ask user with embed
+                    await ask_for_dev_fee_amount(destination=ctx.message.author)
+
+                    try:
+                        dev_fee_answ = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=30)
+                        fee_selected = dev_fee_answ.content
+                        fee_number = float(fee_selected)
+                        fee_atomic = int(fee_number * (10 ** 7))
+                        if fee_atomic > 0:
+                            # Convert to atomic
+                            dev_fee_activated = True
+                        else:
+                            message = f'Dev fee is not allowed to be less than 0 or 0. It will be skipped.'
+                            await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                 destination=0,
+                                                                 sys_msg_title=':warning: Dev Fee Error :warning:')
+                    except ValueError:
+                        message = f'{dev_fee_answ} could not be converted to number and will therefore be skipped'
+                        await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                             sys_msg_title=':warning: Dev Fee Error :warning:')
+                else:
+                    message = f'Dev Fee will not be appended to transaction. '
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                         sys_msg_title=':robot:  Dev Fee Status :robot: ')
+
+                # ############################## MAKE CALCULATIONS ###############################
+                network_fee = 100  # Stroops
+                total_for_transaction = atomic_amount + network_fee + fee_atomic  # Dev fee based on selected
+                requested_amount = total_for_transaction / (10 ** 7)
+                dev_fee_normal = fee_atomic / (10 ** 7)
+                fee_normal = network_fee / (10 ** 7)
+                net_amount = atomic_amount / (10 ** 7)
+
+                # MAKING TRANSACTIONS
+                # 3. Send information to the user to verify transaction with an answer with request to sign
+                data = {"txTotal": requested_amount,
+                        "netValue": net_amount,
+                        "devFee": dev_fee_normal,
+                        "token": "XLM",
+                        "networkFee": fee_normal,
+                        "recipient": f"{to_address}",
+                        "toAddress": to_address,
+                        "memo": memo,
+                        "walletLevel": "External Wallet"
+                        }
+
+                await sign_message_information(destination=ctx.author,
+                                               transaction_details=data,
+                                               recipient=ctx.message.author, layer=None)
+                sign_transaction_answer = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                  timeout=40)
+                if sign_transaction_answer.content.upper() == "SIGN":
+                    await ctx.author.send(
+                        content=':robot: Please provide partial (1/2) private key bellow to sign '
+                                'transaction request.')
+
+                    first_half_of_key = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                timeout=80)
+
+                    # DB 1/2 Private key
+                    private_encrypted = self.backoffice.custodial_manager.get_private_key(
+                        user_id=int(ctx.author.id))
+
+                    # decipher secret key and use it for transaction stream
+                    second_half_of_key = security_manager.decrypt(token=private_encrypted["privateKey"]).decode('utf-8')
+                    private_full = first_half_of_key.content + second_half_of_key
+
+                    if check_private_key(private_key=private_full):
+                        await ctx.author.send(content='Transactions is being sent to network. '
+                                                      'Please wait few moments till its '
+                                                      'completed')
+                        await self.show_typing(
+                            ctx=ctx)  # Shows the typing on discord so user knows that something is going on
+
+                        # Stream tx and return tuple (Boolean , dict response)
+                        result = self.stream_transaction_to_network(private_key=private_full,
+                                                                    amount=net_amount,
+                                                                    dev_fee_status=dev_fee_activated,
+                                                                    tx_data=data)
+
+                        if result[0]:
+                            await self.transaction_report_dispatcher(ctx=ctx, result=result[1], data=data)
+                        else:
+                            hor_error = self.process_error(error=result[1])
+
+                            title = f':exclamation: __Transaction Dispatch Error__ :exclamation: '
+                            message = f'There has been an error in transaction: ```{hor_error}```'
+                            await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                 destination=0,
+                                                                 sys_msg_title=title)
+                    else:
+                        title = f':exclamation: __Private Key Error__ :exclamation: '
+                        message = f'Invalid Ed25519 Secret Seed provided. Please try again fromm scratch'
+                        await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                             destination=0,
+                                                             sys_msg_title=title)
+
+                else:
+                    title = f':exclamation: __Transaction Cancelled __ :exclamation: '
+                    message = f'You have successfully cancelled transaction.'
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                         sys_msg_title=title)
+
+            else:
+                title = f':exclamation: __ Wrong Details Provided__ :exclamation: '
+                message = f'Either address, memo or both are invalid. Please try again.\n' \
+                          f'```MEMO = allowed string encoded using either ASCII or UTF-8, up to 28-bytes long.\n' \
+                          f'ADDRESS =  Valid Ed25519 Public Key Address supported by Stellar network.```'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=title)
         else:
             title = f':exclamation: __Transaction Amount Error __ :exclamation: '
-            message = f'Amount you are able to send needs to be greater than 0.0000001 XLM. You have selected' \
+            message = f'Amount you are able to send needs to be greater than 0.0000100 XLM. You have selected' \
                       f' {atomic_amount / (10 ** 7):.7f} XLM'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
     @custodial.error
     async def cust_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            message = f"In order to be able to use custodial wallet (Layer 2 wallet) please register first into the " \
-                      f"Crypto Link system with {self.command_string}register"
+            message = f"{error},In order to be able to use wallet of level 2, please register first into the " \
+                      f"Crypto Link wallet level 1 system with  `{self.command_string}register`"
             title = f'**__User not found__** :clipboard:'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
@@ -706,7 +665,6 @@ class CustodialAccounts(commands.Cog):
     @account.error
     async def acc_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            print(error)
             message = f"In order to be able to access commands under command group" \
                       f" `{self.command_string}custodial account` " \
                       f" user is required to:\n" \
@@ -719,30 +677,74 @@ class CustodialAccounts(commands.Cog):
     @register.error
     async def reg_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            message = f"You are allowed to register for Second Layer account only through the **direct message**" \
-                      f" with Crypto Link."
-            title = f'**__Wrong Channel Type__**'
+            message = f"In order to be able to register, command needs to be executed over DM. If you have executed" \
+                      f" it over DM and this error still pops up, than it most likely means that you have already " \
+                      f"successfully registered 2 level account into Crypto Link system. Proceed with " \
+                      f"`{self.command_string}custodial account`"
+            title = f'**__Command check errors__**'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+        elif TimeoutError:
+            title = f'__Transaction Request Expired__'
+            message = f'It took you to long to provide requested answer. Please try again or follow ' \
+                      f'guidelines further from the Crypto Link. '
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
     @user.error
     async def user_tx_error(self, ctx, error):
+        print(error)
         if isinstance(error, commands.BadArgument):
             title = f'__Bad Argument Provided __'
             message = f'`{error}`'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+        elif isinstance(error, commands.MissingRequiredArgument):
+            title = f'__Missing Required Argument__'
+            message = f'`{error}` Command structure is ```{self.command_string}custodial tx user  <@discord.User> ' \
+                      f'<amount> <wallet level>```'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif isinstance(error, commands.CheckFailure):
+            title = f'__DM Lockdown__'
+            message = f'This command needs to be initiated on one of the community channels where ' \
+                      f'Crypto Link is present. This allows system to obtain recipient wallet details.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif isinstance(error, AssertionError):
+            title = f'__Wrong Amount Provided __'
+            message = f'You have provided wrong details:' \
+                      f'`{error}`'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+        elif TimeoutError:
+            title = f'__Transaction Request Expired__'
+            message = f'It took you to long to provide requested answer. Please try again or follow ' \
+                      f'guidelines further from the Crypto Link. '
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @address.error
+    async def addr_error(self, ctx, error):
+        if isinstance(error, commands.BadArgument):
+            title = f'__Bad Argument Provided __'
+            message = f'`{error}`'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
         elif isinstance(error, AssertionError):
             title = f'__Wrong Amount Provided __'
             message = f'You have provided wrong amount for transaction amount:' \
                       f'`{error}`'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
+
         elif TimeoutError:
-            title = f'__Transaction Request Expired__'
-            message = f'It took you to long to provide requested answer. Please try again or follow ' \
-                      f'guidliness further from the Crypto Link. '
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            title = f':timer: __Transaction Request Expired__ :timer: '
+            message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
+                      f'time-limits'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
 

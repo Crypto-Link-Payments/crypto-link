@@ -23,26 +23,28 @@ class HelpCommands(commands.Cog):
     async def help(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':sos: __Available Help Commands__ :sos: '
-            description = f"Available sub commands for {self.command_string}"
+            description = f"Available sub commands for `{self.command_string}help`"
             list_of_values = [
                 {"name": " :mega: About the Crypto Link :mega:",
-                 "value": f"`{self.command_string}about`"},
-                {"name": ":coin: Available Currencies :coin:",
-                 "value": f"`{self.command_string}help currencies`\n"
-                          f"`Aliases: tokens, coins`"},
+                 "value": f"```{self.command_string}about```"},
                 {"name": ":rocket: How to get started :rocket:",
-                 "value": f"`{self.command_string}help get_started`\n"
+                 "value": f"```{self.command_string}get_started```\n"
                           f"`Aliases: start`"},
+                {"name": " :moneybag:  Multi-Wallet System :moneybag: ",
+                 "value": f"```{self.command_string}help levels```"},
+                {"name": ":coin: Available Currencies :coin:",
+                 "value": f"```{self.command_string}help currencies```\n"
+                          f"`Aliases: tokens, coins`"},
                 {"name": ":office_worker: Accessing personal account :office_worker:",
-                 "value": f"`{self.command_string}help account`\n"
+                 "value": f"```{self.command_string}help account```\n"
                           f"`Aliases: acc, user, profile, wallet`"},
                 {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
-                 "value": f"`{self.command_string}help transactions`\n"
+                 "value": f"```{self.command_string}help transactions```\n"
                           f"`Aliases: tx, pay`"},
                 {"name": ":crown: Guild Owner Commands :crown:",
-                 "value": f"`{self.command_string}help owner`"},
+                 "value": f"```{self.command_string}help owner```"},
                 {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
-                 "value": f"`{self.command_string}help horizon`\n"
+                 "value": f"```{self.command_string}help horizon```\n"
                           f"`Aliases: hor, network, explorer`"},
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -65,6 +67,11 @@ class HelpCommands(commands.Cog):
                       'allowing for execution of Peer to Peer transactions amongst users, monetization'
                       ' opportunities for Discord guild owners and project promotions/crowdfunding/ICOs activities'
                       ' at low costs for aspiring fintech-companies building with the help of Stellar.'},
+            {"name": ":moneybag:  Interconnected Multi level wallet system :moneybag:  ",
+             "value": f'Crypto Link has integrated and interconnected system of custodial,  '
+                      f'partially custodial and noncustodial wallets. To find more information and explanation '
+                      f'please use `{self.command_string}help levels`. Each user is required to register for level 1 '
+                      f'system in order to be able to use level 2 system.'},
 
             {"name": ":money_with_wings: Instant Peer to Peer feeless transactions :money_with_wings:  ",
              "value": f"Users are able to execute instant peer-2-peer transactions without fees either with the Stellar"
@@ -104,7 +111,7 @@ class HelpCommands(commands.Cog):
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
 
-    @help.command(aliases=["start"])
+    @commands.command(aliases=["start"])
     async def get_started(self, ctx):
         """
         How to get started with the payment system
@@ -113,12 +120,12 @@ class HelpCommands(commands.Cog):
         """
         start_embed = discord.Embed(title=f':rocket: Launch {self.bot.user.name} Experience :rocket:',
                                     colour=Colour.blue())
-        start_embed.add_field(name=':one: Register your account :one:',
+        start_embed.add_field(name=':one: Register yourself wallet level 1 :one:',
                               value=f'In order for you to be able to make peer to peer transactions and use merchant'
-                                    f' system, you must be registered in the system.\n'
+                                    f' system, you must have registered at least wallet level 1.\n'
                                     f'You can do that by executing command on any public Discord channel, where system'
                                     f' is present with command `{self.command_string}register`.\n'
-                                    f'Once successful, you will create personal wallets with details which you can use '
+                                    f'Once successful, you will create personal wallet with details which you can use '
                                     f' to move or deposit funds. To further familiarize yourself with other'
                                     f' commands use `{self.command_string}help`',
                               inline=False)
@@ -130,10 +137,10 @@ class HelpCommands(commands.Cog):
                               value=f'`{self.command_string}send <amount> <ticker> <@discord.Member>`\n'
                                     f'Example: `{self.command_string}send 10 xlm @animus`',
                               inline=False)
-        start_embed.add_field(name=':sos: Access Help Menu :sos: ',
-                              value=f'`{self.command_string}help` or check '
-                                    f'[user command list on Github](https://github.com/launch-pad-investments/crypto-link/blob/master/docs/USERCOMMANDS.md)',
+        start_embed.add_field(name=':sos: Explore Crypto Link :sos: ',
+                              value=f'```{self.command_string}help```',
                               inline=False)
+
         await ctx.author.send(embed=start_embed)
 
     @help.command(aliases=['tokens', 'coins'])
@@ -163,6 +170,36 @@ class HelpCommands(commands.Cog):
                       f'`Homepage:` ***{coins[coin]["homepage"]}***',
                 inline=False)
         await ctx.author.send(embed=available)
+
+    @help.command()
+    async def levels(self, ctx):
+        title = ':office_worker: __Multi Level Wallet system__:office_worker: '
+        description = "Explanation of the multi-level wallet system"
+        list_of_values = [
+            {"name": ":one: Wallet level 1 :one: ",
+             "value": f"Registration for `wallet level 1` is mandatory for all users who would like to "
+                      f"use all the functions Crypto Link has to offer. It is a full custodial wallet "
+                      f"operating on MEMO principles. This allows anyone to receive transaction from sender "
+                      f"instantly, even doe if recipient has not registered yet into the system. Wallet of level 1 "
+                      f"is automatically created and all actions connected with it do not require private key "
+                      f"to be used for signing. Signature for account activity is obtained through unique"
+                      f" ID provided to user upon registration to Discord."},
+            {"name": ":two: Wallet level 2 :two: ",
+             "value": "`Level 2 wallet` allows for full control of your ***private keys*** and with it, ability to use "
+                      "Discord wallet as well with other mediums. Upon successful registration and key verification,"
+                      " Crypto Link safely stores encrypted part of your private key. When making on-chain actions,"
+                      " user is required to provide second part of the private key in order to make puzzle completed"
+                      " and afterwards successfully streamed to network."},
+            {"name": ":three: Wallet level 3 :three: ",
+             "value": "`Level 3 wallet` which utilizes XDR envelopes to make XDR envelopes to be signed either through"
+                      " [Stellar Laboratory](https://laboratory.stellar.org/#?network=public) or any other application"
+                      " allowing to import XDR or than straight through "
+                      "Discord. the only details which are stored into Crypto Link system are unique user id and "
+                      "user public address so XDR can be successfully built."}
+        ]
+
+        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                            destination=1, c=Colour.blue())
 
     @help.command(aliases=['tx', 'pay'])
     async def transactions(self, ctx):

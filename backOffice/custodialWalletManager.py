@@ -24,7 +24,7 @@ class CustodialWalletManager:
         else:
             return False
 
-    def create_user_wallet(self, data_to_store:dict):
+    def create_user_wallet(self, data_to_store: dict):
         """
         Creates the user hot wallet into the database. Decryption happens in COGS
         """
@@ -58,8 +58,9 @@ class CustodialWalletManager:
         else:
             return {}
 
-    def get_private_key(self,user_id):
-        data = self.hotWallets.find_one({"userId":int(user_id)},
-                                        {"_id":0,
-                                         "privateKey":1})["privateKey"]
+    def get_private_key(self, user_id):
+        data = self.hotWallets.find_one({"userId": int(user_id)},
+                                        {"_id": 0,
+                                         "privateKey": 1,
+                                         "publicAddress": 1})
         return data
