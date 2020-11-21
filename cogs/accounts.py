@@ -109,13 +109,14 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
-    @commands.group()
+    @commands.group(alliases=["one", "st", "first", "1"])
     @commands.check(user_has_wallet)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Wallet Commands__ :joystick: '
-            description = "All commands available to operate execute wallet related actions"
+            description = "All commands available to operate execute wallet related actions.\n" \
+                          "`Aliases: one, st, first, 1`"
             list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
                                "value": f"`{self.command_string}wallet balance`"},
                               {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
