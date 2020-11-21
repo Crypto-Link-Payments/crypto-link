@@ -162,9 +162,9 @@ class LevelTwoAccountCommands(commands.Cog):
         except Exception as e:
             return False, e
 
-    @commands.group(aliases=['cust', 'c', '2'])
+    @commands.group(aliases=["nd", '2', 'custodial'])
     @commands.check(user_has_wallet)
-    async def custodial(self, ctx):
+    async def two(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':wave:  __Welcome to Level 2 wallet system__ :wave:  '
             description = "Unlike Wallet __Level 1 system__, ***Level 2*** allows for full control of your" \
@@ -175,21 +175,21 @@ class LevelTwoAccountCommands(commands.Cog):
                           " streamed to the Stellar network\n" \
                           "`Aliases: cust, c, 2`"
             list_of_values = [{"name": ":new: Register for in-active wallet :new: ",
-                               "value": f"```{self.command_string}custodial register```\n"
-                                        f"`Aliases: get, new`"},
+                               "value": f"```{self.command_string}two register```\n"
+                                        f"`Aliases: get, new. reg`"},
                               {"name": ":joystick: Group of commands to obtain info on Layer two Account :joystick: ",
-                               "value": f"```{self.command_string}custodial account```\n"
+                               "value": f"```{self.command_string}two account```\n"
                                         f"`Aliases: acc, a`"},
                               {
                                   "name": ":money_with_wings: Group of commands to create various transactions "
                                           ":money_with_wings:",
-                                  "value": f"```{self.command_string}custodial tx```\n"
-                                           f"`Aliases: transactions`"}
+                                  "value": f"```{self.command_string}two payment```\n"
+                                           f"`Aliases: pay, p, tx, transactions`"}
                               ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @custodial.command(aliases=["reg", "new", 'get'])
+    @two.command(aliases=["reg", "new", 'get'])
     @commands.check(is_dm)
     @commands.check(user_has_no_custodial)
     async def register(self, ctx):
@@ -278,7 +278,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                                                ' :exclamation: ',
                                                  message=message)
 
-    @custodial.group(aliases=["acc", "a"])
+    @two.group(aliases=["acc", "a"])
     @commands.check(user_has_custodial)
     async def account(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -314,9 +314,9 @@ class LevelTwoAccountCommands(commands.Cog):
                                               f' Please activate it by depositing at least 2 XLM to '
                                               f'```{user_public}```')
 
-    @custodial.group(aliases=["transactions"])
+    @two.group(aliases=["transaction", "tx", "pay","p"])
     @commands.check(user_has_custodial)
-    async def tx(self, ctx):
+    async def paymet(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':incoming_envelope:  __Available Transaction Commands__ :incoming_envelope:  '
             description = "Commands dedicated to execution of transactions/payments"
@@ -338,10 +338,11 @@ class LevelTwoAccountCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @tx.command(aliases=["usr", "u"])
+    @paymet.command(aliases=["usr", "u"])
     @commands.check(is_public)
-    @commands.cooldown(1, 30, commands.BucketType.user)
-    async def user(self, ctx, recipient: Member, amount: float, wallet_level: int):
+    # @commands.cooldown(1, 30, commands.BucketType.user)
+    async def user(self, ctx, recipient: Member, wallet_level: int, amount: float):
+
         """
         Create Transaction To User on Discord
         """
@@ -511,8 +512,8 @@ class LevelTwoAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @tx.command(aliases=['addr', 'a', 'add'])
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @paymet.command(aliases=['addr', 'a', 'add'])
+    # @commands.cooldown(1, 30, commands.BucketType.user)
     async def address(self, ctx, to_address: str, amount: float, memo: str = None):
         """
         Send to external Address from second level wallet
@@ -653,7 +654,7 @@ class LevelTwoAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
-    @custodial.error
+    @two.error
     async def cust_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             message = f"{error},In order to be able to use wallet of level 2, please register first into the " \
