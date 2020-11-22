@@ -8,10 +8,11 @@ from Merchant wallet to their won upon withdrawal.
 from discord.ext import commands
 from discord import Embed, Colour, Member
 from cogs.utils.systemMessaages import CustomMessages
+from cogs.utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
-from stellar_sdk import TransactionBuilder, Network, Server,Transaction
-from stellar_sdk.exceptions import NotFoundError
+from stellar_sdk import TransactionBuilder, Network, Transaction
+from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError
 
 helper = Helpers()
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
@@ -42,14 +43,17 @@ class LevelThreeAccountCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = Server(horizon_url="https://horizon-testnet.stellar.org")
+        self.server = self.backoffice.stellar_wallet.server
+        self.acc_mng_rd_lvl = self.backoffice.third_level_manager
         self.supported = list(integrated_coins.keys())
 
     def check_address_on_server(self, address: str):
         try:
-            from_account = self.server.load_account(account_id=address)
+            self.server.load_account(account_id=address)
             return True
         except NotFoundError:
+            return False
+        except Ed25519PublicKeyInvalidError:
             return False
 
     async def send_xdr_info(self, ctx, request_data: dict, command_type: str):
@@ -90,34 +94,39 @@ class LevelThreeAccountCommands(commands.Cog):
         xdr_info.add_field(name="XDR Envelope",
                            value=f'```{request_data["envelope"]}```',
                            inline=False)
-
         xdr_info.add_field(name=":warning: Note :warning:",
                            value=f'Copy the XDR envelope to application which allows __importing of '
                                  f' a transaction envelope in XDR format and follow procedures there.'
                                  f'If you do not have access to such application than you can use as well\n'
-                                 f'[Stellar Laboratory Transaction Signer](https://laboratory.stellar.org/#txsigner?network=test)',
+                                 f'[Stellar Laboratory Transaction Signer]'
+                                 f'(https://laboratory.stellar.org/#txsigner?network=test)',
                            inline=False)
 
         await ctx.author.send(embed=xdr_info)
 
-    @commands.group(aliases=['hot_wallet'])
-    async def xdr(self, ctx):
+    @commands.group(aliases=['3', 'rd'])
+    @commands.check(user_has_second_level)
+    async def three(self, ctx):
         title = ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r:  ' \
-                '__Transaction Envelope Creator__ ' \
+                '__Welcome to level 3 wallet system__ ' \
                 ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r: '
-        description = 'Representation of all currently available commands to create and sign Transaction envelopes.'
+        description = "***Level 3*** wallet provides user full control of the private keys. Unlike in __Level 2__," \
+                      " Crypto Link stores upon registration only Discord Username details and " \
+                      "public wallet key address. Both are required to make wallet levels interoperable and allows " \
+                      " for execution of the transactions with ease."
         list_of_commands = [
             {"name": f':map: Prepare Payment Envelope for external address :map:',
-             "value": f'`{self.command_string}xdr payment <amount> <token> <from address> <to address> <memo=optional>`'},
+             "value": f'```{self.command_string}3 payment <amount> <token> <from address> <to address>'
+                      f' <memo=optional>```\n'
+                      f'`Aliases: p, pay, tx, transaction`'},
             {"name": f':mag_right: Prepare Payment for Discord User :mag:',
-             "value": f'`{self.command_string}xdr discord <<amount> <token> <@discord.User>`'},
+             "value": f'```{self.command_string}xdr discord <<amount> <token> <@discord.User>```'},
             {"name": f':pen_ballpoint: Sign Transaction XDR :pen_ballpoint: ',
-             "value": f'`{self.command_string}xdr sign <Transaction XDR String>`'},
+             "value": f'```{self.command_string}xdr sign <Transaction XDR String>```'},
             {"name": f':arrow_forward: Activate Address XDR :arrow_forward:',
-             "value": f'`{self.command_string}xdr activate <from address> <to address> <@discord.User>`\n'
+             "value": f'```{self.command_string}xdr activate <from address> <to address> <@discord.User>```\n'
                       f'**__Note:__** This command is allowed to be executed only through the public channels of '
                       f'community as it requires access to the User Tag '}
-
         ]
 
         if ctx.invoked_subcommand is None:
@@ -125,7 +134,70 @@ class LevelThreeAccountCommands(commands.Cog):
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
-    @xdr.command()
+    @three.group(aliases=['reg', 'new'])
+    async def register(self, ctx):
+        title = ':new: 3 level wallet registration commands :new: '
+        description = ""
+        list_of_commands = [
+            {"name": f':mag_right: Register new wallet level 3 :mag:',
+             "value": f'```{self.command_string}3 register new ```\n'
+                      f'`Aliases: get, n`'},
+            {"name": f':mag_right: Register Own Public Address :mag:',
+             "value": f'```{self.command_string}3 register own <Valid Public Address>```\n'
+                      f'`Aliases: o, my`'},
+            {"name": f':mag_right: Update Own Public Address :mag:',
+             "value": f'```{self.command_string}3 register update <Valid Public Address> ```\n'
+                      f'`Aliases: u`'}
+        ]
+
+        if ctx.invoked_subcommand is None:
+            await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
+                                                description=description,
+                                                destination=1, c=Colour.lighter_gray())
+
+    @register.command(aliases=["n", "get"])
+    @commands.check(user_has_no_third_level)
+    async def new(self, ctx):
+        """
+        Registers new 3rd level wallet in the system
+        """
+        details = self.backoffice.stellar_wallet.create_stellar_account()
+
+        if details:
+            # TODO notify member on new wallet
+            # TODO ask if he/she has stored the private key
+            # Ask him to provide last three of private key
+
+            secret = details["secret"]
+            # Wallet details to store
+            wallet = {
+                "userId": int(ctx.message.author.id),
+                "publicAddress": details["address"]
+            }
+            if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=wallet):
+                # TODO notify than level has been successfully created and that
+                # Needs to be activated
+                pass
+
+
+            else:
+                print("something went to hell")
+        else:
+            print("something went to hell")
+
+    @register.command(aliases=["o", "my"])
+    @commands.check(user_has_no_third_level)
+    async def own(self, ctx, public_address: str):
+        print("no third level")
+        pass
+
+    @three.command(aliases=["u"])
+    @commands.check(user_has_third_level)
+    async def update(self, ctx):
+        print("user has third")
+        pass
+
+    @three.group(aliases=["p", "pay", "tx", "transaction", 'send'])
     async def payment(self, ctx, amount: float, token: str, from_address: str, to_address: str, memo: str = None):
         """
         Create XDR payment envelope to be used for signing to some other users than discord
@@ -214,7 +286,7 @@ class LevelThreeAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=ctx.author,
                                                  sys_msg_title=CONST_XDR_ERROR)
 
-    @xdr.command()
+    @three.command()
     async def discord(self, ctx, amount: float, token: str, user: Member, layer: int):
         """
         Create XDR to send to user on discord
@@ -228,13 +300,10 @@ class LevelThreeAccountCommands(commands.Cog):
 
                 # TODO Check if user has 2 layer activated
                 pass
-
-
-
             else:
                 message = "User Has not been registered yet into Crypto Link System. If you would still like to send " \
-                          f"user {final_amount} {token.upper()}, please contact him directly and ask him for hot wallet" \
-                          f" address."
+                          f"user {final_amount} {token.upper()}, please contact him directly and ask him for hot " \
+                          f"wallet address."
                 await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=ctx.author,
                                                      sys_msg_title=CONST_XDR_ERROR)
 
@@ -243,14 +312,14 @@ class LevelThreeAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=ctx.author,
                                                  sys_msg_title=CONST_XDR_ERROR)
 
-    @xdr.command()
+    @three.command()
     async def dev(self, ctx, xdr_envelope):
         """
         Modifies the transaction envelope so that another operation is getting added
         """
         pass
 
-    @xdr.command()
+    @three.command()
     async def sign(self, ctx, xdr_envelope):
         """
         Sign XDR envelope
@@ -261,7 +330,7 @@ class LevelThreeAccountCommands(commands.Cog):
         else:
             print('Not a transaction')
 
-    @xdr.command()
+    @three.command()
     async def activate(self, ctx, from_account: str, account_to_activate: str, amount: float = None):
         """
         Make account activate

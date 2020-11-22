@@ -9,11 +9,11 @@ from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadRes
     NotFoundError
 from discord import Colour, Member
 from discord.ext import commands
-from cogs.utils.customCogChecks import user_has_wallet, user_has_custodial, is_dm, is_public, user_has_no_custodial
+from cogs.utils.customCogChecks import user_has_wallet, user_has_second_level, is_dm, is_public, user_has_no_second
 from cogs.utils.systemMessaages import CustomMessages
 from utils.securityManager import SecurityManager
 
-from secondLevel.utils.custodialMessages import account_layer_selection_message, dev_fee_option_notification, \
+from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message, dev_fee_option_notification, \
     ask_for_dev_fee_amount, send_user_account_info, sign_message_information, send_transaction_report, \
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
     server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
@@ -101,7 +101,7 @@ class LevelTwoAccountCommands(commands.Cog):
         if layer == 1:
             return self.backoffice.account_mng.check_user_existence(user_id=user_id)
         elif layer == 2:
-            return self.backoffice.custodial_manager.second_level_user_reg_status(user_id=user_id)
+            return self.backoffice.second_level_manager.second_level_user_reg_status(user_id=user_id)
 
     def get_recipient_details_based_on_layer(self, layer: int, user_id: int):
         """
@@ -117,7 +117,7 @@ class LevelTwoAccountCommands(commands.Cog):
         elif layer == 2:
             # Details for transaction to level 2 wallet
             user_data = {
-                "address": self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=user_id),
+                "address": self.backoffice.second_level_manager.get_custodial_hot_wallet_addr(user_id=user_id),
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
@@ -191,12 +191,12 @@ class LevelTwoAccountCommands(commands.Cog):
 
     @two.command(aliases=["reg", "new", 'get'])
     @commands.check(is_dm)
-    @commands.check(user_has_no_custodial)
+    @commands.check(user_has_no_second)
     async def register(self, ctx):
         """
         Interactive registration procedure for second wallet level
         """
-        # Get public and private key from the sdk
+        # Entry message for the user
         await second_level_account_reg_info(destination=ctx.author)
 
         # Wait for answer
@@ -233,7 +233,7 @@ class LevelTwoAccountCommands(commands.Cog):
                     }
 
                     # Storing data
-                    if self.backoffice.custodial_manager.create_user_wallet(data_to_store=data_to_store):
+                    if self.backoffice.second_level_manager.create_user_wallet(data_to_store=data_to_store):
                         message = f"You have successfully verified your secret key and registered level 2 account" \
                                   f" into Crypto Link system. Public address and 1/2 of private" \
                                   f" key have been securely stored under your Discord User ID {ctx.author.id}. I" \
@@ -279,7 +279,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                                  message=message)
 
     @two.group(aliases=["acc", "a"])
-    @commands.check(user_has_custodial)
+    @commands.check(user_has_second_level)
     async def account(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Custodial Account Commands__ :joystick: '
@@ -293,7 +293,7 @@ class LevelTwoAccountCommands(commands.Cog):
     @account.command(aliases=['nfo'])
     async def info(self, ctx):
         # Get address from database
-        user_public = self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=ctx.message.author.id)
+        user_public = self.backoffice.second_level_manager.get_custodial_hot_wallet_addr(user_id=ctx.message.author.id)
         # Getting data from server for account
         try:
             data = self.server.accounts().account_id(account_id=user_public).call()
@@ -315,7 +315,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                               f'```{user_public}```')
 
     @two.group(aliases=["transaction", "tx", "pay","p"])
-    @commands.check(user_has_custodial)
+    @commands.check(user_has_second_level)
     async def paymet(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':incoming_envelope:  __Available Transaction Commands__ :incoming_envelope:  '
@@ -439,7 +439,7 @@ class LevelTwoAccountCommands(commands.Cog):
                             first_half_of_key = await self.bot.wait_for('message', check=check(ctx.message.author),
                                                                         timeout=80)
                             # DB 1/2 Private key
-                            private_encrypted = self.backoffice.custodial_manager.get_private_key(
+                            private_encrypted = self.backoffice.second_level_manager.get_private_key(
                                 user_id=int(ctx.author.id))
 
                             second_half_of_key = security_manager.decrypt(token=private_encrypted["privateKey"]).decode(
@@ -597,7 +597,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                                                 timeout=80)
 
                     # DB 1/2 Private key
-                    private_encrypted = self.backoffice.custodial_manager.get_private_key(
+                    private_encrypted = self.backoffice.second_level_manager.get_private_key(
                         user_id=int(ctx.author.id))
 
                     # decipher secret key and use it for transaction stream
