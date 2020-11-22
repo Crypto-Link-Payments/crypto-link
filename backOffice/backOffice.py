@@ -27,7 +27,7 @@ class BackOffice:
         self.horizon_url = bot_data['horizonServer']
 
         self.backend_check = BotStructureCheck(self.connection)
-        self.custodial_manager = SecondLevelWalletManager(self.connection)
+        self.second_level_manager = SecondLevelWalletManager(self.connection)
         self.third_level_manager = ThirdLevelWalletManager(self.connection)
         self.stellar_wallet = StellarWallet(horizon_url=self.horizon_url)
         self.merchant_manager = MerchantManager(self.connection)
