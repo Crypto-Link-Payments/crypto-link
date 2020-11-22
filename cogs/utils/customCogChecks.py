@@ -83,12 +83,29 @@ def guild_has_stats(ctx):
     return ctx.bot.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id)
 
 
-def user_has_custodial(ctx):
+def user_has_second_level(ctx):
     """
     Custom check for custodial wallet
     """
-    return ctx.bot.backoffice.custodial_manager.second_level_user_reg_status(user_id=ctx.author.id)
+    return ctx.bot.backoffice.second_level_manager.second_level_user_reg_status(user_id=ctx.author.id)
 
 
-def user_has_no_custodial(ctx):
-    return not ctx.bot.backoffice.custodial_manager.second_level_user_reg_status(user_id=ctx.author.id)
+def user_has_no_second(ctx):
+    """
+    Check if user has not registered for second wallet
+    """
+    return not ctx.bot.backoffice.second_level_manager.second_level_user_reg_status(user_id=ctx.author.id)
+
+
+def user_has_third_level(ctx):
+    """
+    Check if user has registered for third level
+    """
+    return ctx.bot.backoffice.third_level_manager.third_level_user_reg_status(user_id=ctx.author.id)
+
+
+def user_has_no_third_level(ctx):
+    """
+    Check if user has not registered for third level
+    """
+    return not ctx.bot.backoffice.third_level_manager.third_level_user_reg_status(user_id=ctx.author.id)
