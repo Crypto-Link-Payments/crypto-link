@@ -109,10 +109,10 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
-    @commands.group(alliases=["one", "st", "first", "1"])
+    @commands.group(alliases=["one", "st", "first", "1", "wallet"])
     @commands.check(user_has_wallet)
     @commands.cooldown(1, 5, commands.BucketType.guild)
-    async def wallet(self, ctx):
+    async def account(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Wallet Commands__ :joystick: '
             description = "All commands available to operate execute wallet related actions.\n" \
@@ -128,7 +128,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @wallet.command()
+    @account.command()
     async def stats(self, ctx):
         """
         Command which returns statistical information for the wallet
@@ -149,7 +149,7 @@ class UserAccountCommands(commands.Cog):
         await ctx.author.send(embed=stats_info)
         await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
 
-    @wallet.command()
+    @account.command()
     async def deposit(self, ctx):
 
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
@@ -189,7 +189,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @wallet.command(aliases=['bal', 'balances', 'b'])
+    @account.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
         coin_data = helper.read_json_file(file_name='integratedCoins.json')
@@ -223,38 +223,6 @@ class UserAccountCommands(commands.Cog):
         else:
             title = '__Stellar Wallet Error__'
             message = f'Wallet could not be obtained from the system please try again later'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=title)
-
-    @wallet.command()
-    async def trust(self, ctx, private_key, token: str):
-        """
-        Command which is used for users to establish a trust line between their personal dekstop accounts and
-        token issuer
-        """
-        token = token.lower()
-        # check strings, stellar address and token integration status
-        if check_stellar_private(private_key=private_key):
-            if not re.search("[~!#$%^&*()_+{}:;\']", token) and token in self.list_of_coins and token != 'xlm':
-                if self.backoffice.stellar_wallet.establish_trust(private_key=private_key, token=f'{token.upper()}'):
-                    title = ':rocket: __Trust line established__ :rocket:'
-                    message = f'Trustline between your personal wallet and issuer has been successfully established. ' \
-                              f' You can now withdraw token {token} to your personal wallet'
-                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                         sys_msg_title=title)
-                else:
-                    message = f'Crypto Link could not establish trustline with issuer, since wallet address does not ' \
-                              f'exist on the network or the wallet has not been activate yet.'
-                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                         sys_msg_title=CONST_TRUST_ERROR)
-
-            else:
-                message = f'Trustline creation for failed, as token {token} is not implemented in Crypto Link'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                     sys_msg_title=CONST_TRUST_ERROR)
-        else:
-            title = '__Trustline error__'
-            message = f'You have provided wrong Ed25519 Secret Seed.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
@@ -292,7 +260,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
-    @wallet.error
+    @account.error
     async def wallet_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__{self.command_string}wallet Error__'
