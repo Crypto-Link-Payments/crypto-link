@@ -314,9 +314,9 @@ class LevelTwoAccountCommands(commands.Cog):
                                               f' Please activate it by depositing at least 2 XLM to '
                                               f'```{user_public}```')
 
-    @two.group(aliases=["transaction", "tx", "pay","p"])
+    @two.group(aliases=["transaction", "tx", "pay", "p"])
     @commands.check(user_has_second_level)
-    async def paymet(self, ctx):
+    async def payment(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':incoming_envelope:  __Available Transaction Commands__ :incoming_envelope:  '
             description = "Commands dedicated to execution of transactions/payments"
@@ -338,9 +338,9 @@ class LevelTwoAccountCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @paymet.command(aliases=["usr", "u"])
+    @payment.command(aliases=["usr", "u"])
     @commands.check(is_public)
-    # @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def user(self, ctx, recipient: Member, wallet_level: int, amount: float):
 
         """
@@ -512,8 +512,8 @@ class LevelTwoAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @paymet.command(aliases=['addr', 'a', 'add'])
-    # @commands.cooldown(1, 30, commands.BucketType.user)
+    @payment.command(aliases=['addr', 'a', 'add'])
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def address(self, ctx, to_address: str, amount: float, memo: str = None):
         """
         Send to external Address from second level wallet
