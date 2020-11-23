@@ -320,17 +320,17 @@ class LevelTwoAccountCommands(commands.Cog):
         if ctx.invoked_subcommand is None:
             title = ':incoming_envelope:  __Available Transaction Commands__ :incoming_envelope:  '
             description = "Commands dedicated to execution of transactions/payments"
-            list_of_values = [{"name": ":cowboy: Discord related payments :cowboy:",
-                               "value": f"```{self.command_string}custodial tx user <@discord.Member> <amount> "
-                                        f"<wallet level:int>```\n"
+            list_of_values = [{"name": ":cowboy: XLM Discord related payments  :cowboy:",
+                               "value": f"```{self.command_string}custodial tx user <@discord.Member> "
+                                        f"<wallet level:int> <amount>```\n"
                                         f"**__Wallet Levels__**\n"
                                         f":one: => Transaction to 1st level Discord wallet based on MEMO\n"
                                         f":two: => Transaction to 2nd level Discord wallet owned by user over Discord\n"
                                         f"***Note***: All data is automatically obtained from the CL system once "
                                         f"recipient selected."
                                         f"\n`Aliases: usr, u`"},
-                              {"name": ":map: Non-Discord related recipients :map:",
-                               "value": f"```{self.command_string}custodial tx address <public key> <amount>"
+                              {"name": ":map: XLM Non-Discord related recipients :map:",
+                               "value": f"```{self.command_string}custodial tx address <address> <amount>"
                                         f" <memo=optional>```\n"
                                         f"`Aliases: addr, a, add`"}
                               ]
