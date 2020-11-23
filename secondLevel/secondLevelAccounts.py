@@ -127,6 +127,7 @@ class LevelTwoAccountCommands(commands.Cog):
         """
         Place Transaction on the network
         """
+        net_value = tx_data["netValue"]
         key_pair = Keypair.from_secret(private_key)
         source_account = self.backoffice.stellar_wallet.server.load_account(key_pair.public_key)
         tx = TransactionBuilder(
@@ -137,12 +138,12 @@ class LevelTwoAccountCommands(commands.Cog):
         ).append_payment_op(
             destination=tx_data["toAddress"],
             asset_code="XLM",
-            amount=Decimal(amount)).add_text_memo(memo_text=tx_data["memo"])
+            amount=tx_data["netValue"]).add_text_memo(memo_text=tx_data["memo"])
 
         # Append Dev fee if selected
         if dev_fee_status:
             p = Payment(destination=self.backoffice.stellar_wallet.dev_key, asset=Asset.native(),
-                        amount=Decimal(tx_data["devFee"]))
+                        amount=tx_data["devFee"])
             tx.append_operation(operation=p)
 
         new_tx = tx.set_timeout(10).build()
@@ -154,12 +155,16 @@ class LevelTwoAccountCommands(commands.Cog):
 
             return True, result
         except BadRequestError as e:
+            print(f'Bad request {e}')
             return False, e
         except BadResponseError as e:
+            print(f'Bad response {e}')
             return False, e
         except MemoInvalidException as e:
+            print(f'Invalid memo {e}')
             return False, e
         except Exception as e:
+            print(f'Else: {e}')
             return False, e
 
     @commands.group(aliases=["nd", '2', 'custodial'])
@@ -321,7 +326,7 @@ class LevelTwoAccountCommands(commands.Cog):
             title = ':incoming_envelope:  __Available Transaction Commands__ :incoming_envelope:  '
             description = "Commands dedicated to execution of transactions/payments"
             list_of_values = [{"name": ":cowboy: XLM Discord related payments  :cowboy:",
-                               "value": f"```{self.command_string}custodial tx user <@discord.Member> "
+                               "value": f"```{self.command_string}2 tx user <@discord.Member> "
                                         f"<wallet level:int> <amount>```\n"
                                         f"**__Wallet Levels__**\n"
                                         f":one: => Transaction to 1st level Discord wallet based on MEMO\n"
@@ -330,7 +335,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                         f"recipient selected."
                                         f"\n`Aliases: usr, u`"},
                               {"name": ":map: XLM Non-Discord related recipients :map:",
-                               "value": f"```{self.command_string}custodial tx address <address> <amount>"
+                               "value": f"```{self.command_string}2 tx address <address> <amount>"
                                         f" <memo=optional>```\n"
                                         f"`Aliases: addr, a, add`"}
                               ]
@@ -411,11 +416,11 @@ class LevelTwoAccountCommands(commands.Cog):
                         # 3. Send information to the user to verify transaction with an answer with request to sign
                         recipient_details = self.get_recipient_details_based_on_layer(layer=wallet_level,
                                                                                       user_id=recipient.id)
-                        data = {"txTotal": requested_amount,
-                                "netValue": net_amount,
-                                "devFee": dev_fee_normal,
+                        data = {"txTotal": f'{requested_amount:.7f}',
+                                "netValue": f'{net_amount:.7f}',
+                                "devFee": f'{dev_fee_normal:.7f}',
                                 "token": "XLM",
-                                "networkFee": fee_normal,
+                                "networkFee": f'{fee_normal:.7f}',
                                 "recipient": f"Discord User: {recipient}\n"
                                              f"User ID: {recipient.id}\n"
                                              f"Wallet Level: {wallet_level}",
@@ -572,11 +577,11 @@ class LevelTwoAccountCommands(commands.Cog):
 
                 # MAKING TRANSACTIONS
                 # 3. Send information to the user to verify transaction with an answer with request to sign
-                data = {"txTotal": requested_amount,
-                        "netValue": net_amount,
-                        "devFee": dev_fee_normal,
+                data = {"txTotal": f'{requested_amount:.7f}',
+                        "netValue": f'{net_amount:.7f}',
+                        "devFee": f'{dev_fee_normal:.7f}',
                         "token": "XLM",
-                        "networkFee": fee_normal,
+                        "networkFee": f'{fee_normal:.7f}',
                         "recipient": f"{to_address}",
                         "toAddress": to_address,
                         "memo": memo,
@@ -616,7 +621,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                                                     amount=net_amount,
                                                                     dev_fee_status=dev_fee_activated,
                                                                     tx_data=data)
-
+                        print(result)
                         if result[0]:
                             await self.transaction_report_dispatcher(ctx=ctx, result=result[1], data=data)
                         else:
@@ -740,13 +745,16 @@ class LevelTwoAccountCommands(commands.Cog):
                       f'`{error}`'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
+        # elif TimeoutError:
+        #     title = f':timer: __Transaction Request Expired__ :timer: '
+        #     message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
+        #               f'time-limits'
+        #     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+        #                                          sys_msg_title=title)
 
-        elif TimeoutError:
-            title = f':timer: __Transaction Request Expired__ :timer: '
-            message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
-                      f'time-limits'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
+        else:
+            print('smth is up')
+            raise
 
 
 def setup(bot):
