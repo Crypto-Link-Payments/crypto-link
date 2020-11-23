@@ -26,9 +26,9 @@ horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.paths',
                 'horizonCommands.tradeAggregations']
 
-non_custodial_layer_cmds = ['thirdLevel.userAccounts']
+non_custodial_layer_cmds = ['thirdLevel.thirdLevelAccounts']
 
-custodial_layer = ['secondLevel.userAccounts']
+custodial_layer = ['secondLevel.secondLevelAccounts']
 
 
 class DiscordBot(commands.Bot):
