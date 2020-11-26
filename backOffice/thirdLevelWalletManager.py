@@ -24,7 +24,7 @@ class ThirdLevelWalletManager:
         else:
             return False
 
-    def create_user_wallet(self, data_to_store: dict):
+    def register_rd_level_wallet(self, data_to_store: dict):
         """
         Creates the user hot wallet into the database. Decryption happens in COGS
         """
@@ -34,6 +34,11 @@ class ThirdLevelWalletManager:
             return True
         else:
             return False
+
+    def update_public_address(self, user_id: int, pub_address: str):
+        result = self.third_level.update_one({"userId": int(user_id)},
+                                             {"$set": {"publicAddress": pub_address}})
+        return result.modified_count > 0
 
     def get_third_account_details(self, user_id: int):
         """
@@ -50,7 +55,7 @@ class ThirdLevelWalletManager:
         """
         Get user hot wallet details for decription in cogs
         """
-        data = self.hotWallets.find_one({"userId": int(user_id)},
+        data = self.third_level.find_one({"userId": int(user_id)},
                                         {"_id": 0,
                                          "publicAddress": 1})
         if data:
