@@ -109,10 +109,10 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
-    @commands.group(alliases=["one", "st", "first", "1", "wallet"])
+    @commands.group(alliases=["one", "st", "first", "1", "account",])
     @commands.check(user_has_wallet)
     @commands.cooldown(1, 5, commands.BucketType.guild)
-    async def account(self, ctx):
+    async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Wallet Commands__ :joystick: '
             description = "All commands available to operate execute wallet related actions.\n" \
@@ -128,7 +128,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @account.command()
+    @wallet.command()
     async def stats(self, ctx):
         """
         Command which returns statistical information for the wallet
@@ -149,7 +149,7 @@ class UserAccountCommands(commands.Cog):
         await ctx.author.send(embed=stats_info)
         await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
 
-    @account.command()
+    @wallet.command()
     async def deposit(self, ctx):
 
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
@@ -189,7 +189,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @account.command(aliases=['bal', 'balances', 'b'])
+    @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
         coin_data = helper.read_json_file(file_name='integratedCoins.json')
@@ -260,7 +260,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
-    @account.error
+    @wallet.error
     async def wallet_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__{self.command_string}wallet Error__'
