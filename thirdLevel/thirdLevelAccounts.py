@@ -63,6 +63,16 @@ class LevelThreeAccountCommands(commands.Cog):
         async with ctx.author.typing():
             await asyncio.sleep(5)
 
+    async def uplink_notification(self, message: str):
+        """
+        Dispatch informational embeds to sender and Crypto Link Upling
+        """
+        # Send notification on transaciton to Crypto Link Uplink
+        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                         self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+        for dest in load_channels:
+            await dest.send(content=message)
+
     def check_user_wallet_layer_level(self, layer, user_id):
         """
         Check if user has registered account under selected wallet level
@@ -494,6 +504,9 @@ class LevelThreeAccountCommands(commands.Cog):
                                             }
                             xdr_envelope = self.produce_envelope(tx_data=request_data, dev_fee_status=dev_fee_activated)
 
+                            message = f":new::envelope: Has been created for Discord Transaction to wallet level {wallet_level} " \
+                                      f" in value of ***{request_data['txTotal']} {request_data['token']}*** :rocket: "
+                            await self.uplink_notification(message=message)
                             # Send details to sender on produced envelope
                             await send_xdr_info(ctx=ctx, request_data=request_data, envelope=xdr_envelope,
                                                 command_type='discord')
@@ -524,11 +537,65 @@ class LevelThreeAccountCommands(commands.Cog):
                                                  sys_msg_title=CONST_XDR_ERROR)
 
     @tx.command(aliases=["addr", "a"])
-    async def address(self, ctx, amount: float, token: str, user: Member, layer: int):
+    async def address(self, ctx, public_address: str, amount: float):
         """
         Create XDR to send to user on discord
         """
-        await ctx.author.send(content="This area is under construction")
+        """
+        Create XDR payment envelope to be used for signing to some other users than discord
+        """
+        dev_fee_atomic = 0
+        atomic_amount = int(amount * (10 ** 7))
+        dev_fee_activated = False
+
+        if atomic_amount >= 100:
+            # Get sender hot wallet
+            if check_stellar_address(address=public_address):
+                user_address = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
+                if public_address != user_address:
+                    if public_address != self.bot.backoffice.stellar_wallet.public_key:
+                        request_data = {"fromAddr": user_address,
+                                        "txTotal": f'{atomic_amount / (10 ** 7):.7f}',
+                                        "netValue": f'{atomic_amount / (10 ** 7):.7f}',
+                                        "devFee": f'0.0001',
+                                        "token": "XLM",
+                                        "networkFee": f'0.0000100',
+                                        "recipient": f"External Wallet",
+                                        "toAddress": public_address,
+                                        "memo": "From Discord",
+                                        "walletLevel": f"External Wallet"
+                                        }
+
+                        xdr_envelope = self.produce_envelope(tx_data=request_data, dev_fee_status=dev_fee_activated)
+
+                        # Send details to sender on produced envelope
+                        await send_xdr_info(ctx=ctx, request_data=request_data, envelope=xdr_envelope,
+                                            command_type='discord')
+
+                        message = f":new::envelope: has been created for external address in value of " \
+                                  f"***{request_data['txTotal']} {request_data['token']}*** :rocket: "
+                        await self.uplink_notification(message=message)
+
+                    else:
+                        message = f"You re trying to send funds to the Crypto Link hot wallet which is used for "
+                        f" level 1 wallet hot wallet address. Funds might not come through as MEMO is "
+                        f"required. If you wish to send it to your Level 1 wallet please "
+                        f"use `{self.command_string}3 tx user `"
+                        await custom_messages.system_message(ctx=ctx, message=message, color_code=1,
+                                                             destination=ctx.author,
+                                                             sys_msg_title=CONST_XDR_ERROR)
+                else:
+                    message = 'No need to send it to yourself to 3 level'
+                    await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=ctx.author,
+                                                         sys_msg_title=CONST_XDR_ERROR)
+            else:
+                message = f'Destination Address is not valid Stellar Public address'
+                await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=ctx.author,
+                                                     sys_msg_title=CONST_XDR_ERROR)
+        else:
+            message = f'Amount needs to be greater than 0.0000100 XLM'
+            await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=ctx.author,
+                                                 sys_msg_title=CONST_XDR_ERROR)
 
     @three.group(aliases=["envelope", "env"])
     async def xdr(self, ctx):
@@ -587,7 +654,9 @@ class LevelThreeAccountCommands(commands.Cog):
                         result_data = result[1]
 
                         await transaction_result(destination=ctx.message.author, result_data=result_data)
-
+                        message = f":regional_indicator_x: :regional_indicator_d: :regional_indicator_r: Signed and " \
+                                  f"dispatched :rocket: "
+                        await self.uplink_notification(message=message)
                     else:
                         error = result[1]
                         title = f':exclamation: __Transaction Failed __ :exclamation: '
@@ -611,17 +680,23 @@ class LevelThreeAccountCommands(commands.Cog):
         Sign XDR envelope
         """
 
-        imported = parse_transaction_envelope_from_xdr(xdr_envelope,
-                                                       network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE)
-        if isinstance(imported, TransactionEnvelope):
-            details_to_sign = {
-                "from": imported.transaction.source.public_key,
-                "fee": f'{imported.transaction.fee / (10 ** 7):.7f}',
-                "txSequence": imported.transaction.sequence,
-                "operations": self.process_operations(imported.transaction.operations)
-            }
+        try:
+            imported = parse_transaction_envelope_from_xdr(xdr_envelope,
+                                                           network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE)
+            if isinstance(imported, TransactionEnvelope):
+                details_to_sign = {
+                    "from": imported.transaction.source.public_key,
+                    "fee": f'{imported.transaction.fee / (10 ** 7):.7f}',
+                    "txSequence": imported.transaction.sequence,
+                    "operations": self.process_operations(imported.transaction.operations)
+                }
 
-            await xdr_data_to_embed(destination=ctx.author, data=details_to_sign)
+                await xdr_data_to_embed(destination=ctx.author, data=details_to_sign)
+        except Exception as e:
+            title = f':exclamation: __XDR import error__ :exclamation: '
+            message = f'Provided string is not XDR envelope'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
 
     @new.error
     async def new_err(self, ctx, error):
