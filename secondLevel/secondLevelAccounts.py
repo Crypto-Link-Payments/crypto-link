@@ -2,7 +2,6 @@
 Discord Commands dedicated to 2 wallet level system
 """
 import asyncio
-from decimal import Decimal
 
 from stellar_sdk import Keypair, TransactionBuilder, Network, Payment, Asset
 from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadResponseError, \
@@ -621,7 +620,6 @@ class LevelTwoAccountCommands(commands.Cog):
                                                                     amount=net_amount,
                                                                     dev_fee_status=dev_fee_activated,
                                                                     tx_data=data)
-                        print(result)
                         if result[0]:
                             await self.transaction_report_dispatcher(ctx=ctx, result=result[1], data=data)
                         else:
