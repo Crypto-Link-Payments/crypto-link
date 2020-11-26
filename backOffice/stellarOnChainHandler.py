@@ -151,7 +151,6 @@ class StellarWallet:
                 tx.pop('signatures')
                 tx['asset_type'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
                 tx.pop('envelope_xdr')
-                tx.pop('valid_after')
                 to_process.append(tx)
         return to_process
 
