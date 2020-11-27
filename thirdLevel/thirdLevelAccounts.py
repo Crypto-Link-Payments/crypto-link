@@ -26,6 +26,8 @@ integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 custom_messages = CustomMessages()
 helper = Helpers()
 CONST_XDR_ERROR = ":exclamation: XDR Creation Error :exclamation: "
+CONST_REG_ERROR_TITLE = "3. level wallet registration error"
+CONST_REG_ERROR = "Account could not be registered into Crypto Link system. Please try again later."
 
 
 def check(author):
@@ -139,7 +141,6 @@ class LevelThreeAccountCommands(commands.Cog):
             return True
         except Ed25519SecretSeedInvalidError:
             return False
-        pass
 
     def process_operations(self, operations: list):
         """
@@ -310,27 +311,23 @@ class LevelThreeAccountCommands(commands.Cog):
                         await new_acc_details(author=ctx.author, details=details)
 
                     else:
-                        title = "3. level wallet registration error"
-                        message = "Account could not be registered into Crypto Link system. Please try again later."
-                        await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                             sys_msg_title=title)
+                        await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
+                                                             destination=0,
+                                                             sys_msg_title=CONST_REG_ERROR_TITLE)
 
                 else:
-                    title = "3. level wallet registration error"
                     message = "Registration process has been cancelled."
                     await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                         sys_msg_title=title)
+                                                         sys_msg_title=CONST_REG_ERROR_TITLE)
             else:
-                title = "3. level wallet registration error"
                 message = "Account could not be created. Please try again later. If issue persists. Please contact" \
                           " Crypto Link team."
                 await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                     sys_msg_title=title)
+                                                     sys_msg_title=CONST_REG_ERROR_TITLE)
         else:
-            title = "3. level wallet registration error"
             message = "You have cancelled the registration process for level 3 wallet."
             await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                 sys_msg_title=title)
+                                                 sys_msg_title=CONST_REG_ERROR_TITLE)
 
     @register.command(aliases=["o", "my"])
     @commands.check(user_has_no_third_level)
@@ -357,22 +354,19 @@ class LevelThreeAccountCommands(commands.Cog):
                     if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=details):
                         await new_acc_details(author=ctx.author, details=details)
                     else:
-                        title = "3. level wallet registration error"
-                        message = "Account could not be registered into Crypto Link system. Please try again later."
-                        await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                             sys_msg_title=title)
+                        await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
+                                                             destination=0,
+                                                             sys_msg_title=CONST_REG_ERROR_TITLE)
 
                 else:
-                    title = "3. level wallet registration error"
                     message = "You have cancelled the registration process for level 3 wallet."
                     await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                         sys_msg_title=title)
+                                                         sys_msg_title=CONST_REG_ERROR_TITLE)
             else:
-                title = "3. level wallet registration error"
                 message = f"Wallet address `{public_address}` is owned by Crypto Link and can not be used as your " \
                           f"personal wallet."
                 await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                     sys_msg_title=title)
+                                                     sys_msg_title=CONST_REG_ERROR_TITLE)
         else:
             title = "Public address Error"
             message = f"Address `{public_address}` is not a valid Stellar Public Address. Please check provided " \
@@ -399,21 +393,19 @@ class LevelThreeAccountCommands(commands.Cog):
                     if self.acc_mng_rd_lvl.update_public_address(user_id=ctx.author.id, pub_address=public_address):
                         await new_acc_details(author=ctx.author, details=details)
                     else:
-                        title = "3. level wallet registration error"
-                        message = "Account could not be registered into Crypto Link system. Please try again later."
-                        await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                             sys_msg_title=title)
+                        await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
+                                                             destination=0,
+                                                             sys_msg_title=CONST_REG_ERROR_TITLE)
                 else:
                     title = f':exclamation: __Address Update Cancelled__ :exclamation: '
                     message = f'You have canceled level 3 wallet address update.'
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                          sys_msg_title=title)
             else:
-                title = "3. level wallet registration error"
                 message = f"Wallet address `{public_address}` is owned by Crypto Link and can not be used as your " \
                           f"personal wallet."
                 await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                     sys_msg_title=title)
+                                                     sys_msg_title=CONST_REG_ERROR_TITLE)
         else:
             title = f':exclamation: __Wrong Public Address__ :exclamation: '
             message = f'Address `{public_address}` is not a valid Stellar Public Address'
