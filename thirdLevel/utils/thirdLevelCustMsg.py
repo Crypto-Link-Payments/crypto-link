@@ -147,7 +147,6 @@ async def send_xdr_info(ctx, request_data: dict, envelope: str, command_type: st
         xdr_info.add_field(name="Token and Amount",
                            value=f'{request_data["amount"]} {request_data["token"]}',
                            inline=False)
-
     elif command_type == "discord":
         xdr_info.add_field(name="From Address",
                            value=f'```{request_data["fromAddr"]}```',
@@ -155,8 +154,11 @@ async def send_xdr_info(ctx, request_data: dict, envelope: str, command_type: st
         xdr_info.add_field(name="To Address",
                            value=f'```{request_data["toAddress"]}```',
                            inline=False)
-        xdr_info.add_field(name="Token and Amount",
+        xdr_info.add_field(name="Transaction Net Value",
                            value=f'{request_data["txTotal"]} {request_data["token"]}',
+                           inline=False)
+        xdr_info.add_field(name=":hammer_pick: Dev Fee :hammer_pick: ",
+                           value=f'`{request_data["devFee"]} XLM`',
                            inline=False)
 
     elif command_type == "activate":

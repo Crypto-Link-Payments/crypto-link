@@ -28,6 +28,8 @@ helper = Helpers()
 CONST_XDR_ERROR = ":exclamation: XDR Creation Error :exclamation: "
 CONST_REG_ERROR_TITLE = "3. level wallet registration error"
 CONST_REG_ERROR = "Account could not be registered into Crypto Link system. Please try again later."
+CONST_DEV_ACTIVATED = True
+CONST_DEV_FEE = '0.0010000'
 
 
 def check(author):
@@ -332,7 +334,6 @@ class LevelThreeAccountCommands(commands.Cog):
     @register.command(aliases=["o", "my"])
     @commands.check(user_has_no_third_level)
     async def own(self, ctx, public_address: str):
-
         # Check if correct address provided
         if check_stellar_address(address=public_address):
             if public_address in [self.bot.backoffice.stellar_wallet.public_key,
@@ -478,10 +479,7 @@ class LevelThreeAccountCommands(commands.Cog):
         """
         Create XDR payment envelope to be used for signing to some other users than discord
         """
-        dev_fee_atomic = 0
         atomic_amount = int(amount * (10 ** 7))
-        dev_fee_activated = False
-
         recipient_check = ctx.message.author.id != recipient.id  # Boolean
         wallet_level_check = ctx.message.author.id == recipient.id and wallet_level != 3
 
@@ -497,14 +495,13 @@ class LevelThreeAccountCommands(commands.Cog):
 
                         # Check if account is live on network
                         if self.check_if_acc_is_live(address=recipient_data["address"]):
-
                             # get sender details
                             sender = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
 
                             request_data = {"fromAddr": sender,
                                             "txTotal": f'{atomic_amount / (10 ** 7):.7f}',
                                             "netValue": f'{atomic_amount / (10 ** 7):.7f}',
-                                            "devFee": f'0.0001',
+                                            "devFee": CONST_DEV_FEE,
                                             "token": "XLM",
                                             "networkFee": f'0.0000100',
                                             "recipient": f"{ctx.author}",
@@ -512,7 +509,8 @@ class LevelThreeAccountCommands(commands.Cog):
                                             "memo": recipient_data["memo"],
                                             "walletLevel": f"{wallet_level}"
                                             }
-                            xdr_envelope = self.produce_envelope(tx_data=request_data, dev_fee_status=dev_fee_activated)
+                            xdr_envelope = self.produce_envelope(tx_data=request_data,
+                                                                 dev_fee_status=CONST_DEV_ACTIVATED)
 
                             message = f":new::envelope: Has been created for Discord Transaction to wallet level {wallet_level} " \
                                       f" in value of ***{request_data['txTotal']} {request_data['token']}*** :rocket: "
