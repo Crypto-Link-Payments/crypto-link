@@ -13,7 +13,6 @@ from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_w
 from cogs.utils.systemMessaages import CustomMessages
 
 from cogs.utils.monetaryConversions import get_decimal_point
-from utils import numbers
 from utils.tools import Helpers
 
 helper = Helpers()
@@ -46,11 +45,6 @@ class ConsumerCommands(commands.Cog):
     def make_atomic(amount, coin_name):
         if coin_name == 'xlm':
             return int(amount * (10 ** 7))
-
-    @staticmethod
-    def convert_to_format(amount, coin_name):
-        if coin_name == 'xlm':
-            return numbers.scientific_conversion(value=amount, decimals=7)
 
     @commands.group()
     @commands.check(guild_has_merchant)
