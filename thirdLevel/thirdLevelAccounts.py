@@ -552,9 +552,7 @@ class LevelThreeAccountCommands(commands.Cog):
         """
         Create XDR payment envelope to be used for signing to some other users than discord
         """
-        dev_fee_atomic = 0
         atomic_amount = int(amount * (10 ** 7))
-        dev_fee_activated = False
 
         if atomic_amount >= 100:
             # Get sender hot wallet
@@ -565,7 +563,7 @@ class LevelThreeAccountCommands(commands.Cog):
                         request_data = {"fromAddr": user_address,
                                         "txTotal": f'{atomic_amount / (10 ** 7):.7f}',
                                         "netValue": f'{atomic_amount / (10 ** 7):.7f}',
-                                        "devFee": f'0.0001',
+                                        "devFee": CONST_DEV_FEE,
                                         "token": "XLM",
                                         "networkFee": f'0.0000100',
                                         "recipient": f"External Wallet",
@@ -574,7 +572,7 @@ class LevelThreeAccountCommands(commands.Cog):
                                         "walletLevel": f"External Wallet"
                                         }
 
-                        xdr_envelope = self.produce_envelope(tx_data=request_data, dev_fee_status=dev_fee_activated)
+                        xdr_envelope = self.produce_envelope(tx_data=request_data, dev_fee_status=CONST_DEV_ACTIVATED)
 
                         # Send details to sender on produced envelope
                         await send_xdr_info(ctx=ctx, request_data=request_data, envelope=xdr_envelope,
