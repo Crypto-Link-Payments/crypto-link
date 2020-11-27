@@ -29,7 +29,7 @@ class StellarManager:
         self.xlm_unprocessed = self.cl_connection.StellarUnprocessedDeposits  # history of successful deposits
         self.xlm_unprocessed_withdrawals = self.cl_connection.StellarUnprocessedWithdrawals  # history of error withdrawals
 
-        #TODO rewrite to fit new wallet structures!
+        # TODO rewrite to fit new wallet structures!
         self.xlm_guild_wallets = self.cl_connection.StellarCorporateWallets
 
         # Async support
@@ -80,7 +80,7 @@ class StellarManager:
 
         result = self.xlm_wallets.find_one({"depositId": tx_memo})
 
-        #todo bug fix wrong wallets
+        # todo bug fix wrong wallets
         if result:
             return True
         else:

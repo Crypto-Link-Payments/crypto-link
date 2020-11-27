@@ -22,7 +22,6 @@ class StellarWallet:
 
     """
 
-
     def __init__(self, horizon_url: str):
         helpers = Helpers()
         secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
