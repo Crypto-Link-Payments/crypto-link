@@ -230,19 +230,18 @@ class TransactionCommands(commands.Cog):
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def send(self, ctx, amount: float, ticker: str, recipient: User, *, message: str = None):
+    async def send(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
         await self.send_impl(ctx, amount, ticker, recipient, tx_type="public", message=message)
 
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def private(self, ctx, amount: float, ticker: str, recipient: User, *, message: str = None):
+    async def private(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
         await self.send_impl(ctx, amount, ticker, recipient, tx_type="private", message=message)
 
     @send.error
     async def send_error(self, ctx, error):
-        print(f'ERR SEND TRIGGERED  : {error}')
         if isinstance(error, commands.CheckFailure):
             title = f'__System Transaction Error__'
             message = f'In order to execute P2P transaction you need to be registered into the system, and ' \

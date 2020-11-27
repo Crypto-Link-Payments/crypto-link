@@ -13,7 +13,8 @@ from backOffice.guildServicesManager import GuildProfileManager
 from backOffice.profileRegistrations import AccountManager
 from backOffice.botWallet import BotManager
 from backOffice.corpHistory import CorporateHistoryManager
-from backOffice.custodialWalletManager import CustodialWalletManager
+from backOffice.secondLevelWalletManager import SecondLevelWalletManager
+from backOffice.thirdLevelWalletManager import ThirdLevelWalletManager
 
 
 class BackOffice:
@@ -26,7 +27,8 @@ class BackOffice:
         self.horizon_url = bot_data['horizonServer']
 
         self.backend_check = BotStructureCheck(self.connection)
-        self.custodial_manager = CustodialWalletManager(self.connection)
+        self.second_level_manager = SecondLevelWalletManager(self.connection)
+        self.third_level_manager = ThirdLevelWalletManager(self.connection)
         self.stellar_wallet = StellarWallet(horizon_url=self.horizon_url)
         self.merchant_manager = MerchantManager(self.connection)
         self.stellar_manager = StellarManager(self.connection, self.as_connection)

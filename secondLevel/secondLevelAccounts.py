@@ -2,23 +2,22 @@
 Discord Commands dedicated to 2 wallet level system
 """
 import asyncio
-from decimal import Decimal
 
 from stellar_sdk import Keypair, TransactionBuilder, Network, Payment, Asset
 from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadResponseError, \
     NotFoundError
 from discord import Colour, Member
 from discord.ext import commands
-from cogs.utils.customCogChecks import user_has_wallet, user_has_custodial, is_dm, is_public, user_has_no_custodial
+from cogs.utils.customCogChecks import user_has_wallet, user_has_second_level, is_dm, is_public, user_has_no_second
 from cogs.utils.systemMessaages import CustomMessages
 from utils.securityManager import SecurityManager
 
-from custodialLayer.utils.custodialMessages import account_layer_selection_message, dev_fee_option_notification, \
+from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message, dev_fee_option_notification, \
     ask_for_dev_fee_amount, send_user_account_info, sign_message_information, send_transaction_report, \
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
     server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
 
-from custodialLayer.utils.tools import check_memo, check_public_key, check_private_key
+from secondLevel.utils.tools import check_memo, check_public_key, check_private_key
 
 security_manager = SecurityManager()
 custom_messages = CustomMessages()
@@ -41,7 +40,7 @@ def check(author):
     return inner_check
 
 
-class CustodialAccounts(commands.Cog):
+class LevelTwoAccountCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.backoffice = bot.backoffice
@@ -101,7 +100,7 @@ class CustodialAccounts(commands.Cog):
         if layer == 1:
             return self.backoffice.account_mng.check_user_existence(user_id=user_id)
         elif layer == 2:
-            return self.backoffice.custodial_manager.second_level_user_reg_status(user_id=user_id)
+            return self.backoffice.second_level_manager.second_level_user_reg_status(user_id=user_id)
 
     def get_recipient_details_based_on_layer(self, layer: int, user_id: int):
         """
@@ -117,7 +116,7 @@ class CustodialAccounts(commands.Cog):
         elif layer == 2:
             # Details for transaction to level 2 wallet
             user_data = {
-                "address": self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=user_id),
+                "address": self.backoffice.second_level_manager.get_custodial_hot_wallet_addr(user_id=user_id),
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
@@ -127,6 +126,7 @@ class CustodialAccounts(commands.Cog):
         """
         Place Transaction on the network
         """
+        net_value = tx_data["netValue"]
         key_pair = Keypair.from_secret(private_key)
         source_account = self.backoffice.stellar_wallet.server.load_account(key_pair.public_key)
         tx = TransactionBuilder(
@@ -137,12 +137,12 @@ class CustodialAccounts(commands.Cog):
         ).append_payment_op(
             destination=tx_data["toAddress"],
             asset_code="XLM",
-            amount=Decimal(amount)).add_text_memo(memo_text=tx_data["memo"])
+            amount=tx_data["netValue"]).add_text_memo(memo_text=tx_data["memo"])
 
         # Append Dev fee if selected
         if dev_fee_status:
             p = Payment(destination=self.backoffice.stellar_wallet.dev_key, asset=Asset.native(),
-                        amount=Decimal(tx_data["devFee"]))
+                        amount=tx_data["devFee"])
             tx.append_operation(operation=p)
 
         new_tx = tx.set_timeout(10).build()
@@ -154,17 +154,21 @@ class CustodialAccounts(commands.Cog):
 
             return True, result
         except BadRequestError as e:
+            print(f'Bad request {e}')
             return False, e
         except BadResponseError as e:
+            print(f'Bad response {e}')
             return False, e
         except MemoInvalidException as e:
+            print(f'Invalid memo {e}')
             return False, e
         except Exception as e:
+            print(f'Else: {e}')
             return False, e
 
-    @commands.group(aliases=['cust', 'c', '2'])
+    @commands.group(aliases=["nd", '2', 'custodial'])
     @commands.check(user_has_wallet)
-    async def custodial(self, ctx):
+    async def two(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':wave:  __Welcome to Level 2 wallet system__ :wave:  '
             description = "Unlike Wallet __Level 1 system__, ***Level 2*** allows for full control of your" \
@@ -175,28 +179,28 @@ class CustodialAccounts(commands.Cog):
                           " streamed to the Stellar network\n" \
                           "`Aliases: cust, c, 2`"
             list_of_values = [{"name": ":new: Register for in-active wallet :new: ",
-                               "value": f"```{self.command_string}custodial register```\n"
-                                        f"`Aliases: get, new`"},
+                               "value": f"```{self.command_string}two register```\n"
+                                        f"`Aliases: get, new. reg`"},
                               {"name": ":joystick: Group of commands to obtain info on Layer two Account :joystick: ",
-                               "value": f"```{self.command_string}custodial account```\n"
+                               "value": f"```{self.command_string}two account```\n"
                                         f"`Aliases: acc, a`"},
                               {
                                   "name": ":money_with_wings: Group of commands to create various transactions "
                                           ":money_with_wings:",
-                                  "value": f"```{self.command_string}custodial tx```\n"
-                                           f"`Aliases: transactions`"}
+                                  "value": f"```{self.command_string}two payment```\n"
+                                           f"`Aliases: pay, p, tx, transactions`"}
                               ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @custodial.command(aliases=["reg", "new", 'get'])
+    @two.command(aliases=["reg", "new", 'get'])
     @commands.check(is_dm)
-    @commands.check(user_has_no_custodial)
+    @commands.check(user_has_no_second)
     async def register(self, ctx):
         """
         Interactive registration procedure for second wallet level
         """
-        # Get public and private key from the sdk
+        # Entry message for the user
         await second_level_account_reg_info(destination=ctx.author)
 
         # Wait for answer
@@ -233,7 +237,7 @@ class CustodialAccounts(commands.Cog):
                     }
 
                     # Storing data
-                    if self.backoffice.custodial_manager.create_user_wallet(data_to_store=data_to_store):
+                    if self.backoffice.second_level_manager.create_user_wallet(data_to_store=data_to_store):
                         message = f"You have successfully verified your secret key and registered level 2 account" \
                                   f" into Crypto Link system. Public address and 1/2 of private" \
                                   f" key have been securely stored under your Discord User ID {ctx.author.id}. I" \
@@ -278,8 +282,8 @@ class CustodialAccounts(commands.Cog):
                                                                ' :exclamation: ',
                                                  message=message)
 
-    @custodial.group(aliases=["acc", "a"])
-    @commands.check(user_has_custodial)
+    @two.group(aliases=["acc", "a"])
+    @commands.check(user_has_second_level)
     async def account(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Custodial Account Commands__ :joystick: '
@@ -293,7 +297,7 @@ class CustodialAccounts(commands.Cog):
     @account.command(aliases=['nfo'])
     async def info(self, ctx):
         # Get address from database
-        user_public = self.backoffice.custodial_manager.get_custodial_hot_wallet_addr(user_id=ctx.message.author.id)
+        user_public = self.backoffice.second_level_manager.get_custodial_hot_wallet_addr(user_id=ctx.message.author.id)
         # Getting data from server for account
         try:
             data = self.server.accounts().account_id(account_id=user_public).call()
@@ -314,23 +318,23 @@ class CustodialAccounts(commands.Cog):
                                               f' Please activate it by depositing at least 2 XLM to '
                                               f'```{user_public}```')
 
-    @custodial.group(aliases=["transactions"])
-    @commands.check(user_has_custodial)
-    async def tx(self, ctx):
+    @two.group(aliases=["transaction", "tx", "pay", "p"])
+    @commands.check(user_has_second_level)
+    async def payment(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':incoming_envelope:  __Available Transaction Commands__ :incoming_envelope:  '
             description = "Commands dedicated to execution of transactions/payments"
-            list_of_values = [{"name": ":cowboy: Discord related payments :cowboy:",
-                               "value": f"```{self.command_string}custodial tx user <@discord.Member> <amount> "
-                                        f"<wallet level:int>```\n"
+            list_of_values = [{"name": ":cowboy: XLM Discord related payments  :cowboy:",
+                               "value": f"```{self.command_string}2 tx user <@discord.Member> "
+                                        f"<wallet level:int> <amount>```\n"
                                         f"**__Wallet Levels__**\n"
                                         f":one: => Transaction to 1st level Discord wallet based on MEMO\n"
                                         f":two: => Transaction to 2nd level Discord wallet owned by user over Discord\n"
                                         f"***Note***: All data is automatically obtained from the CL system once "
                                         f"recipient selected."
                                         f"\n`Aliases: usr, u`"},
-                              {"name": ":map: Non-Discord related recipients :map:",
-                               "value": f"```{self.command_string}custodial tx address <public key> <amount>"
+                              {"name": ":map: XLM Non-Discord related recipients :map:",
+                               "value": f"```{self.command_string}2 tx address <address> <amount>"
                                         f" <memo=optional>```\n"
                                         f"`Aliases: addr, a, add`"}
                               ]
@@ -338,10 +342,11 @@ class CustodialAccounts(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
-    @tx.command(aliases=["usr", "u"])
+    @payment.command(aliases=["usr", "u"])
     @commands.check(is_public)
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def user(self, ctx, recipient: Member, amount: float, wallet_level: int):
+    async def user(self, ctx, recipient: Member, wallet_level: int, amount: float):
+
         """
         Create Transaction To User on Discord
         """
@@ -410,11 +415,11 @@ class CustodialAccounts(commands.Cog):
                         # 3. Send information to the user to verify transaction with an answer with request to sign
                         recipient_details = self.get_recipient_details_based_on_layer(layer=wallet_level,
                                                                                       user_id=recipient.id)
-                        data = {"txTotal": requested_amount,
-                                "netValue": net_amount,
-                                "devFee": dev_fee_normal,
+                        data = {"txTotal": f'{requested_amount:.7f}',
+                                "netValue": f'{net_amount:.7f}',
+                                "devFee": f'{dev_fee_normal:.7f}',
                                 "token": "XLM",
-                                "networkFee": fee_normal,
+                                "networkFee": f'{fee_normal:.7f}',
                                 "recipient": f"Discord User: {recipient}\n"
                                              f"User ID: {recipient.id}\n"
                                              f"Wallet Level: {wallet_level}",
@@ -438,7 +443,7 @@ class CustodialAccounts(commands.Cog):
                             first_half_of_key = await self.bot.wait_for('message', check=check(ctx.message.author),
                                                                         timeout=80)
                             # DB 1/2 Private key
-                            private_encrypted = self.backoffice.custodial_manager.get_private_key(
+                            private_encrypted = self.backoffice.second_level_manager.get_private_key(
                                 user_id=int(ctx.author.id))
 
                             second_half_of_key = security_manager.decrypt(token=private_encrypted["privateKey"]).decode(
@@ -511,7 +516,7 @@ class CustodialAccounts(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @tx.command(aliases=['addr', 'a', 'add'])
+    @payment.command(aliases=['addr', 'a', 'add'])
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def address(self, ctx, to_address: str, amount: float, memo: str = None):
         """
@@ -571,11 +576,11 @@ class CustodialAccounts(commands.Cog):
 
                 # MAKING TRANSACTIONS
                 # 3. Send information to the user to verify transaction with an answer with request to sign
-                data = {"txTotal": requested_amount,
-                        "netValue": net_amount,
-                        "devFee": dev_fee_normal,
+                data = {"txTotal": f'{requested_amount:.7f}',
+                        "netValue": f'{net_amount:.7f}',
+                        "devFee": f'{dev_fee_normal:.7f}',
                         "token": "XLM",
-                        "networkFee": fee_normal,
+                        "networkFee": f'{fee_normal:.7f}',
                         "recipient": f"{to_address}",
                         "toAddress": to_address,
                         "memo": memo,
@@ -596,7 +601,7 @@ class CustodialAccounts(commands.Cog):
                                                                 timeout=80)
 
                     # DB 1/2 Private key
-                    private_encrypted = self.backoffice.custodial_manager.get_private_key(
+                    private_encrypted = self.backoffice.second_level_manager.get_private_key(
                         user_id=int(ctx.author.id))
 
                     # decipher secret key and use it for transaction stream
@@ -615,7 +620,6 @@ class CustodialAccounts(commands.Cog):
                                                                     amount=net_amount,
                                                                     dev_fee_status=dev_fee_activated,
                                                                     tx_data=data)
-
                         if result[0]:
                             await self.transaction_report_dispatcher(ctx=ctx, result=result[1], data=data)
                         else:
@@ -653,7 +657,7 @@ class CustodialAccounts(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
-    @custodial.error
+    @two.error
     async def cust_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             message = f"{error},In order to be able to use wallet of level 2, please register first into the " \
@@ -739,14 +743,17 @@ class CustodialAccounts(commands.Cog):
                       f'`{error}`'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
+        # elif TimeoutError:
+        #     title = f':timer: __Transaction Request Expired__ :timer: '
+        #     message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
+        #               f'time-limits'
+        #     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+        #                                          sys_msg_title=title)
 
-        elif TimeoutError:
-            title = f':timer: __Transaction Request Expired__ :timer: '
-            message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
-                      f'time-limits'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
+        else:
+            print('smth is up')
+            raise
 
 
 def setup(bot):
-    bot.add_cog(CustodialAccounts(bot))
+    bot.add_cog(LevelTwoAccountCommands(bot))

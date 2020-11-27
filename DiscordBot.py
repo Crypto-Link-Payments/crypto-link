@@ -26,9 +26,9 @@ horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.paths',
                 'horizonCommands.tradeAggregations']
 
-non_custodial_layer_cmds = ['nonCustodialLayer.payments']
+non_custodial_layer_cmds = ['thirdLevel.thirdLevelAccounts']
 
-custodial_layer = ['custodialLayer.userAccount']
+custodial_layer = ['secondLevel.secondLevelAccounts']
 
 
 class DiscordBot(commands.Bot):
@@ -57,20 +57,21 @@ class DiscordBot(commands.Bot):
         notification_str += '+++++++++++++++++++++++++++++++++++++++'
         print(notification_str)
 
-        notification_str = Fore.CYAN + '+++++++++++++++++++++++++++++++++++++++\n' \
-                                       '           LOADING Horizon COGS....        \n'
-        for hor in horizon_cogs:
+        notification_str = Fore.BLUE + '+++++++++++++++++++++++++++++++++++++++\n' \
+                                       '           LOADING Commands level 2....        \n'
+
+        for cust_cmd in custodial_layer:
             try:
-                self.load_extension(hor)
-                notification_str += f'| {hor} :smile: \n'
+                self.load_extension(cust_cmd)
+                notification_str += f'| {cust_cmd} :smile: \n'
             except Exception as error:
-                notification_str += f'| {hor} --> {error}\n'
+                notification_str += f'| {cust_cmd} --> {error}\n'
                 raise
         notification_str += '+++++++++++++++++++++++++++++++++++++++'
         print(notification_str)
 
-        notification_str = Fore.BLUE + '+++++++++++++++++++++++++++++++++++++++\n' \
-                                       '           LOADING Non Custodial Layer....        \n'
+        notification_str = Fore.WHITE + '+++++++++++++++++++++++++++++++++++++++\n' \
+                                        '           LOADING Commands level 3....        \n'
 
         for cmd in non_custodial_layer_cmds:
             try:
@@ -82,15 +83,14 @@ class DiscordBot(commands.Bot):
         notification_str += '+++++++++++++++++++++++++++++++++++++++'
         print(notification_str)
 
-        notification_str = Fore.WHITE + '+++++++++++++++++++++++++++++++++++++++\n' \
-                                        '           LOADING Custodial Layer 2....        \n'
-
-        for cust_cmd in custodial_layer:
+        notification_str = Fore.CYAN + '+++++++++++++++++++++++++++++++++++++++\n' \
+                                       '           LOADING Horizon commands....        \n'
+        for hor in horizon_cogs:
             try:
-                self.load_extension(cust_cmd)
-                notification_str += f'| {cust_cmd} :smile: \n'
+                self.load_extension(hor)
+                notification_str += f'| {hor} :smile: \n'
             except Exception as error:
-                notification_str += f'| {cust_cmd} --> {error}\n'
+                notification_str += f'| {hor} --> {error}\n'
                 raise
         notification_str += '+++++++++++++++++++++++++++++++++++++++'
         print(notification_str)

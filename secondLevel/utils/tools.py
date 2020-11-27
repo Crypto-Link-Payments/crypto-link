@@ -1,6 +1,5 @@
 from stellar_sdk import TextMemo, Account, Keypair
-from stellar_sdk.exceptions import MemoInvalidException, Ed25519PublicKeyInvalidError, NotFoundError, BadRequestError, \
-    BadResponseError, UnknownRequestError, Ed25519SecretSeedInvalidError
+from stellar_sdk.exceptions import MemoInvalidException, Ed25519PublicKeyInvalidError, Ed25519SecretSeedInvalidError
 
 
 def check_memo(memo):

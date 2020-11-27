@@ -30,7 +30,7 @@ class HelpCommands(commands.Cog):
                 {"name": ":rocket: How to get started :rocket:",
                  "value": f"```{self.command_string}get_started```\n"
                           f"`Aliases: start`"},
-                {"name": " :moneybag:  Multi-Wallet System :moneybag: ",
+                {"name": " :moneybag: Wallet level system information :moneybag: ",
                  "value": f"```{self.command_string}help levels```"},
                 {"name": ":coin: Available Currencies :coin:",
                  "value": f"```{self.command_string}help currencies```\n"
@@ -185,17 +185,19 @@ class HelpCommands(commands.Cog):
                       f"to be used for signing. Signature for account activity is obtained through unique"
                       f" ID provided to user upon registration to Discord."},
             {"name": ":two: Wallet level 2 :two: ",
-             "value": "`Level 2 wallet` allows for full control of your ***private keys*** and with it, ability to use "
-                      "Discord wallet as well with other mediums. Upon successful registration and key verification,"
-                      " Crypto Link safely stores encrypted part of your private key. When making on-chain actions,"
-                      " user is required to provide second part of the private key in order to make puzzle completed"
-                      " and afterwards successfully streamed to network."},
+             "value": f"`Level 2 wallet` allows for full control of your ***private keys*** and with it, ability to use "
+                      f"Discord wallet as well with other mediums. Upon successful registration and key verification,"
+                      f" Crypto Link safely stores encrypted part of your private key. When making on-chain actions,"
+                      f" user is required to provide second part of the private key in order to make puzzle completed"
+                      f" and afterwards successfully streamed to network."
+                      f"```Access it with: {self.command_string}two```"},
             {"name": ":three: Wallet level 3 :three: ",
              "value": "`Level 3 wallet` which utilizes XDR envelopes to make XDR envelopes to be signed either through"
                       " [Stellar Laboratory](https://laboratory.stellar.org/#?network=public) or any other application"
                       " allowing to import XDR or than straight through "
                       "Discord. the only details which are stored into Crypto Link system are unique user id and "
-                      "user public address so XDR can be successfully built."}
+                      "user public address so XDR can be successfully built."
+                      f"```Access it with: {self.command_string}three```"}
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -203,7 +205,7 @@ class HelpCommands(commands.Cog):
 
     @help.command(aliases=['tx', 'pay'])
     async def transactions(self, ctx):
-        title = ':money_with_wings: __How to make peer to peer transaction__ :money_with_wings: '
+        title = ':money_with_wings: __How to make transactions/payments on level 1__ :money_with_wings: '
         description = f"Forms of transactions available on {self.bot.user.name}"
         list_of_values = [
             {"name": f":cowboy: Public P-2-P transactions :cowboy:",
@@ -219,21 +221,21 @@ class HelpCommands(commands.Cog):
 
     @help.command(aliases=['acc', 'user', 'profile', 'wallet'])
     async def account(self, ctx):
-        title = ':office_worker: __Obtain information on personal account__:office_worker: '
+        title = ':office_worker: __Obtain information on personal account of level 1__:office_worker: '
         description = "Below are presented all currencies available for P2P transactions"
         list_of_values = [
             {"name": ":credit_card: Get balance information :credit_card: ",
-             "value": f"`{self.command_string}me`"},
+             "value": f"```{self.command_string}me```"},
             {"name": ":moneybag: Access wallet commands :moneybag: ",
-             "value": f"`{self.command_string}wallet`"},
+             "value": f"```{self.command_string}wallet```"},
             {"name": " :woman_technologist: Get full account balance report :woman_technologist:  ",
-             "value": f"`{self.command_string}wallet balance`"},
+             "value": f"```{self.command_string}wallet balance```"},
             {"name": ":bar_chart: Wallet Statistics :bar_chart:",
-             "value": f"`{self.command_string}wallet stats`"},
+             "value": f"```{self.command_string}wallet stats```"},
             {"name": ":inbox_tray: Get instructions on how to deposit :inbox_tray:",
-             "value": f"`{self.command_string}wallet deposit`"},
+             "value": f"```{self.command_string}wallet deposit```"},
             {"name": ":outbox_tray: Withdrawal instructions :outbox_tray: ",
-             "value": f"`{self.command_string}withdraw`"}]
+             "value": f"```{self.command_string}withdraw```"}]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())

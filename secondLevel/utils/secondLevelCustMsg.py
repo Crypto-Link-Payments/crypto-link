@@ -1,3 +1,7 @@
+"""
+Custom messages for second level wallets
+"""
+
 from discord import Embed, Colour
 from datetime import datetime
 from cogs.utils.monetaryConversions import scientific_conversion, get_rates, rate_converter
@@ -260,11 +264,11 @@ async def sign_message_information(destination, transaction_details: dict, layer
                            value=f'```{transaction_details["toAddress"]}```',
                            inline=False)
     sign_message.add_field(name=f':money_with_wings: Transaction Values :money_with_wings: ',
-                           value=f'```Total: {transaction_details["txTotal"]:.7f} XLM\n'
+                           value=f'```Total: {transaction_details["txTotal"]} XLM\n'
                                  f'===============================\n'
-                                 f'Net Value: {transaction_details["netValue"]:.7f} XLM\n'
-                                 f'Dev Fee: {transaction_details["devFee"]:.7f} XLM\n'
-                                 f'Network fee: {transaction_details["networkFee"]:.7f} XLM```',
+                                 f'Net Value: {transaction_details["netValue"]} XLM\n'
+                                 f'Dev Fee: {transaction_details["devFee"]} XLM\n'
+                                 f'Network fee: {transaction_details["networkFee"]} XLM```',
                            inline=False)
     sign_message.add_field(name=f':pen_ballpoint: Signature Required :pen_ballpoint:',
                            value='If you agree with transactions details please answer with ***__sign__*** and you '

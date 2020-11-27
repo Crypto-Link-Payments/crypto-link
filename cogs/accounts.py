@@ -109,13 +109,14 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
-    @commands.group()
+    @commands.group(alliases=["one", "st", "first", "1", "account",])
     @commands.check(user_has_wallet)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Wallet Commands__ :joystick: '
-            description = "All commands available to operate execute wallet related actions"
+            description = "All commands available to operate execute wallet related actions.\n" \
+                          "`Aliases: one, st, first, 1`"
             list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
                                "value": f"`{self.command_string}wallet balance`"},
                               {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
@@ -222,38 +223,6 @@ class UserAccountCommands(commands.Cog):
         else:
             title = '__Stellar Wallet Error__'
             message = f'Wallet could not be obtained from the system please try again later'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=title)
-
-    @wallet.command()
-    async def trust(self, ctx, private_key, token: str):
-        """
-        Command which is used for users to establish a trust line between their personal dekstop accounts and
-        token issuer
-        """
-        token = token.lower()
-        # check strings, stellar address and token integration status
-        if check_stellar_private(private_key=private_key):
-            if not re.search("[~!#$%^&*()_+{}:;\']", token) and token in self.list_of_coins and token != 'xlm':
-                if self.backoffice.stellar_wallet.establish_trust(private_key=private_key, token=f'{token.upper()}'):
-                    title = ':rocket: __Trust line established__ :rocket:'
-                    message = f'Trustline between your personal wallet and issuer has been successfully established. ' \
-                              f' You can now withdraw token {token} to your personal wallet'
-                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                         sys_msg_title=title)
-                else:
-                    message = f'Crypto Link could not establish trustline with issuer, since wallet address does not ' \
-                              f'exist on the network or the wallet has not been activate yet.'
-                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                         sys_msg_title=CONST_TRUST_ERROR)
-
-            else:
-                message = f'Trustline creation for failed, as token {token} is not implemented in Crypto Link'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                     sys_msg_title=CONST_TRUST_ERROR)
-        else:
-            title = '__Trustline error__'
-            message = f'You have provided wrong Ed25519 Secret Seed.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
