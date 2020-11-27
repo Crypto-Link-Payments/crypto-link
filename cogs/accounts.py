@@ -1,12 +1,10 @@
 from datetime import datetime
-import re
 from discord import Embed, Colour
 from discord.ext import commands
 from cogs.utils.customCogChecks import is_public, user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal, scientific_conversion
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.securityChecks import check_stellar_private
 from utils.tools import Helpers
 
 helper = Helpers()

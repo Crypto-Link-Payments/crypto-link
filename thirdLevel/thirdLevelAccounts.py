@@ -13,7 +13,7 @@ from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level
 from cogs.utils.securityChecks import check_stellar_address
 from utils.tools import Helpers
-from stellar_sdk import TransactionBuilder, Network, Transaction, Account, TransactionEnvelope, Asset, Payment, \
+from stellar_sdk import TransactionBuilder, Network, Account, TransactionEnvelope, Asset, Payment, \
     parse_transaction_envelope_from_xdr, Keypair
 from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError, Ed25519SecretSeedInvalidError, \
     BadRequestError, BadResponseError, ConnectionError
