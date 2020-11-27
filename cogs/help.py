@@ -197,7 +197,7 @@ class HelpCommands(commands.Cog):
                       " allowing to import XDR or than straight through "
                       "Discord. the only details which are stored into Crypto Link system are unique user id and "
                       "user public address so XDR can be successfully built."
-                      f"```Access it with: {self.command_string}three```" }
+                      f"```Access it with: {self.command_string}three```"}
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
