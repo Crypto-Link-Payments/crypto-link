@@ -19,7 +19,7 @@ from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError, 
     BadRequestError, BadResponseError, ConnectionError
 from thirdLevel.utils.thirdLevelCustMsg import third_level_acc_details, new_acc_details, \
     third_level_account_reg_info, third_level_own_reg_info, send_xdr_info, xdr_data_to_embed, user_approval_request, \
-    transaction_result
+    transaction_result, server_error_response, send_user_account_info
 
 helper = Helpers()
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
@@ -443,7 +443,26 @@ class LevelThreeAccountCommands(commands.Cog):
 
     @account.command(aliases=["nfo", "i"])
     async def info(self, ctx):
-        await ctx.author.send(content="Command under construction")
+
+        user_public = self.backoffice.third_level_manager.get_third_hot_wallet_addr(user_id=ctx.author.id)
+        data = self.server.accounts().account_id(account_id=user_public).call()
+        try:
+            if data and 'status' not in data:
+                # Send user account info
+                await send_user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
+
+            else:
+                sys_msg_title = 'Stellar Wallet Query Server error'
+                message = 'Status of the wallet could not be obtained at this moment'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                     sys_msg_title=sys_msg_title)
+
+        except NotFoundError:
+            await server_error_response(destination=ctx.message.author,
+                                        title=":exclamation: Account Not Activated :exclamation: ",
+                                        error=f'Account has not been activated yet'
+                                              f' Please activate it by depositing at least 2 XLM to '
+                                              f'```{user_public}```')
 
     @three.group(aliases=["payment", "t", "p", "transaction", "pay"])
     @commands.check(user_has_third_level)
@@ -453,11 +472,10 @@ class LevelThreeAccountCommands(commands.Cog):
             description = "List of sub-commands to handle payments and transactions for 3. level wallet"
             list_of_commands = [
                 {"name": f':map: Prepare Payment Envelope for external address :map:',
-                 "value": f'```{self.command_string}3 payment <amount> <token> <from address> <to address>'
-                          f' <memo=optional>```\n'
+                 "value": f'```{self.command_string}3 tx user <@discord.User> <wallet level> <amount XLM>```\n'
                           f'`Aliases: p, pay, tx, transaction`'},
                 {"name": f':mag_right: Prepare Payment for Discord User :mag:',
-                 "value": f'```{self.command_string}xdr discord <<amount> <token> <@discord.User>```'}
+                 "value": f'```{self.command_string}3 tx address <public address> <amount XLM>```'}
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
