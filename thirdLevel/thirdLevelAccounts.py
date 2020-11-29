@@ -309,7 +309,8 @@ class LevelThreeAccountCommands(commands.Cog):
                     }
                     if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=details):
                         await new_acc_details(author=ctx.author, details=details)
-
+                        msg = ':new: User register for wallet level 3. :rocket: '
+                        await self.uplink_notification(message=msg)
                     else:
                         await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
                                                              destination=0,
@@ -353,6 +354,8 @@ class LevelThreeAccountCommands(commands.Cog):
 
                     if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=details):
                         await new_acc_details(author=ctx.author, details=details)
+                        msg = ':new: User register for wallet level 3. :rocket: '
+                        await self.uplink_notification(message=msg)
                     else:
                         await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
                                                              destination=0,
