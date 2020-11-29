@@ -56,9 +56,15 @@ class ThirdLevelWalletManager:
         Get user hot wallet details for decription in cogs
         """
         data = self.third_level.find_one({"userId": int(user_id)},
-                                        {"_id": 0,
-                                         "publicAddress": 1})
+                                         {"_id": 0,
+                                          "publicAddress": 1})
         if data:
             return data["publicAddress"]
         else:
             return {}
+
+    def remove_account(self, user_id: int):
+
+        result = self.third_level.delete_one({"userId": int(user_id)})
+
+        return result.deleted_count > 0
