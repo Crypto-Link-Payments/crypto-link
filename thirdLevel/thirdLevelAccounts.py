@@ -8,7 +8,7 @@ from Merchant wallet to their won upon withdrawal.
 import re
 import asyncio
 from discord.ext import commands
-from discord import Colour, Member
+from discord import Colour, Member, Embed
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level
 from cogs.utils.securityChecks import check_stellar_address
@@ -253,23 +253,22 @@ class LevelThreeAccountCommands(commands.Cog):
     @three.group(aliases=['reg', 'r', 'get', 'n'])
     @commands.check(user_has_second_level)
     async def register(self, ctx):
-        title = ':new: 3 level wallet registration commands :new: '
-        description = ""
-        list_of_commands = [
-            {"name": f':mag_right: Register new in-active wallet level 3 :mag:',
-             "value": f'```{self.command_string}3 register new ```\n'
-                      f'`Aliases: n`'},
-
-            {"name": f':mag_right: Register Own Public Address :mag:',
-             "value": f'```{self.command_string}3 register own <Valid Public Address>```\n'
-                      f'`Aliases: o, my`'},
-
-            {"name": f':mag_right: Update Own Public Address :mag:',
-             "value": f'```{self.command_string}3 register update <Valid Public Address> ```\n'
-                      f'`Aliases: u`'}
-        ]
-
         if ctx.invoked_subcommand is None:
+            title = ':new: 3 level wallet registration commands :new: '
+            description = ""
+            list_of_commands = [
+                {"name": f':mag_right: Register new in-active wallet level 3 :mag:',
+                 "value": f'```{self.command_string}3 register new ```\n'
+                          f'`Aliases: n`'},
+
+                {"name": f':mag_right: Register Own Public Address :mag:',
+                 "value": f'```{self.command_string}3 register own <Valid Public Address>```\n'
+                          f'`Aliases: o, my`'},
+
+                {"name": f':mag_right: Update Own Public Address :mag:',
+                 "value": f'```{self.command_string}3 register update <Valid Public Address> ```\n'
+                          f'`Aliases: u`'}
+            ]
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
@@ -304,12 +303,11 @@ class LevelThreeAccountCommands(commands.Cog):
 
                 if done_answer.content.upper() in ["DONE"]:
                     # Wallet details to store
-                    wallet = {
+                    details = {
                         "userId": int(ctx.message.author.id),
                         "publicAddress": details["address"]
                     }
-
-                    if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=wallet):
+                    if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=details):
                         await new_acc_details(author=ctx.author, details=details)
 
                     else:
@@ -336,8 +334,9 @@ class LevelThreeAccountCommands(commands.Cog):
     async def own(self, ctx, public_address: str):
         # Check if correct address provided
         if check_stellar_address(address=public_address):
-            if public_address in [self.bot.backoffice.stellar_wallet.public_key,
-                                  self.bot.backoffice.stellar_wallet.dev_key]:
+
+            if public_address not in [self.bot.backoffice.stellar_wallet.public_key,
+                                      self.bot.backoffice.stellar_wallet.dev_key]:
                 await third_level_own_reg_info(destination=ctx.author)
 
                 # Prompt for response
@@ -379,8 +378,8 @@ class LevelThreeAccountCommands(commands.Cog):
     @commands.check(user_has_third_level)
     async def update(self, ctx, public_address: str):
         if check_stellar_address(address=public_address):
-            if public_address in [self.bot.backoffice.stellar_wallet.public_key,
-                                  self.bot.backoffice.stellar_wallet.dev_key]:
+            if public_address not in [self.bot.backoffice.stellar_wallet.public_key,
+                                      self.bot.backoffice.stellar_wallet.dev_key]:
                 await ctx.author.send(f'Are you sure you would like update your 3rd level wallet address to '
                                       f'{public_address}? yes/y or no/n')
 
@@ -414,10 +413,12 @@ class LevelThreeAccountCommands(commands.Cog):
                                                  sys_msg_title=title)
 
     @three.group(aliases=["acc", "a", "wallet", "w"])
+    @commands.check(user_has_third_level)
     async def account(self, ctx):
         """
         Entry point for account sub-commands
         """
+        print('access account')
         if ctx.invoked_subcommand is None:
             title = ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r:  ' \
                     '__Welcome to level 3 wallet system__ ' \
@@ -428,11 +429,48 @@ class LevelThreeAccountCommands(commands.Cog):
                 {"name": f':information_source: Account Status :information_source: ',
                  "value": f'```{self.command_string}3 account info```\n'
                           f'`Aliases: n, nfo`'},
+                {"name": f':octagonal_sign: Remove account from Crypto Link :octagonal_sign:  ',
+                 "value": f'```{self.command_string}3 account remove```\n'
+                          f'`Aliases: delete, r`'},
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
+
+    @account.command(aliases=["delete", "r"])
+    async def remove(self, ctx):
+        removal_info = Embed(title=f':octagonal_sign:  Account Removal Process :octagonal_sign:  ',
+                             description="You have initiated account removal procedure from the Crypto Link System",
+                             color=Colour.orange())
+        removal_info.add_field(name=":warning: Read Carefully :warning: ",
+                               value="Wallet address registered under the wallet level 3 will be removed from Crypto "
+                                     "Link system however can be still accessible through other applications as you"
+                                     " hold private keys. In order to re-register same public address please use"
+                                     f" `{self.command_string}3 register own`")
+        await ctx.author.send(embed=removal_info)
+
+        await ctx.author.send(f'Are you sure you would like to delete wallet from 3rd level wallets? yes/y or no/n')
+
+        verification = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=60)
+
+        if verification.content.upper() in ["YES", "Y"]:
+            if self.acc_mng_rd_lvl.remove_account(user_id=ctx.author.id):
+                sys_msg_title = 'Wallet level 3 removed from system'
+                message = 'You have successfully removed wallet from the Crypto Link system.'
+                await custom_messages.system_message(ctx=ctx, color_code=Colour.green(), message=message, destination=1,
+                                                     sys_msg_title=sys_msg_title)
+            else:
+                sys_msg_title = 'Wallet removal issue'
+                message = 'Wallet could not be removed from the system. Please try again later or contact Crypto ' \
+                          'Link staff. '
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                     sys_msg_title=sys_msg_title)
+        else:
+            sys_msg_title = 'Removal cancelled'
+            message = 'You have successfully canceled wallet removal procedure.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.green, message=message, destination=1,
+                                                 sys_msg_title=sys_msg_title)
 
     @account.command(aliases=["nfo", "i"])
     async def info(self, ctx):
@@ -707,12 +745,24 @@ class LevelThreeAccountCommands(commands.Cog):
     @new.error
     async def new_err(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await ctx.author.send(content='You have already registered for wallet')
+            title = f'Registration status'
+            message = f'You have already registered for a wallet of 3rd level. Use `{self.command_string}3` to' \
+                      f'familiarize yourself with available commands.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green, message=message, destination=0,
+                                                 sys_msg_title=title)
 
     @sign.error
     async def sign_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             print("You are required to provide envelope to be signed.")
+
+    @register.error
+    async def reg_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Requirements not met'
+            message = 'In order to be eligible for wallet level 3 system please register first 2nd level wallet.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.red, message=message, destination=0,
+                                                 sys_msg_title=title)
 
 
 def setup(bot):
