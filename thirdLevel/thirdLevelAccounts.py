@@ -239,7 +239,8 @@ class LevelThreeAccountCommands(commands.Cog):
                  "value": f'```{self.command_string}3 payment```\n'
                           f'`Aliases: tx, t, p, transaction, pay`'},
                 {
-                    "name": f':regional_indicator_x: :regional_indicator_d: :regional_indicator_r: view and sign transaction'
+                    "name": f':regional_indicator_x: :regional_indicator_d: :regional_indicator_r:'
+                            f' view and sign transaction'
                             f' :regional_indicator_x: :regional_indicator_d: :regional_indicator_r: ',
                     "value": f'```{self.command_string}3 xdr```\n'
                              f'`Aliases: envelope, env`'}
@@ -309,7 +310,7 @@ class LevelThreeAccountCommands(commands.Cog):
                     }
                     if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=details):
                         await new_acc_details(author=ctx.author, details=details)
-                        msg = ':new: User register for wallet level 3. :rocket: '
+                        msg = ':new: User register wallet level 3. :rocket: '
                         await self.uplink_notification(message=msg)
                     else:
                         await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
@@ -354,7 +355,7 @@ class LevelThreeAccountCommands(commands.Cog):
 
                     if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=details):
                         await new_acc_details(author=ctx.author, details=details)
-                        msg = ':new: User register for wallet level 3. :rocket: '
+                        msg = ':new: User register wallet level 3. :rocket: '
                         await self.uplink_notification(message=msg)
                     else:
                         await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
@@ -461,26 +462,26 @@ class LevelThreeAccountCommands(commands.Cog):
             if self.acc_mng_rd_lvl.remove_account(user_id=ctx.author.id):
                 sys_msg_title = 'Wallet level 3 removed from system'
                 message = 'You have successfully removed wallet from the Crypto Link system.'
-                await custom_messages.system_message(ctx=ctx, color_code=Colour.green(), message=message, destination=1,
+                await custom_messages.system_message(ctx=ctx, color_code=Colour.green(), message=message, destination=0,
                                                      sys_msg_title=sys_msg_title)
             else:
                 sys_msg_title = 'Wallet removal issue'
                 message = 'Wallet could not be removed from the system. Please try again later or contact Crypto ' \
                           'Link staff. '
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title=sys_msg_title)
         else:
             sys_msg_title = 'Removal cancelled'
             message = 'You have successfully canceled wallet removal procedure.'
-            await custom_messages.system_message(ctx=ctx, color_code=Colour.green, message=message, destination=1,
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.green, message=message, destination=0,
                                                  sys_msg_title=sys_msg_title)
 
     @account.command(aliases=["nfo", "i"])
     async def info(self, ctx):
 
         user_public = self.backoffice.third_level_manager.get_third_hot_wallet_addr(user_id=ctx.author.id)
-        data = self.server.accounts().account_id(account_id=user_public).call()
         try:
+            data = self.server.accounts().account_id(account_id=user_public).call()
             if data and 'status' not in data:
                 # Send user account info
                 await send_user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
@@ -488,7 +489,7 @@ class LevelThreeAccountCommands(commands.Cog):
             else:
                 sys_msg_title = 'Stellar Wallet Query Server error'
                 message = 'Status of the wallet could not be obtained at this moment'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title=sys_msg_title)
 
         except NotFoundError:
@@ -754,10 +755,27 @@ class LevelThreeAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green, message=message, destination=0,
                                                  sys_msg_title=title)
 
+        elif TimeoutError:
+            title = f'__Transaction Request Expired__'
+            message = f'It took you to long to provide requested answer. Please try again or follow ' \
+                      f'guidelines further from the Crypto Link. '
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
     @sign.error
     async def sign_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             print("You are required to provide envelope to be signed.")
+            title = f'__Missing Envelope__'
+            message = f'You are required to provide XDR envelope to be able to sign it.  '
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+        elif TimeoutError:
+            title = f'__Transaction Request Expired__'
+            message = f'It took you to long to provide requested answer. Please try again or follow ' \
+                      f'guidelines further from the Crypto Link. '
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
 
     @register.error
     async def reg_error(self, ctx, error):
@@ -765,6 +783,12 @@ class LevelThreeAccountCommands(commands.Cog):
             title = f'Requirements not met'
             message = 'In order to be eligible for wallet level 3 system please register first 2nd level wallet.'
             await custom_messages.system_message(ctx=ctx, color_code=Colour.red, message=message, destination=0,
+                                                 sys_msg_title=title)
+        elif TimeoutError:
+            title = f'__Transaction Request Expired__'
+            message = f'It took you to long to provide requested answer. Please try again or follow ' \
+                      f'guidelines further from the Crypto Link. '
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
 
