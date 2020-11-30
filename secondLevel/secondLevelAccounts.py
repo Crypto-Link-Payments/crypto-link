@@ -743,16 +743,12 @@ class LevelTwoAccountCommands(commands.Cog):
                       f'`{error}`'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
-        # elif TimeoutError:
-        #     title = f':timer: __Transaction Request Expired__ :timer: '
-        #     message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
-        #               f'time-limits'
-        #     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-        #                                          sys_msg_title=title)
-
-        else:
-            print('smth is up')
-            raise
+        elif TimeoutError:
+            title = f':timer: __Transaction Request Expired__ :timer: '
+            message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
+                      f'time-limits'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
 
 
 def setup(bot):
