@@ -599,41 +599,48 @@ class LevelThreeAccountCommands(commands.Cog):
         if atomic_amount >= 100:
             # Get sender hot wallet
             if check_stellar_address(address=public_address):
-                user_address = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
-                if public_address != user_address:
-                    if public_address != self.bot.backoffice.stellar_wallet.public_key:
-                        request_data = {"fromAddr": user_address,
-                                        "txTotal": f'{atomic_amount / (10 ** 7):.7f}',
-                                        "netValue": f'{atomic_amount / (10 ** 7):.7f}',
-                                        "devFee": CONST_DEV_FEE,
-                                        "token": "XLM",
-                                        "networkFee": f'0.0000100',
-                                        "recipient": f"External Wallet",
-                                        "toAddress": public_address,
-                                        "memo": "From Discord",
-                                        "walletLevel": f"External Wallet"
-                                        }
+                if self.check_if_acc_is_live(address=public_address):
+                    user_address = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
+                    if public_address != user_address:
+                        if public_address != self.bot.backoffice.stellar_wallet.public_key:
+                            request_data = {"fromAddr": user_address,
+                                            "txTotal": f'{atomic_amount / (10 ** 7):.7f}',
+                                            "netValue": f'{atomic_amount / (10 ** 7):.7f}',
+                                            "devFee": CONST_DEV_FEE,
+                                            "token": "XLM",
+                                            "networkFee": f'0.0000100',
+                                            "recipient": f"External Wallet",
+                                            "toAddress": public_address,
+                                            "memo": "From Discord",
+                                            "walletLevel": f"External Wallet"
+                                            }
 
-                        xdr_envelope = self.produce_envelope(tx_data=request_data, dev_fee_status=CONST_DEV_ACTIVATED)
+                            xdr_envelope = self.produce_envelope(tx_data=request_data,
+                                                                 dev_fee_status=CONST_DEV_ACTIVATED)
 
-                        # Send details to sender on produced envelope
-                        await send_xdr_info(ctx=ctx, request_data=request_data, envelope=xdr_envelope,
-                                            command_type='discord')
+                            # Send details to sender on produced envelope
+                            await send_xdr_info(ctx=ctx, request_data=request_data, envelope=xdr_envelope,
+                                                command_type='discord')
 
-                        message = f":new::envelope: has been created for external address in value of " \
-                                  f"***{request_data['txTotal']} {request_data['token']}*** :rocket: "
-                        await self.uplink_notification(message=message)
+                            message = f":new::envelope: has been created for external address in value of " \
+                                      f"***{request_data['txTotal']} {request_data['token']}*** :rocket: "
+                            await self.uplink_notification(message=message)
 
+                        else:
+                            message = f"You re trying to send funds to the Crypto Link hot wallet which is used for "
+                            f" level 1 wallet hot wallet address. Funds might not come through as MEMO is "
+                            f"required. If you wish to send it to your Level 1 wallet please "
+                            f"use `{self.command_string}3 tx user `"
+                            await custom_messages.system_message(ctx=ctx, message=message, color_code=1,
+                                                                 destination=ctx.author,
+                                                                 sys_msg_title=CONST_XDR_ERROR)
                     else:
-                        message = f"You re trying to send funds to the Crypto Link hot wallet which is used for "
-                        f" level 1 wallet hot wallet address. Funds might not come through as MEMO is "
-                        f"required. If you wish to send it to your Level 1 wallet please "
-                        f"use `{self.command_string}3 tx user `"
+                        message = 'No need to send it to yourself to 3 level'
                         await custom_messages.system_message(ctx=ctx, message=message, color_code=1,
                                                              destination=ctx.author,
                                                              sys_msg_title=CONST_XDR_ERROR)
                 else:
-                    message = 'No need to send it to yourself to 3 level'
+                    message = f'Address `{public_address}` has not been activated yet.'
                     await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=ctx.author,
                                                          sys_msg_title=CONST_XDR_ERROR)
             else:
