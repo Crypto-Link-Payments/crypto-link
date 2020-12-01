@@ -252,7 +252,7 @@ class LevelThreeAccountCommands(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @three.group(aliases=['reg', 'r', 'get', 'n'])
-    @commands.check(user_has_second_level)
+    @commands.check(user_has_no_third_level)
     async def register(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':new: 3 level wallet registration commands :new: '
@@ -753,6 +753,15 @@ class LevelThreeAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
+    @three.error
+    async def three_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Requirements missing'
+            message = f'In order to be able to access wallet level 3 you need to first register yourself in wallet ' \
+                      f'level 2 with `{self.command_string}2 register`'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green, message=message, destination=0,
+                                                 sys_msg_title=title)
+
     @new.error
     async def new_err(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
@@ -763,24 +772,71 @@ class LevelThreeAccountCommands(commands.Cog):
                                                  sys_msg_title=title)
 
         elif TimeoutError:
-            title = f'__Transaction Request Expired__'
-            message = f'It took you to long to provide requested answer. Please try again or follow ' \
-                      f'guidelines further from the Crypto Link. '
+            title = f'__Time Run Out__'
+            message = f'Your time to respond to bots request has expired and process has been therefore cancelled.' \
+                      f' Please re-initiate the account registration process.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @own.error
+    async def own_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Registration status'
+            message = f'You have already registered for a wallet of 3rd level. Use `{self.command_string}3` to' \
+                      f'familiarize yourself with available commands. If you would like to update your wallet with' \
+                      f' new address please use `{self.command_string}3 register update`.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif TimeoutError:
+            title = f'__Time Run Out__'
+            message = f'Your time to respond to bots request has expired and process has been therefore cancelled.' \
+                      f' Please re-initiate the account registration process.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif isinstance(error, commands.MissingRequiredArgument):
+            title = f'__Missing Required argument__'
+            message = f'You forgot to provide required argument `public address`. Please re-initiate the process and ' \
+                      f'provide a Stellar valid public key/address.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @update.error
+    async def update_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'3 level wallet not registered'
+            message = f'You can not update the wallet address as you have not registered yourself yet to wallet level ' \
+                      f'3 system. Please use first `{self.command_string}3 register new` or `{self.command_string}3 ' \
+                      f'register own`'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif TimeoutError:
+            title = f'__Time Run Out__'
+            message = f'Your time to respond to bots request has expired and process has been therefore cancelled.' \
+                      f' Please re-initiate the account update process.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif isinstance(error, commands.MissingRequiredArgument):
+            title = f'__Missing Required argument__'
+            message = f'You forgot to provide required argument `public address`. Please re-initiate the process and ' \
+                      f'provide a Stellar valid public key/address.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
     @sign.error
     async def sign_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            print("You are required to provide envelope to be signed.")
             title = f'__Missing Envelope__'
             message = f'You are required to provide XDR envelope to be able to sign it.  '
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
         elif TimeoutError:
-            title = f'__Transaction Request Expired__'
-            message = f'It took you to long to provide requested answer. Please try again or follow ' \
-                      f'guidelines further from the Crypto Link. '
+            title = f'__Time Run Out__'
+            message = f'Your time to respond to bots request has expired and process has been therefore cancelled.' \
+                      f' Please re-initiate it '
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
@@ -798,6 +854,23 @@ class LevelThreeAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
+    @account.error
+    async def acc_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Registration status'
+            message = 'You can not access this command as you have not registered yet into the 3 level wallet system.' \
+                      f' Please use first `{self.command_string}3 register` before you can query account details '
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.red, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @tx.error
+    async def t_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Registration status'
+            message = 'You can not access this command as you have not registered yet into the 3 level wallet system.' \
+                      f' Please use first `{self.command_string}3 register` before you can create transactions/payments '
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.red, message=message, destination=0,
+                                                 sys_msg_title=title)
 
 def setup(bot):
     bot.add_cog(LevelThreeAccountCommands(bot))
