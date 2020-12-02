@@ -16,19 +16,6 @@ CONST_ACC_REG_STATUS = '__Account registration status__'
 CONST_TRUST_ERROR = ':warning: __Trustline error__ :warning:'
 
 
-def check(author):
-    def inner_check(message):
-        """
-        Check for answering the verification message on withdrawal. Author origin
-        """
-        if message.author.id == author.id:
-            return True
-        else:
-            return False
-
-    return inner_check
-
-
 class UserAccountCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -107,7 +94,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
-    @commands.group(alliases=["one", "st", "first", "1", "account",])
+    @commands.group(alliases=["one", "st", "first", "1", "account", ])
     @commands.check(user_has_wallet)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):

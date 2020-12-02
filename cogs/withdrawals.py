@@ -3,7 +3,7 @@ import re
 from discord.ext import commands
 from discord import TextChannel
 
-from cogs.utils.customCogChecks import user_has_wallet
+from cogs.utils.customCogChecks import user_has_wallet, check
 from cogs.utils.monetaryConversions import convert_to_usd
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -17,19 +17,6 @@ integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 CONST_REG_SEARCH = "[~!#$%^&*()_+{}:;\']"
 
 
-def check(author):
-    def inner_check(message):
-        """
-        Check for answering the verification message on withdrawal. Author origin
-        """
-        if message.author.id == author.id:
-            return True
-        else:
-            return False
-
-    return inner_check
-
-
 class WithdrawalCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -37,7 +24,6 @@ class WithdrawalCommands(commands.Cog):
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
         self.help_functions = bot.backoffice.helper
-
 
     @commands.group()
     @commands.check(user_has_wallet)
@@ -67,7 +53,8 @@ class WithdrawalCommands(commands.Cog):
         strip_address = address.strip()
 
         # check strings, stellar address and token integration status
-        if self.help_functions.check_public_key(address=strip_address) and not re.search(CONST_REG_SEARCH, strip_address):
+        if self.help_functions.check_public_key(address=strip_address) and not re.search(CONST_REG_SEARCH,
+                                                                                         strip_address):
             if strip_address != self.bot.backoffice.stellar_wallet.public_key:
                 if not re.search(CONST_REG_SEARCH, token) and token in self.list_of_coins:
 
@@ -481,8 +468,6 @@ class WithdrawalCommands(commands.Cog):
         :param error:
         :return:
         """
-        print(f'ERR WITHDRAW XLM TRIGGERED  : {error}')
-
         if isinstance(error, commands.CheckFailure):
             message = f'You are either not registered in the system or you have tried to use command' \
                       f' over DM with the system itself. Head to one of the channels on community' \

@@ -43,9 +43,8 @@ class LevelTwoAccountCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.backoffice = bot.backoffice
         self.server = self.backoffice.stellar_wallet.server
-        self.available_layers = [1, 2]
+        self.available_layers = [1, 2,3]
         self.network_type = Network.TESTNET_NETWORK_PASSPHRASE
         self.help_functions = self.backoffice.helper
 
@@ -60,7 +59,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                      envelope=result['envelope_xdr'],
                                      network_type=self.network_type)
 
-        # Send notification on transaciton to Crypto Link Uplink
+        # Send notification on transaction to Crypto Link Uplink
         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
@@ -100,6 +99,8 @@ class LevelTwoAccountCommands(commands.Cog):
             return self.backoffice.account_mng.check_user_existence(user_id=user_id)
         elif layer == 2:
             return self.backoffice.second_level_manager.second_level_user_reg_status(user_id=user_id)
+        elif layer == 3:
+            return self.backoffice.second_level_manager.second_level_user_reg_status(user_id=user_id)
 
     def get_recipient_details_based_on_layer(self, layer: int, user_id: int):
         """
@@ -109,6 +110,13 @@ class LevelTwoAccountCommands(commands.Cog):
             # Details for transaction to level 1 wallet
             user_data = {
                 "address": self.backoffice.stellar_wallet.public_key,
+                "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
+            }
+            return user_data
+        elif layer == 2:
+            # Details for transaction to level 2 wallet
+            user_data = {
+                "address": self.backoffice.second_level_manager.get_custodial_hot_wallet_addr(user_id=user_id),
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
