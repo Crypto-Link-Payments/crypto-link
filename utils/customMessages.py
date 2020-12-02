@@ -91,3 +91,31 @@ async def user_account_info(ctx, data, bot_avatar_url):
             gems_nfo.add_field(name=f':gem: {cn} :gem:',
                                value=f"{coin['balance']}")
             await ctx.author.send(embed=gems_nfo)
+
+
+async def dev_fee_option_notification(destination):
+    """
+    Prompt user if he is willing to give dev fee
+    """
+    dev_fee_info = Embed(title=":robot: Optional Dev Fee for Crypto Link Team:robot: ",
+                         color=Colour.lighter_gray())
+    dev_fee_info.add_field(name=f':money_with_wings: Dev fee :money_with_wings: ',
+                           value=f'If you would like to support us in what we are doing please answer with'
+                                 f'***__Yes__*** and system will ask you for custom amount.'
+                                 f'If you choose **__No__** than dev fee will be skipped.',
+                           inline=False)
+    await destination.send(embed=dev_fee_info)
+
+
+async def ask_for_dev_fee_amount(destination):
+    """
+    Prompt to user to provide dev fee
+    """
+    dev_fee_info = Embed(title=":robot: Dev Fee Amount/Value :robot: ",
+                         color=Colour.lighter_gray())
+    dev_fee_info.add_field(name=f':money_with_wings: Value :money_with_wings: ',
+                           value=f'Please provide amount in format 0.0000000 you are willing to contribute to '
+                                 f'development. Crypto Link will than automatically append Payment operation to the '
+                                 f'current transactions.',
+                           inline=False)
+    await destination.send(embed=dev_fee_info)

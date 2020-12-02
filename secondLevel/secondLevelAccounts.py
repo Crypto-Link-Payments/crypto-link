@@ -11,9 +11,9 @@ from discord.ext import commands
 from cogs.utils.customCogChecks import user_has_wallet, user_has_second_level, is_dm, is_public, user_has_no_second
 from cogs.utils.systemMessaages import CustomMessages
 from utils.securityManager import SecurityManager
-from utils.customMessages import user_account_info
-from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message, dev_fee_option_notification, \
-    ask_for_dev_fee_amount, sign_message_information, send_transaction_report, \
+from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
+from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message, sign_message_information, \
+    send_transaction_report, \
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
     server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
 
