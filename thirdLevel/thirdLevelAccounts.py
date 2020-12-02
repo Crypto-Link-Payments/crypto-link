@@ -748,7 +748,7 @@ class LevelThreeAccountCommands(commands.Cog):
                 }
 
                 await xdr_data_to_embed(destination=ctx.author, data=details_to_sign)
-        except Exception as e:
+        except Exception:
             title = f':exclamation: __XDR import error__ :exclamation: '
             message = f'Provided string is not XDR envelope'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
