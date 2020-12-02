@@ -137,23 +137,18 @@ async def send_xdr_info(ctx, request_data: dict, envelope: str, command_type: st
     xdr_info = Embed(title=f'Transaction as XDR',
                      description='Bellow is the XDR envelope of payment with provided details',
                      colour=Colour.magenta())
+    xdr_info.add_field(name="From Address",
+                       value=f'```{request_data["fromAddr"]}```',
+                       inline=False)
+    xdr_info.add_field(name="Address",
+                       value=f'```{request_data["toAddr"]}```',
+                       inline=False)
+
     if command_type == 'public':
-        xdr_info.add_field(name="From Address",
-                           value=f'```{request_data["fromAddr"]}```',
-                           inline=False)
-        xdr_info.add_field(name="To Address",
-                           value=f'```{request_data["toAddr"]}```',
-                           inline=False)
         xdr_info.add_field(name="Token and Amount",
                            value=f'{request_data["amount"]} {request_data["token"]}',
                            inline=False)
     elif command_type == "discord":
-        xdr_info.add_field(name="From Address",
-                           value=f'```{request_data["fromAddr"]}```',
-                           inline=False)
-        xdr_info.add_field(name="To Address",
-                           value=f'```{request_data["toAddress"]}```',
-                           inline=False)
         xdr_info.add_field(name="Transaction Net Value",
                            value=f'{request_data["txTotal"]} {request_data["token"]}',
                            inline=False)
@@ -162,12 +157,6 @@ async def send_xdr_info(ctx, request_data: dict, envelope: str, command_type: st
                            inline=False)
 
     elif command_type == "activate":
-        xdr_info.add_field(name="From Address",
-                           value=f'```{request_data["fromAddr"]}```',
-                           inline=False)
-        xdr_info.add_field(name="Address to be activated",
-                           value=f'```{request_data["toAddr"]}```',
-                           inline=False)
         xdr_info.add_field(name="Total Amount to be sent",
                            value=f'`{request_data["amount"]} XLM`',
                            inline=False)
@@ -269,4 +258,3 @@ async def server_error_response(destination, error, title):
     horizon_err.add_field(name=f'Error Details',
                           value=f'{error}')
     await destination.send(embed=horizon_err)
-

@@ -548,7 +548,7 @@ class LevelThreeAccountCommands(commands.Cog):
                                             "token": "XLM",
                                             "networkFee": f'0.0000100',
                                             "recipient": f"{ctx.author}",
-                                            "toAddress": recipient_data["address"],
+                                            "toAddr": recipient_data["address"],
                                             "memo": recipient_data["memo"],
                                             "walletLevel": f"{wallet_level}"
                                             }
@@ -611,7 +611,7 @@ class LevelThreeAccountCommands(commands.Cog):
                                             "token": "XLM",
                                             "networkFee": f'0.0000100',
                                             "recipient": f"External Wallet",
-                                            "toAddress": public_address,
+                                            "toAddr": public_address,
                                             "memo": "From Discord",
                                             "walletLevel": f"External Wallet"
                                             }
