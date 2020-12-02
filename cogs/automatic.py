@@ -102,7 +102,6 @@ class AutoFunctions(commands.Cog):
                 await ctx.message.delete()
             except Exception as e:
                 print(f'Bot could not delete command from channel: {e}')
-                pass
 
         if ctx.author.id != 360367188432912385:
             get_count = helpers.read_json_file(file_name=CONST_COUNTERS)["actions"]
