@@ -58,26 +58,6 @@ class StellarWallet:
         else:
             return result_code
 
-    @staticmethod
-    def __decode_processed_withdrawal_envelope(envelope_xdr):
-        """
-        Decode envelope and get details
-        Credits to overcat :
-        https://stellar.stackexchange.com/questions/3022/how-can-i-get-the-value-of-the-stellar-transaction/3025#3025
-        :param envelope_xdr: Xdr envelope from stellar network
-        :return: Decoded transaction details
-        """
-        te = TransactionEnvelope.from_xdr(envelope_xdr, Network.TESTNET_NETWORK_PASSPHRASE)
-        operations = te.transaction.operations
-
-        for op in operations:
-            if isinstance(op, Payment):
-                asset = op.asset.to_dict()
-                if asset.get('type') == 'native':
-                    asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
-                asset["amount"] = op.to_xdr_amount(op.amount)
-                return asset
-
     def get_stellar_hot_wallet_details(self):
         """
         Return the stellar hot wallet balance
@@ -178,7 +158,7 @@ class StellarWallet:
         tx.sign(self.root_keypair)
         try:
             resp = self.server.submit_transaction(tx)
-            details = self.__decode_processed_withdrawal_envelope(envelope_xdr=resp['envelope_xdr'])
+            details = self.decode_transaction_envelope(envelope_xdr=resp['envelope_xdr'])
             end_details = {
                 "asset": details['code'],
                 "explorer": resp['_links']['transaction']['href'],
