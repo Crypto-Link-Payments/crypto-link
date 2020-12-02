@@ -11,9 +11,9 @@ from discord.ext import commands
 from cogs.utils.customCogChecks import user_has_wallet, user_has_second_level, is_dm, is_public, user_has_no_second
 from cogs.utils.systemMessaages import CustomMessages
 from utils.securityManager import SecurityManager
-
+from utils.customMessages import user_account_info
 from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message, dev_fee_option_notification, \
-    ask_for_dev_fee_amount, send_user_account_info, sign_message_information, send_transaction_report, \
+    ask_for_dev_fee_amount, sign_message_information, send_transaction_report, \
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
     server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
 
@@ -303,7 +303,7 @@ class LevelTwoAccountCommands(commands.Cog):
             data = self.server.accounts().account_id(account_id=user_public).call()
             if data and 'status' not in data:
                 # Send user account info
-                await send_user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
+                await user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
 
             else:
                 sys_msg_title = 'Stellar Wallet Query Server error'

@@ -12,6 +12,8 @@ from discord import Colour, Member, Embed
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level
 from cogs.utils.securityChecks import check_stellar_address
+from utils.customMessages import user_account_info
+
 from utils.tools import Helpers
 from stellar_sdk import TransactionBuilder, Network, Account, TransactionEnvelope, Asset, Payment, \
     parse_transaction_envelope_from_xdr, Keypair
@@ -19,7 +21,7 @@ from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError, 
     BadRequestError, BadResponseError, ConnectionError
 from thirdLevel.utils.thirdLevelCustMsg import third_level_acc_details, new_acc_details, \
     third_level_account_reg_info, third_level_own_reg_info, send_xdr_info, xdr_data_to_embed, user_approval_request, \
-    transaction_result, server_error_response, send_user_account_info
+    transaction_result, server_error_response
 
 helper = Helpers()
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
@@ -484,7 +486,7 @@ class LevelThreeAccountCommands(commands.Cog):
             data = self.server.accounts().account_id(account_id=user_public).call()
             if data and 'status' not in data:
                 # Send user account info
-                await send_user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
+                await user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
 
             else:
                 sys_msg_title = 'Stellar Wallet Query Server error'
