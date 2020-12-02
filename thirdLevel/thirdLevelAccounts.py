@@ -60,6 +60,7 @@ class LevelThreeAccountCommands(commands.Cog):
         self.acc_mng_rd_lvl = self.backoffice.third_level_manager
         self.supported = list(integrated_coins.keys())
         self.available_levels = [1, 2, 3]
+        self.help_functions = self.backoffice.helper
 
     @staticmethod
     async def show_typing(ctx):
@@ -124,26 +125,6 @@ class LevelThreeAccountCommands(commands.Cog):
         except NotFoundError:
             return False
         except Ed25519PublicKeyInvalidError:
-            return False
-
-    def public_addr_struct_check(self, public_address: str):
-        """
-        Check the public key address
-        """
-        try:
-            Account(account_id=public_address, sequence=0)
-            return True
-        except Ed25519PublicKeyInvalidError:
-            return False
-
-    def check_private_key(self, private_key: str):
-        """
-        Check if private key constructed matches criteria
-        """
-        try:
-            Keypair.from_secret(private_key)
-            return True
-        except Ed25519SecretSeedInvalidError:
             return False
 
     def process_operations(self, operations: list):
@@ -747,8 +728,9 @@ class LevelThreeAccountCommands(commands.Cog):
                 # Gets private key from user response
                 private_key_response = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=30)
                 private_key = private_key_response.content.upper()
-                if self.check_private_key(private_key=private_key) and not re.search("[~!#$%^&*()_+{}:;\']",
-                                                                                     private_key):
+                if self.help_functions.check_private_key(private_key=private_key) and not re.search(
+                        "[~!#$%^&*()_+{}:;\']",
+                        private_key):
                     await self.show_typing(ctx)
 
                     result = self.stream_transaction_from_envelope(private_key=private_key, xdr_string=xdr_envelope)

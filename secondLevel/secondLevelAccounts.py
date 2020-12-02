@@ -17,8 +17,6 @@ from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
     server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
 
-from secondLevel.utils.tools import check_memo, check_public_key, check_private_key
-
 security_manager = SecurityManager()
 custom_messages = CustomMessages()
 
@@ -49,6 +47,7 @@ class LevelTwoAccountCommands(commands.Cog):
         self.server = self.backoffice.stellar_wallet.server
         self.available_layers = [1, 2]
         self.network_type = Network.TESTNET_NETWORK_PASSPHRASE
+        self.help_functions = self.backoffice.helper
 
     async def transaction_report_dispatcher(self, ctx, result: dict, data: dict = None):
         """
@@ -450,7 +449,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                 'utf-8')
                             private_full = first_half_of_key.content + second_half_of_key
 
-                            if check_private_key(private_key=private_full):
+                            if self.help_functions.check_private_key(private_key=private_full):
                                 await ctx.author.send(content='Transactions is being streamed to network. '
                                                               'Please wait few moments till its '
                                                               'completed and response received from Crypto Link')
@@ -530,7 +529,7 @@ class LevelTwoAccountCommands(commands.Cog):
             memo = 'None'
 
         if atomic_amount >= 100:
-            if check_memo(memo) and check_public_key(address=to_address):
+            if self.help_functions.check_memo(memo) and self.help_functions.check_public_key(address=to_address):
 
                 # DEV FEE INTEGRATION PROCESS
                 # Send notification to user about dev fee
@@ -608,7 +607,7 @@ class LevelTwoAccountCommands(commands.Cog):
                     second_half_of_key = security_manager.decrypt(token=private_encrypted["privateKey"]).decode('utf-8')
                     private_full = first_half_of_key.content + second_half_of_key
 
-                    if check_private_key(private_key=private_full):
+                    if self.help_functions.check_private_key(private_key=private_full):
                         await ctx.author.send(content='Transactions is being sent to network. '
                                                       'Please wait few moments till its '
                                                       'completed')
