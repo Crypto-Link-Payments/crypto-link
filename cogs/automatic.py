@@ -25,6 +25,7 @@ d = helpers.read_json_file(file_name='botSetup.json')
 auto_messaging = helpers.read_json_file(file_name='autoMessagingChannels.json')
 KAVIC_ID = 455916314238648340
 ANIMUS_ID = 360367188432912385
+CONST_COUNTERS = "counters.json"
 
 
 class AutoFunctions(commands.Cog):
@@ -44,10 +45,6 @@ class AutoFunctions(commands.Cog):
                       f'type `{d["command"]}help` to check available commands.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
-        elif isinstance(exception, commands.BadArgument):
-            # Skipped as its handled on lower level
-            pass
-
         elif isinstance(exception, commands.CommandOnCooldown):
             message = f'`{exception}`. In order to prevent abuse and unwanted delays, we have implemented cool down ' \
                       f' into various commands. Thank you for your understanding.'
@@ -66,13 +63,13 @@ class AutoFunctions(commands.Cog):
                                                  sys_msg_title=title)
         else:
             if isinstance(exception, commands.CheckFailure):
-                pass
+                print('Check failure occurred')
             else:
                 bug_channel = self.bot.get_channel(id=int(self.channel_id))
 
-                get_bug_count = helpers.read_json_file(file_name="counters.json")["bug"]
+                get_bug_count = helpers.read_json_file(file_name=CONST_COUNTERS)["bug"]
                 get_bug_count += 1
-                helpers.update_json_file(file_name="counters.json", key="bug", value=int(get_bug_count))
+                helpers.update_json_file(file_name=CONST_COUNTERS, key="bug", value=int(get_bug_count))
 
                 animus = await self.bot.fetch_user(user_id=int(self.animus_id))
                 bug_info = Embed(title=f':new: :bug: :warning: ',
@@ -108,9 +105,9 @@ class AutoFunctions(commands.Cog):
                 pass
 
         if ctx.author.id != 360367188432912385:
-            get_count = helpers.read_json_file(file_name="counters.json")["actions"]
+            get_count = helpers.read_json_file(file_name=CONST_COUNTERS)["actions"]
             get_count += 1
-            helpers.update_json_file(file_name="counters.json", key="actions", value=int(get_count))
+            helpers.update_json_file(file_name=CONST_COUNTERS, key="actions", value=int(get_count))
 
             if is_dm(ctx):
                 c = 'P'
