@@ -101,7 +101,8 @@ async def dev_fee_option_notification(destination):
                          color=Colour.lighter_gray())
     dev_fee_info.add_field(name=f':money_with_wings: Dev fee :money_with_wings: ',
                            value=f'If you would like to support us in what we are doing please answer with'
-                                 f'***__Yes__*** and system will ask you for custom amount.'
+                                 f'***__Yes__*** and system will ask you for custom amount you are willing to donate'
+                                 f' for Crypto Link development..'
                                  f'If you choose **__No__** than dev fee will be skipped.',
                            inline=False)
     await destination.send(embed=dev_fee_info)
