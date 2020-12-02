@@ -254,7 +254,6 @@ class LevelThreeAccountCommands(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @three.group(aliases=['reg', 'r', 'get', 'n'])
-    @commands.check(user_has_no_third_level)
     async def register(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':new: 3 level wallet registration commands :new: '
@@ -873,6 +872,7 @@ class LevelThreeAccountCommands(commands.Cog):
                       f' Please use first `{self.command_string}3 register` before you can create transactions/payments '
             await custom_messages.system_message(ctx=ctx, color_code=Colour.red, message=message, destination=0,
                                                  sys_msg_title=title)
+
 
 def setup(bot):
     bot.add_cog(LevelThreeAccountCommands(bot))
