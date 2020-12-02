@@ -5,7 +5,6 @@ COGS which handle explanation  on commands available to communicate with the Pay
 from discord.ext import commands
 from discord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.securityChecks import check_stellar_address
 from horizonCommands.utils.customMessages import horizon_error_msg, send_payments_details
 from stellar_sdk.exceptions import BadRequestError
 
@@ -18,6 +17,7 @@ class HorizonPayments(commands.Cog):
         self.bot = bot
         self.command_string = bot.get_command_str()
         self.hor_payments = self.bot.backoffice.stellar_wallet.server.payments()
+        self.help_functions = bot.backoffice.helper
 
     @staticmethod
     async def process_server_response(ctx, data, query_key: str, user_query: str):
@@ -124,7 +124,7 @@ class HorizonPayments(commands.Cog):
     @payments.command(aliases=['addr'])
     async def address(self, ctx, address: str):
         try:
-            if check_stellar_address(address=address):
+            if self.help_functions.check_public_key(address=address):
                 data = self.hor_payments.for_account(account_id=address).order(
                     desc=True).limit(limit=200).call()
                 if data['_embedded']['records']:

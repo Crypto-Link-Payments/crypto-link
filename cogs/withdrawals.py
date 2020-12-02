@@ -5,7 +5,6 @@ from discord import TextChannel
 
 from cogs.utils.customCogChecks import user_has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd
-from cogs.utils.securityChecks import check_stellar_address
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
@@ -37,6 +36,8 @@ class WithdrawalCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
+        self.help_functions = bot.backoffice.helper
+
 
     @commands.group()
     @commands.check(user_has_wallet)
@@ -66,7 +67,7 @@ class WithdrawalCommands(commands.Cog):
         strip_address = address.strip()
 
         # check strings, stellar address and token integration status
-        if check_stellar_address(address=strip_address) and not re.search(CONST_REG_SEARCH, strip_address):
+        if self.help_functions.check_public_key(address=strip_address) and not re.search(CONST_REG_SEARCH, strip_address):
             if strip_address != self.bot.backoffice.stellar_wallet.public_key:
                 if not re.search(CONST_REG_SEARCH, token) and token in self.list_of_coins:
 
@@ -304,7 +305,7 @@ class WithdrawalCommands(commands.Cog):
         """
 
         strip_address = address.strip()
-        if check_stellar_address(address=address) and not re.search(CONST_REG_SEARCH, strip_address):
+        if self.help_functions.check_public_key(address=address) and not re.search(CONST_REG_SEARCH, strip_address):
             if strip_address != self.bot.backoffice.stellar_wallet.public_key:
                 # Get the fee for stellar withdrawal
                 stellar_fee = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')['fee_list']['xlm']

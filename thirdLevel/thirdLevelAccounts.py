@@ -11,14 +11,12 @@ from discord.ext import commands
 from discord import Colour, Member, Embed
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level
-from cogs.utils.securityChecks import check_stellar_address
 from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
 
 from utils.tools import Helpers
-from stellar_sdk import TransactionBuilder, Network, Account, TransactionEnvelope, Asset, Payment, \
-    parse_transaction_envelope_from_xdr, Keypair
-from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError, Ed25519SecretSeedInvalidError, \
-    BadRequestError, BadResponseError, ConnectionError
+from stellar_sdk import TransactionBuilder, Network, TransactionEnvelope, Asset, Payment, \
+    parse_transaction_envelope_from_xdr
+from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError,BadRequestError, BadResponseError, ConnectionError
 from thirdLevel.utils.thirdLevelCustMsg import third_level_acc_details, new_acc_details, \
     third_level_account_reg_info, third_level_own_reg_info, send_xdr_info, xdr_data_to_embed, user_approval_request, \
     transaction_result, server_error_response
@@ -127,7 +125,8 @@ class LevelThreeAccountCommands(commands.Cog):
         except Ed25519PublicKeyInvalidError:
             return False
 
-    def process_operations(self, operations: list):
+    @staticmethod
+    def process_operations(operations: list):
         """
         Process operations from XDR envelope to make it human readable dict
         """
@@ -207,10 +206,10 @@ class LevelThreeAccountCommands(commands.Cog):
             title = ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r:  ' \
                     '__Welcome to level 3 wallet system__ ' \
                     ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r: '
-            description = "***Level 3*** wallet provides user full control of the private keys. Unlike in __Level 2__," \
-                          " Crypto Link stores upon registration only Discord Username details and " \
-                          "public wallet key address. Both are required to make wallet levels interoperable and allows " \
-                          " for execution of the transactions with ease."
+            description = "***Level 3*** wallet provides user full control of the private keys. Unlike in " \
+                          "__Level 2__, Crypto Link stores upon registration only Discord Username details and " \
+                          "public wallet key address. Both are required to make wallet levels interoperable and " \
+                          "allows for execution of the transactions with ease."
             list_of_commands = [
                 {"name": f':new: Register/Update 3 level wallet :new:',
                  "value": f'```{self.command_string}3 register```\n'
@@ -317,7 +316,7 @@ class LevelThreeAccountCommands(commands.Cog):
     @commands.check(user_has_no_third_level)
     async def own(self, ctx, public_address: str):
         # Check if correct address provided
-        if check_stellar_address(address=public_address):
+        if self.help_functions.check_public_key(address=public_address):
 
             if public_address not in [self.bot.backoffice.stellar_wallet.public_key,
                                       self.bot.backoffice.stellar_wallet.dev_key]:
@@ -363,7 +362,7 @@ class LevelThreeAccountCommands(commands.Cog):
     @register.command(aliases=["u"])
     @commands.check(user_has_third_level)
     async def update(self, ctx, public_address: str):
-        if check_stellar_address(address=public_address):
+        if self.help_functions.check_public_key(address=public_address):
             if public_address not in [self.bot.backoffice.stellar_wallet.public_key,
                                       self.bot.backoffice.stellar_wallet.dev_key]:
                 await ctx.author.send(f'Are you sure you would like update your 3rd level wallet address to '
@@ -626,7 +625,7 @@ class LevelThreeAccountCommands(commands.Cog):
 
         if atomic_amount >= 100:
             # Get sender hot wallet
-            if check_stellar_address(address=public_address):
+            if self.help_functions.check_public_key(address=public_address):
                 if self.check_if_acc_is_live(address=public_address):
                     user_address = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
                     if public_address != user_address:

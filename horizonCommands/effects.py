@@ -6,7 +6,6 @@ from discord.ext import commands
 from discord import Colour
 
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.securityChecks import check_stellar_address
 from stellar_sdk.exceptions import BadRequestError
 from horizonCommands.utils.customMessages import send_effects, send_effect_details, horizon_error_msg
 
@@ -24,6 +23,7 @@ class HorizonEffects(commands.Cog):
         self.bot = bot
         self.command_string = bot.get_command_str()
         self.hor_effects = self.bot.backoffice.stellar_wallet.server.effects()
+        self.help_functions = bot.backoffice.helper
 
     @commands.group(aliases=["ef", 'effect'])
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -56,7 +56,7 @@ class HorizonEffects(commands.Cog):
 
     @effects.command(aliases=["acc", "addr", "address"])
     async def account(self, ctx, address: str):
-        if check_stellar_address(address=address):
+        if self.help_functions.check_public_key(address=address):
             try:
                 data = self.hor_effects.for_account(account_id=address).call()
                 await send_effects(destination=ctx.message.author, data=data, usr_query=f'{address}',
