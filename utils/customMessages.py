@@ -91,6 +91,4 @@ async def user_account_info(ctx, data, bot_avatar_url):
         else:
             gems_nfo.add_field(name=f':gem: {cn} :gem:',
                                value=f"{coin['balance']}")
-            gems_nfo.add_field(name=f':gem: {cn} :gem:',
-                               value=f"{coin['balance']}")
             await ctx.author.send(embed=gems_nfo)
