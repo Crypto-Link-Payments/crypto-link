@@ -61,10 +61,8 @@ def get_decimal_point(symbol):
     """
     Get decimal points based on symbol
     """
-    if symbol == 'xlm':
-        return 7
-    elif symbol == "clt":
-        return 7
+    print(symbol)
+    return 7
 
 
 def get_normal(value, decimal_point: int):
