@@ -5,6 +5,7 @@ from colorama import Fore, init
 
 from utils.tools import Helpers
 
+CONST_SEPARATOR = '+++++++++++++++++++++++++++++++++++++++'
 # init colorama :
 init(autoreset=True)
 
@@ -54,7 +55,7 @@ class DiscordBot(commands.Bot):
             except Exception as error:
                 notification_str += f'| {extension} --> {error}\n'
                 raise
-        notification_str += '+++++++++++++++++++++++++++++++++++++++'
+        notification_str += CONST_SEPARATOR
         print(notification_str)
 
         notification_str = Fore.BLUE + '+++++++++++++++++++++++++++++++++++++++\n' \
@@ -67,7 +68,7 @@ class DiscordBot(commands.Bot):
             except Exception as error:
                 notification_str += f'| {cust_cmd} --> {error}\n'
                 raise
-        notification_str += '+++++++++++++++++++++++++++++++++++++++'
+        notification_str += CONST_SEPARATOR
         print(notification_str)
 
         notification_str = Fore.WHITE + '+++++++++++++++++++++++++++++++++++++++\n' \
@@ -80,7 +81,7 @@ class DiscordBot(commands.Bot):
             except Exception as error:
                 notification_str += f'| {cmd} --> {error}\n'
                 raise
-        notification_str += '+++++++++++++++++++++++++++++++++++++++'
+        notification_str += CONST_SEPARATOR
         print(notification_str)
 
         notification_str = Fore.CYAN + '+++++++++++++++++++++++++++++++++++++++\n' \
@@ -92,7 +93,7 @@ class DiscordBot(commands.Bot):
             except Exception as error:
                 notification_str += f'| {hor} --> {error}\n'
                 raise
-        notification_str += '+++++++++++++++++++++++++++++++++++++++'
+        notification_str += CONST_SEPARATOR
         print(notification_str)
 
     async def on_ready(self):
