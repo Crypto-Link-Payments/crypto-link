@@ -12,7 +12,7 @@ from discord import Colour, Member, Embed
 from cogs.utils.systemMessaages import CustomMessages
 from cogs.utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level
 from cogs.utils.securityChecks import check_stellar_address
-from utils.customMessages import user_account_info
+from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
 
 from utils.tools import Helpers
 from stellar_sdk import TransactionBuilder, Network, Account, TransactionEnvelope, Asset, Payment, \
@@ -184,7 +184,7 @@ class LevelThreeAccountCommands(commands.Cog):
             base_fee=self.server.fetch_base_fee()
 
         ).append_payment_op(
-            destination=tx_data["toAddress"],
+            destination=tx_data["toAddr"],
             asset_code="XLM",
             amount=tx_data["netValue"]).add_text_memo(memo_text=tx_data["memo"])
 
@@ -423,7 +423,6 @@ class LevelThreeAccountCommands(commands.Cog):
         """
         Entry point for account sub-commands
         """
-        print('access account')
         if ctx.invoked_subcommand is None:
             title = ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r:  ' \
                     '__Welcome to level 3 wallet system__ ' \
@@ -522,6 +521,9 @@ class LevelThreeAccountCommands(commands.Cog):
         """
         Create XDR payment envelope to be used for signing to some other users than discord
         """
+        fee_atomic = 0
+        dev_fee_activated = False
+
         atomic_amount = int(amount * (10 ** 7))
         recipient_check = ctx.message.author.id != recipient.id  # Boolean
         wallet_level_check = ctx.message.author.id == recipient.id and wallet_level != 3
@@ -541,19 +543,61 @@ class LevelThreeAccountCommands(commands.Cog):
                             # get sender details
                             sender = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
 
+                            await dev_fee_option_notification(destination=ctx.message.author)
+
+                            verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                       timeout=30)
+
+                            if verification_msg.content.upper() in ["YES", "Y"]:
+                                # Ask user with embed
+                                await ask_for_dev_fee_amount(destination=ctx.message.author)
+
+                                try:
+                                    dev_fee_answ = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                           timeout=30)
+                                    fee_selected = dev_fee_answ.content
+                                    fee_number = float(fee_selected)
+                                    fee_atomic = int(fee_number * (10 ** 7))
+                                    if fee_atomic > 0:
+                                        # Convert to atomic
+                                        dev_fee_activated = True
+                                    else:
+                                        message = f'Dev fee is not allowed to be less than 0 or 0. It will be skipped.'
+                                        await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                             destination=0,
+                                                                             sys_msg_title=':warning: Dev Fee Error :warning:')
+
+                                except ValueError:
+                                    message = f'{dev_fee_answ} could not be converted to number and will therefore be skipped'
+                                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                         destination=0,
+                                                                         sys_msg_title=':warning: Dev Fee Error :warning:')
+                            else:
+                                message = f'Dev Fee will not be appended to transaction. '
+                                await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                     destination=0,
+                                                                     sys_msg_title=':robot:  Dev Fee Status :robot: ')
+
+                            network_fee = 100  # Stroops
+                            total_for_transaction = atomic_amount + network_fee + fee_atomic
+                            requested_amount = total_for_transaction / (10 ** 7)
+                            dev_fee_normal = fee_atomic / (10 ** 7)
+                            fee_normal = network_fee / (10 ** 7)
+                            net_amount = atomic_amount / (10 ** 7)
+
                             request_data = {"fromAddr": sender,
-                                            "txTotal": f'{atomic_amount / (10 ** 7):.7f}',
-                                            "netValue": f'{atomic_amount / (10 ** 7):.7f}',
-                                            "devFee": CONST_DEV_FEE,
+                                            "txTotal": f'{requested_amount:.7f}',
+                                            "netValue": f'{net_amount:.7f}',
+                                            "devFee": f'{dev_fee_normal:.7f}',
                                             "token": "XLM",
-                                            "networkFee": f'0.0000100',
+                                            "networkFee": f'{fee_normal:.7f}',
                                             "recipient": f"{ctx.author}",
                                             "toAddr": recipient_data["address"],
                                             "memo": recipient_data["memo"],
                                             "walletLevel": f"{wallet_level}"
                                             }
                             xdr_envelope = self.produce_envelope(tx_data=request_data,
-                                                                 dev_fee_status=CONST_DEV_ACTIVATED)
+                                                                 dev_fee_status=dev_fee_activated)
 
                             message = f":new::envelope: Has been created for Discord Transaction to wallet level {wallet_level} " \
                                       f" in value of ***{request_data['txTotal']} {request_data['token']}*** :rocket: "
@@ -595,7 +639,9 @@ class LevelThreeAccountCommands(commands.Cog):
         """
         Create XDR payment envelope to be used for signing to some other users than discord
         """
+        fee_atomic = 0
         atomic_amount = int(amount * (10 ** 7))
+        dev_fee_activated = False
 
         if atomic_amount >= 100:
             # Get sender hot wallet
