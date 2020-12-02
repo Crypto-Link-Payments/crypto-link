@@ -11,8 +11,7 @@ async def user_account_info(ctx, data, bot_avatar_url):
         [f':map:`{signer["key"]}`\n:key:`{signer["type"]}` | :scales:`{signer["weight"]}`\n================' for
          signer in data["signers"]])
     dt_format = datetime.strptime(data["last_modified_time"], '%Y-%m-%dT%H:%M:%SZ')
-    account_info = Embed(title=f':office_worker: 2 Level Wallet Information :office_worker:',
-                         description="Bellow is up to date information on your 2 Level Wallet state",
+    account_info = Embed(title=f':office_worker: Current On-Chain Wallet State :office_worker:',
                          colour=Colour.dark_blue(),
                          timestamp=datetime.utcnow())
     account_info.set_author(name=f'{ctx.message.author} (ID: {ctx.message.author.id})',
