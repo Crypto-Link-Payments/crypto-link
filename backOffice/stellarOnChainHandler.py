@@ -34,13 +34,6 @@ class StellarWallet:
         self.root_account = Account(account_id=self.root_keypair.public_key, sequence=1)
         self.server = Server(horizon_url=horizon_url)  # Testnet
 
-    def __base_fee(self):
-        """
-        Get the base fee from the network
-        """
-        fee = self.server.fetch_base_fee()
-        return fee
-
     @staticmethod
     def create_stellar_account():
         """
