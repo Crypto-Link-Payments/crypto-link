@@ -13,7 +13,7 @@ from datetime import datetime
 
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
-from cogs.utils.customCogChecks import is_dm
+from utils.customCogChecks import is_dm
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)

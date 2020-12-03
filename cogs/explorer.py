@@ -1,6 +1,6 @@
 from discord.ext import commands
+from utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.customCogChecks import user_has_wallet
 
 custom_messages = CustomMessages()
 
@@ -15,7 +15,7 @@ class AssetCommands(commands.Cog):
         self.command_string = bot.get_command_str()
 
     @commands.group()
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     async def asset(self):
         """
         Command Entry Point for Stellar Expert Queries

@@ -3,7 +3,7 @@ import re
 from discord.ext import commands
 from discord import TextChannel
 
-from cogs.utils.customCogChecks import user_has_wallet, check
+from utils.customCogChecks import has_wallet, check
 from cogs.utils.monetaryConversions import convert_to_usd
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -26,7 +26,7 @@ class WithdrawalCommands(commands.Cog):
         self.help_functions = bot.backoffice.helper
 
     @commands.group()
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     async def withdraw(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available withdrawal commands__ :joystick: '
@@ -45,7 +45,7 @@ class WithdrawalCommands(commands.Cog):
                                                 destination=1)
 
     @withdraw.command(aliases=["t"])
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     @commands.cooldown(1, 45, commands.BucketType.user)
     async def token(self, ctx, ticker: str, withdrawal_amount: float, address: str):
         # TOKEN check for bot hot wallet
@@ -280,7 +280,7 @@ class WithdrawalCommands(commands.Cog):
                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
     @withdraw.command(aliases=["x"])
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     @commands.cooldown(1, 45, commands.BucketType.user)
     async def xlm(self, ctx, amount: float, address: str):
         """

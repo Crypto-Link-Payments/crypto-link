@@ -8,7 +8,7 @@ from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadRes
     NotFoundError
 from discord import Colour, Member
 from discord.ext import commands
-from cogs.utils.customCogChecks import user_has_wallet, user_has_second_level, is_dm, is_public, user_has_no_second
+from utils.customCogChecks import has_wallet, user_has_second_level , is_dm, is_public, user_has_no_second
 from cogs.utils.systemMessaages import CustomMessages
 from utils.securityManager import SecurityManager
 from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
@@ -44,7 +44,7 @@ class LevelTwoAccountCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.server = self.backoffice.stellar_wallet.server
-        self.available_layers = [1, 2,3]
+        self.available_layers = [1, 2, 3]
         self.network_type = Network.TESTNET_NETWORK_PASSPHRASE
         self.help_functions = self.backoffice.helper
 
@@ -174,7 +174,7 @@ class LevelTwoAccountCommands(commands.Cog):
             return False, e
 
     @commands.group(aliases=["nd", '2', 'custodial'])
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     async def two(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':wave:  __Welcome to Level 2 wallet system__ :wave:  '
@@ -203,6 +203,7 @@ class LevelTwoAccountCommands(commands.Cog):
     @two.command(aliases=["reg", "new", 'get'])
     @commands.check(is_dm)
     @commands.check(user_has_no_second)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def register(self, ctx):
         """
         Interactive registration procedure for second wallet level
@@ -750,12 +751,14 @@ class LevelTwoAccountCommands(commands.Cog):
                       f'`{error}`'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
-        elif TimeoutError:
+        elif isinstance(error,TimeoutError):
             title = f':timer: __Transaction Request Expired__ :timer: '
             message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
                       f'time-limits'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
+        else:
+            print(error)
 
 
 def setup(bot):

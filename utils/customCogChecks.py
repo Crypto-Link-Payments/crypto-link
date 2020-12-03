@@ -110,6 +110,7 @@ def user_has_no_third_level(ctx):
     """
     return not ctx.bot.backoffice.third_level_manager.third_level_user_reg_status(user_id=ctx.author.id)
 
+
 def check(author):
     def inner_check(message):
         """
@@ -121,4 +122,3 @@ def check(author):
             return False
 
     return inner_check
-

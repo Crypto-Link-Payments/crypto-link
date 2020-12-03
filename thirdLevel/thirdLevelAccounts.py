@@ -10,13 +10,14 @@ import asyncio
 from discord.ext import commands
 from discord import Colour, Member, Embed
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level
+from utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level, check
 from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
 
 from utils.tools import Helpers
 from stellar_sdk import TransactionBuilder, Network, TransactionEnvelope, Asset, Payment, \
     parse_transaction_envelope_from_xdr
-from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError,BadRequestError, BadResponseError, ConnectionError
+from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError, BadRequestError, BadResponseError, \
+    ConnectionError
 from thirdLevel.utils.thirdLevelCustMsg import third_level_acc_details, new_acc_details, \
     third_level_account_reg_info, third_level_own_reg_info, send_xdr_info, xdr_data_to_embed, user_approval_request, \
     transaction_result, server_error_response
@@ -30,19 +31,6 @@ CONST_REG_ERROR_TITLE = "3. level wallet registration error"
 CONST_REG_ERROR = "Account could not be registered into Crypto Link system. Please try again later."
 CONST_DEV_ACTIVATED = True
 CONST_DEV_FEE = '0.0010000'
-
-
-def check(author):
-    def inner_check(message):
-        """
-        Check for answering the verification message on withdrawal. Author origin
-        """
-        if message.author.id == author.id:
-            return True
-        else:
-            return False
-
-    return inner_check
 
 
 class LevelThreeAccountCommands(commands.Cog):

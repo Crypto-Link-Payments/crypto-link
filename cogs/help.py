@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from discord import Colour
 from utils.tools import Helpers
-from cogs.utils.customCogChecks import is_owner, is_public
+from utils.customCogChecks import is_owner, is_public
 from cogs.utils.systemMessaages import CustomMessages
 
 custom_messages = CustomMessages()

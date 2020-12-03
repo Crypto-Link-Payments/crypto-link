@@ -9,7 +9,7 @@ from discord import Colour
 from discord.ext import commands
 from pycoingecko import CoinGeckoAPI
 
-from cogs.utils.customCogChecks import is_public, guild_has_merchant, user_has_wallet
+from utils.customCogChecks import is_public, guild_has_merchant, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 
 from cogs.utils.monetaryConversions import get_decimal_point
@@ -48,7 +48,7 @@ class ConsumerCommands(commands.Cog):
 
     @commands.group()
     @commands.check(guild_has_merchant)
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     @commands.check(is_public)
     async def membership(self, ctx):
         """
