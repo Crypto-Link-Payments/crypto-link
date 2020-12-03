@@ -79,8 +79,6 @@ class StellarManager:
         """
 
         result = self.xlm_wallets.find_one({"depositId": tx_memo})
-
-        # todo bug fix wrong wallets
         if result:
             return True
         else:
