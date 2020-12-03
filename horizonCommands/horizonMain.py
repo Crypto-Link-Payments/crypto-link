@@ -4,7 +4,6 @@ COGS which handle explanation on access to Horizon
 
 from discord.ext import commands
 from discord import Colour
-from cogs.utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 
 custom_messages = CustomMessages()
@@ -20,7 +19,6 @@ class HorizonAccessCommands(commands.Cog):
         self.command_string = bot.get_command_str()
 
     @commands.group()
-    @commands.check(has_wallet)
     async def horizon(self, ctx):
         """
         Entry point for horizon queries

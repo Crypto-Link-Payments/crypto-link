@@ -109,3 +109,16 @@ def user_has_no_third_level(ctx):
     Check if user has not registered for third level
     """
     return not ctx.bot.backoffice.third_level_manager.third_level_user_reg_status(user_id=ctx.author.id)
+
+
+def check(author):
+    def inner_check(message):
+        """
+        Check for answering the verification message on withdrawal. Author origin
+        """
+        if message.author.id == author.id:
+            return True
+        else:
+            return False
+
+    return inner_check

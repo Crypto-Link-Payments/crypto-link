@@ -3,8 +3,7 @@ from datetime import datetime
 
 from discord import Role, Embed, Color, utils
 from discord.ext import commands
-
-from cogs.utils.customCogChecks import is_owner, has_wallet, is_public, merchant_com_reg_stats
+from utils.customCogChecks import is_owner, has_wallet, is_public, merchant_com_reg_stats
 from cogs.utils.monetaryConversions import convert_to_currency, get_decimal_point
 from cogs.utils.monetaryConversions import get_normal
 from cogs.utils.systemMessaages import CustomMessages

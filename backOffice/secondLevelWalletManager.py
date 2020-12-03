@@ -12,13 +12,13 @@ class SecondLevelWalletManager:
         """Connection to Database and Crypto Link collections"""
         self.connection = connection
         self.bot_stuff = self.connection['CryptoLink']
-        self.hotWallets = self.bot_stuff.userHotWallets
+        self.hot_wallets = self.bot_stuff.userHotWallets
 
     def second_level_user_reg_status(self, user_id: int):
         """
         Check user registration status
         """
-        data = self.hotWallets.find_one({"userId": int(user_id)})
+        data = self.hot_wallets.find_one({"userId": int(user_id)})
         if data:
             return True
         else:
@@ -28,7 +28,7 @@ class SecondLevelWalletManager:
         """
         Creates the user hot wallet into the database. Decryption happens in COGS
         """
-        result = self.hotWallets.insert_one(data_to_store)
+        result = self.hot_wallets.insert_one(data_to_store)
 
         if result.inserted_id:
             return True
@@ -39,8 +39,8 @@ class SecondLevelWalletManager:
         """
         Get user hot wallet details for decription in cogs
         """
-        data = self.hotWallets.find_one({"userId": int(user_id)},
-                                        {"_id": 0})
+        data = self.hot_wallets.find_one({"userId": int(user_id)},
+                                         {"_id": 0})
         if data:
             return data
         else:
@@ -50,8 +50,8 @@ class SecondLevelWalletManager:
         """
         Get user hot wallet details for decription in cogs
         """
-        data = self.hotWallets.find_one({"userId": int(user_id)},
-                                        {"_id": 0,
+        data = self.hot_wallets.find_one({"userId": int(user_id)},
+                                         {"_id": 0,
                                          "publicAddress": 1})
         if data:
             return data["publicAddress"]
@@ -59,8 +59,8 @@ class SecondLevelWalletManager:
             return {}
 
     def get_private_key(self, user_id):
-        data = self.hotWallets.find_one({"userId": int(user_id)},
-                                        {"_id": 0,
+        data = self.hot_wallets.find_one({"userId": int(user_id)},
+                                         {"_id": 0,
                                          "privateKey": 1,
                                          "publicAddress": 1})
         return data

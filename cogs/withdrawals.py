@@ -3,9 +3,8 @@ import re
 from discord.ext import commands
 from discord import TextChannel
 
-from cogs.utils.customCogChecks import user_has_wallet
+from utils.customCogChecks import has_wallet, check
 from cogs.utils.monetaryConversions import convert_to_usd
-from cogs.utils.securityChecks import check_stellar_address
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
@@ -15,19 +14,7 @@ notify_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_WITHDRAWAL_ERROR = "__Withdrawal error___"
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
-
-
-def check(author):
-    def inner_check(message):
-        """
-        Check for answering the verification message on withdrawal. Author origin
-        """
-        if message.author.id == author.id:
-            return True
-        else:
-            return False
-
-    return inner_check
+CONST_REG_SEARCH = "[~!#$%^&*()_+{}:;\']"
 
 
 class WithdrawalCommands(commands.Cog):
@@ -36,9 +23,10 @@ class WithdrawalCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
+        self.help_functions = bot.backoffice.helper
 
     @commands.group()
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     async def withdraw(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available withdrawal commands__ :joystick: '
@@ -57,7 +45,7 @@ class WithdrawalCommands(commands.Cog):
                                                 destination=1)
 
     @withdraw.command(aliases=["t"])
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     @commands.cooldown(1, 45, commands.BucketType.user)
     async def token(self, ctx, ticker: str, withdrawal_amount: float, address: str):
         # TOKEN check for bot hot wallet
@@ -65,9 +53,10 @@ class WithdrawalCommands(commands.Cog):
         strip_address = address.strip()
 
         # check strings, stellar address and token integration status
-        if check_stellar_address(address=strip_address) and not re.search("[~!#$%^&*()_+{}:;\']", strip_address):
+        if self.help_functions.check_public_key(address=strip_address) and not re.search(CONST_REG_SEARCH,
+                                                                                         strip_address):
             if strip_address != self.bot.backoffice.stellar_wallet.public_key:
-                if not re.search("[~!#$%^&*()_+{}:;\']", token) and token in self.list_of_coins:
+                if not re.search(CONST_REG_SEARCH, token) and token in self.list_of_coins:
 
                     # get and convert coin withdrawal fee from major to atomic
                     all_coin_fees = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')[
@@ -291,7 +280,7 @@ class WithdrawalCommands(commands.Cog):
                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
     @withdraw.command(aliases=["x"])
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     @commands.cooldown(1, 45, commands.BucketType.user)
     async def xlm(self, ctx, amount: float, address: str):
         """
@@ -303,7 +292,7 @@ class WithdrawalCommands(commands.Cog):
         """
 
         strip_address = address.strip()
-        if check_stellar_address(address=address) and not re.search("[~!#$%^&*()_+{}:;\']", strip_address):
+        if self.help_functions.check_public_key(address=address) and not re.search(CONST_REG_SEARCH, strip_address):
             if strip_address != self.bot.backoffice.stellar_wallet.public_key:
                 # Get the fee for stellar withdrawal
                 stellar_fee = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')['fee_list']['xlm']
@@ -479,8 +468,6 @@ class WithdrawalCommands(commands.Cog):
         :param error:
         :return:
         """
-        print(f'ERR WITHDRAW XLM TRIGGERED  : {error}')
-
         if isinstance(error, commands.CheckFailure):
             message = f'You are either not registered in the system or you have tried to use command' \
                       f' over DM with the system itself. Head to one of the channels on community' \

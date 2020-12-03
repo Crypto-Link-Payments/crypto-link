@@ -1,12 +1,10 @@
 from datetime import datetime
-import re
 from discord import Embed, Colour
 from discord.ext import commands
-from cogs.utils.customCogChecks import is_public, user_has_wallet
+from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal, scientific_conversion
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.securityChecks import check_stellar_private
 from utils.tools import Helpers
 
 helper = Helpers()
@@ -18,19 +16,6 @@ CONST_ACC_REG_STATUS = '__Account registration status__'
 CONST_TRUST_ERROR = ':warning: __Trustline error__ :warning:'
 
 
-def check(author):
-    def inner_check(message):
-        """
-        Check for answering the verification message on withdrawal. Author origin
-        """
-        if message.author.id == author.id:
-            return True
-        else:
-            return False
-
-    return inner_check
-
-
 class UserAccountCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -39,7 +24,7 @@ class UserAccountCommands(commands.Cog):
         self.list_of_coins = list(integrated_coins.keys())
 
     @commands.command()
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     async def me(self, ctx):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
@@ -109,8 +94,8 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
-    @commands.group(alliases=["one", "st", "first", "1", "account",])
-    @commands.check(user_has_wallet)
+    @commands.group(alliases=["one", "st", "first", "1", "account", ])
+    @commands.check(has_wallet)
     @commands.cooldown(1, 5, commands.BucketType.guild)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:

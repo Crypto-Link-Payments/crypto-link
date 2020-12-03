@@ -8,37 +8,29 @@ from Merchant wallet to their won upon withdrawal.
 import re
 import asyncio
 from discord.ext import commands
-from discord import Colour, Member
+from discord import Colour, Member, Embed
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level
-from cogs.utils.securityChecks import check_stellar_address
+from utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level, check
+from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
+
 from utils.tools import Helpers
-from stellar_sdk import TransactionBuilder, Network, Transaction, Account, TransactionEnvelope, Asset, Payment, \
-    parse_transaction_envelope_from_xdr, Keypair
-from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError, Ed25519SecretSeedInvalidError, \
-    BadRequestError, BadResponseError, ConnectionError
+from stellar_sdk import TransactionBuilder, Network, TransactionEnvelope, Asset, Payment, \
+    parse_transaction_envelope_from_xdr
+from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError, BadRequestError, BadResponseError, \
+    ConnectionError
 from thirdLevel.utils.thirdLevelCustMsg import third_level_acc_details, new_acc_details, \
     third_level_account_reg_info, third_level_own_reg_info, send_xdr_info, xdr_data_to_embed, user_approval_request, \
-    transaction_result, server_error_response, send_user_account_info
+    transaction_result, server_error_response
 
 helper = Helpers()
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 custom_messages = CustomMessages()
 helper = Helpers()
 CONST_XDR_ERROR = ":exclamation: XDR Creation Error :exclamation: "
-
-
-def check(author):
-    def inner_check(message):
-        """
-        Check for answering the verification message on withdrawal. Author origin
-        """
-        if message.author.id == author.id:
-            return True
-        else:
-            return False
-
-    return inner_check
+CONST_REG_ERROR_TITLE = "3. level wallet registration error"
+CONST_REG_ERROR = "Account could not be registered into Crypto Link system. Please try again later."
+CONST_DEV_ACTIVATED = True
+CONST_DEV_FEE = '0.0010000'
 
 
 class LevelThreeAccountCommands(commands.Cog):
@@ -54,6 +46,7 @@ class LevelThreeAccountCommands(commands.Cog):
         self.acc_mng_rd_lvl = self.backoffice.third_level_manager
         self.supported = list(integrated_coins.keys())
         self.available_levels = [1, 2, 3]
+        self.help_functions = self.backoffice.helper
 
     @staticmethod
     async def show_typing(ctx):
@@ -120,28 +113,8 @@ class LevelThreeAccountCommands(commands.Cog):
         except Ed25519PublicKeyInvalidError:
             return False
 
-    def public_addr_struct_check(self, public_address: str):
-        """
-        Check the public key address
-        """
-        try:
-            Account(account_id=public_address, sequence=0)
-            return True
-        except Ed25519PublicKeyInvalidError:
-            return False
-
-    def check_private_key(self, private_key: str):
-        """
-        Check if private key constructed matches criteria
-        """
-        try:
-            Keypair.from_secret(private_key)
-            return True
-        except Ed25519SecretSeedInvalidError:
-            return False
-        pass
-
-    def process_operations(self, operations: list):
+    @staticmethod
+    def process_operations(operations: list):
         """
         Process operations from XDR envelope to make it human readable dict
         """
@@ -179,7 +152,7 @@ class LevelThreeAccountCommands(commands.Cog):
             base_fee=self.server.fetch_base_fee()
 
         ).append_payment_op(
-            destination=tx_data["toAddress"],
+            destination=tx_data["toAddr"],
             asset_code="XLM",
             amount=tx_data["netValue"]).add_text_memo(memo_text=tx_data["memo"])
 
@@ -221,10 +194,10 @@ class LevelThreeAccountCommands(commands.Cog):
             title = ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r:  ' \
                     '__Welcome to level 3 wallet system__ ' \
                     ':regional_indicator_x: :regional_indicator_d: :regional_indicator_r: '
-            description = "***Level 3*** wallet provides user full control of the private keys. Unlike in __Level 2__," \
-                          " Crypto Link stores upon registration only Discord Username details and " \
-                          "public wallet key address. Both are required to make wallet levels interoperable and allows " \
-                          " for execution of the transactions with ease."
+            description = "***Level 3*** wallet provides user full control of the private keys. Unlike in " \
+                          "__Level 2__, Crypto Link stores upon registration only Discord Username details and " \
+                          "public wallet key address. Both are required to make wallet levels interoperable and " \
+                          "allows for execution of the transactions with ease."
             list_of_commands = [
                 {"name": f':new: Register/Update 3 level wallet :new:',
                  "value": f'```{self.command_string}3 register```\n'
@@ -236,7 +209,8 @@ class LevelThreeAccountCommands(commands.Cog):
                  "value": f'```{self.command_string}3 payment```\n'
                           f'`Aliases: tx, t, p, transaction, pay`'},
                 {
-                    "name": f':regional_indicator_x: :regional_indicator_d: :regional_indicator_r: view and sign transaction'
+                    "name": f':regional_indicator_x: :regional_indicator_d: :regional_indicator_r:'
+                            f' view and sign transaction'
                             f' :regional_indicator_x: :regional_indicator_d: :regional_indicator_r: ',
                     "value": f'```{self.command_string}3 xdr```\n'
                              f'`Aliases: envelope, env`'}
@@ -248,25 +222,23 @@ class LevelThreeAccountCommands(commands.Cog):
                                                 destination=1, c=Colour.lighter_gray())
 
     @three.group(aliases=['reg', 'r', 'get', 'n'])
-    @commands.check(user_has_second_level)
     async def register(self, ctx):
-        title = ':new: 3 level wallet registration commands :new: '
-        description = ""
-        list_of_commands = [
-            {"name": f':mag_right: Register new in-active wallet level 3 :mag:',
-             "value": f'```{self.command_string}3 register new ```\n'
-                      f'`Aliases: n`'},
-
-            {"name": f':mag_right: Register Own Public Address :mag:',
-             "value": f'```{self.command_string}3 register own <Valid Public Address>```\n'
-                      f'`Aliases: o, my`'},
-
-            {"name": f':mag_right: Update Own Public Address :mag:',
-             "value": f'```{self.command_string}3 register update <Valid Public Address> ```\n'
-                      f'`Aliases: u`'}
-        ]
-
         if ctx.invoked_subcommand is None:
+            title = ':new: 3 level wallet registration commands :new: '
+            description = ""
+            list_of_commands = [
+                {"name": f':mag_right: Register new in-active wallet level 3 :mag:',
+                 "value": f'```{self.command_string}3 register new ```\n'
+                          f'`Aliases: n`'},
+
+                {"name": f':mag_right: Register Own Public Address :mag:',
+                 "value": f'```{self.command_string}3 register own <Valid Public Address>```\n'
+                          f'`Aliases: o, my`'},
+
+                {"name": f':mag_right: Update Own Public Address :mag:',
+                 "value": f'```{self.command_string}3 register update <Valid Public Address> ```\n'
+                          f'`Aliases: u`'}
+            ]
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
@@ -301,45 +273,41 @@ class LevelThreeAccountCommands(commands.Cog):
 
                 if done_answer.content.upper() in ["DONE"]:
                     # Wallet details to store
-                    wallet = {
+                    details = {
                         "userId": int(ctx.message.author.id),
                         "publicAddress": details["address"]
                     }
-
-                    if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=wallet):
+                    if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=details):
                         await new_acc_details(author=ctx.author, details=details)
-
+                        msg = ':new: User register wallet level 3. :rocket: '
+                        await self.uplink_notification(message=msg)
                     else:
-                        title = "3. level wallet registration error"
-                        message = "Account could not be registered into Crypto Link system. Please try again later."
-                        await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                             sys_msg_title=title)
+                        await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
+                                                             destination=0,
+                                                             sys_msg_title=CONST_REG_ERROR_TITLE)
 
                 else:
-                    title = "3. level wallet registration error"
                     message = "Registration process has been cancelled."
                     await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                         sys_msg_title=title)
+                                                         sys_msg_title=CONST_REG_ERROR_TITLE)
             else:
-                title = "3. level wallet registration error"
                 message = "Account could not be created. Please try again later. If issue persists. Please contact" \
                           " Crypto Link team."
                 await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                     sys_msg_title=title)
+                                                     sys_msg_title=CONST_REG_ERROR_TITLE)
         else:
-            title = "3. level wallet registration error"
             message = "You have cancelled the registration process for level 3 wallet."
             await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                 sys_msg_title=title)
+                                                 sys_msg_title=CONST_REG_ERROR_TITLE)
 
     @register.command(aliases=["o", "my"])
     @commands.check(user_has_no_third_level)
     async def own(self, ctx, public_address: str):
-
         # Check if correct address provided
-        if check_stellar_address(address=public_address):
-            if public_address in [self.bot.backoffice.stellar_wallet.public_key,
-                                  self.bot.backoffice.stellar_wallet.dev_key]:
+        if self.help_functions.check_public_key(address=public_address):
+
+            if public_address not in [self.bot.backoffice.stellar_wallet.public_key,
+                                      self.bot.backoffice.stellar_wallet.dev_key]:
                 await third_level_own_reg_info(destination=ctx.author)
 
                 # Prompt for response
@@ -356,23 +324,22 @@ class LevelThreeAccountCommands(commands.Cog):
 
                     if self.acc_mng_rd_lvl.register_rd_level_wallet(data_to_store=details):
                         await new_acc_details(author=ctx.author, details=details)
+                        msg = ':new: User register wallet level 3. :rocket: '
+                        await self.uplink_notification(message=msg)
                     else:
-                        title = "3. level wallet registration error"
-                        message = "Account could not be registered into Crypto Link system. Please try again later."
-                        await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                             sys_msg_title=title)
+                        await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
+                                                             destination=0,
+                                                             sys_msg_title=CONST_REG_ERROR_TITLE)
 
                 else:
-                    title = "3. level wallet registration error"
                     message = "You have cancelled the registration process for level 3 wallet."
                     await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                         sys_msg_title=title)
+                                                         sys_msg_title=CONST_REG_ERROR_TITLE)
             else:
-                title = "3. level wallet registration error"
                 message = f"Wallet address `{public_address}` is owned by Crypto Link and can not be used as your " \
                           f"personal wallet."
                 await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                     sys_msg_title=title)
+                                                     sys_msg_title=CONST_REG_ERROR_TITLE)
         else:
             title = "Public address Error"
             message = f"Address `{public_address}` is not a valid Stellar Public Address. Please check provided " \
@@ -383,9 +350,9 @@ class LevelThreeAccountCommands(commands.Cog):
     @register.command(aliases=["u"])
     @commands.check(user_has_third_level)
     async def update(self, ctx, public_address: str):
-        if check_stellar_address(address=public_address):
-            if public_address in [self.bot.backoffice.stellar_wallet.public_key,
-                                  self.bot.backoffice.stellar_wallet.dev_key]:
+        if self.help_functions.check_public_key(address=public_address):
+            if public_address not in [self.bot.backoffice.stellar_wallet.public_key,
+                                      self.bot.backoffice.stellar_wallet.dev_key]:
                 await ctx.author.send(f'Are you sure you would like update your 3rd level wallet address to '
                                       f'{public_address}? yes/y or no/n')
 
@@ -399,21 +366,19 @@ class LevelThreeAccountCommands(commands.Cog):
                     if self.acc_mng_rd_lvl.update_public_address(user_id=ctx.author.id, pub_address=public_address):
                         await new_acc_details(author=ctx.author, details=details)
                     else:
-                        title = "3. level wallet registration error"
-                        message = "Account could not be registered into Crypto Link system. Please try again later."
-                        await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                             sys_msg_title=title)
+                        await custom_messages.system_message(ctx=ctx, message=CONST_REG_ERROR, color_code=1,
+                                                             destination=0,
+                                                             sys_msg_title=CONST_REG_ERROR_TITLE)
                 else:
                     title = f':exclamation: __Address Update Cancelled__ :exclamation: '
                     message = f'You have canceled level 3 wallet address update.'
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                          sys_msg_title=title)
             else:
-                title = "3. level wallet registration error"
                 message = f"Wallet address `{public_address}` is owned by Crypto Link and can not be used as your " \
                           f"personal wallet."
                 await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=0,
-                                                     sys_msg_title=title)
+                                                     sys_msg_title=CONST_REG_ERROR_TITLE)
         else:
             title = f':exclamation: __Wrong Public Address__ :exclamation: '
             message = f'Address `{public_address}` is not a valid Stellar Public Address'
@@ -421,6 +386,7 @@ class LevelThreeAccountCommands(commands.Cog):
                                                  sys_msg_title=title)
 
     @three.group(aliases=["acc", "a", "wallet", "w"])
+    @commands.check(user_has_third_level)
     async def account(self, ctx):
         """
         Entry point for account sub-commands
@@ -435,26 +401,63 @@ class LevelThreeAccountCommands(commands.Cog):
                 {"name": f':information_source: Account Status :information_source: ',
                  "value": f'```{self.command_string}3 account info```\n'
                           f'`Aliases: n, nfo`'},
+                {"name": f':octagonal_sign: Remove account from Crypto Link :octagonal_sign:  ',
+                 "value": f'```{self.command_string}3 account remove```\n'
+                          f'`Aliases: delete, r`'},
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands,
                                                 description=description,
                                                 destination=1, c=Colour.lighter_gray())
 
+    @account.command(aliases=["delete", "r"])
+    async def remove(self, ctx):
+        removal_info = Embed(title=f':octagonal_sign:  Account Removal Process :octagonal_sign:  ',
+                             description="You have initiated account removal procedure from the Crypto Link System",
+                             color=Colour.orange())
+        removal_info.add_field(name=":warning: Read Carefully :warning: ",
+                               value="Wallet address registered under the wallet level 3 will be removed from Crypto "
+                                     "Link system however can be still accessible through other applications as you"
+                                     " hold private keys. In order to re-register same public address please use"
+                                     f" `{self.command_string}3 register own`")
+        await ctx.author.send(embed=removal_info)
+
+        await ctx.author.send(f'Are you sure you would like to delete wallet from 3rd level wallets? yes/y or no/n')
+
+        verification = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=60)
+
+        if verification.content.upper() in ["YES", "Y"]:
+            if self.acc_mng_rd_lvl.remove_account(user_id=ctx.author.id):
+                sys_msg_title = 'Wallet level 3 removed from system'
+                message = 'You have successfully removed wallet from the Crypto Link system.'
+                await custom_messages.system_message(ctx=ctx, color_code=Colour.green(), message=message, destination=0,
+                                                     sys_msg_title=sys_msg_title)
+            else:
+                sys_msg_title = 'Wallet removal issue'
+                message = 'Wallet could not be removed from the system. Please try again later or contact Crypto ' \
+                          'Link staff. '
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=sys_msg_title)
+        else:
+            sys_msg_title = 'Removal cancelled'
+            message = 'You have successfully canceled wallet removal procedure.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.green, message=message, destination=0,
+                                                 sys_msg_title=sys_msg_title)
+
     @account.command(aliases=["nfo", "i"])
     async def info(self, ctx):
 
         user_public = self.backoffice.third_level_manager.get_third_hot_wallet_addr(user_id=ctx.author.id)
-        data = self.server.accounts().account_id(account_id=user_public).call()
         try:
+            data = self.server.accounts().account_id(account_id=user_public).call()
             if data and 'status' not in data:
                 # Send user account info
-                await send_user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
+                await user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
 
             else:
                 sys_msg_title = 'Stellar Wallet Query Server error'
                 message = 'Status of the wallet could not be obtained at this moment'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title=sys_msg_title)
 
         except NotFoundError:
@@ -486,10 +489,10 @@ class LevelThreeAccountCommands(commands.Cog):
         """
         Create XDR payment envelope to be used for signing to some other users than discord
         """
-        dev_fee_atomic = 0
-        atomic_amount = int(amount * (10 ** 7))
+        fee_atomic = 0
         dev_fee_activated = False
 
+        atomic_amount = int(amount * (10 ** 7))
         recipient_check = ctx.message.author.id != recipient.id  # Boolean
         wallet_level_check = ctx.message.author.id == recipient.id and wallet_level != 3
 
@@ -505,22 +508,64 @@ class LevelThreeAccountCommands(commands.Cog):
 
                         # Check if account is live on network
                         if self.check_if_acc_is_live(address=recipient_data["address"]):
-
                             # get sender details
                             sender = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
 
+                            await dev_fee_option_notification(destination=ctx.message.author)
+
+                            verification_msg = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                       timeout=30)
+
+                            if verification_msg.content.upper() in ["YES", "Y"]:
+                                # Ask user with embed
+                                await ask_for_dev_fee_amount(destination=ctx.message.author)
+
+                                try:
+                                    dev_fee_answ = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                           timeout=30)
+                                    fee_selected = dev_fee_answ.content
+                                    fee_number = float(fee_selected)
+                                    fee_atomic = int(fee_number * (10 ** 7))
+                                    if fee_atomic > 0:
+                                        # Convert to atomic
+                                        dev_fee_activated = True
+                                    else:
+                                        message = f'Dev fee is not allowed to be less than 0 or 0. It will be skipped.'
+                                        await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                             destination=0,
+                                                                             sys_msg_title=':warning: Dev Fee Error :warning:')
+
+                                except ValueError:
+                                    message = f'{dev_fee_answ} could not be converted to number and will therefore be skipped'
+                                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                         destination=0,
+                                                                         sys_msg_title=':warning: Dev Fee Error :warning:')
+                            else:
+                                message = f'Dev Fee will not be appended to transaction. '
+                                await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                                                     destination=0,
+                                                                     sys_msg_title=':robot:  Dev Fee Status :robot: ')
+
+                            network_fee = 100  # Stroops
+                            total_for_transaction = atomic_amount + network_fee + fee_atomic
+                            requested_amount = total_for_transaction / (10 ** 7)
+                            dev_fee_normal = fee_atomic / (10 ** 7)
+                            fee_normal = network_fee / (10 ** 7)
+                            net_amount = atomic_amount / (10 ** 7)
+
                             request_data = {"fromAddr": sender,
-                                            "txTotal": f'{atomic_amount / (10 ** 7):.7f}',
-                                            "netValue": f'{atomic_amount / (10 ** 7):.7f}',
-                                            "devFee": f'0.0001',
+                                            "txTotal": f'{requested_amount:.7f}',
+                                            "netValue": f'{net_amount:.7f}',
+                                            "devFee": f'{dev_fee_normal:.7f}',
                                             "token": "XLM",
-                                            "networkFee": f'0.0000100',
+                                            "networkFee": f'{fee_normal:.7f}',
                                             "recipient": f"{ctx.author}",
-                                            "toAddress": recipient_data["address"],
+                                            "toAddr": recipient_data["address"],
                                             "memo": recipient_data["memo"],
                                             "walletLevel": f"{wallet_level}"
                                             }
-                            xdr_envelope = self.produce_envelope(tx_data=request_data, dev_fee_status=dev_fee_activated)
+                            xdr_envelope = self.produce_envelope(tx_data=request_data,
+                                                                 dev_fee_status=dev_fee_activated)
 
                             message = f":new::envelope: Has been created for Discord Transaction to wallet level {wallet_level} " \
                                       f" in value of ***{request_data['txTotal']} {request_data['token']}*** :rocket: "
@@ -562,48 +607,55 @@ class LevelThreeAccountCommands(commands.Cog):
         """
         Create XDR payment envelope to be used for signing to some other users than discord
         """
-        dev_fee_atomic = 0
+        fee_atomic = 0
         atomic_amount = int(amount * (10 ** 7))
         dev_fee_activated = False
 
         if atomic_amount >= 100:
             # Get sender hot wallet
-            if check_stellar_address(address=public_address):
-                user_address = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
-                if public_address != user_address:
-                    if public_address != self.bot.backoffice.stellar_wallet.public_key:
-                        request_data = {"fromAddr": user_address,
-                                        "txTotal": f'{atomic_amount / (10 ** 7):.7f}',
-                                        "netValue": f'{atomic_amount / (10 ** 7):.7f}',
-                                        "devFee": f'0.0001',
-                                        "token": "XLM",
-                                        "networkFee": f'0.0000100',
-                                        "recipient": f"External Wallet",
-                                        "toAddress": public_address,
-                                        "memo": "From Discord",
-                                        "walletLevel": f"External Wallet"
-                                        }
+            if self.help_functions.check_public_key(address=public_address):
+                if self.check_if_acc_is_live(address=public_address):
+                    user_address = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
+                    if public_address != user_address:
+                        if public_address != self.bot.backoffice.stellar_wallet.public_key:
+                            request_data = {"fromAddr": user_address,
+                                            "txTotal": f'{atomic_amount / (10 ** 7):.7f}',
+                                            "netValue": f'{atomic_amount / (10 ** 7):.7f}',
+                                            "devFee": CONST_DEV_FEE,
+                                            "token": "XLM",
+                                            "networkFee": f'0.0000100',
+                                            "recipient": f"External Wallet",
+                                            "toAddr": public_address,
+                                            "memo": "From Discord",
+                                            "walletLevel": f"External Wallet"
+                                            }
 
-                        xdr_envelope = self.produce_envelope(tx_data=request_data, dev_fee_status=dev_fee_activated)
+                            xdr_envelope = self.produce_envelope(tx_data=request_data,
+                                                                 dev_fee_status=CONST_DEV_ACTIVATED)
 
-                        # Send details to sender on produced envelope
-                        await send_xdr_info(ctx=ctx, request_data=request_data, envelope=xdr_envelope,
-                                            command_type='discord')
+                            # Send details to sender on produced envelope
+                            await send_xdr_info(ctx=ctx, request_data=request_data, envelope=xdr_envelope,
+                                                command_type='discord')
 
-                        message = f":new::envelope: has been created for external address in value of " \
-                                  f"***{request_data['txTotal']} {request_data['token']}*** :rocket: "
-                        await self.uplink_notification(message=message)
+                            message = f":new::envelope: has been created for external address in value of " \
+                                      f"***{request_data['txTotal']} {request_data['token']}*** :rocket: "
+                            await self.uplink_notification(message=message)
 
+                        else:
+                            message = f"You re trying to send funds to the Crypto Link hot wallet which is used for "
+                            f" level 1 wallet hot wallet address. Funds might not come through as MEMO is "
+                            f"required. If you wish to send it to your Level 1 wallet please "
+                            f"use `{self.command_string}3 tx user `"
+                            await custom_messages.system_message(ctx=ctx, message=message, color_code=1,
+                                                                 destination=ctx.author,
+                                                                 sys_msg_title=CONST_XDR_ERROR)
                     else:
-                        message = f"You re trying to send funds to the Crypto Link hot wallet which is used for "
-                        f" level 1 wallet hot wallet address. Funds might not come through as MEMO is "
-                        f"required. If you wish to send it to your Level 1 wallet please "
-                        f"use `{self.command_string}3 tx user `"
+                        message = 'No need to send it to yourself to 3 level'
                         await custom_messages.system_message(ctx=ctx, message=message, color_code=1,
                                                              destination=ctx.author,
                                                              sys_msg_title=CONST_XDR_ERROR)
                 else:
-                    message = 'No need to send it to yourself to 3 level'
+                    message = f'Address `{public_address}` has not been activated yet.'
                     await custom_messages.system_message(ctx=ctx, message=message, color_code=1, destination=ctx.author,
                                                          sys_msg_title=CONST_XDR_ERROR)
             else:
@@ -663,8 +715,9 @@ class LevelThreeAccountCommands(commands.Cog):
                 # Gets private key from user response
                 private_key_response = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=30)
                 private_key = private_key_response.content.upper()
-                if self.check_private_key(private_key=private_key) and not re.search("[~!#$%^&*()_+{}:;\']",
-                                                                                     private_key):
+                if self.help_functions.check_private_key(private_key=private_key) and not re.search(
+                        "[~!#$%^&*()_+{}:;\']",
+                        private_key):
                     await self.show_typing(ctx)
 
                     result = self.stream_transaction_from_envelope(private_key=private_key, xdr_string=xdr_envelope)
@@ -710,21 +763,130 @@ class LevelThreeAccountCommands(commands.Cog):
                 }
 
                 await xdr_data_to_embed(destination=ctx.author, data=details_to_sign)
-        except Exception as e:
+        except Exception:
             title = f':exclamation: __XDR import error__ :exclamation: '
             message = f'Provided string is not XDR envelope'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
+    @three.error
+    async def three_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Requirements missing'
+            message = f'In order to be able to access wallet level 3 you need to first register yourself in wallet ' \
+                      f'level 2 with `{self.command_string}2 register`'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green, message=message, destination=0,
+                                                 sys_msg_title=title)
+
     @new.error
     async def new_err(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await ctx.author.send(content='You have already registered for wallet')
+            title = f'Registration status'
+            message = f'You have already registered for a wallet of 3rd level. Use `{self.command_string}3` to' \
+                      f'familiarize yourself with available commands.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif TimeoutError:
+            title = f'__Time Run Out__'
+            message = f'Your time to respond to bots request has expired and process has been therefore cancelled.' \
+                      f' Please re-initiate the account registration process.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @own.error
+    async def own_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Registration status'
+            message = f'You have already registered for a wallet of 3rd level. Use `{self.command_string}3` to' \
+                      f'familiarize yourself with available commands. If you would like to update your wallet with' \
+                      f' new address please use `{self.command_string}3 register update`.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif TimeoutError:
+            title = f'__Time Run Out__'
+            message = f'Your time to respond to bots request has expired and process has been therefore cancelled.' \
+                      f' Please re-initiate the account registration process.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif isinstance(error, commands.MissingRequiredArgument):
+            title = f'__Missing Required argument__'
+            message = f'You forgot to provide required argument `public address`. Please re-initiate the process and ' \
+                      f'provide a Stellar valid public key/address.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @update.error
+    async def update_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'3 level wallet not registered'
+            message = f'You can not update the wallet address as you have not registered yourself yet to wallet level ' \
+                      f'3 system. Please use first `{self.command_string}3 register new` or `{self.command_string}3 ' \
+                      f'register own`'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.dark_green, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif TimeoutError:
+            title = f'__Time Run Out__'
+            message = f'Your time to respond to bots request has expired and process has been therefore cancelled.' \
+                      f' Please re-initiate the account update process.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+        elif isinstance(error, commands.MissingRequiredArgument):
+            title = f'__Missing Required argument__'
+            message = f'You forgot to provide required argument `public address`. Please re-initiate the process and ' \
+                      f'provide a Stellar valid public key/address.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
 
     @sign.error
     async def sign_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            print("You are required to provide envelope to be signed.")
+            title = f'__Missing Envelope__'
+            message = f'You are required to provide XDR envelope to be able to sign it.  '
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+        elif TimeoutError:
+            title = f'__Time Run Out__'
+            message = f'Your time to respond to bots request has expired and process has been therefore cancelled.' \
+                      f' Please re-initiate it '
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @register.error
+    async def reg_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Requirements not met'
+            message = 'In order to be eligible for wallet level 3 system please register first 2nd level wallet.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.red, message=message, destination=0,
+                                                 sys_msg_title=title)
+        elif TimeoutError:
+            title = f'__Transaction Request Expired__'
+            message = f'It took you to long to provide requested answer. Please try again or follow ' \
+                      f'guidelines further from the Crypto Link. '
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @account.error
+    async def acc_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Registration status'
+            message = 'You can not access this command as you have not registered yet into the 3 level wallet system.' \
+                      f' Please use first `{self.command_string}3 register` before you can query account details '
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.red, message=message, destination=0,
+                                                 sys_msg_title=title)
+
+    @tx.error
+    async def t_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            title = f'Registration status'
+            message = 'You can not access this command as you have not registered yet into the 3 level wallet system.' \
+                      f' Please use first `{self.command_string}3 register` before you can create transactions/payments '
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.red, message=message, destination=0,
+                                                 sys_msg_title=title)
 
 
 def setup(bot):

@@ -2,7 +2,7 @@ from discord.ext import commands
 from discord import User
 import re
 from cogs.utils import monetaryConversions
-from cogs.utils.customCogChecks import is_public, has_wallet
+from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 

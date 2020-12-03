@@ -5,7 +5,6 @@ COGS which handle explanation  on commands available to communicate with the Pat
 from discord.ext import commands
 from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.securityChecks import check_stellar_address
 from stellar_sdk.exceptions import BadRequestError
 from horizonCommands.utils.customMessages import send_paths_records_details, send_paths_entry_details, horizon_error_msg
 from horizonCommands.utils.tools import get_asset
@@ -18,6 +17,7 @@ class HorizonPaths(commands.Cog):
         self.bot = bot
         self.command_string = bot.get_command_str()
         self.server = self.bot.backoffice.stellar_wallet.server
+        self.help_functions = bot.backoffice.helper
 
     @commands.group()
     async def paths(self, ctx):
@@ -46,7 +46,8 @@ class HorizonPaths(commands.Cog):
         normal = (atomic_value / (10 ** 7))
 
         # Validate stellar address structure
-        if check_stellar_address(address=to_address) and check_stellar_address(asset_issuer):
+        if self.help_functions.check_public_key(address=to_address) and self.help_functions.check_public_key(
+                asset_issuer):
             asset_obj = get_asset(asset_code=asset_code.upper(), asset_issuer=asset_issuer)
             try:
                 data = self.server.strict_send_paths(source_asset=asset_obj, source_amount=normal,
@@ -87,7 +88,8 @@ class HorizonPaths(commands.Cog):
         normal = (atomic_value / (10 ** 7))
 
         # Validate stellar address structure
-        if check_stellar_address(address=from_address) and check_stellar_address(asset_issuer):
+        if self.help_functions.check_public_key(address=from_address) and self.help_functions.check_public_key(
+                asset_issuer):
             asset_boj = get_asset(asset_code=asset_code, asset_issuer=asset_issuer)
 
             try:

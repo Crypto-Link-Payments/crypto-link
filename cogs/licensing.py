@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from discord import Embed, Color, Colour
 from discord.ext import commands
 
-from cogs.utils.customCogChecks import is_owner, has_wallet, merchant_com_reg_stats, is_public
+from utils.customCogChecks import is_owner, has_wallet, merchant_com_reg_stats, is_public
 from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers

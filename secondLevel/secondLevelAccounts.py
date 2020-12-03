@@ -8,16 +8,14 @@ from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadRes
     NotFoundError
 from discord import Colour, Member
 from discord.ext import commands
-from cogs.utils.customCogChecks import user_has_wallet, user_has_second_level, is_dm, is_public, user_has_no_second
+from utils.customCogChecks import has_wallet, user_has_second_level , is_dm, is_public, user_has_no_second
 from cogs.utils.systemMessaages import CustomMessages
 from utils.securityManager import SecurityManager
-
-from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message, dev_fee_option_notification, \
-    ask_for_dev_fee_amount, send_user_account_info, sign_message_information, send_transaction_report, \
+from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
+from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message, sign_message_information, \
+    send_transaction_report, \
     send_new_account_information, verification_request_explanation, second_level_account_reg_info, \
     server_error_response, send_operation_details, recipient_incoming_notification, send_uplink_message
-
-from secondLevel.utils.tools import check_memo, check_public_key, check_private_key
 
 security_manager = SecurityManager()
 custom_messages = CustomMessages()
@@ -45,10 +43,10 @@ class LevelTwoAccountCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.backoffice = bot.backoffice
         self.server = self.backoffice.stellar_wallet.server
-        self.available_layers = [1, 2]
+        self.available_layers = [1, 2, 3]
         self.network_type = Network.TESTNET_NETWORK_PASSPHRASE
+        self.help_functions = self.backoffice.helper
 
     async def transaction_report_dispatcher(self, ctx, result: dict, data: dict = None):
         """
@@ -61,7 +59,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                      envelope=result['envelope_xdr'],
                                      network_type=self.network_type)
 
-        # Send notification on transaciton to Crypto Link Uplink
+        # Send notification on transaction to Crypto Link Uplink
         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
@@ -101,6 +99,8 @@ class LevelTwoAccountCommands(commands.Cog):
             return self.backoffice.account_mng.check_user_existence(user_id=user_id)
         elif layer == 2:
             return self.backoffice.second_level_manager.second_level_user_reg_status(user_id=user_id)
+        elif layer == 3:
+            return self.backoffice.second_level_manager.second_level_user_reg_status(user_id=user_id)
 
     def get_recipient_details_based_on_layer(self, layer: int, user_id: int):
         """
@@ -110,6 +110,13 @@ class LevelTwoAccountCommands(commands.Cog):
             # Details for transaction to level 1 wallet
             user_data = {
                 "address": self.backoffice.stellar_wallet.public_key,
+                "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
+            }
+            return user_data
+        elif layer == 2:
+            # Details for transaction to level 2 wallet
+            user_data = {
+                "address": self.backoffice.second_level_manager.get_custodial_hot_wallet_addr(user_id=user_id),
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
@@ -167,7 +174,7 @@ class LevelTwoAccountCommands(commands.Cog):
             return False, e
 
     @commands.group(aliases=["nd", '2', 'custodial'])
-    @commands.check(user_has_wallet)
+    @commands.check(has_wallet)
     async def two(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':wave:  __Welcome to Level 2 wallet system__ :wave:  '
@@ -196,6 +203,7 @@ class LevelTwoAccountCommands(commands.Cog):
     @two.command(aliases=["reg", "new", 'get'])
     @commands.check(is_dm)
     @commands.check(user_has_no_second)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def register(self, ctx):
         """
         Interactive registration procedure for second wallet level
@@ -303,7 +311,7 @@ class LevelTwoAccountCommands(commands.Cog):
             data = self.server.accounts().account_id(account_id=user_public).call()
             if data and 'status' not in data:
                 # Send user account info
-                await send_user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
+                await user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
 
             else:
                 sys_msg_title = 'Stellar Wallet Query Server error'
@@ -450,7 +458,7 @@ class LevelTwoAccountCommands(commands.Cog):
                                 'utf-8')
                             private_full = first_half_of_key.content + second_half_of_key
 
-                            if check_private_key(private_key=private_full):
+                            if self.help_functions.check_private_key(private_key=private_full):
                                 await ctx.author.send(content='Transactions is being streamed to network. '
                                                               'Please wait few moments till its '
                                                               'completed and response received from Crypto Link')
@@ -530,7 +538,7 @@ class LevelTwoAccountCommands(commands.Cog):
             memo = 'None'
 
         if atomic_amount >= 100:
-            if check_memo(memo) and check_public_key(address=to_address):
+            if self.help_functions.check_memo(memo) and self.help_functions.check_public_key(address=to_address):
 
                 # DEV FEE INTEGRATION PROCESS
                 # Send notification to user about dev fee
@@ -608,7 +616,7 @@ class LevelTwoAccountCommands(commands.Cog):
                     second_half_of_key = security_manager.decrypt(token=private_encrypted["privateKey"]).decode('utf-8')
                     private_full = first_half_of_key.content + second_half_of_key
 
-                    if check_private_key(private_key=private_full):
+                    if self.help_functions.check_private_key(private_key=private_full):
                         await ctx.author.send(content='Transactions is being sent to network. '
                                                       'Please wait few moments till its '
                                                       'completed')
@@ -743,16 +751,14 @@ class LevelTwoAccountCommands(commands.Cog):
                       f'`{error}`'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
-        # elif TimeoutError:
-        #     title = f':timer: __Transaction Request Expired__ :timer: '
-        #     message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
-        #               f'time-limits'
-        #     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-        #                                          sys_msg_title=title)
-
+        elif isinstance(error,TimeoutError):
+            title = f':timer: __Transaction Request Expired__ :timer: '
+            message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
+                      f'time-limits'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
         else:
-            print('smth is up')
-            raise
+            print(error)
 
 
 def setup(bot):

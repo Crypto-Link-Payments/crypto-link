@@ -5,7 +5,6 @@ COGS which handle explanation  on commands available to communicate with the Hor
 from discord.ext import commands
 from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
-from cogs.utils.securityChecks import check_stellar_address
 from stellar_sdk.exceptions import BadRequestError, NotFoundError
 from horizonCommands.utils.tools import format_date
 from horizonCommands.utils.customMessages import account_create_msg, send_details_for_stellar, send_details_for_asset, \
@@ -25,6 +24,7 @@ class HorizonAccounts(commands.Cog):
         self.bot = bot
         self.command_string = bot.get_command_str()
         self.hor_accounts = self.bot.backoffice.stellar_wallet.server.accounts()
+        self.help_functions = bot.backoffice.helper
 
     @commands.group(aliases=["account", "acc"])
     async def accounts(self, ctx):
@@ -70,7 +70,7 @@ class HorizonAccounts(commands.Cog):
         """
         Query details for specific public address
         """
-        if check_stellar_address(address=address):
+        if self.help_functions.check_public_key(address=address):
             try:
                 data = self.hor_accounts.account_id(account_id=address).call()
                 if data:
