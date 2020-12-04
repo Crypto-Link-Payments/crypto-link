@@ -3,7 +3,7 @@ from discord import Embed, Colour
 from discord.ext import commands
 from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
-from cogs.utils.monetaryConversions import get_normal, scientific_conversion
+from cogs.utils.monetaryConversions import get_normal
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
@@ -52,17 +52,17 @@ class UserAccountCommands(commands.Cog):
                               value=f'`{xlm_balance:.7f} {CONST_STELLAR_EMOJI}`',
                               inline=False)
         acc_details.add_field(name=f':flag_us: USA',
-                              value=f'$ {scientific_conversion(in_usd, 4)}')
+                              value=f'$ {in_usd:.4f}')
         acc_details.add_field(name=f':flag_eu: EUR',
-                              value=f'€ {scientific_conversion(in_eur, 4)}')
+                              value=f'€ {in_eur:.4f}')
         acc_details.add_field(name=f':flag_ru:  RUB',
-                              value=f'₽ {scientific_conversion(in_rub, 4)}')
+                              value=f'₽ {in_rub:.4f}')
         acc_details.add_field(name=f'BTC',
-                              value=f'₿ {scientific_conversion(in_btc, 8)}')
+                              value=f'₿ {in_btc:.8f}')
         acc_details.add_field(name=f'ETH',
-                              value=f'Ξ {scientific_conversion(in_eth, 8)}')
+                              value=f'Ξ {in_eth:.8f}')
         acc_details.add_field(name=f'LTC',
-                              value=f'Ł {scientific_conversion(in_ltc, 8)}')
+                              value=f'Ł {in_ltc:.8f}')
 
         acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
                               value=f'[Stellar](https://www.stellar.org/)\n'

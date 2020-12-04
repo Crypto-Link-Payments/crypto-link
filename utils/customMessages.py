@@ -1,6 +1,6 @@
 from discord import Embed, Colour
 from datetime import datetime
-from cogs.utils.monetaryConversions import scientific_conversion, get_rates, rate_converter
+from cogs.utils.monetaryConversions import get_rates, rate_converter
 
 
 async def user_account_info(ctx, data, bot_avatar_url):
@@ -72,17 +72,17 @@ async def user_account_info(ctx, data, bot_avatar_url):
                             description=f'```{coin["balance"]} XLM```',
                             color=Colour.dark_blue())
             xlm_nfo.add_field(name=f':flag_us: USA',
-                              value=f'$ {scientific_conversion(in_usd, 4)}')
+                              value=f'$ {in_usd:.4f}')
             xlm_nfo.add_field(name=f':flag_eu: EUR',
-                              value=f'€ {scientific_conversion(in_eur, 4)}')
+                              value=f'€ {in_eur:.4f}')
             xlm_nfo.add_field(name=f':flag_ru:  RUB',
-                              value=f'₽ {scientific_conversion(in_rub, 4)}')
+                              value=f'₽ {in_rub}')
             xlm_nfo.add_field(name=f'BTC',
-                              value=f'₿ {scientific_conversion(in_btc, 8)}')
+                              value=f'₿ {in_btc:.8f}')
             xlm_nfo.add_field(name=f'ETH',
-                              value=f'Ξ {scientific_conversion(in_eth, 8)}')
+                              value=f'Ξ {in_eth:.8f}')
             xlm_nfo.add_field(name=f'LTC',
-                              value=f'Ł {scientific_conversion(in_ltc, 8)}')
+                              value=f'Ł {in_ltc:.8f}')
             xlm_nfo.set_footer(text='Conversion rates provided by CoinGecko',
                                icon_url="https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png")
             await ctx.author.send(embed=xlm_nfo)

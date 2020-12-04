@@ -11,8 +11,6 @@ from pycoingecko import CoinGeckoAPI
 
 from utils.customCogChecks import is_public, guild_has_merchant, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-
-from cogs.utils.monetaryConversions import get_decimal_point
 from utils.tools import Helpers
 
 helper = Helpers()
@@ -174,7 +172,7 @@ class ConsumerCommands(commands.Cog):
                     convert_to_dollar = role_details["pennyValues"] / 100  # Convert to $
                     coin_usd_price = self.get_coin_usd_value(ticker)
                     role_value_crypto = float(convert_to_dollar / coin_usd_price)
-                    role_rounded = round(role_value_crypto, get_decimal_point(symbol=ticker))
+                    role_rounded = round(role_value_crypto, 7)
                     crypto_price_atomic = self.make_atomic(amount=role_value_crypto, coin_name=ticker)
                     balance = self.backoffice.account_mng.get_balance_based_on_ticker(
                         user_id=int(ctx.message.author.id),

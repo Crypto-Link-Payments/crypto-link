@@ -4,7 +4,7 @@ from datetime import datetime
 from discord import Role, Embed, Color, utils
 from discord.ext import commands
 from utils.customCogChecks import is_owner, has_wallet, is_public, merchant_com_reg_stats
-from cogs.utils.monetaryConversions import convert_to_currency, get_decimal_point
+from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.monetaryConversions import get_normal
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -384,8 +384,7 @@ class MerchantCommunityOwner(commands.Cog):
         data = merchant_manager.get_wallet_balance(community_id=ctx.message.guild.id)
         if data:
             stellar_balance = data['balance']
-            get_xlm_point = get_decimal_point(symbol='xlm')
-            stellar_real = get_normal(value=str(stellar_balance), decimal_point=get_xlm_point)
+            stellar_real = get_normal(value=str(stellar_balance), decimal_point=7)
 
             wallet_details = Embed(title=' :bank: __Merchant wallet status__ :bank:',
                                    description="Current state of the Merchant Community wallet",
