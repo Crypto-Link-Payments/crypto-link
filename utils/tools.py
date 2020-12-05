@@ -1,5 +1,6 @@
 import json
 import os
+from re import search
 import sys
 from stellar_sdk import TextMemo, Account, Keypair
 from stellar_sdk.exceptions import MemoInvalidException, Ed25519PublicKeyInvalidError, Ed25519SecretSeedInvalidError
@@ -75,3 +76,7 @@ class Helpers:
             return True
         except Ed25519SecretSeedInvalidError:
             return False
+
+    @staticmethod
+    def check_for_special_char(string):
+        return search("[~!#$%^&*()_+{}:;\']", string)
