@@ -9,6 +9,8 @@ customMessages = CustomMessages()
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_SYS_ERROR = '__System error__'
+CONST_SYS_MSG = '__System Message__'
+
 
 class GuildOwnerCommands(commands.Cog):
     def __init__(self, bot):
@@ -64,7 +66,7 @@ class GuildOwnerCommands(commands.Cog):
 
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message='You have successfully registered guild into the system',
-                                                destination=ctx.message.author, sys_msg_title='__System Message__')
+                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(ctx=ctx, color_code=1, message='Guild already registered',
                                                 destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
@@ -144,11 +146,11 @@ class GuildOwnerCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message=f'You have successfully set channel {chn} to receive Crypto'
                                                         f' Link Network Activity feed',
-                                                destination=ctx.message.author, sys_msg_title='__System Message__')
+                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue while trying'
                                                                                'to update data.',
-                                                destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
+                                                destination=ctx.message.channel, sys_msg_title=CONST_SYS_MSG)
 
     @uplink.command()
     async def remove(self, ctx):
@@ -160,7 +162,7 @@ class GuildOwnerCommands(commands.Cog):
                                                                      data_to_update=data_to_update):
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message=f'You have successfully turned OFF Crypto Link Network Feed',
-                                                destination=ctx.message.author, sys_msg_title='__System Message__')
+                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue and Crypto Link'
                                                                                ' Network Feed could not be turned OFF.'
