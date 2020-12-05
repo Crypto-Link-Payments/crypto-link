@@ -133,7 +133,6 @@ class LevelTwoAccountCommands(commands.Cog):
         """
         Place Transaction on the network
         """
-        net_value = tx_data["netValue"]
         key_pair = Keypair.from_secret(private_key)
         source_account = self.backoffice.stellar_wallet.server.load_account(key_pair.public_key)
         tx = TransactionBuilder(
@@ -472,13 +471,7 @@ class LevelTwoAccountCommands(commands.Cog):
 
                                 # Process result returned from stream
                                 if result[0]:
-                                    if wallet_level == 1 and ctx.message.author.id != recipient:
-                                        await recipient_incoming_notification(recipient=recipient,
-                                                                              sender=ctx.message.author,
-                                                                              wallet_level=wallet_level, data=data,
-                                                                              response=result[1])
-
-                                    elif wallet_level == 2 and ctx.message.author.id != recipient:
+                                    if ctx.message.author.id != recipient:
                                         await recipient_incoming_notification(recipient=recipient,
                                                                               sender=ctx.message.author,
                                                                               wallet_level=wallet_level, data=data,
