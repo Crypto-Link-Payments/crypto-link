@@ -152,6 +152,7 @@ class GuildOwnerCommands(commands.Cog):
                                                                                'to update data.',
                                                 destination=ctx.message.channel, sys_msg_title=CONST_SYS_MSG)
 
+
     @uplink.command()
     async def remove(self, ctx):
         data_to_update = {
