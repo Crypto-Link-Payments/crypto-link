@@ -17,6 +17,7 @@ CONST_ROLE_CREATION_ERROR = "__Role creation error___"
 CONST_ROLE_STATUS_CHANGE_ERROR = "__Role status change error__"
 CONST_SYSTEM_ERROR = '__System Message error__'
 CONST_ROLE_STATUS_CHANGE = '__Role status change error__'
+CONST_BAD_ARGUMENT_ROLE = "You have provided bad argument for Role parameter. Use @ in-front of the role name and tag it"
 
 
 class MerchantCommunityOwner(commands.Cog):
@@ -662,8 +663,8 @@ class MerchantCommunityOwner(commands.Cog):
             message = "In order for system to be able to delete role, bot requires **manage role** permission"
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
         elif isinstance(error, commands.BadArgument):
-            message = "You have provided bad argument for Role parameter. Use @ in-front of the role name and tag it"
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_BAD_ARGUMENT_ROLE, destination=0)
 
     @delete_role.error
     async def community_tole_check_error(self, ctx, error):
@@ -676,8 +677,7 @@ class MerchantCommunityOwner(commands.Cog):
     @stop_role.error
     async def stop_role_error(self, ctx, error):
         if isinstance(error, commands.BadArgument):
-            message = "You have provided bad argument for Role parameter. Use @ in-front of the role name and tag it"
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_BAD_ARGUMENT_ROLE, destination=0)
         elif isinstance(error, commands.CheckFailure):
             message = 'In order to be able to deactivate role you need to execute the function on public channel ' \
                       ' and be the owner of the community. Please try again and if issue persist contact staff.'
@@ -686,8 +686,7 @@ class MerchantCommunityOwner(commands.Cog):
     @start_role.error
     async def start_role_error(self, ctx, error):
         if isinstance(error, commands.BadArgument):
-            message = "You have provided bad argument for Role parameter. Use @ in-front of the role name and tag it"
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+            await customMessages.system_message(ctx=ctx, color_code=1, message=CONST_BAD_ARGUMENT_ROLE, destination=0)
         elif isinstance(error, commands.CheckFailure):
             message = 'In order to be able to re-activate role you need to execute the function on public channel ' \
                       ' and be the owner of the community. Please try again and if issue persist contact staff.'
