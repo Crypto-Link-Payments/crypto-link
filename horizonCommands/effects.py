@@ -12,6 +12,7 @@ from horizonCommands.utils.customMessages import send_effects, send_effect_detai
 custom_messages = CustomMessages()
 
 CONST_ACCOUNT_ERROR = '__Account Not Registered__'
+CONST_EFFECTS = 'There are more effects so please user Stellar Laboratory for complete overview'
 
 
 class HorizonEffects(commands.Cog):
@@ -68,6 +69,8 @@ class HorizonEffects(commands.Cog):
                     if counter <= 2:
                         await send_effect_details(destination=ctx.message.author, effect=effect)
                         counter += 1
+                    else:
+                        await ctx.author.send(content=CONST_EFFECTS)
             except BadRequestError as e:
                 extras = e.extras
                 await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
@@ -90,7 +93,8 @@ class HorizonEffects(commands.Cog):
                     await send_effect_details(destination=ctx.message.author, effect=effect)
                     counter += 1
                 else:
-                    pass
+                    await ctx.author.send(content=CONST_EFFECTS)
+
         except BadRequestError as e:
             extras = e.extras
             await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
@@ -108,7 +112,7 @@ class HorizonEffects(commands.Cog):
                     await send_effect_details(destination=ctx.message.author, effect=effect)
                     counter += 1
                 else:
-                    pass
+                    await ctx.author.send(content=CONST_EFFECTS)
         except BadRequestError as e:
             extras = e.extras
             await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
@@ -126,7 +130,7 @@ class HorizonEffects(commands.Cog):
                     await send_effect_details(destination=ctx.message.author, effect=effect)
                     counter += 1
                 else:
-                    pass
+                    await ctx.author.send(content=CONST_EFFECTS)
         except BadRequestError as e:
             extras = e.extras
             await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
