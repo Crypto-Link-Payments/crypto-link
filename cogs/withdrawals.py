@@ -1,5 +1,4 @@
 import time
-import re
 from discord.ext import commands
 from discord import TextChannel
 
@@ -14,7 +13,6 @@ notify_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_WITHDRAWAL_ERROR = "__Withdrawal error___"
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
-CONST_REG_SEARCH = "[~!#$%^&*()_+{}:;\']"
 
 
 class WithdrawalCommands(commands.Cog):
@@ -53,10 +51,10 @@ class WithdrawalCommands(commands.Cog):
         strip_address = address.strip()
 
         # check strings, stellar address and token integration status
-        if self.help_functions.check_public_key(address=strip_address) and not re.search(CONST_REG_SEARCH,
-                                                                                         strip_address):
+        if self.help_functions.check_public_key(
+                address=strip_address) and not self.help_functions.check_for_special_char(string=strip_address):
             if strip_address != self.bot.backoffice.stellar_wallet.public_key:
-                if not re.search(CONST_REG_SEARCH, token) and token in self.list_of_coins:
+                if not self.help_functions.check_for_special_char(string=token) and token in self.list_of_coins:
 
                     # get and convert coin withdrawal fee from major to atomic
                     all_coin_fees = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')[
@@ -292,7 +290,7 @@ class WithdrawalCommands(commands.Cog):
         """
 
         strip_address = address.strip()
-        if self.help_functions.check_public_key(address=address) and not re.search(CONST_REG_SEARCH, strip_address):
+        if self.help_functions.check_public_key(address=address) and not self.help_functions.check_for_special_char(string=strip_address):
             if strip_address != self.bot.backoffice.stellar_wallet.public_key:
                 # Get the fee for stellar withdrawal
                 stellar_fee = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')['fee_list']['xlm']

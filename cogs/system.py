@@ -28,6 +28,7 @@ CONST_CORP_TRANSFER_ERROR_TITLE = '__Corporate Transfer Error__'
 CONST_MERCHANT_LICENSE_CHANGE = '__Merchant monthly license change information__'
 CONST_WARNING_TITLE = f':warning: __Restricted area__ :warning: '
 CONST_WARNING_MESSAGE = f'You do not have rights to access this are of the bot'
+CONST_FEE_INFO = '__Stellar Lumen withdrawal fee information__'
 
 # Extensions integrated into Crypto Link
 extensions = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
@@ -561,20 +562,17 @@ class BotManagementCommands(commands.Cog):
             }
             if self.backoffice.bot_manager.manage_fees_and_limits(key='withdrawals', data_to_update=fee_data):
                 message = f'You have successfully set Stellar Lumen withdrawal fee to be {rounded}$.'
-                title = '__Stellar Lumen withdrawal fee information__'
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
-                                                     sys_msg_title=title)
+                                                     sys_msg_title=CONST_FEE_INFO)
             else:
                 message = f'There has been an error while trying to set Stellar Lumen withdrawal fee to {rounded}$.' \
                           f'Please try again later or contact system administrator!'
-                title = '__Stellar Lumen withdrawal fee information__'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                     sys_msg_title=title)
+                                                     sys_msg_title=CONST_FEE_INFO)
         else:
             message = f'Coin {ticker} not listed yet'
-            title = '__Stellar Lumen withdrawal fee information__'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
+                                                 sys_msg_title=CONST_FEE_INFO)
 
     @change.command()
     async def min_merchant_transfer(self, ctx, value: float):
@@ -657,19 +655,19 @@ class BotManagementCommands(commands.Cog):
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
 
     @system.error
-    async def system_error(self, ctx, error):
+    async def sys_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
 
     @cogs.error
-    async def manage_error(self, ctx, error):
+    async def mng_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
 
     @hot.error
-    async def hot_error(self, ctx, error):
+    async def h_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)

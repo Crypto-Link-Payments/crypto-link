@@ -8,7 +8,7 @@ from stellar_sdk.exceptions import BadRequestError, MemoInvalidException, BadRes
     NotFoundError
 from discord import Colour, Member
 from discord.ext import commands
-from utils.customCogChecks import has_wallet, user_has_second_level , is_dm, is_public, user_has_no_second
+from utils.customCogChecks import has_wallet, user_has_second_level, is_dm, is_public, user_has_no_second
 from cogs.utils.systemMessaages import CustomMessages
 from utils.securityManager import SecurityManager
 from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
@@ -19,6 +19,9 @@ from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message
 
 security_manager = SecurityManager()
 custom_messages = CustomMessages()
+
+CONST_DEV_FEE_ERROR = ':warning: Dev Fee Error :warning:'
+
 
 
 def check(author):
@@ -87,8 +90,6 @@ class LevelTwoAccountCommands(commands.Cog):
                     err += "Insufficient Funds\n"
                 elif error == "op_no_destination":
                     err += "Destination address does not exist or has not been activate yet"
-        else:
-            pass
         return err
 
     def check_user_wallet_layer_level(self, layer, user_id):
@@ -120,10 +121,10 @@ class LevelTwoAccountCommands(commands.Cog):
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
-        elif layer == 2:
-            # Details for transaction to level 2 wallet
+        elif layer == 3:
+            # Details for transaction to level 3 wallet
             user_data = {
-                "address": self.backoffice.second_level_manager.get_custodial_hot_wallet_addr(user_id=user_id),
+                "address": self.backoffice.get_third_hot_wallet_addr.get_custodial_hot_wallet_addr(user_id=user_id),
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
@@ -133,7 +134,6 @@ class LevelTwoAccountCommands(commands.Cog):
         """
         Place Transaction on the network
         """
-        net_value = tx_data["netValue"]
         key_pair = Keypair.from_secret(private_key)
         source_account = self.backoffice.stellar_wallet.server.load_account(key_pair.public_key)
         tx = TransactionBuilder(
@@ -399,14 +399,13 @@ class LevelTwoAccountCommands(commands.Cog):
                                     message = f'Dev fee is not allowed to be less than 0 or 0. It will be skipped.'
                                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                          destination=0,
-                                                                         sys_msg_title=':warning: Dev Fee Error '
-                                                                                       ':warning:')
+                                                                         sys_msg_title=CONST_DEV_FEE_ERROR)
                             except ValueError:
                                 message = f'{dev_fee_answ} could not be converted to number and will therefore be ' \
                                           f'skipped.'
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                      destination=0,
-                                                                     sys_msg_title=':warning: Dev Fee Error :warning:')
+                                                                     sys_msg_title=CONST_DEV_FEE_ERROR)
                         else:
                             message = f'Dev Fee will not be appended to transaction. '
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -472,13 +471,7 @@ class LevelTwoAccountCommands(commands.Cog):
 
                                 # Process result returned from stream
                                 if result[0]:
-                                    if wallet_level == 1 and ctx.message.author.id != recipient:
-                                        await recipient_incoming_notification(recipient=recipient,
-                                                                              sender=ctx.message.author,
-                                                                              wallet_level=wallet_level, data=data,
-                                                                              response=result[1])
-
-                                    elif wallet_level == 2 and ctx.message.author.id != recipient:
+                                    if ctx.message.author.id != recipient:
                                         await recipient_incoming_notification(recipient=recipient,
                                                                               sender=ctx.message.author,
                                                                               wallet_level=wallet_level, data=data,
@@ -564,11 +557,11 @@ class LevelTwoAccountCommands(commands.Cog):
                             message = f'Dev fee is not allowed to be less than 0 or 0. It will be skipped.'
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                                  destination=0,
-                                                                 sys_msg_title=':warning: Dev Fee Error :warning:')
+                                                                 sys_msg_title=CONST_DEV_FEE_ERROR)
                     except ValueError:
                         message = f'{dev_fee_answ} could not be converted to number and will therefore be skipped'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                             sys_msg_title=':warning: Dev Fee Error :warning:')
+                                                             sys_msg_title=CONST_DEV_FEE_ERROR)
                 else:
                     message = f'Dev Fee will not be appended to transaction. '
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -751,7 +744,7 @@ class LevelTwoAccountCommands(commands.Cog):
                       f'`{error}`'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
-        elif isinstance(error,TimeoutError):
+        elif isinstance(error, TimeoutError):
             title = f':timer: __Transaction Request Expired__ :timer: '
             message = f'It took you to long to answer. Please try again, follow guidelines and stay inside ' \
                       f'time-limits'

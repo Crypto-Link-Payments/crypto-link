@@ -8,7 +8,7 @@ from cogs.utils.systemMessaages import CustomMessages
 customMessages = CustomMessages()
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
-
+CONST_SYS_ERROR = '__System error__'
 
 class GuildOwnerCommands(commands.Cog):
     def __init__(self, bot):
@@ -67,7 +67,7 @@ class GuildOwnerCommands(commands.Cog):
                                                 destination=ctx.message.author, sys_msg_title='__System Message__')
         else:
             await customMessages.system_message(ctx=ctx, color_code=1, message='Guild already registered',
-                                                destination=ctx.message.channel, sys_msg_title='__System error__')
+                                                destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
 
     @owner.command()
     @commands.check(guild_has_stats)
@@ -148,7 +148,7 @@ class GuildOwnerCommands(commands.Cog):
         else:
             await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue while trying'
                                                                                'to update data.',
-                                                destination=ctx.message.channel, sys_msg_title='__System error__')
+                                                destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
 
     @uplink.command()
     async def remove(self, ctx):
@@ -165,7 +165,7 @@ class GuildOwnerCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue and Crypto Link'
                                                                                ' Network Feed could not be turned OFF.'
                                                                                'Please try again later',
-                                                destination=ctx.message.channel, sys_msg_title='__System error__')
+                                                destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
 
 
 def setup(bot):

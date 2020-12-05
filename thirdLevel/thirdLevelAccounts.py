@@ -5,7 +5,6 @@ Owners of the community can pay a one time monthly fee which allows them to make
 from Merchant wallet to their won upon withdrawal.
 """
 
-import re
 import asyncio
 from discord.ext import commands
 from discord import Colour, Member, Embed
@@ -42,7 +41,8 @@ class LevelThreeAccountCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.server = self.backoffice.stellar_wallet.server
+        self.hot_wallet = self.backoffice.stellar_wallet
+        self.server = self.hot_wallet.server
         self.acc_mng_rd_lvl = self.backoffice.third_level_manager
         self.supported = list(integrated_coins.keys())
         self.available_levels = [1, 2, 3]
@@ -103,15 +103,6 @@ class LevelThreeAccountCommands(commands.Cog):
                 "memo": None
             }
             return user_data
-
-    def check_if_acc_is_live(self, address: str):
-        try:
-            self.server.load_account(account_id=address)
-            return True
-        except NotFoundError:
-            return False
-        except Ed25519PublicKeyInvalidError:
-            return False
 
     @staticmethod
     def process_operations(operations: list):
@@ -507,7 +498,7 @@ class LevelThreeAccountCommands(commands.Cog):
                                                                                    user_id=recipient.id)
 
                         # Check if account is live on network
-                        if self.check_if_acc_is_live(address=recipient_data["address"]):
+                        if self.hot_wallet.check_if_account_activated(address=recipient_data["address"]):
                             # get sender details
                             sender = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
 
@@ -607,14 +598,12 @@ class LevelThreeAccountCommands(commands.Cog):
         """
         Create XDR payment envelope to be used for signing to some other users than discord
         """
-        fee_atomic = 0
         atomic_amount = int(amount * (10 ** 7))
-        dev_fee_activated = False
 
         if atomic_amount >= 100:
             # Get sender hot wallet
             if self.help_functions.check_public_key(address=public_address):
-                if self.check_if_acc_is_live(address=public_address):
+                if self.hot_wallet.check_if_account_activated(address=public_address):
                     user_address = self.acc_mng_rd_lvl.get_third_hot_wallet_addr(user_id=int(ctx.author.id))
                     if public_address != user_address:
                         if public_address != self.bot.backoffice.stellar_wallet.public_key:
@@ -715,9 +704,8 @@ class LevelThreeAccountCommands(commands.Cog):
                 # Gets private key from user response
                 private_key_response = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=30)
                 private_key = private_key_response.content.upper()
-                if self.help_functions.check_private_key(private_key=private_key) and not re.search(
-                        "[~!#$%^&*()_+{}:;\']",
-                        private_key):
+                if self.help_functions.check_private_key(
+                        private_key=private_key) and not self.help_functions.check_for_special_char(private_key):
                     await self.show_typing(ctx)
 
                     result = self.stream_transaction_from_envelope(private_key=private_key, xdr_string=xdr_envelope)

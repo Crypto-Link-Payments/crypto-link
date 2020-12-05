@@ -25,7 +25,6 @@ class HorizonPayments(commands.Cog):
         if query_key == 'address':
             desc = f'Detail for:\n' \
                    f':map:`{user_query}`'
-            pass
         elif query_key == "ledger":
             desc = f'Detail for :ledger: {user_query}'
         elif query_key == 'transaction hash':
