@@ -58,6 +58,14 @@ class StellarWallet:
         else:
             return result_code
 
+    def check_if_account_activate(self, address):
+        "Try to load account on the network"
+        try:
+            self.server.load_account(account_id=address)
+            return True
+        except NotFoundError:
+            return False
+
     def get_stellar_hot_wallet_details(self):
         """
         Return the stellar hot wallet balance
