@@ -5,7 +5,7 @@ from discord import errors
 from discord import Role, Embed, Colour, TextChannel
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
-CONST_HASH_STR = ':hash: Tx hash :hash: '
+CONST_HASH_STR = ':hash: Transaction Hash :hash: '
 
 
 class CustomMessages:
@@ -68,7 +68,7 @@ class CustomMessages:
                          inline=False)
         notify.add_field(name='From',
                          value=f'{tx_details["source_account"]}', inline=False)
-        notify.add_field(name='Tx hash',
+        notify.add_field(name=CONST_HASH_STR,
                          value=f'{tx_details["hash"]}')
         notify.add_field(name='Deposit Value',
                          value=f"Amount: {int(tx_details['asset_type']['amount']) / 10000000:9.7f} {tx_details['asset_type']['code']}",
