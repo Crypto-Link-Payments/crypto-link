@@ -68,8 +68,6 @@ class HorizonEffects(commands.Cog):
                     if counter <= 2:
                         await send_effect_details(destination=ctx.message.author, effect=effect)
                         counter += 1
-                    else:
-                        pass
             except BadRequestError as e:
                 extras = e.extras
                 await horizon_error_msg(destination=ctx.message.author, error=extras["reason"])
