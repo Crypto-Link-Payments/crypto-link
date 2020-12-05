@@ -56,7 +56,6 @@ def convert_to_usd(amount, coin_name):
         }
         return details
 
-
 def get_normal(value, decimal_point: int):
     """
     Converts from minor to major
