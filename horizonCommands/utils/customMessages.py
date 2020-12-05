@@ -1,6 +1,7 @@
 from discord import Embed, Colour
 from re import sub
 
+CONST_HASH = ':hash: Transaction Hash :hash:'
 CONST_PAG = ':white_circle: Paging Token :white_circle: '
 
 
@@ -205,7 +206,7 @@ async def tx_info_for_account(destination, record: dict, signers: str, memo, dat
     account_record.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
                              value=signers,
                              inline=False)
-    account_record.add_field(name=':hash: Hash :hash: ',
+    account_record.add_field(name=CONST_HASH,
                              value=f'`{record["hash"]}`',
                              inline=False)
     account_record.add_field(name=':money_with_wings: Fee :money_with_wings: ',
@@ -244,7 +245,7 @@ async def tx_info_for_hash(destination, data: dict, signatures, date: str, memo)
     single_info.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
                           value=signatures,
                           inline=False)
-    single_info.add_field(name=':hash: Hash :hash: ',
+    single_info.add_field(name=CONST_HASH,
                           value=f'`{data["hash"]}`',
                           inline=False)
     single_info.add_field(name=':money_with_wings: Fee :money_with_wings: ',
@@ -316,7 +317,7 @@ async def tx_info_for_ledger(destination, ledger_id, record: dict, signatures, d
     ledger_record.add_field(name=f':pen_ballpoint: Signers :pen_ballpoint: ',
                             value=signatures,
                             inline=False)
-    ledger_record.add_field(name=':hash: Hash :hash: ',
+    ledger_record.add_field(name=CONST_HASH,
                             value=f'`{record["hash"]}`',
                             inline=False)
     ledger_record.add_field(name=f':sunrise: Horizon Link :sunrise:',
@@ -422,7 +423,7 @@ async def send_payments_details(destination, record, action_name):
     ledger_record.add_field(name=':cowboy:  Recipient :cowboy:  ',
                             value=f'```{record["to"]}```',
                             inline=False)
-    ledger_record.add_field(name=':hash: Transaction Hash :hash: ',
+    ledger_record.add_field(name=CONST_HASH,
                             value=f'`{record["transaction_hash"]}`',
                             inline=False)
     ledger_record.add_field(name=':moneybag:  Amount :moneybag:  ',
