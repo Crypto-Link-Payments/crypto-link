@@ -9,7 +9,8 @@ from datetime import datetime
 from discord import Embed, Colour
 from discord.ext import commands
 from git import Repo, InvalidGitRepositoryError
-from cogs.utils.monetaryConversions import get_decimal_point, get_normal, get_rates, convert_to_currency
+from cogs.utils.monetaryConversions import get_normal, get_rates, convert_to_currency
+
 from utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -118,9 +119,8 @@ class BotManagementCommands(commands.Cog):
         for bal in data:
             ticker = bal['ticker']
             print(ticker)
-            decimal = get_decimal_point(ticker)
             conversion = int(bal["balance"])
-            normal = get_normal(conversion, decimal)
+            normal = get_normal(conversion, 7)
             values.add_field(name=ticker.upper(),
                              value=f'{normal}',
                              inline=False)
@@ -209,7 +209,7 @@ class BotManagementCommands(commands.Cog):
                     # Deduct the balance from the community balance
                     if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=balance, wallet="xlm", direction=2):
                         # Store in history and send notifications to owner and to channel
-                        dec_point = get_decimal_point(symbol='xlm')
+                        dec_point = 7
                         normal_amount = get_normal(str(balance), decimal_point=dec_point)
 
                         # Store into the history of corporate transfers

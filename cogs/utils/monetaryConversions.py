@@ -56,15 +56,6 @@ def convert_to_usd(amount, coin_name):
         }
         return details
 
-
-def get_decimal_point(symbol):
-    """
-    Get decimal points based on symbol
-    """
-    print(symbol)
-    return 7
-
-
 def get_normal(value, decimal_point: int):
     """
     Converts from minor to major
@@ -80,41 +71,5 @@ def get_normal(value, decimal_point: int):
     return s
 
 
-def get_in_micro(size, decimal_point: int):
-    """
-    Converts from major units to minor
-    """
-    str_amount = str(size)
-    fraction_size = 0
-
-    if '.' in str_amount:
-
-        point_index = str_amount.index('.')
-
-        fraction_size = len(str_amount) - point_index - 1
-
-        while fraction_size < decimal_point and '0' == str_amount[-1]:
-            str_amount = str_amount[:-1]
-            fraction_size = fraction_size - 1
-
-        if decimal_point < fraction_size:
-            return False
-
-        str_amount = str_amount[:point_index] + str_amount[point_index + 1:]
-
-    if not str_amount:
-        return False
-
-    if fraction_size < decimal_point:
-        str_amount = str_amount + '0' * (decimal_point - fraction_size)
-
-    return str_amount
-
-
 def rate_converter(amount, rate):
-    return round(float(amount * rate), 6)
-
-
-def scientific_conversion(value, decimals):
-    formatted = (f'%.{decimals}f' % value)
-    return formatted
+    return round(float(amount * rate), 7)
