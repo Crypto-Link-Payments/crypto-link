@@ -3,11 +3,9 @@ from datetime import datetime
 import discord
 from discord import errors
 from discord import Role, Embed, Colour, TextChannel
-from utils.tools import Helpers
 
-helper = Helpers()
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
-notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
+CONST_HASH_STR = ':hash: Tx hash :hash: '
 
 
 class CustomMessages:
@@ -21,7 +19,8 @@ class CustomMessages:
         """
         pass
 
-    def filter_message(self, message, tx_type: str):
+    @staticmethod
+    def filter_message(message, tx_type: str):
         msg_streamed = ''
         if tx_type == 'public':
             msg_streamed += message
@@ -46,7 +45,8 @@ class CustomMessages:
 
         return msg_streamed
 
-    def get_emoji(self, tx_type):
+    @staticmethod
+    def get_emoji(tx_type):
         if tx_type == 'public':
             emoji = ':cowboy:'
         elif tx_type == 'private':
@@ -225,14 +225,14 @@ class CustomMessages:
                                   description=f'Deposit processed successfully!',
                                   colour=Colour.dark_purple(),
                                   timestamp=datetime.utcnow())
-        sys_embed.add_field(name='From',
+        sys_embed.add_field(name=':map: From :map: ',
                             value=f'{tx_details["source_account"]}', inline=False)
-        sys_embed.add_field(name='Tx hash',
+        sys_embed.add_field(name=CONST_HASH_STR,
                             value=f'{tx_details["hash"]}',
                             inline=False)
-        sys_embed.add_field(name=f'Asset',
+        sys_embed.add_field(name=f':gem: Asset :gem: ',
                             value=f'{tx_details["asset_type"]["code"]}')
-        sys_embed.add_field(name="Amount",
+        sys_embed.add_field(name=":moneybag: Amount :moneybag: ",
                             value=f"{int(tx_details['asset_type']['amount']) / 10000000:9.7f}",
                             inline=False)
         await recipient.send(embed=sys_embed)
@@ -250,7 +250,7 @@ class CustomMessages:
         notify.add_field(name=':map: Destination :map: ',
                          value=f'```{withdrawal_data["destination"]}```',
                          inline=False)
-        notify.add_field(name=':hash: Transaction hash :hash: ',
+        notify.add_field(name=CONST_HASH_STR,
                          value=f'`{withdrawal_data["hash"]}`',
                          inline=False)
         notify.add_field(name=':receipt: Withdrawal asset details :receipt: ',
