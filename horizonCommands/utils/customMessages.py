@@ -1,6 +1,8 @@
 from discord import Embed, Colour
 from re import sub
 
+CONST_PAG = ':white_circle: Paging Token :white_circle: '
+
 
 async def horizon_error_msg(destination, error):
     horizon_err = Embed(title=f':exclamation: Horizon API error :exclamation:',
@@ -189,7 +191,7 @@ async def tx_info_for_account(destination, record: dict, signers: str, memo, dat
                            colour=Colour.dark_orange())
     account_record.add_field(name=':ledger: Ledger :ledger: ',
                              value=f'`{record["ledger"]}`')
-    account_record.add_field(name=':white_circle: Paging Token :white_circle: ',
+    account_record.add_field(name=CONST_PAG,
                              value=f'`{record["paging_token"]}`')
     account_record.add_field(name=f':calendar: Created :calendar: ',
                              value=f'`{date}`',
@@ -227,7 +229,7 @@ async def tx_info_for_hash(destination, data: dict, signatures, date: str, memo)
                           value=f'[Transaction Hash]({data["_links"]["self"]["href"]})')
     single_info.add_field(name=':ledger: Ledger :ledger: ',
                           value=f'`{data["ledger"]}`')
-    single_info.add_field(name=':white_circle: Paging Token :white_circle: ',
+    single_info.add_field(name=CONST_PAG,
                           value=f'`{data["paging_token"]}`',
                           inline=True)
     single_info.add_field(name=f':calendar: Created :calendar: ',
@@ -299,7 +301,7 @@ async def tx_info_for_ledger(destination, ledger_id, record: dict, signatures, d
     """
     ledger_record = Embed(title=f':record_button: Record for {ledger_id} :record_button:',
                           colour=Colour.dark_orange())
-    ledger_record.add_field(name=':white_circle: Paging Token :white_circle: ',
+    ledger_record.add_field(name=CONST_PAG,
                             value=f'`{record["paging_token"]}`',
                             inline=False)
     ledger_record.add_field(name=f':calendar: Created :calendar: ',
@@ -412,7 +414,7 @@ async def send_payments_details(destination, record, action_name):
                           colour=Colour.dark_orange())
     ledger_record.add_field(name=f':calendar: Date and time :calendar: ',
                             value=f'`{record["created_at"]}`')
-    ledger_record.add_field(name=':white_circle: Paging Token :white_circle: ',
+    ledger_record.add_field(name=CONST_PAG,
                             value=f'`{record["paging_token"]}`')
     ledger_record.add_field(name=f':map: Source account :map:',
                             value=f'```{record["source_account"]}```',
