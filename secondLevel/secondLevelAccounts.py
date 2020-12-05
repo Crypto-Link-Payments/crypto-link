@@ -120,10 +120,10 @@ class LevelTwoAccountCommands(commands.Cog):
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
-        elif layer == 2:
-            # Details for transaction to level 2 wallet
+        elif layer == 3:
+            # Details for transaction to level 3 wallet
             user_data = {
-                "address": self.backoffice.second_level_manager.get_custodial_hot_wallet_addr(user_id=user_id),
+                "address": self.backoffice.get_third_hot_wallet_addr.get_custodial_hot_wallet_addr(user_id=user_id),
                 "memo": self.backoffice.account_mng.get_user_memo(user_id=user_id)["stellarDepositId"]
             }
             return user_data
