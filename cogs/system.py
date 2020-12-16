@@ -33,7 +33,7 @@ CONST_FEE_INFO = '__Stellar Lumen withdrawal fee information__'
 # Extensions integrated into Crypto Link
 extensions = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
               'cogs.system', 'cogs.withdrawals',
-              'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.licensing', 'cogs.guildOwners']
+              'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners']
 
 
 class BotManagementCommands(commands.Cog):
