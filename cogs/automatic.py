@@ -6,32 +6,25 @@ import os
 import sys
 
 from colorama import Fore
-from discord import Embed, Colour, TextChannel
+from discord import Embed, Colour
 from discord.ext import commands
 from discord.errors import HTTPException
 from datetime import datetime
 
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
-from utils.customCogChecks import is_dm
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
-helpers = Helpers()
 custom_messages = CustomMessages()
-
-d = helpers.read_json_file(file_name='botSetup.json')
-auto_messaging = helpers.read_json_file(file_name='autoMessagingChannels.json')
-KAVIC_ID = 455916314238648340
-ANIMUS_ID = 360367188432912385
 
 
 class AutoFunctions(commands.Cog):
     def __init__(self, bot):
+        self.bot_channels = bot.backoffice.auto_messaging_channels
         self.bot = bot
-        self.channel_id = auto_messaging["bug"]
-        self.animus_id = d["creator"]
+        self.animus_id = bot.backoffice.creator_id
+        self.command_string = bot.get_command_str()
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, exception):
@@ -41,7 +34,7 @@ class AutoFunctions(commands.Cog):
         if isinstance(exception, commands.CommandNotFound):
             title = 'System Command Error'
             message = f':no_entry: Sorry, this command does not exist! Please' \
-                      f'type `{d["command"]}help` to check available commands.'
+                      f'type `{self.bot.co}help` to check available commands.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
         elif isinstance(exception, commands.CommandOnCooldown):
@@ -64,7 +57,7 @@ class AutoFunctions(commands.Cog):
             if isinstance(exception, commands.CheckFailure):
                 print('Check failure occurred')
             else:
-                bug_channel = self.bot.get_channel(id=int(self.channel_id))
+                bug_channel = self.bot.get_channel(id=int(self.bot_channels["bug"]))
 
                 animus = await self.bot.fetch_user(user_id=int(self.animus_id))
                 bug_info = Embed(title=f':new: :bug: :warning: ',
@@ -99,8 +92,8 @@ class AutoFunctions(commands.Cog):
                                       f" {self.bot.user.name}, where you can make payments,"
                                       f" donations, or tips over Discord. System Allows as well to purchase guild"
                                       f" roles so contact owner to find more info."
-                                      f"and other discord users. To get started use command ***{d['command']}help***"
-                                      f" or ***{d['command']}help get_started***.",
+                                      f"and other discord users. To get started use command ***{self.command_string}"
+                                      f"help*** or ***{self.command_string}help get_started***.",
                                 inline=False)
             join_info.add_field(name="Terms Of Service",
                                 value="By accessing or using any part of this bot, "
@@ -178,9 +171,9 @@ class AutoFunctions(commands.Cog):
                             value=f'{guild.member_count}',
                             inline=False)
 
-        animus = await self.bot.fetch_user(user_id=int(ANIMUS_ID))
+        animus = await self.bot.fetch_user(user_id=int(self.animus_id))
 
-        channel_id = auto_messaging["sys"]
+        channel_id = self.bot_channels["sys"]
         dest = self.bot.get_channel(id=int(channel_id))
         await dest.send(embed=new_guild, content=f'{animus.mention}')
 
@@ -235,14 +228,11 @@ class AutoFunctions(commands.Cog):
         removed_guild.add_field(name='Member Count',
                                 value=f'{guild.member_count}',
                                 inline=False)
+        animus = await self.bot.fetch_user(user_id=int(self.animus_id))
 
-        kavic = await self.bot.fetch_user(user_id=int(KAVIC_ID))
-        animus = await self.bot.fetch_user(user_id=int(ANIMUS_ID))
+        dest = self.bot.get_channel(id=int(self.bot_channels["sys"]))
 
-        channel_id = auto_messaging["sys"]
-        dest = self.bot.get_channel(id=int(channel_id))
-
-        await dest.send(embed=removed_guild, content=f'{kavic.mention} {animus.mention}')
+        await dest.send(embed=removed_guild, content=f'{animus.mention}')
 
         print(
             Fore.LIGHTYELLOW_EX + '===================================\nGlobal Stats Updated'
