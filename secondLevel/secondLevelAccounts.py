@@ -11,6 +11,7 @@ from discord.ext import commands
 from utils.customCogChecks import has_wallet, user_has_second_level, is_dm, is_public, user_has_no_second
 from cogs.utils.systemMessaages import CustomMessages
 from utils.securityManager import SecurityManager
+from utils.customCogChecks import check
 from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
 from secondLevel.utils.secondLevelCustMsg import account_layer_selection_message, sign_message_information, \
     send_transaction_report, \
@@ -21,24 +22,6 @@ security_manager = SecurityManager()
 custom_messages = CustomMessages()
 
 CONST_DEV_FEE_ERROR = ':warning: Dev Fee Error :warning:'
-
-
-
-def check(author):
-    """
-    Check for author
-    """
-
-    def inner_check(message):
-        """
-        Check for answering the verification message on withdrawal. Author origin
-        """
-        if message.author.id == author.id:
-            return True
-        else:
-            return False
-
-    return inner_check
 
 
 class LevelTwoAccountCommands(commands.Cog):
