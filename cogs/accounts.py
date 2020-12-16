@@ -9,7 +9,7 @@ from utils.tools import Helpers
 
 helper = Helpers()
 custom_messages = CustomMessages()
-hot_wallets = helper.read_json_file(file_name='hotWallets.json')
+# Move this to class
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_ACC_REG_STATUS = '__Account registration status__'
@@ -44,7 +44,7 @@ class UserAccountCommands(commands.Cog):
                             timestamp=utc_now)
         acc_details.set_author(name=f'Discord Account details', icon_url=ctx.author.avatar_url)
         acc_details.add_field(name=":map: Wallet address :map: ",
-                              value=f"```{hot_wallets['xlm']}```")
+                              value=f"```{self.backoffice.stellar_wallet.public_key}```")
         acc_details.add_field(name=":compass: MEMO :compass: ",
                               value=f"```{wallet_data['depositId']}```",
                               inline=False)
@@ -155,7 +155,7 @@ class UserAccountCommands(commands.Cog):
             deposit_embed.add_field(
                 name=f' {CONST_STELLAR_EMOJI} Stellar wallet Deposit Details {CONST_STELLAR_EMOJI}',
                 value=f'\n:map: Public Address :map: \n'
-                      f'```{hot_wallets["xlm"]}```\n'
+                      f'```{self.backoffice.stellar_wallet.public_key}```\n'
                       f':compass: MEMO :compass:\n'
                       f'> {user_profile["stellarDepositId"]}',
                 inline=False)
