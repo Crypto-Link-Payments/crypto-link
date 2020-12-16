@@ -5,12 +5,9 @@ from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 
-helper = Helpers()
 custom_messages = CustomMessages()
 # Move this to class
-integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_ACC_REG_STATUS = '__Account registration status__'
 CONST_TRUST_ERROR = ':warning: __Trustline error__ :warning:'
@@ -21,7 +18,7 @@ class UserAccountCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.list_of_coins = list(integrated_coins.keys())
+        self.list_of_coins = list(self.backoffice.integrated_coins.keys())
 
     @commands.command()
     @commands.check(has_wallet)
@@ -177,7 +174,7 @@ class UserAccountCommands(commands.Cog):
     @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
-        coin_data = helper.read_json_file(file_name='integratedCoins.json')
+        coin_data = self.backoffice.integrated_coins
         if user_balances:
             all_wallets = list(user_balances.keys())
 
