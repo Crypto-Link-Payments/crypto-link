@@ -4,13 +4,8 @@ import re
 from cogs.utils import monetaryConversions
 from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 
-helper = Helpers()
 custom_messages = CustomMessages()
-
-integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
-
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_TX_ERROR_TITLE = ":exclamation: __Transaction Error__ :exclamation: "
 
@@ -36,7 +31,7 @@ class TransactionCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.backoffice = bot.backoffice
-        self.list_of_coins = list(integrated_coins.keys())
+        self.list_of_coins = list(self.backoffice.integrated_coins.keys())
 
     def build_stats(self, transaction_data: dict, tx_type: str):
         """
@@ -155,7 +150,7 @@ class TransactionCommands(commands.Cog):
         if amount > 0:
             if not ctx.message.author == recipient and not recipient.bot:
                 if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins:
-                    coin_data = integrated_coins[ticker]
+                    coin_data = self.backoffice.integrated_coins[ticker]
                     atomic_value = (int(amount * (10 ** int(coin_data["decimal"]))))
                     # Get user wallet ticker balance
                     wallet_value = self.backoffice.wallet_manager.get_ticker_balance(ticker=ticker,
