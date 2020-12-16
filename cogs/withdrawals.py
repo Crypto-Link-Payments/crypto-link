@@ -9,7 +9,6 @@ from utils.tools import Helpers
 
 helper = Helpers()
 custom_messages = CustomMessages()
-notify_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_WITHDRAWAL_ERROR = "__Withdrawal error___"
 integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
@@ -21,6 +20,7 @@ class WithdrawalCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
+        self.stellar_channel = bot.backoffice.auto_messaging_channels["stellar"]
         self.help_functions = bot.backoffice.helper
 
     @commands.group()
@@ -176,10 +176,9 @@ class WithdrawalCommands(commands.Cog):
                                                                                     on_chain=True)
 
                                             # System channel notification on withdrawal
-                                            channel_id = notify_channel["stellar"]
                                             channel_sys = self.bot.get_channel(
                                                 id=int(
-                                                    channel_id))  # Get the channel wer notification on withdrawal will be sent
+                                                    self.stellar_channel))  # Get the channel wer notification on withdrawal will be sent
 
                                             # Send withdrawal notification to CL system
                                             await custom_messages.withdrawal_notification_channel(ctx=ctx,
@@ -363,10 +362,9 @@ class WithdrawalCommands(commands.Cog):
                                                                             fee=f'{stellar_fee} XLM and')
 
                                     # System channel notification on withdrawal
-                                    channel_id = notify_channel["stellar"]
                                     channel_sys = self.bot.get_channel(
                                         id=int(
-                                            channel_id))  # Get the channel wer notification on withdrawal will be sent
+                                            self.stellar_channel))  # Get the channel wer notification on withdrawal will be sent
 
                                     # Send withdrawal notification to CL system
                                     await custom_messages.withdrawal_notification_channel(ctx=ctx,
