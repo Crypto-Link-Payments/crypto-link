@@ -410,21 +410,18 @@ class MerchantCommunityOwner(commands.Cog):
         :return:
         """
         ticker = 'xlm'
-        # channel_id = auto_channels["merchant"]  # Channel where message will be sent on transfer
         author_id = ctx.message.author.id
         author_name = ctx.message.author
         current_time = datetime.utcnow()
         notification_channel = self.bot.get_channel(id=int(self.merchant_channel_info))
 
-        fee_in_stroops = 0
         merchant_manager = self.backoffice.merchant_manager
-        # Check merchant situation and modify fee accordingly
-        if not merchant_manager.check_community_license_status(community_id=ctx.message.author.id):
-            fee_dollar_details = self.backoffice.bot_manager.get_fees_by_category(key='wallet_transfer')
-            fee_value = fee_dollar_details['fee']  # Get out fee
-            in_stellar = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
-            total = (in_stellar['total'])  # Get total in lumen
-            fee_in_stroops = (int(total * (10 ** 7)))  # Convert to stroops
+
+        fee_dollar_details = self.backoffice.bot_manager.get_fees_by_category(key='wallet_transfer')
+        fee_value = fee_dollar_details['fee']  # Get out fee
+        in_stellar = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
+        total = (in_stellar['total'])  # Get total in lumen
+        fee_in_stroops = (int(total * (10 ** 7)))  # Convert to stroops
 
         # Get the current minimum withdrawal fee in Dollars
         minimum_with_limit = self.backoffice.bot_manager.get_fees_by_category(key='merchant_min')
