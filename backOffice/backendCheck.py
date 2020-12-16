@@ -28,7 +28,6 @@ class BotStructureCheck(object):
                                      "userProfiles",
                                      "MerchantMonetizedRoles",
                                      "MerchantAppliedUsers",
-                                     "MerchantPurchasedLicenses",
                                      "userWallets",
                                      "StellarDeposits",
                                      "StellarWithdrawals",
