@@ -11,13 +11,9 @@ from pycoingecko import CoinGeckoAPI
 
 from utils.customCogChecks import is_public, guild_has_merchant, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 
-helper = Helpers()
 custom_messages = CustomMessages()
 gecko = CoinGeckoAPI()
-sys_channel = helper.read_json_file(file_name='autoMessagingChannels.json')
-
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_MERCHANT_ROLE_ERROR = "__Merchant System Role Error__"
 CONST_MERCHANT_PURCHASE_ERROR = ":warning: __Merchant System Purchase Error__:warning: "
