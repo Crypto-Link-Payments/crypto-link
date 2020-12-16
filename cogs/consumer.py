@@ -25,7 +25,7 @@ class ConsumerCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
-    @commands.group()
+    @commands.group(alieases=["Subscription"])
     @commands.check(guild_has_merchant)
     @commands.check(has_wallet)
     @commands.check(is_public)
@@ -34,19 +34,17 @@ class ConsumerCommands(commands.Cog):
         Entry point for membership connected with merchant system
         """
 
-        title = ':joystick: __Subscription available commands__ :joystick:'
-        description = 'Representation of all available commands under ***membership*** category to purchase' \
-                      ' and monitor roles.'
-        list_of_commands = [
-            {"name": f':circus_tent: Available Roles on {ctx.message.guild} :circus_tent:',
-             "value": f'`{self.command_string}membership roles`'},
-            {"name": f':person_juggling: Gets yourself a role :person_juggling: ',
-             "value": f'`{self.command_string}membership subscribe <@discord Role>`'},
-            {"name": f':man_mage: List active roles :man_mage:',
-             "value": f'`{self.command_string}membership current`'}
-        ]
-
         if ctx.invoked_subcommand is None:
+            title = ':joystick: __Membership available commands__ :joystick:'
+            description = 'Representation of all available commands under ***membership*** category '
+            list_of_commands = [
+                {"name": f':circus_tent: Available Roles on {ctx.message.guild} :circus_tent:',
+                 "value": f'```{self.command_string}membership roles```'},
+                {"name": f':person_juggling: Subscribe for role on community :person_juggling: ',
+                 "value": f'```{self.command_string}membership subscribe <@discord Role>```'},
+                {"name": f':man_mage: List active roles on community:man_mage:',
+                 "value": f'```{self.command_string}membership current```'}
+            ]
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
                                                 destination=1, c=Colour.magenta())
 
