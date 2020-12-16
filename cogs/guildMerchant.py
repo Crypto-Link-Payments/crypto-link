@@ -7,17 +7,15 @@ from utils.customCogChecks import is_owner, has_wallet, is_public, merchant_com_
 from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.monetaryConversions import get_normal
 from cogs.utils.systemMessaages import CustomMessages
-from utils.tools import Helpers
 
-helper = Helpers()
 customMessages = CustomMessages()
-auto_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_ROLE_CREATION_ERROR = "__Role creation error___"
 CONST_ROLE_STATUS_CHANGE_ERROR = "__Role status change error__"
 CONST_SYSTEM_ERROR = '__System Message error__'
 CONST_ROLE_STATUS_CHANGE = '__Role status change error__'
-CONST_BAD_ARGUMENT_ROLE = "You have provided bad argument for Role parameter. Use @ in-front of the role name and tag it"
+CONST_BAD_ARGUMENT_ROLE = "You have provided bad argument for Role parameter. Use @ in-front of " \
+                          "the role name and tag it"
 
 
 class MerchantCommunityOwner(commands.Cog):
@@ -27,6 +25,7 @@ class MerchantCommunityOwner(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.merchant_channel_info = bot.backoffice.auto_messaging_channels["merchant"]
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
@@ -411,10 +410,11 @@ class MerchantCommunityOwner(commands.Cog):
         :return:
         """
         ticker = 'xlm'
-        channel_id = auto_channels["merchant"]  # Channel where message will be sent on transfer
+        # channel_id = auto_channels["merchant"]  # Channel where message will be sent on transfer
         author_id = ctx.message.author.id
         author_name = ctx.message.author
         current_time = datetime.utcnow()
+        notification_channel = self.bot.get_channel(id=int(self.merchant_channel_info))
 
         fee_in_stroops = 0
         merchant_manager = self.backoffice.merchant_manager
@@ -508,7 +508,6 @@ class MerchantCommunityOwner(commands.Cog):
                                                 value=f":moneybag: balance:{balance / 10000000} {CONST_STELLAR_EMOJI}\n"
                                                       f":atm: Net withdrawal: {for_owner / 10000000} {CONST_STELLAR_EMOJI}",
                                                 inline=False)
-                            notification_channel = self.bot.get_channel(id=int(channel_id))
                             await notification_channel.send(embed=corp_info)
 
                         else:
@@ -544,7 +543,7 @@ class MerchantCommunityOwner(commands.Cog):
                                             inline=False)
                         merch_fee.add_field(name='Action Required',
                                             value='Try Again later')
-                        await channel_id.send(embed=merch_fee)
+                        await notification_channel.send(embed=merch_fee)
 
                         sys_msg_title = '__System Withdrawal error__'
                         message = 'There has been an issue with withdrawal from Merchant Corporate account to your ' \
