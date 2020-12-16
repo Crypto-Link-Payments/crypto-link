@@ -33,58 +33,6 @@ class MerchantManager:
         # Collection of applied users in the system
         self.applied_users = self.communities.MerchantAppliedUsers
 
-        # Collection of all applied communities who payed for the fees
-        self.active_licenses = self.communities.MerchantPurchasedLicenses
-
-    def check_community_license_status(self, community_id):
-        """
-        Checks if community has already live license
-        :param community_id:
-        :return:
-        """
-        data = self.active_licenses.find_one({"communityId": int(community_id)})
-        return data
-
-    def get_community_license_details(self, community_id):
-        """
-        Get license details from active community
-        :param community_id:
-        :return:
-        """
-        data = self.active_licenses.find_one({"communityId": int(community_id)},
-                                             {"_id": 0})
-        return data
-
-    def insert_license(self, new_license: dict):
-        """
-        Insert license into directory of active licenses
-        """
-        try:
-            self.active_licenses.insert_one(new_license)
-            return True
-        except errors.PyMongoError:
-            return False
-
-    def get_over_due_communities(self, timestamp: int):
-        """
-        Returns all communities who have expired licenses
-        :param timestamp: unix time stamp
-        :return:
-        """
-        all_communities = list(self.active_licenses.find({"end": {"$lt": timestamp}}))
-        return all_communities
-
-    def remove_over_due_community(self, discord_id):
-        """
-        Removes the overdue from community based on discord id
-        :param discord_id:
-        :return:
-        """
-        try:
-            self.active_licenses.delete_one({'communityId': int(discord_id)})
-            return True
-        except errors.PyMongoError:
-            return False
 
     def check_if_community_exist(self, community_id: int):
         """
