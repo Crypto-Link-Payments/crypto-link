@@ -48,18 +48,16 @@ class ConsumerCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, data=list_of_commands, description=description,
                                                 destination=1, c=Colour.magenta())
 
-    @membership.command()
+    @membership.command(aliases=["live"])
     @commands.check(is_public)
     async def current(self, ctx):
         """
-        Returns information on current membership details
+        Returns information on current membership details user currently has active
         """
         author = ctx.message.author.id
         community = ctx.message.guild.id
 
-        merchant_manager = self.backoffice.merchant_manager
-
-        roles = merchant_manager.check_user_roles(user_id=author, discord_id=community)
+        roles = self.backoffice.merchant_manager.check_user_roles(user_id=author, discord_id=community)
         if roles:
             for role in roles:
                 value_in_stellar = round(int(role['atomicValue']) / 10000000, 7)
@@ -92,7 +90,7 @@ class ConsumerCommands(commands.Cog):
 
                 await ctx.author.send(embed=role_embed)
         else:
-            message = f"You have not purchased any roles on {ctx.message.guild}, or all of them have expired."
+            message = f"You have no active roles on {ctx.message.guild}, or all of them have expired."
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
