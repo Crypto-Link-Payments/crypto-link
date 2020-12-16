@@ -25,21 +25,6 @@ class ConsumerCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
-    @staticmethod
-    def get_coin_usd_value(coin_name):
-        """
-        Get the USD coin value
-        :param coin_name:
-        :return:
-        """
-        if coin_name == 'xlm':
-            return gecko.get_price(ids='stellar', vs_currencies='usd')['stellar']['usd']
-
-    @staticmethod
-    def make_atomic(amount, coin_name):
-        if coin_name == 'xlm':
-            return int(amount * (10 ** 7))
-
     @commands.group()
     @commands.check(guild_has_merchant)
     @commands.check(has_wallet)
