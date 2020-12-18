@@ -33,7 +33,6 @@ class MerchantManager:
         # Collection of applied users in the system
         self.applied_users = self.communities.MerchantAppliedUsers
 
-
     def check_if_community_exist(self, community_id: int):
         """
         Check if community is registered into the system
@@ -173,7 +172,7 @@ class MerchantManager:
         except errors.PyMongoError:
             return False
 
-    def check_user_roles(self, user_id, discord_id):
+    def check_user_roles(self, user_id:int, discord_id:int) -> list:
         """
         return roles which user has obtained on the community
         :param user_id:
