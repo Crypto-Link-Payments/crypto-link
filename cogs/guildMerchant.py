@@ -12,7 +12,7 @@ customMessages = CustomMessages()
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_ROLE_CREATION_ERROR = "__Role creation error___"
 CONST_ROLE_STATUS_CHANGE_ERROR = "__Role status change error__"
-CONST_SYSTEM_ERROR = '__System Message error__'
+CONST_SYSTEM_ERROR = '__Merchant System Error__'
 CONST_ROLE_STATUS_CHANGE = '__Role status change error__'
 CONST_BAD_ARGUMENT_ROLE = "You have provided bad argument for Role parameter. Use @ in-front of " \
                           "the role name and tag it"
@@ -28,6 +28,7 @@ class MerchantCommunityOwner(commands.Cog):
         self.merchant_channel_info = bot.backoffice.auto_messaging_channels["merchant"]
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.merchant = self.backoffice.merchant_manager
 
     @commands.command()
     @commands.check(is_owner)
@@ -40,28 +41,29 @@ class MerchantCommunityOwner(commands.Cog):
         :param ctx:
         :return:
         """
-        merchant_manager = self.backoffice.merchant_manager
-        if not merchant_manager.check_if_community_exist(community_id=ctx.message.guild.id):
-            if merchant_manager.register_community_wallet(community_id=ctx.message.guild.id,
-                                                          community_owner_id=ctx.message.author.id,
-                                                          community_name=f'{ctx.message.guild}'):
+
+        if not self.merchant.check_if_community_exist(community_id=ctx.message.guild.id):
+            if self.merchant.register_community_wallet(community_id=ctx.message.guild.id,
+                                                       community_owner_id=ctx.message.author.id,
+                                                       community_name=f'{ctx.message.guild}'):
                 msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
-                message = f'You have successfully created community wallet. You can proceed' \
-                          f' with {self.command_string}merchant ' \
-                          f'in order to familiarize yourself with all available commands. '
+                message = f'You have successfully merchant system on ***{ctx.message.guil}***. You can proceed' \
+                          f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
+                          f' commands or have a look at ***merchant system manual on' \
+                          f' `{self.command_string}merchant manual` '
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                     destination=1)
             else:
-                msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
+                msg_title = ':warning:  __Merchant Registration Status___ :warning: '
                 message = f'There has been an issue while registering wallet into the system. Please try again later.' \
                           f' or contact one of the support staff. '
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
                                                     destination=1)
         else:
             msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
-            message = f'You have already registered {ctx.guild} for Merchant system on {self.bot.user}. Proceed' \
-                      f' with command ***{self.command_string} merchant***'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
+            message = f'You have already registered {ctx.guild} for Merchant system on {self.bot.user.mention}. Proceed' \
+                      f' with command ```{self.command_string}merchant``` or ```{self.command_string}```'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                 destination=1)
 
     @commands.group()
@@ -77,24 +79,24 @@ class MerchantCommunityOwner(commands.Cog):
             list_of_commands = [
 
                 {"name": f':information_source: How to Monetize Roles :information_source: ',
-                 "value": f'`{self.command_string}merchant manual`'},
-                {"name": f':joystick: Command sub-categories :joystick: ',
-                 "value": f'`{self.command_string}merchant monetize`'},
+                 "value": f'```{self.command_string}merchant manual```'},
                 {"name": f':moneybag: Guild Wallet Balance :moneybag: ',
-                 "value": f'`{self.command_string}merchant balance`'},
+                 "value": f'```{self.command_string}merchant balance```'},
                 {"name": f':broom: Merchant Wallet withdrawals :broom:  ',
-                 "value": f'`{self.command_string}merchant sweep`'},
+                 "value": f'```{self.command_string}merchant sweep```'},
                 {"name": f':tools: Create Monetized Role :tools: ',
-                 "value": f'`{self.command_string}merchant create_role <role name> <value in dollars > '
-                          f'<weeks> <days> <hours> <minutes>`'},
+                 "value": f'```{self.command_string}merchant create_role <role name> <value in dollars > '
+                          f'<weeks> <days> <hours> <minutes>```\n'
+                          f'`Aliases: create`'},
                 {"name": f':x: Remove Monetized Role :x: ',
-                 "value": f'`{self.command_string}merchant  delete_role <@Discord Role>`'},
+                 "value": f'```{self.command_string}merchant delete_role <@Discord Role>```'},
                 {"name": f':octagonal_sign: Stop Monetized Role :octagonal_sign: ',
-                 "value": f'`{self.command_string}merchant stop_role <@Discord Role>`'},
+                 "value": f'```{self.command_string}merchant stop_role <@Discord Role>```'},
                 {"name": f':arrow_forward: Start Monetized Role :arrow_forward: ',
-                 "value": f'`{self.command_string}merchant start_role <@Discord Role>`'},
+                 "value": f'```{self.command_string}merchant start_role <@Discord Role>```'},
                 {"name": f':person_juggling: List Monetized Roles :person_juggling: ',
-                 "value": f'`{self.command_string}merchant community_roles`'}
+                 "value": f'```{self.command_string}merchant roles```\n'
+                          f'`Aliases: community_roles`'}
 
             ]
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands,
@@ -104,24 +106,23 @@ class MerchantCommunityOwner(commands.Cog):
     async def manual(self, ctx):
         manual = Embed(title=':convenience_store: __Merchant system manual__ :convenience_store: ',
                        colour=Color.purple())
-        manual.add_field(name=':one: Create monetized roles',
-                         value=f'`{self.command_string}monetize create_role <role name> <Dollar value of role> '
-                               f'<duration weeks> <days> <hours> <minutes>`\n'
+        manual.add_field(name=':one: Create monetized roles :one:',
+                         value=f'```{self.command_string}monetize create_role <role name> <Dollar value of role> '
+                               f'<duration weeks> <days> <hours> <minutes>```\n'
                                f'\n:warning: __Required parameters__ :warning: \n'
                                f'\n'
                                f'> :white_check_mark:  No spaces in role name and max length 20 characters\n'
                                f'> :white_check_mark:  At least one of the time parameters needs to be greater than 0\n'
                                f'> :white_check_mark:  Dollar value of the role required to be greater than 0.00 $',
                          inline=False)
-        manual.add_field(name=':two: Inform members',
-                         value=f'Once role successfully create, it can be purchased by your members with command\n'
-                               f'{self.command_string}membership subscribe @discord.Role',
+        manual.add_field(name=':two: Inform members :two:',
+                         value=f'Once role successfully created, it can be purchased by your members with command\n'
+                               f'```{self.command_string}membership subscribe @discord.Role```',
                          inline=False)
         await ctx.channel.send(embed=manual, delete_after=600)
 
-    @merchant.command()
+    @merchant.command(aliases=["create"])
     @commands.check(is_public)
-    @commands.bot_has_permissions(manage_roles=True)
     async def create_role(self, ctx, role_name: str, dollar_value: float, weeks_count: int, days_count: int,
                           hours_count: int, minutes_count: int):
         """
@@ -135,7 +136,7 @@ class MerchantCommunityOwner(commands.Cog):
         :param minutes_count: length in minutes
         :return:
         """
-        merchant_manager = self.backoffice.merchant_manager
+
         in_penny = (int(dollar_value * (10 ** 2)))  # Convert to pennies
         total = weeks_count + days_count + hours_count + minutes_count
 
@@ -163,7 +164,7 @@ class MerchantCommunityOwner(commands.Cog):
                                 "status": "active"
                             }
 
-                            if merchant_manager.register_role(new_role):
+                            if self.merchant.register_role(new_role):
 
                                 # Send the message to the owner
                                 msg_title = ':person_juggling: __Role Creation Status___ :person_juggling: '
@@ -236,7 +237,6 @@ class MerchantCommunityOwner(commands.Cog):
                                                 destination=1)
 
     @merchant.command()
-    @commands.bot_has_permissions(manage_roles=True)
     async def delete_role(self, ctx, discord_role: Role):
         """
         Delete monetized role from the system and community
@@ -244,10 +244,9 @@ class MerchantCommunityOwner(commands.Cog):
         :param discord_role:
         :return:
         """
-        merchant_manager = self.backoffice.merchant_manager
-        if merchant_manager.find_role_details(role_id=discord_role.id):
-            if merchant_manager.remove_monetized_role_from_system(role_id=discord_role.id,
-                                                                  community_id=ctx.message.guild.id):
+        if self.merchant.find_role_details(role_id=discord_role.id):
+            if self.merchant.remove_monetized_role_from_system(role_id=discord_role.id,
+                                                               community_id=ctx.message.guild.id):
                 await discord_role.delete()
                 title = '__System Notification__'
                 message = 'Monetized role has been successfully removed from the Merchant System, Community and from, ' \
@@ -265,7 +264,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 color_code=0,
                                                 destination=1)
 
-    @merchant.command(aliases=['community', 'roles'])
+    @merchant.command(aliases=['roles'])
     @commands.check(is_owner)
     @commands.check(is_public)
     async def community_roles(self, ctx):
@@ -274,8 +273,8 @@ class MerchantCommunityOwner(commands.Cog):
         :param ctx:
         :return:
         """
-        merchant_manager = self.backoffice.merchant_manager
-        roles = merchant_manager.get_all_roles_community(community_id=ctx.message.guild.id)
+
+        roles = self.merchant.get_all_roles_community(community_id=ctx.message.guild.id)
         title = f':circus_tent: __Available Roles on Community {ctx.message.guild}__ :circus_tent: '
         description = 'Details on monetized role.'
         if roles:
@@ -303,12 +302,12 @@ class MerchantCommunityOwner(commands.Cog):
         """
         Command used to change activity status of the role
         """
-        merchant_manager = self.backoffice.merchant_manager
-        role_details = merchant_manager.find_role_details(role_id=role.id)
+
+        role_details = self.merchant.find_role_details(role_id=role.id)
         if role_details:
             if role_details['status'] == 'active':
                 role_details['status'] = 'inactive'
-                if merchant_manager.change_role_details(role_data=role_details):
+                if self.merchant.change_role_details(role_data=role_details):
                     title = '__Role status change notification__'
                     message = f'Role has been deactivated successfully. in order to re-activate it and make it ' \
                               f'available to users again, use command' \
@@ -344,12 +343,12 @@ class MerchantCommunityOwner(commands.Cog):
         :param role:
         :return:
         """
-        merchant_manager = self.backoffice.merchant_manager
-        role_details = merchant_manager.find_role_details(role_id=role.id)
+
+        role_details = self.merchant.find_role_details(role_id=role.id)
         if role_details:
             if role_details['status'] == 'inactive':
                 role_details['status'] = 'active'
-                if merchant_manager.change_role_details(role_data=role_details):
+                if self.merchant.change_role_details(role_data=role_details):
                     title = '__Role status change notification__'
                     message = f'Role {role} has been re-activate successfully.'
                     await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
@@ -380,20 +379,25 @@ class MerchantCommunityOwner(commands.Cog):
         :param ctx:
         :return:
         """
-        merchant_manager = self.backoffice.merchant_manager
-        data = merchant_manager.get_wallet_balance(community_id=ctx.message.guild.id)
+        data = self.merchant.get_wallet_balance(community_id=ctx.message.guild.id)
+
         if data:
             stellar_balance = data['balance']
             stellar_real = get_normal(value=str(stellar_balance), decimal_point=7)
 
-            wallet_details = Embed(title=' :bank: __Merchant wallet status__ :bank:',
-                                   description="Current state of the Merchant Community wallet",
+            wallet_details = Embed(title=' :bank: __Merchant Wallet Balance__ :bank:',
+                                   description=f"Current balance of the {ctx.guild}",
                                    colour=Color.gold())
-            wallet_details.add_field(name=f'{CONST_STELLAR_EMOJI} Stellar Lumen {CONST_STELLAR_EMOJI}',
-                                     value=f"{stellar_real} {CONST_STELLAR_EMOJI}",
+            wallet_details.add_field(name=f':moneybag:  Stellar Lumen :moneybag: ',
+                                     value=f"***__{stellar_real} {CONST_STELLAR_EMOJI}__***",
                                      inline=False)
-
+            wallet_details.add_field(name=f':warning: Withdrawal from merchant wallet :warning: ',
+                                     value=f"Please use command ```{self.command_string}sweep``` to withdraw all"
+                                           f" available funds to your personal wallet. Withdrawing is allowed only"
+                                           f" for the owner of the {ctx.guild}",
+                                     inline=False)
             await ctx.author.send(embed=wallet_details)
+
         else:
             title = '__Balance Check Error__'
             message = 'There has been an issue while obtaining community balance. Please try again later and if the ' \
@@ -414,9 +418,6 @@ class MerchantCommunityOwner(commands.Cog):
         author_name = ctx.message.author
         current_time = datetime.utcnow()
         notification_channel = self.bot.get_channel(id=int(self.merchant_channel_info))
-
-        merchant_manager = self.backoffice.merchant_manager
-
         fee_dollar_details = self.backoffice.bot_manager.get_fees_by_category(key='wallet_transfer')
         fee_value = fee_dollar_details['fee']  # Get out fee
         in_stellar = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
@@ -431,15 +432,15 @@ class MerchantCommunityOwner(commands.Cog):
         minimum_in_stroops = (int(total_xlm * (10 ** 7)))  # Convert to stroops
 
         # Get merchant wallet balance of the community
-        balance = merchant_manager.get_balance_based_on_ticker(community_id=ctx.message.guild.id, ticker=ticker)
+        balance = self.merchant.get_balance_based_on_ticker(community_id=ctx.message.guild.id, ticker=ticker)
         # Compare wallet balance to minimum withdrawal limit
         if balance >= minimum_in_stroops:
             if balance > fee_in_stroops:
                 # Deduct total amount required from the community merchant wallet
-                if merchant_manager.modify_funds_in_community_merchant_wallet(direction=1,
-                                                                              community_id=ctx.message.guild.id,
-                                                                              wallet_tick='xlm',
-                                                                              amount=balance):
+                if self.merchant.modify_funds_in_community_merchant_wallet(direction=1,
+                                                                           community_id=ctx.message.guild.id,
+                                                                           wallet_tick='xlm',
+                                                                           amount=balance):
                     for_owner = balance - fee_in_stroops
                     # TODO fix bug where it could happen that fee in stroops us greater than the available balance
 
@@ -603,14 +604,21 @@ class MerchantCommunityOwner(commands.Cog):
         :param error:
         :return:
         """
-        if isinstance(error, commands.CheckFailure):
+        if isinstance(error, commands.BotMissingPermissions):
+            message = f'{self.bot.user.mention} ***_{error}_***'
+            title = "Bot missing required permissions for Merchant System"
+            await ctx.channel.send(content=f'{ctx.author.mention}')
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                sys_msg_title=title)
+
+        elif isinstance(error, commands.CheckFailure):
             message = 'Something went wrong while trying to access **merchant platform**:\n' \
                       '\n' \
                       'All checks need to be met in order for access to be granted:\n' \
-                      ' --> You need to be the owner of community \n' \
-                      ' --> You need to have personal discord wallet  \n' \
-                      '--> Community needs to be registered in the system \n' \
-                      '--> Command needs to be executed on public channel \n' \
+                      ' > - You need to be the owner of community \n' \
+                      ' > - You need to have personal discord wallet  \n' \
+                      ' > - Community needs to be registered in the system \n' \
+                      ' > -  Command needs to be executed on public channel \n' \
                       'If issue persists please contact staff.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1)
 
@@ -631,7 +639,6 @@ class MerchantCommunityOwner(commands.Cog):
                       '--> Command needs to be executed on public channel :white_check_mark:\n' \
                       '__If issue persists please contact staff.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
-
         elif isinstance(error, commands.BotMissingPermissions):
             message = f'You can not register {ctx.guild} into the system because {self.bot.user} does not have ' \
                       f' ***Manage Role*** permission which is required for bot to function optimally.'
@@ -639,15 +646,18 @@ class MerchantCommunityOwner(commands.Cog):
 
     @create_role.error
     async def create_role_error(self, ctx, error):
-        if isinstance(error, commands.BotMissingPermissions):
-            message = "In order for system to be able to create role it requires **manage role** permission"
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
-        elif isinstance(error, commands.CheckFailure):
+        if isinstance(error, commands.CheckFailure):
             message = f'In order to be able to create role on {ctx.message.guild} you need to execute command on one ' \
                       f'of the public channels of the community you are owner off.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
         elif isinstance(error, commands.BadArgument):
             message = f'You have provided wrong command arguments. Appropriate command structure is:\n' \
+                      f'**{self.command_string}merchant monetize create_role <role name> <dollar value> <week amount> ' \
+                      f'<day amount> <hour amount> <minute amount>.\n' \
+                      f'__Note__: duration amount need to be given as integer.'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+        elif isinstance(error, commands.MissingRequiredArgument):
+            message = f'You forgot to provide required variables to be able to create monetized role:\n' \
                       f'**{self.command_string}merchant monetize create_role <role name> <dollar value> <week amount> ' \
                       f'<day amount> <hour amount> <minute amount>.\n' \
                       f'__Note__: duration amount need to be given as integer.'
