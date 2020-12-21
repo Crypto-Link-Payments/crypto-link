@@ -33,8 +33,8 @@ class AutoFunctions(commands.Cog):
         """
         if isinstance(exception, commands.CommandNotFound):
             title = 'System Command Error'
-            message = f':no_entry: Sorry, this command does not exist! Please' \
-                      f'type `{self.bot.co}help` to check available commands.'
+            message = f':no_entry: command `{ctx.message.content}` does not exist! Please' \
+                      f'type `{self.command_string}help` to check available commands.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
         elif isinstance(exception, commands.CommandOnCooldown):
@@ -55,7 +55,7 @@ class AutoFunctions(commands.Cog):
                                                  sys_msg_title=title)
         else:
             if isinstance(exception, commands.CheckFailure):
-                print('Check failure occurred')
+                pass
             else:
                 bug_channel = self.bot.get_channel(id=int(self.bot_channels["bug"]))
 
