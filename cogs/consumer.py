@@ -163,14 +163,12 @@ class ConsumerCommands(commands.Cog):
                         user_id=int(ctx.message.author.id),
                         ticker=ticker)
 
-
                     # Check if user has sufficient balance
-                    if balance >= crypto_price_atomic and \
-                            self.backoffice.merchant_manager.modify_funds_in_community_merchant_wallet(
-                                community_id=int(ctx.message.guild.id),
-                                amount=int(crypto_price_atomic),
-                                direction=0,
-                                wallet_tick=ticker):
+                    if balance >= crypto_price_atomic and self.backoffice.merchant_manager.modify_funds_in_community_merchant_wallet(
+                            community_id=int(ctx.message.guild.id),
+                            amount=int(crypto_price_atomic),
+                            direction=0,
+                            wallet_tick=ticker):
 
                         # Update community wallet
                         if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
@@ -180,11 +178,8 @@ class ConsumerCommands(commands.Cog):
 
                             # Assign the role to the user
                             await ctx.message.author.add_roles(role,
-                                                               reason='you just got yourself a role')
-
-                            # Current time
+                                                               reason='Merchnat purchased role given')
                             start = datetime.utcnow()
-
                             # get the timedelta from the role description
                             td = timedelta(weeks=role_details['weeks'],
                                            days=role_details['days'],
@@ -211,7 +206,7 @@ class ConsumerCommands(commands.Cog):
                                 "communityName": f'{ctx.message.guild}',
                                 "communityId": int(ctx.message.guild.id)}
 
-                            # Add active user to databasse of applied merchant
+                            # Add active user to database of applied merchant
                             if self.backoffice.merchant_manager.add_user_to_payed_roles(purchase_data=purchase_data):
                                 purchase_role_data = {
                                     "roleStart": f"{start} UTC",
@@ -269,7 +264,7 @@ class ConsumerCommands(commands.Cog):
                                                                                        guild_stats_data=guild_stats)
                                 # TODO integrate stats update for the overall community economics.
 
-                                # Send notifcation to All applied channels on purchased role
+                                # Send notifcation to uplink stream
                                 load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                                 explorer_msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
@@ -285,7 +280,7 @@ class ConsumerCommands(commands.Cog):
                                                                  color_code=1, destination=1)
                     else:
                         message = f'You have insufficient balance in your wallet to purchase {role.mention}. Your' \
-                                  f' current balance is {balance / 10000000}{CONST_STELLAR_EMOJI} and role value ' \
+                                  f' current balance is {balance / (10 ** 7)}{CONST_STELLAR_EMOJI} and role value ' \
                                   f'according to current rate is {role_value_crypto}{CONST_STELLAR_EMOJI}.'
                         await custom_messages.system_message(ctx=ctx, message=message,
                                                              sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
