@@ -240,6 +240,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 destination=1)
 
     @merchant.command()
+    @commands.check(is_public)
     async def delete_role(self, ctx, discord_role: Role):
         """
         Delete monetized role from the system and community
@@ -251,9 +252,9 @@ class MerchantCommunityOwner(commands.Cog):
             if self.merchant.remove_monetized_role_from_system(role_id=discord_role.id,
                                                                community_id=ctx.message.guild.id):
                 await discord_role.delete()
-                title = '__System Notification__'
-                message = 'Monetized role has been successfully removed from the Merchant System, Community and from, ' \
-                          ' all the users who has obtained it.'
+                title = ':convenience_store: Merchant System Notification__:convenience_store: '
+                message = f'Monetized role has been successfully removed from the Crypto Link Merchant System, ' \
+                          f'{ctx.guild} and from all the users who has obtained it.'
                 await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
                                                     destination=1)
             else:
@@ -285,13 +286,14 @@ class MerchantCommunityOwner(commands.Cog):
                 dollar_value = float(role["pennyValues"] / 100)
                 values = [{"name": ':person_juggling: Role Name :person_juggling: ',
                            "value": f'```{role["roleName"]} (ID: {role["roleId"]})```'},
-                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value":f'```{role["status"]}```'},
+                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:',
+                           "value": f'```{role["status"]}```'},
                           {"name": ':dollar: Price :dollar: ', "value": f"```${dollar_value}```"},
                           {"name": ':timer: Role Length :timer:',
-                           "value": f"{role['weeks']} week/s \n{role['days']} day/s \n{role['hours']} "
-                                    f"hour/s \n{role['minutes']} minute/s"}]
+                           "value": f"```{role['weeks']} week/s \n{role['days']} day/s \n{role['hours']} "
+                                    f"hour/s \n{role['minutes']} minute/s```"}]
                 await customMessages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
-                                                   data=values, thumbnail=self.bot.user.avatar_url)
+                                                   data=values, thumbnail=self.bot.user.avatar_url, c=Color.blue())
         else:
             title1 = "__Merchant System notification__"
             message = "Currently you have no monetized roles. "
