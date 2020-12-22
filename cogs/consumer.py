@@ -30,7 +30,7 @@ class ConsumerCommands(commands.Cog):
     @commands.check(is_public)
     async def membership(self, ctx):
         """
-        Entry point for membership connected with merchant system
+        Entry point for membership connected with wmerchant system
         """
 
         if ctx.invoked_subcommand is None:
@@ -127,148 +127,176 @@ class ConsumerCommands(commands.Cog):
 
     @membership.command(aliases=['purchase', 'buy', 'get'])
     @commands.bot_has_permissions(manage_roles=True)
-    async def subscribe(self, ctx, role: discord.Role):
+    async def subscribe(self, ctx, role: discord.Role, ticker: str = None):
         """
         Obtain a role available from community
         :param ctx: Discord Context
         :param role:
         :return:
         """
-        ticker = "xlm"
-        merchant_manager = self.backoffice.merchant_manager
-        role_details = merchant_manager.find_role_details(role_id=role.id)
+
+        # User XLM incase the ticker of the currency is not provided
+        if not ticker:
+            ticker = "xlm"
+        else:
+            ticker = 'xlm'
+
+        role_details = self.backoffice.merchant_manager.find_role_details(
+            role_id=role.id)  # Get the roles from the system
+
         # Check if community has activated merchant
         if role_details and role_details['status'] == 'active':
+
             # Check if user has already applied for the role
-            if role.id not in [author_role.id for author_role in ctx.message.author.roles]:
+            if role.id not in [author_role.id for author_role in
+                               ctx.message.author.roles]:  # Check if user has not purchased role yet
                 # Calculations and conversions
                 convert_to_dollar = role_details["pennyValues"] / 100  # Convert to $
                 coin_usd_price = gecko.get_price(ids='stellar', vs_currencies='usd')['stellar']['usd']
-                role_value_crypto = float(convert_to_dollar / coin_usd_price)
-                role_rounded = round(role_value_crypto, 7)
-                crypto_price_atomic = int(role_rounded * (10 ** 7))
-                balance = self.backoffice.account_mng.get_balance_based_on_ticker(
-                    user_id=int(ctx.message.author.id),
-                    ticker=ticker)
-                # Check if user has sufficient balance
-                if balance >= crypto_price_atomic and merchant_manager.modify_funds_in_community_merchant_wallet(
-                        community_id=int(ctx.message.guild.id),
-                        amount=int(crypto_price_atomic),
-                        direction=0,
-                        wallet_tick=ticker):
 
-                    # Update the community wallet
-                    if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
-                                                                              ticker=ticker,
-                                                                              direction=1,
-                                                                              amount=crypto_price_atomic):
+                # Check if api returned price
+                if coin_usd_price:
+                    role_value_crypto = float(convert_to_dollar / coin_usd_price)
+                    role_rounded = round(role_value_crypto, 7)
+                    crypto_price_atomic = int(role_rounded * (10 ** 7))
+                    balance = self.backoffice.account_mng.get_balance_based_on_ticker(
+                        user_id=int(ctx.message.author.id),
+                        ticker=ticker)
 
-                        # Assign the role to the user
-                        await ctx.message.author.add_roles(role,
-                                                           reason='you just got yourself a role')
 
-                        # Current time
-                        start = datetime.utcnow()
+                    # Check if user has sufficient balance
+                    if balance >= crypto_price_atomic and \
+                            self.backoffice.merchant_manager.modify_funds_in_community_merchant_wallet(
+                                community_id=int(ctx.message.guild.id),
+                                amount=int(crypto_price_atomic),
+                                direction=0,
+                                wallet_tick=ticker):
 
-                        # get the timedelta from the role description
-                        td = timedelta(weeks=role_details['weeks'],
-                                       days=role_details['days'],
-                                       hours=role_details['hours'],
-                                       minutes=role_details['minutes'])
+                        # Update community wallet
+                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
+                                                                                  ticker=ticker,
+                                                                                  direction=1,
+                                                                                  amount=crypto_price_atomic):
 
-                        # calculate future date
-                        end = start + td
-                        gap = end - start
-                        unix_today = (int(time.mktime(start.timetuple())))
-                        unix_future = (int(time.mktime(end.timetuple())))
+                            # Assign the role to the user
+                            await ctx.message.author.add_roles(role,
+                                                               reason='you just got yourself a role')
 
-                        # make data for store in database
-                        purchase_data = {
-                            "userId": int(ctx.message.author.id),
-                            "userName": str(ctx.message.author),
-                            "roleId": int(role.id),
-                            "roleName": f'{role.name}',
-                            "start": unix_today,
-                            "end": unix_future,
-                            "currency": ticker,
-                            "atomicValue": crypto_price_atomic,
-                            "pennies": int(role_details["pennyValues"]),
-                            "communityName": f'{ctx.message.guild}',
-                            "communityId": int(ctx.message.guild.id)}
+                            # Current time
+                            start = datetime.utcnow()
 
-                        if merchant_manager.add_user_to_payed_roles(purchase_data=purchase_data):
-                            purchase_role_data = {
-                                "roleStart": f"{start} UTC",
-                                "roleEnd": end,
-                                "roleLeft": gap,
-                                "dollarValue": convert_to_dollar,
-                                "roleRounded": role_rounded,
-                                "usdRate": coin_usd_price,
-                                "roleDetails": f"weeks: {role_details['weeks']}\n"
-                                               f"days: {role_details['days']}\n"
-                                               f"hours: {role_details['hours']}\n"
-                                               f"minutes: {role_details['minutes']}"
-                            }
+                            # get the timedelta from the role description
+                            td = timedelta(weeks=role_details['weeks'],
+                                           days=role_details['days'],
+                                           hours=role_details['hours'],
+                                           minutes=role_details['minutes'])
 
-                            # Send user payment slip info on purchased role
-                            await custom_messages.user_role_purchase_msg(ctx=ctx, role=role,
-                                                                         role_details=purchase_role_data)
+                            # calculate future date
+                            end = start + td
+                            gap = end - start
+                            unix_today = (int(time.mktime(start.timetuple())))
+                            unix_future = (int(time.mktime(end.timetuple())))
 
-                            await custom_messages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
-                                                                                role_details=purchase_role_data)
+                            # make data for store in database
+                            purchase_data = {
+                                "userId": int(ctx.message.author.id),
+                                "userName": str(ctx.message.author),
+                                "roleId": int(role.id),
+                                "roleName": f'{role.name}',
+                                "start": unix_today,
+                                "end": unix_future,
+                                "currency": ticker,
+                                "atomicValue": crypto_price_atomic,
+                                "pennies": int(role_details["pennyValues"]),
+                                "communityName": f'{ctx.message.guild}',
+                                "communityId": int(ctx.message.guild.id)}
 
-                            user_stats_update = {
-                                'xlmStats.spentOnRoles': float(role_rounded),
-                                'xlmStats.roleTxCount': int(1),
-                            }
+                            # Add active user to databasse of applied merchant
+                            if self.backoffice.merchant_manager.add_user_to_payed_roles(purchase_data=purchase_data):
+                                purchase_role_data = {
+                                    "roleStart": f"{start} UTC",
+                                    "roleEnd": end,
+                                    "roleLeft": gap,
+                                    "dollarValue": convert_to_dollar,
+                                    "roleRounded": role_rounded,
+                                    "usdRate": coin_usd_price,
+                                    "roleDetails": f"weeks: {role_details['weeks']}\n"
+                                                   f"days: {role_details['days']}\n"
+                                                   f"hours: {role_details['hours']}\n"
+                                                   f"minutes: {role_details['minutes']}"
+                                }
 
-                            await self.backoffice.stats_manager.as_update_role_purchase_stats(
-                                user_id=ctx.message.author.id,
-                                merchant_data=user_stats_update)
+                                # Send user payment slip info on purchased role
+                                await custom_messages.user_role_purchase_msg(ctx=ctx, role=role,
+                                                                             role_details=purchase_role_data)
 
-                            global_merchant_stats = {
-                                'totalSpentInUsd': convert_to_dollar,
-                                'totalSpentInXlm': role_rounded
-                            }
+                                # Send report to guild oowner that he recieved funds
+                                await custom_messages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
+                                                                                    role_details=purchase_role_data)
 
-                            global_ticker_stats = {
-                                "merchantPurchases": 1,
-                                "merchantMoved": role_rounded
-                            }
-                            await self.backoffice.stats_manager.update_cl_merchant_stats(ticker='xlm',
-                                                                                         merchant_stats=global_merchant_stats,
-                                                                                         ticker_stats=global_ticker_stats)
+                                user_stats_update = {
+                                    f'{ticker}.spentOnRoles': float(role_rounded),
+                                    f'{ticker}.roleTxCount': int(1),
+                                }
 
-                            guild_stats = {
+                                # Update user purchase stats
+                                await self.backoffice.stats_manager.as_update_role_purchase_stats(
+                                    user_id=ctx.message.author.id,
+                                    merchant_data=user_stats_update)
 
-                                "communityStats.roleTxCount": 1,
-                                "communityStats.xlmVolume": role_rounded
+                                global_merchant_stats = {
+                                    'totalSpentInUsd': convert_to_dollar,
+                                    'totalSpentInXlm': role_rounded
+                                }
 
-                            }
-                            await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
-                                                                                   guild_stats_data=guild_stats)
+                                global_ticker_stats = {
+                                    "merchantPurchases": 1,
+                                    "merchantMoved": role_rounded
+                                }
 
-                            load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                             self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                            explorer_msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
-                                           f'(${convert_to_dollar}) on ' \
-                                           f'{ctx.message.guild}'
-                            await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                    message=explorer_msg, on_chain=False,
-                                                                    tx_type='role_purchase')
+                                # Update merchant stats of CL
+                                await self.backoffice.stats_manager.update_cl_merchant_stats(ticker='xlm',
+                                                                                             merchant_stats=global_merchant_stats,
+                                                                                             ticker_stats=global_ticker_stats)
+
+                                guild_stats = {
+                                    f"{ticker}.roleTxCount": 1,
+                                    f"{ticker}.volume": role_rounded
+
+                                }
+                                # Update guild stats
+                                await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
+                                                                                       guild_stats_data=guild_stats)
+                                # TODO integrate stats update for the overall community economics.
+
+                                # Send notifcation to All applied channels on purchased role
+                                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                 self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                                explorer_msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
+                                               f'(${convert_to_dollar}) on ' \
+                                               f'{ctx.message.guild}'
+                                await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                                        message=explorer_msg, on_chain=False,
+                                                                        tx_type='role_purchase')
+                        else:
+                            message = f'Error while trying to deduct funds from user'
+                            await custom_messages.system_message(ctx=ctx, message=message,
+                                                                 sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                                                                 color_code=1, destination=1)
                     else:
-                        message = f'Error while trying to deduct funds from user'
+                        message = f'You have insufficient balance in your wallet to purchase {role.mention}. Your' \
+                                  f' current balance is {balance / 10000000}{CONST_STELLAR_EMOJI} and role value ' \
+                                  f'according to current rate is {role_value_crypto}{CONST_STELLAR_EMOJI}.'
                         await custom_messages.system_message(ctx=ctx, message=message,
                                                              sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
-                                                             color_code=1, destination=1)
+                                                             color_code=1, destination=0)
+
                 else:
-                    message = f'You have insufficient balance in your wallet to purchase {role.mention}. Your' \
-                              f' current balance is {balance / 10000000}{CONST_STELLAR_EMOJI} and role value ' \
-                              f'according to current rate is {role_value_crypto}{CONST_STELLAR_EMOJI}.'
+                    message = f'Role can not be purchased at this moment as conversion rates could no be obtained' \
+                              f'from CoinGecko. Please try again later. We apologize for inconvenience.'
                     await custom_messages.system_message(ctx=ctx, message=message,
                                                          sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
                                                          color_code=1, destination=0)
-
             else:
                 message = f'You have already obtained role with name ***{role}***. In order ' \
                           f'to extend the role you will need to first wait that role expires.'
@@ -284,7 +312,6 @@ class ConsumerCommands(commands.Cog):
                                                  sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
                                                  color_code=1,
                                                  destination=1)
-
 
     @subscribe.error
     async def subscribe_error(self, ctx, error):
