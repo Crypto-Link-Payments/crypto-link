@@ -167,27 +167,30 @@ class MerchantCommunityOwner(commands.Cog):
                             if self.merchant.register_role(new_role):
 
                                 # Send the message to the owner
-                                msg_title = ':person_juggling: __Role Creation Status___ :person_juggling: '
-                                message = f'Role with name ***{role_name}*** has been successfully created.\n' \
-                                          f'Details:\n' \
+                                msg_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
+                                sys_title = f":man_juggling: ***Role successfully created*** :man_juggling: "
+                                message = f'Details:\n' \
+                                          f'```Role Name : {role_name}\n' \
                                           f'Role ID: {created_role.id}\n' \
                                           f'Value: {dollar_value} $\n' \
                                           f'Duration of role: \n' \
-                                          f'{weeks_count} week/s, {days_count} day/s {hours_count} hour/s ' \
-                                          f'{minutes_count}minute/s'
+                                          f'{weeks_count} week/s, \n{days_count} day/s \n{hours_count} hour/s\n' \
+                                          f'{minutes_count} minute/s```'
 
-                                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
+                                await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
                                                                     color_code=0,
-                                                                    destination=1)
+                                                                    destination=1, embed_title=msg_title)
 
-                                msg_title = ':mega: __ Time to Inform Members__ :mega:'
+                                message_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
+                                sys_title = ":mega: Time to inform your members on available role to be " \
+                                            "purchased. :mega:"
                                 message = f'Users can now apply for the role by executing the' \
-                                          f' command bellow: \n ***{self.command_string}membership subscribe ' \
-                                          f'<@Discord Role>***\n. ' \
+                                          f'```command bellow: \n {self.command_string}membership subscribe ' \
+                                          f'<@Discord Role>```' \
                                           f'Thank You for using Merchant System!'
-                                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message,
+                                await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
                                                                     color_code=0,
-                                                                    destination=1)
+                                                                    destination=1, embed_title=message_title)
                             else:
                                 message = f'Role could not be stores into the system at this point. Please try again' \
                                           f' later. We apologize for inconvenience.'
@@ -280,13 +283,13 @@ class MerchantCommunityOwner(commands.Cog):
         if roles:
             for role in roles:
                 dollar_value = float(role["pennyValues"] / 100)
-                values = [{"name": ':person_juggling: Role :person_juggling: ',
-                           "value": f'{role["roleName"]} ID({role["roleId"]}'},
+                values = [{"name": ':person_juggling: Role Name :person_juggling: ',
+                           "value": f'***{role["roleName"]}*** (ID: {role["roleId"]})'},
                           {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": role["status"]},
-                          {"name": ':dollar: Values :dollar: ', "value": f"{dollar_value} $"},
+                          {"name": ':dollar: Price :dollar: ', "value": f"{dollar_value} $"},
                           {"name": ':timer: Role Length :timer:',
-                           "value": f"{role['weeks']} week/s {role['days']} day/s {role['hours']} "
-                                    f"hour/s {role['minutes']} minute/s"}]
+                           "value": f"{role['weeks']} week/s \n{role['days']} day/s \n{role['hours']} "
+                                    f"hour/s \n{role['minutes']} minute/s"}]
                 await customMessages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
                                                    data=values, thumbnail=self.bot.user.avatar_url)
         else:
