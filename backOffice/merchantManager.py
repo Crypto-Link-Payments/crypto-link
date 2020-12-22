@@ -93,6 +93,7 @@ class MerchantManager:
             "communityOwner": int(community_owner_id),
             "communityName": community_name,
             "balance": int(0),
+            "xlm": int(0),
             "overallGained": int(0),
             "rolesObtained": int(0)
         }
@@ -172,7 +173,7 @@ class MerchantManager:
         except errors.PyMongoError:
             return False
 
-    def check_user_roles(self, user_id:int, discord_id:int) -> list:
+    def check_user_roles(self, user_id: int, discord_id: int) -> list:
         """
         return roles which user has obtained on the community
         :param user_id:
