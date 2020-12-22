@@ -53,13 +53,6 @@ class GuildOwnerCommands(commands.Cog):
                         "publicCount": int(0),
                         "roleTxCount": int(0),
                         "emojiTxCount": int(0),
-                        "multiTxCount": int(0)},
-                "clt": {"volume": float(0.0),
-                        "txCount": int(0),
-                        "privateCount": int(0),
-                        "publicCount": int(0),
-                        "roleTxCount": int(0),
-                        "emojiTxCount": int(0),
                         "multiTxCount": int(0)}
             }
             await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
@@ -151,7 +144,6 @@ class GuildOwnerCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue while trying'
                                                                                'to update data.',
                                                 destination=ctx.message.channel, sys_msg_title=CONST_SYS_MSG)
-
 
     @uplink.command()
     async def remove(self, ctx):
