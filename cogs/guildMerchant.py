@@ -284,9 +284,9 @@ class MerchantCommunityOwner(commands.Cog):
             for role in roles:
                 dollar_value = float(role["pennyValues"] / 100)
                 values = [{"name": ':person_juggling: Role Name :person_juggling: ',
-                           "value": f'***{role["roleName"]}*** (ID: {role["roleId"]})'},
-                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": role["status"]},
-                          {"name": ':dollar: Price :dollar: ', "value": f"{dollar_value} $"},
+                           "value": f'```{role["roleName"]} (ID: {role["roleId"]})```'},
+                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value":f'```{role["status"]}```'},
+                          {"name": ':dollar: Price :dollar: ', "value": f"```${dollar_value}```"},
                           {"name": ':timer: Role Length :timer:',
                            "value": f"{role['weeks']} week/s \n{role['days']} day/s \n{role['hours']} "
                                     f"hour/s \n{role['minutes']} minute/s"}]
@@ -395,9 +395,9 @@ class MerchantCommunityOwner(commands.Cog):
                                      value=f"***__{stellar_real} {CONST_STELLAR_EMOJI}__***",
                                      inline=False)
             wallet_details.add_field(name=f':warning: Withdrawal from merchant wallet :warning: ',
-                                     value=f"Please use command ```{self.command_string}sweep``` to withdraw all"
+                                     value=f"Please use command ```{self.command_string}merchant sweep``` to withdraw all"
                                            f" available funds to your personal wallet. Withdrawing is allowed only"
-                                           f" for the owner of the {ctx.guild}",
+                                           f" for the owner of the ***{ctx.guild}***",
                                      inline=False)
             await ctx.author.send(embed=wallet_details)
 
