@@ -92,7 +92,6 @@ class MerchantManager:
             "communityId": int(community_id),
             "communityOwner": int(community_owner_id),
             "communityName": community_name,
-            "balance": int(0),
             "xlm": int(0),
             "overallGained": int(0),
             "rolesObtained": int(0)
@@ -113,7 +112,7 @@ class MerchantManager:
         """
         stellar_wallet = self.community_stellar_wallets.find_one({"communityId": community_id},
                                                                  {"_id": 0,
-                                                                  "balance": 1})
+                                                                  "xlm": 1})
 
         return stellar_wallet
 
@@ -133,7 +132,7 @@ class MerchantManager:
         if wallet_tick == 'xlm':
             try:
                 self.community_stellar_wallets.update_one({"communityId": community_id},
-                                                          {"$inc": {"balance": amount}})
+                                                          {"$inc": {"xlm": amount}})
                 return True
             except errors.PyMongoError as e:
                 print(e)
@@ -255,8 +254,8 @@ class MerchantManager:
         if ticker == 'xlm':
             stellar_wallet = self.community_stellar_wallets.find_one({"communityId": community_id},
                                                                      {"_id": 0,
-                                                                      "balance": 1})
-            return stellar_wallet['balance']
+                                                                      "xlm": 1})
+            return stellar_wallet['xlm']
 
         else:
             return None
