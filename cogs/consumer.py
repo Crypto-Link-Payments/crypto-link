@@ -129,10 +129,7 @@ class ConsumerCommands(commands.Cog):
     @commands.bot_has_permissions(manage_roles=True)
     async def subscribe(self, ctx, role: discord.Role, ticker: str = None):
         """
-        Obtain a role available from community
-        :param ctx: Discord Context
-        :param role:
-        :return:
+        Subscribe to service
         """
 
         # User XLM incase the ticker of the currency is not provided
@@ -150,6 +147,7 @@ class ConsumerCommands(commands.Cog):
             # Check if user has already applied for the role
             if role.id not in [author_role.id for author_role in
                                ctx.message.author.roles]:  # Check if user has not purchased role yet
+
                 # Calculations and conversions
                 convert_to_dollar = role_details["pennyValues"] / 100  # Convert to $
                 coin_usd_price = gecko.get_price(ids='stellar', vs_currencies='usd')['stellar']['usd']
@@ -157,16 +155,18 @@ class ConsumerCommands(commands.Cog):
                 # Check if api returned price
                 if coin_usd_price:
                     role_value_crypto = float(convert_to_dollar / coin_usd_price)
-                    role_rounded = round(role_value_crypto, 7)
-                    crypto_price_atomic = int(role_rounded * (10 ** 7))
+                    role_value_rounded = round(role_value_crypto, 7)
+                    role_value_atomic = int(role_value_rounded * (10 ** 7))
+
+                    # Get users balance
                     balance = self.backoffice.account_mng.get_balance_based_on_ticker(
                         user_id=int(ctx.message.author.id),
                         ticker=ticker)
 
                     # Check if user has sufficient balance
-                    if balance >= crypto_price_atomic and self.backoffice.merchant_manager.modify_funds_in_community_merchant_wallet(
+                    if balance >= role_value_atomic and self.backoffice.merchant_manager.modify_funds_in_community_merchant_wallet(
                             community_id=int(ctx.message.guild.id),
-                            amount=int(crypto_price_atomic),
+                            amount=int(role_value_atomic),
                             direction=0,
                             wallet_tick=ticker):
 
@@ -174,7 +174,7 @@ class ConsumerCommands(commands.Cog):
                         if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.message.author.id,
                                                                                   ticker=ticker,
                                                                                   direction=1,
-                                                                                  amount=crypto_price_atomic):
+                                                                                  amount=role_value_atomic):
 
                             # Assign the role to the user
                             await ctx.message.author.add_roles(role,
@@ -201,7 +201,7 @@ class ConsumerCommands(commands.Cog):
                                 "start": unix_today,
                                 "end": unix_future,
                                 "currency": ticker,
-                                "atomicValue": crypto_price_atomic,
+                                "atomicValue": role_value_atomic,
                                 "pennies": int(role_details["pennyValues"]),
                                 "communityName": f'{ctx.message.guild}',
                                 "communityId": int(ctx.message.guild.id)}
@@ -213,7 +213,7 @@ class ConsumerCommands(commands.Cog):
                                     "roleEnd": end,
                                     "roleLeft": gap,
                                     "dollarValue": convert_to_dollar,
-                                    "roleRounded": role_rounded,
+                                    "roleRounded": role_value_rounded,
                                     "usdRate": coin_usd_price,
                                     "roleDetails": f"weeks: {role_details['weeks']}\n"
                                                    f"days: {role_details['days']}\n"
@@ -230,7 +230,7 @@ class ConsumerCommands(commands.Cog):
                                                                                     role_details=purchase_role_data)
 
                                 user_stats_update = {
-                                    f'{ticker}.spentOnRoles': float(role_rounded),
+                                    f'{ticker}.spentOnRoles': float(role_value_rounded),
                                     f'{ticker}.roleTxCount': int(1),
                                 }
 
@@ -241,12 +241,12 @@ class ConsumerCommands(commands.Cog):
 
                                 global_merchant_stats = {
                                     'totalSpentInUsd': convert_to_dollar,
-                                    'totalSpentInXlm': role_rounded
+                                    'totalSpentInXlm': role_value_rounded
                                 }
 
                                 global_ticker_stats = {
                                     "merchantPurchases": 1,
-                                    "merchantMoved": role_rounded
+                                    "merchantMoved": role_value_rounded
                                 }
 
                                 # Update merchant stats of CL
@@ -256,18 +256,19 @@ class ConsumerCommands(commands.Cog):
 
                                 guild_stats = {
                                     f"{ticker}.roleTxCount": 1,
-                                    f"{ticker}.volume": role_rounded
+                                    f"{ticker}.volume": role_value_rounded
 
                                 }
                                 # Update guild stats
                                 await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
                                                                                        guild_stats_data=guild_stats)
+
                                 # TODO integrate stats update for the overall community economics.
 
                                 # Send notifcation to uplink stream
                                 load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                                explorer_msg = f':man_juggling: purchased in value {role_rounded} {CONST_STELLAR_EMOJI} ' \
+                                explorer_msg = f':man_juggling: purchased in value {role_value_rounded} {CONST_STELLAR_EMOJI} ' \
                                                f'(${convert_to_dollar}) on ' \
                                                f'{ctx.message.guild}'
                                 await custom_messages.explorer_messages(applied_channels=load_channels,
