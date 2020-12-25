@@ -47,7 +47,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                        community_owner_id=ctx.message.author.id,
                                                        community_name=f'{ctx.message.guild}'):
                 msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
-                message = f'You have successfully merchant system on ***{ctx.message.guil}***. You can proceed' \
+                message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed' \
                           f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
                           f' commands or have a look at ***merchant system manual on' \
                           f' `{self.command_string}merchant manual` '
@@ -109,7 +109,7 @@ class MerchantCommunityOwner(commands.Cog):
                          inline=False)
         await ctx.channel.send(embed=manual, delete_after=600)
 
-    @merchant.group(aliases=['role','r'])
+    @merchant.group(aliases=['role', 'r'])
     async def roles(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ":man_juggling: __Merchant Role Management__ :man_juggling: "
@@ -435,6 +435,7 @@ class MerchantCommunityOwner(commands.Cog):
     @wallet.command(aliases=["withdraw"])
     @commands.check(is_owner)
     async def sweep(self, ctx):
+        #TODO CHeck Sweeps/withdrawals
         """
         Transfers Stellar from Merchant corp wallet to community owner's own wallet
         :param ctx:
@@ -492,17 +493,12 @@ class MerchantCommunityOwner(commands.Cog):
                                                  inline=False)
 
                             # Info according to has license or does not have license
-                            if fee_in_stroops != 0:
-                                info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
-                                                     value=f'{balance / 10000000} {CONST_STELLAR_EMOJI}\n'
-                                                           f'Service Fee: {fee_in_stroops / 10000000}'
-                                                           f' {CONST_STELLAR_EMOJI} (est. {total}$)',
-                                                     inline=False)
-                            else:
-                                info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
-                                                     value=f'{balance / 10000000} {CONST_STELLAR_EMOJI}\n'
-                                                           f'Service Fee: 0 {CONST_STELLAR_EMOJI} (License activated)',
-                                                     inline=False)
+
+
+                            info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
+                                                 value=f'{balance / 10000000} {CONST_STELLAR_EMOJI}\n'
+                                                       f'Service Fee: 0 {CONST_STELLAR_EMOJI} (License activated)',
+                                                 inline=False)
 
                             await ctx.author.send(embed=info_embed)
 
@@ -534,7 +530,6 @@ class MerchantCommunityOwner(commands.Cog):
                                                       f":atm: Net withdrawal: {for_owner / 10000000} {CONST_STELLAR_EMOJI}",
                                                 inline=False)
                             await notification_channel.send(embed=corp_info)
-
                         else:
                             sys_msg_title = '__System Withdrawal error__'
                             message = 'There has been an issue with withdrawal from Merchant Corporate ' \
