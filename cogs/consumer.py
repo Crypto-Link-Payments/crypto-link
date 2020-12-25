@@ -263,9 +263,14 @@ class ConsumerCommands(commands.Cog):
                                 await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
                                                                                        guild_stats_data=guild_stats)
 
-                                # TODO integrate stats update for the overall community economics.
+                                data = {
+                                    "overallGained": role_value_rounded,
+                                    "rolesObtained": 1
+                                }
+                                await self.backoffice.guild_profiles.update_stellar_community_wallet_stats(
+                                    guild_id=ctx.guild.id, data=data)
 
-                                # Send notifcation to uplink stream
+                                # Send notifcications
                                 load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                                 explorer_msg = f':man_juggling: purchased in value {role_value_rounded} {CONST_STELLAR_EMOJI} ' \
