@@ -33,7 +33,6 @@ class BotStructureCheck(object):
                                      "StellarWithdrawals",
                                      "StellarUnprocessedDeposits",
                                      "StellarUnprocessedWithdrawals",
-                                     "StellarCorporateWallets",
                                      "guildProfiles",
                                      "userHotWallets",
                                      "thirdLevelWallets"]
