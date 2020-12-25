@@ -78,6 +78,14 @@ class AutoFunctions(commands.Cog):
                 await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
 
     @commands.Cog.listener()
+    async def on_command(self, ctx):
+        try:
+            await ctx.message.delete()
+        except Exception as e:
+            print(e)
+            pass
+
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         """
         When member joins a message will be sent to newly joined user
