@@ -135,10 +135,8 @@ class MerchantManager:
                                                           {"$inc": {"xlm": amount}})
                 return True
             except errors.PyMongoError as e:
-                print(e)
                 return False
         else:
-            print('Currency in community merchant wallet not found')
             return False
 
     def add_user_to_payed_roles(self, purchase_data: dict):
