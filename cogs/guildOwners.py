@@ -2,7 +2,7 @@ from datetime import datetime
 
 from discord.ext import commands
 from discord import TextChannel, Embed, Colour
-from utils.customCogChecks import is_owner, is_public, guild_has_stats
+from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 
 customMessages = CustomMessages()
@@ -17,6 +17,7 @@ class GuildOwnerCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.merchant = self.backoffice.merchant_manager
 
     @commands.group()
     @commands.check(is_owner)
@@ -161,6 +162,50 @@ class GuildOwnerCommands(commands.Cog):
                                                                                ' Network Feed could not be turned OFF.'
                                                                                'Please try again later',
                                                 destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
+
+    @owner.group(aliases=['merchant'])
+    @commands.check(is_owner)
+    @commands.check(has_wallet)
+    @commands.check(is_public)
+    async def merch(self, ctx):
+        if ctx.invoked_subcommand is None:
+            title = ':convenience_store: __Crypto Link Uplink manual__ :convenience_store: '
+            description = "All available commands to operate with guild system"
+            list_of_values = [
+                {"name": ":pencil:  Open/Reigster for Merchant system :pencil:  ",
+                 "value": f"```{self.command_string}owner merchant open ```"},
+                {"name": ":joystick: Access commands for merchant :joystick: ",
+                 "value": f"```{self.command_string}merchant```"}
+            ]
+
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                               destination=1, c=Colour.dark_gold())
+
+    @merch.command()
+    async def open(self, ctx):
+        if not self.merchant.check_if_community_exist(community_id=ctx.message.guild.id):  # Check if not registered
+            if self.merchant.register_community_wallet(community_id=ctx.message.guild.id,
+                                                       community_owner_id=ctx.message.author.id,
+                                                       community_name=f'{ctx.message.guild}'):  # register community wallet
+                msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
+                message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed' \
+                          f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
+                          f' commands or have a look at ***merchant system manual on' \
+                          f' `{self.command_string}merchant manual` '
+                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
+                                                    destination=1)
+            else:
+                msg_title = ':warning:  __Merchant Registration Status___ :warning: '
+                message = f'There has been an issue while registering wallet into the system. Please try again later.' \
+                          f' or contact one of the support staff. '
+                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
+                                                    destination=1)
+        else:
+            msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
+            message = f'You have already registered {ctx.guild} for Merchant system on {self.bot.user.mention}. Proceed' \
+                      f' with command ```{self.command_string}merchant``` or ```{self.command_string}```'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
+                                                destination=1)
 
 
 def setup(bot):
