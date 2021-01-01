@@ -42,10 +42,10 @@ class MerchantCommunityOwner(commands.Cog):
         :return:
         """
 
-        if not self.merchant.check_if_community_exist(community_id=ctx.message.guild.id):
+        if not self.merchant.check_if_community_exist(community_id=ctx.message.guild.id):  # Check if not registered
             if self.merchant.register_community_wallet(community_id=ctx.message.guild.id,
                                                        community_owner_id=ctx.message.author.id,
-                                                       community_name=f'{ctx.message.guild}'):
+                                                       community_name=f'{ctx.message.guild}'):  # register community wallet
                 msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
                 message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed' \
                           f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
@@ -116,7 +116,8 @@ class MerchantCommunityOwner(commands.Cog):
             description = 'All available commands to manage monetized roles'
             list_of_commands = [
                 {"name": f':information_source: Create new monetized role :information_source: ',
-                 "value": f'```{self.command_string}merchant role create <role name> <role value in $> <weeks> <days> <hours> <minutes>```'},
+                 "value": f'```{self.command_string}merchant role create <role name> <role value in $> '
+                          f'<weeks> <days> <hours> <minutes>```'},
 
                 {"name": f':play_pause:  Stop Active Role :play_pause:  ',
                  "value": f'```{self.command_string}merchant role stop <@discord.Role>```'},
@@ -409,7 +410,7 @@ class MerchantCommunityOwner(commands.Cog):
         data = self.merchant.get_wallet_balance(community_id=ctx.message.guild.id)
 
         if data:
-            stellar_balance = data['balance']
+            stellar_balance = data['xlm']
             stellar_real = get_normal(value=str(stellar_balance), decimal_point=7)
 
             wallet_details = Embed(title=' :bank: __Merchant Wallet Balance__ :bank:',
@@ -435,19 +436,23 @@ class MerchantCommunityOwner(commands.Cog):
     @wallet.command(aliases=["withdraw"])
     @commands.check(is_owner)
     async def sweep(self, ctx):
-        #TODO CHeck Sweeps/withdrawals
         """
         Transfers Stellar from Merchant corp wallet to community owner's own wallet
         :param ctx:
         :return:
         """
         ticker = 'xlm'
+
+        # Details of the author
         author_id = ctx.message.author.id
         author_name = ctx.message.author
         current_time = datetime.utcnow()
-        notification_channel = self.bot.get_channel(id=int(self.merchant_channel_info))
+
+        # Fee information
         fee_dollar_details = self.backoffice.bot_manager.get_fees_by_category(key='wallet_transfer')
         fee_value = fee_dollar_details['fee']  # Get out fee
+
+        # TODO implement data pulling and than conversion to minimize the API calls
         in_stellar = convert_to_currency(fee_value, coin_name='stellar')  # Convert fee to currency
         total = (in_stellar['total'])  # Get total in lumen
         fee_in_stroops = (int(total * (10 ** 7)))  # Convert to stroops
@@ -461,125 +466,131 @@ class MerchantCommunityOwner(commands.Cog):
 
         # Get merchant wallet balance of the community
         balance = self.merchant.get_balance_based_on_ticker(community_id=ctx.message.guild.id, ticker=ticker)
+
         # Compare wallet balance to minimum withdrawal limit
-        if balance >= minimum_in_stroops:
-            if balance > fee_in_stroops:
-                # Deduct total amount required from the community merchant wallet
-                if self.merchant.modify_funds_in_community_merchant_wallet(direction=1,
-                                                                           community_id=ctx.message.guild.id,
-                                                                           wallet_tick='xlm',
-                                                                           amount=balance):
-                    for_owner = balance - fee_in_stroops
-                    # TODO fix bug where it could happen that fee in stroops us greater than the available balance
+        if balance >= minimum_in_stroops and balance > fee_in_stroops:
+            # Deduct total amount required from the community merchant wallet
 
-                    # credit fee to launch pad investment wallet
-                    if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=fee_in_stroops, wallet='xlm',
-                                                                             direction=1):
+            if self.merchant.modify_funds_in_community_merchant_wallet(direction=1,
+                                                                       community_id=ctx.message.guild.id,
+                                                                       wallet_tick='xlm',
+                                                                       amount=balance):
+                # TODO fix bug where it could happen that fee in stroops us greater than the available balance
+                for_owner = balance - fee_in_stroops
 
-                        # Append withdrawal amount to the community owner personal wallet
-                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm',
-                                                                                  direction=0,
-                                                                                  amount=for_owner):
-                            info_embed = Embed(
-                                title=' :money_with_wings: __Corporate account Transaction details__  :money_with_wings:',
-                                description="Here are the details on withdrawal from Merchant "
-                                            "Corporate Account to your personal account.",
-                                colour=Color.purple())
-                            info_embed.add_field(name=':clock: Time of withdrawal :clock: ',
-                                                 value=f"{current_time} (UTC)",
-                                                 inline=False)
-                            info_embed.add_field(name=":moneybag: Wallet Balance Before Withdrawal :moneybag: ",
-                                                 value=f"{balance / 10000000} {CONST_STELLAR_EMOJI}",
-                                                 inline=False)
+                # Notification channel
+                notification_channel = self.bot.get_channel(id=int(self.merchant_channel_info))
+                # credit fee to launch pad investment wallet
+                CL_wallet_update = {
+                    "balance": fee_in_stroops
+                }
+                if self.backoffice.bot_manager.update_lpi_wallet_balance(to_update=CL_wallet_update, ticker='xlm'):
 
-                            # Info according to has license or does not have license
+                    # Append withdrawal amount to the community owner personal wallet
+                    if self.backoffice.account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm',
+                                                                              direction=0,
+                                                                              amount=for_owner):
+                        info_embed = Embed(
+                            title=' :money_with_wings: __Corporate account Transaction details__  :money_with_wings:',
+                            description="Here are the details on withdrawal from Merchant "
+                                        "Corporate Account to your personal account.",
+                            colour=Color.purple())
+                        info_embed.add_field(name=':clock: Time of withdrawal :clock: ',
+                                             value=f"{current_time} (UTC)",
+                                             inline=False)
+                        info_embed.add_field(name=":moneybag: Wallet Balance Before Withdrawal :moneybag: ",
+                                             value=f"{balance / (10 ** 7)} {CONST_STELLAR_EMOJI}",
+                                             inline=False)
+
+                        # Info according to has license or does not have license
+                        info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
+                                             value=f'```Total: {balance / (10 ** 7)} {CONST_STELLAR_EMOJI}\n'
+                                                   f'-\n'
+                                                   f'Merchant Fee: {fee_in_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}\n'
+                                                   f'------------------------\n'
+                                                   f'Net: {for_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}```',
+                                             inline=False)
+
+                        await ctx.author.send(embed=info_embed)
+
+                        # Send information to corporate account channel
+
+                        corp_info = Embed(
+                            title=":convenience_store: __ Merchant withdrawal fee incoming to Corp"
+                                  " Wallet__ :convenience_store:",
+                            description="This message was sent from the system, to inform you,"
+                                        "that additional funds have been transferred and credited"
+                                        " to Crypto Link Corporate wallet",
+                            colour=Color.green()
+                        )
+                        corp_info.add_field(name=':clock: Time of initiated withdrawal :clock:',
+                                            value=f"{current_time} UTC",
+                                            inline=False)
+                        corp_info.add_field(name=" :bank: Merchant Corp Account :bank:",
+                                            value=f"{ctx.message.guild}",
+                                            inline=False)
+                        corp_info.add_field(name=":crown: Guild Owner :crown: ",
+                                            value=f"{ctx.message.author}",
+                                            inline=False)
+                        corp_info.add_field(name=":money_mouth: Income amount to corporate wallet :money_mouth: ",
+                                            value=f"Amount: {fee_in_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}\n"
+                                                  f"Amount is 0 if community has purchased monthly license",
+                                            inline=False)
+                        corp_info.add_field(name=":receipt: Transaction Slip :receipt: ",
+                                            value=f":moneybag: balance:{balance / (10 ** 7)} {CONST_STELLAR_EMOJI}\n"
+                                                  f":atm: Net withdrawal: {for_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}",
+                                            inline=False)
+                        await notification_channel.send(embed=corp_info)
 
 
-                            info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
-                                                 value=f'{balance / 10000000} {CONST_STELLAR_EMOJI}\n'
-                                                       f'Service Fee: 0 {CONST_STELLAR_EMOJI} (License activated)',
-                                                 inline=False)
+                        # TODO integrate withdrawal data to CL histoory for TAX office to count gains
 
-                            await ctx.author.send(embed=info_embed)
+                        # TODO update community merchant wallet stats
 
-                            # Send information to corporate account channel
-
-                            corp_info = Embed(
-                                title=":convenience_store: __ Merchant withdrawal fee incoming to Corp"
-                                      " Wallet__ :convenience_store:",
-                                description="This message was sent from the system, to inform you,"
-                                            "that additional funds have been transferred and credited"
-                                            " to Launch Pad Investment Corporate wallet",
-                                colour=Color.green()
-                            )
-                            corp_info.add_field(name=':clock: Time of initiated withdrawal :clock:',
-                                                value=f"{current_time} UTC",
-                                                inline=False)
-                            corp_info.add_field(name=" :bank: Merchant Corp Account :bank:",
-                                                value=f"{ctx.message.guild}",
-                                                inline=False)
-                            corp_info.add_field(name=":crown: Guild Owner :crown: ",
-                                                value=f"{ctx.message.author}",
-                                                inline=False)
-                            corp_info.add_field(name=":money_mouth: Income amount to corporate wallet :money_mouth: ",
-                                                value=f"Amount: {fee_in_stroops / 10000000} {CONST_STELLAR_EMOJI}\n"
-                                                      f"Amount is 0 if community has purchased monthly license",
-                                                inline=False)
-                            corp_info.add_field(name=":receipt: Transaction Slip :receipt: ",
-                                                value=f":moneybag: balance:{balance / 10000000} {CONST_STELLAR_EMOJI}\n"
-                                                      f":atm: Net withdrawal: {for_owner / 10000000} {CONST_STELLAR_EMOJI}",
-                                                inline=False)
-                            await notification_channel.send(embed=corp_info)
-                        else:
-                            sys_msg_title = '__System Withdrawal error__'
-                            message = 'There has been an issue with withdrawal from Merchant Corporate ' \
-                                      'account to your personal wallet. Please try again later, or contact' \
-                                      ' the staff members. '
-                            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                                sys_msg_title=sys_msg_title)
                     else:
-                        merch_fee = Embed(title="__Merchant Transfer error__",
-                                          description='This is error notification as funds from '
-                                                      'corporate Merchant wallet could not be transferred to'
-                                                      'Launchpad Investment Corp Wallet. Details bellow ',
-                                          colour=Color.red())
-                        merch_fee.set_footer(text=f"{current_time}")
-                        merch_fee.add_field(name='Discord Details',
-                                            value=f"Guild: {ctx.message.guild}\n"
-                                                  f"ID: {ctx.message.guild.id}\n"
-                                                  f"Owner:{author_name}\n"
-                                                  f"ID: {ctx.message.author.id}")
-                        merch_fee.add_field(name='Command',
-                                            value=f"{self.command_string}corp transfer_xlm",
-                                            inline=False)
-                        merch_fee.add_field(name='Error details',
-                                            value='Could not apply fees from transaction to Launch Pad Investment Corp'
-                                                  'wallet.',
-                                            inline=False)
-                        merch_fee.add_field(name='Details',
-                                            value=f"To Withdraw: {balance / 10000000} {CONST_STELLAR_EMOJI}\n"
-                                                  f"Fees: {fee_in_stroops / 10000000}{CONST_STELLAR_EMOJI}\n"
-                                                  f"To owner: {for_owner / 10000000}{CONST_STELLAR_EMOJI}",
-                                            inline=False)
-                        merch_fee.add_field(name='Action Required',
-                                            value='Try Again later')
-                        await notification_channel.send(embed=merch_fee)
-
                         sys_msg_title = '__System Withdrawal error__'
-                        message = 'There has been an issue with withdrawal from Merchant Corporate account to your ' \
-                                  'personal wallet. Please try again later, or contact the staff members. '
+                        message = 'There has been an issue with withdrawal from Merchant Corporate ' \
+                                  'account to your personal wallet. Please try again later, or contact' \
+                                  ' the staff members. '
                         await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                             sys_msg_title=sys_msg_title)
                 else:
-                    message = 'There has been an error while trying to withdraw total balance from Stellar Merchant ' \
-                              'Community Wallet. Please try again later and if the issue persists contact support ' \
-                              'staff.'
+                    merch_fee = Embed(title="__Merchant Transfer error__",
+                                      description='This is error notification as funds from '
+                                                  'corporate Merchant wallet could not be transferred to'
+                                                  'Launchpad Investment Corp Wallet. Details bellow ',
+                                      colour=Color.red())
+                    merch_fee.set_footer(text=f"{current_time}")
+                    merch_fee.add_field(name='Discord Details',
+                                        value=f"Guild: {ctx.message.guild}\n"
+                                              f"ID: {ctx.message.guild.id}\n"
+                                              f"Owner:{author_name}\n"
+                                              f"ID: {ctx.message.author.id}")
+                    merch_fee.add_field(name='Command',
+                                        value=f"{self.command_string}corp transfer_xlm",
+                                        inline=False)
+                    merch_fee.add_field(name='Error details',
+                                        value='Could not apply fees from transaction to Launch Pad Investment Corp'
+                                              'wallet.',
+                                        inline=False)
+                    merch_fee.add_field(name='Details',
+                                        value=f"To Withdraw: {balance / 10000000} {CONST_STELLAR_EMOJI}\n"
+                                              f"Fees: {fee_in_stroops / 10000000}{CONST_STELLAR_EMOJI}\n"
+                                              f"To owner: {for_owner / 10000000}{CONST_STELLAR_EMOJI}",
+                                        inline=False)
+                    merch_fee.add_field(name='Action Required',
+                                        value='Try Again later')
+                    await notification_channel.send(embed=merch_fee)
+
+                    sys_msg_title = '__System Withdrawal error__'
+                    message = 'There has been an issue with withdrawal from Merchant Corporate account to your ' \
+                              'personal wallet. Please try again later, or contact the staff members. '
                     await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                        sys_msg_title=CONST_SYSTEM_ERROR)
+                                                        sys_msg_title=sys_msg_title)
             else:
-                message = f'Fees are currently greater than the balance amount to initiate withdrawal' \
-                          f'Current Balance is {balance / 10000000} {CONST_STELLAR_EMOJI} while ' \
-                          f'fee is {total_xlm}{CONST_STELLAR_EMOJI}'
+                message = 'There has been an error while trying to withdraw total balance from Stellar Merchant ' \
+                          'Community Wallet. Please try again later and if the issue persists contact support ' \
+                          'staff.'
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                     sys_msg_title=CONST_SYSTEM_ERROR)
         else:
