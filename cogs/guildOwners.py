@@ -48,6 +48,7 @@ class GuildOwnerCommands(commands.Cog):
                 "guildName": f'{ctx.guild}',
                 "explorerSettings": {"channelId": int(0)},
                 "txFees": {"xlmFeeValue": int(0)},
+                "registeredUsers": 0,
                 "xlm": {"volume": float(0.0),
                         "txCount": int(0),
                         "privateCount": int(0),
