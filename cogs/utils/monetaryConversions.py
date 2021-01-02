@@ -29,8 +29,11 @@ def get_rates(coin_name):
     """
     Getting rates for Stellar
     """
-    data = gecko.get_price(ids=coin_name, vs_currencies='usd,eur,rub,btc,eth,ltc')
-    return data
+    try:
+        data = gecko.get_price(ids=coin_name, vs_currencies='usd,eur,rub,btc,eth,ltc')
+        return data
+    except Exception:
+        return{}
 
 
 def convert_to_usd(amount, coin_name):
