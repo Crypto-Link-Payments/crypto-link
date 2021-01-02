@@ -46,7 +46,7 @@ class UserAccountCommands(commands.Cog):
                               value=f"```{wallet_data['depositId']}```",
                               inline=False)
         acc_details.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag: ',
-                              value=f'`{xlm_balance:.7f} {CONST_STELLAR_EMOJI}`',
+                              value=f'`{xlm_balance:.7f}` {CONST_STELLAR_EMOJI}',
                               inline=False)
         acc_details.add_field(name=f':flag_us: USA',
                               value=f'$ {in_usd:.4f}')
@@ -81,6 +81,14 @@ class UserAccountCommands(commands.Cog):
                           f' Please use {self.command_string}acc or {self.command_string}wallet.'
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
+
+                # Send message to explorer
+                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                 self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                current_total = self.backoffice.account_mng.count_registrations()
+                explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
+                for chn in load_channels:
+                    await chn.send(content=explorer_msg)
             else:
                 message = f'Account could not be registered at this moment please try again later.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,

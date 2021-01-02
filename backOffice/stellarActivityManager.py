@@ -16,6 +16,7 @@ class StellarManager:
     """
     Manages Stellar on chain activities
     """
+
     def __init__(self, connection, as_connection):
         self.connection = connection
         self.cl_connection = self.connection['CryptoLink']
@@ -28,9 +29,6 @@ class StellarManager:
         self.xlm_withdrawals = self.cl_connection.StellarWithdrawals  # Access to history of successful withdrawals
         self.xlm_unprocessed = self.cl_connection.StellarUnprocessedDeposits  # history of successful deposits
         self.xlm_unprocessed_withdrawals = self.cl_connection.StellarUnprocessedWithdrawals  # history of error withdrawals
-
-        # TODO rewrite to fit new wallet structures!
-        self.xlm_guild_wallets = self.cl_connection.StellarCorporateWallets
 
         # Async support
         self.as_xlm_withdrawals = self.as_cl_connection.StellarWithdrawals

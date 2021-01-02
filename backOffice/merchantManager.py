@@ -33,7 +33,6 @@ class MerchantManager:
         # Collection of applied users in the system
         self.applied_users = self.communities.MerchantAppliedUsers
 
-
     def check_if_community_exist(self, community_id: int):
         """
         Check if community is registered into the system
@@ -93,7 +92,7 @@ class MerchantManager:
             "communityId": int(community_id),
             "communityOwner": int(community_owner_id),
             "communityName": community_name,
-            "balance": int(0),
+            "xlm": int(0),
             "overallGained": int(0),
             "rolesObtained": int(0)
         }
@@ -113,7 +112,7 @@ class MerchantManager:
         """
         stellar_wallet = self.community_stellar_wallets.find_one({"communityId": community_id},
                                                                  {"_id": 0,
-                                                                  "balance": 1})
+                                                                  "xlm": 1})
 
         return stellar_wallet
 
@@ -133,13 +132,11 @@ class MerchantManager:
         if wallet_tick == 'xlm':
             try:
                 self.community_stellar_wallets.update_one({"communityId": community_id},
-                                                          {"$inc": {"balance": amount}})
+                                                          {"$inc": {"xlm": amount}})
                 return True
             except errors.PyMongoError as e:
-                print(e)
                 return False
         else:
-            print('Currency in community merchant wallet not found')
             return False
 
     def add_user_to_payed_roles(self, purchase_data: dict):
@@ -173,7 +170,7 @@ class MerchantManager:
         except errors.PyMongoError:
             return False
 
-    def check_user_roles(self, user_id, discord_id):
+    def check_user_roles(self, user_id: int, discord_id: int) -> list:
         """
         return roles which user has obtained on the community
         :param user_id:
@@ -255,8 +252,8 @@ class MerchantManager:
         if ticker == 'xlm':
             stellar_wallet = self.community_stellar_wallets.find_one({"communityId": community_id},
                                                                      {"_id": 0,
-                                                                      "balance": 1})
-            return stellar_wallet['balance']
+                                                                      "xlm": 1})
+            return stellar_wallet['xlm']
 
         else:
             return None

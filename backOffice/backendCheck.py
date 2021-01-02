@@ -18,8 +18,8 @@ class BotStructureCheck(object):
         self.connection = connection
         self.crypto_link = self.connection["CryptoLink"]  #
 
-        self.required_collections = ["CLOnChainStats",
-                                     "CLOffChainStats",
+        self.required_collections = ["CLOnChainStats",  # On chain statistics
+                                     "CLOffChainStats",  # OFf chain statistics
                                      "CLWallets",
                                      "CLFees",
                                      "CORPFromTransactions",
@@ -33,7 +33,6 @@ class BotStructureCheck(object):
                                      "StellarWithdrawals",
                                      "StellarUnprocessedDeposits",
                                      "StellarUnprocessedWithdrawals",
-                                     "StellarCorporateWallets",
                                      "guildProfiles",
                                      "userHotWallets",
                                      "thirdLevelWallets"]
@@ -148,8 +147,6 @@ class BotStructureCheck(object):
 
         if count_bot_fees == 0:
             print(Fore.YELLOW + "MAKING FEE STRUCTURE DOCS")
-
-            #TODO branchout to json file
             token_fees = {
                 "xlm": float(1.0),
                 'clt': float(1.0)

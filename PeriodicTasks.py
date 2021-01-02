@@ -262,90 +262,6 @@ class PeriodicTasks:
             print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
             print('===========================================================')
 
-    async def check_merchant_licences(self):
-        """
-        Script which checks merchant license situation
-        """
-        print(Fore.GREEN + f"{get_time()} --> CHECKING FOR COMMUNITIES WITH EXPIRED MERCHANT LICENSE")
-
-        now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
-        bot = self.bot
-        merchant_manager = self.backoffice.merchant_manager
-        overdue_communities = merchant_manager.get_over_due_communities(timestamp=int(now))
-        if overdue_communities:
-            for community in overdue_communities:
-                community_id = community['communityId']
-                community_name = community['communityName']
-                owner_id = community['ownerId']
-                start = community['start']
-                end = community['end']
-                start_date = datetime.fromtimestamp(int(start))
-                end_date = datetime.fromtimestamp(int(end))
-
-                if merchant_manager.remove_over_due_community(discord_id=int(community_id)):
-
-                    # Send notification to owner ,
-                    expired = discord.Embed(title='__Merchant License Expiration Notification!__',
-                                            colour=discord.Colour.dark_red(),
-                                            description='You have received this notification because '
-                                                        '31 day Merchant License for Crypto Link has expired. Thank you '
-                                                        ' for using Crypto Link Merchant.')
-                    expired.set_thumbnail(url=bot.user.avatar_url)
-                    expired.add_field(name='Community Name of purchase',
-                                      value=f'{community_name} (ID:{community_id})')
-                    expired.add_field(name='Start of the license',
-                                      value=f'{start_date}',
-                                      inline=False)
-                    expired.add_field(name='End of the license',
-                                      value=f'{end_date}',
-                                      inline=False)
-                    dest = await bot.fetch_user(user_id=int(owner_id))
-                    await dest.send(embed=expired)
-
-                    channel_sys = channels["merchant"]
-                    # send notification to merchant channel of LPI community
-                    expired_sys = discord.Embed(title='Merchant license expired and removed successfully!',
-                                                colour=discord.Color.red())
-                    expired_sys.set_thumbnail(url=bot.user.avatar_url)
-                    expired_sys.add_field(name='Community Name of purchase',
-                                          value=f'{community_name} (ID:{community_id})')
-                    expired_sys.add_field(name='Start of the license',
-                                          value=f'{start_date}',
-                                          inline=False)
-                    expired_sys.add_field(name='End of the license',
-                                          value=f'{end_date}',
-                                          inline=False)
-
-                    merch_channel = bot.get_channel(id=int(channel_sys))
-                    await merch_channel.send(embed=expired_sys)
-                else:
-                    sys_error = discord.Embed(title='__Merchant License System error__!',
-                                              description='This error has been triggered because merchant community license'
-                                                          ' could not be removed from database. Community details '
-                                                          'are presented below',
-                                              colour=discord.Color.red())
-                    sys_error.add_field(name='Community details',
-                                        value=f'{community_name} (ID: {community_id})',
-                                        inline=False)
-                    sys_error.add_field(name='Owner ID',
-                                        value=f'{owner_id}',
-                                        inline=False)
-                    sys_error.add_field(name='Started @',
-                                        value=f'{start_date} (UNIX {start})',
-                                        inline=False)
-                    sys_error.add_field(name='Finished @',
-                                        value=f'{end_date} (UNIX {end})',
-                                        inline=False)
-
-                    channel_id_details = self.notification_channels['merchant']
-                    channel_to_send = bot.get_channel(id=int(channel_id_details))
-                    await channel_to_send.send(embed=sys_error)
-
-        else:
-            print(Fore.CYAN + 'No communities with overdue license\n'
-                              ' ===================================')
-
-
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
@@ -354,8 +270,6 @@ def start_scheduler(timed_updater):
                       CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
     scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
         second='00'), misfire_grace_time=10, max_instances=20)
-    scheduler.add_job(timed_updater.check_merchant_licences,
-                      CronTrigger(minute='00', second='10'), misfire_grace_time=10, max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
     return scheduler

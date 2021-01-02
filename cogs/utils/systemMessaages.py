@@ -128,10 +128,11 @@ class CustomMessages:
             await ctx.channel.send(embed=embed)
 
     @staticmethod
-    async def system_message(ctx, message: str, color_code, destination: int, sys_msg_title: str = None):
+    async def system_message(ctx, message: str, color_code, destination: int, sys_msg_title: str = None, embed_title:str = None):
         """
         Custom System Messages
         """
+        # Color filtering
         if isinstance(color_code, Colour):
             emoji = ":robot:"
             c = color_code
@@ -143,13 +144,13 @@ class CustomMessages:
                 c = discord.Colour.red()
                 emoji = ":warning:"
 
-        if sys_msg_title is None:
-            sys_msg_title = 'System Message'
+        if embed_title is None:
+            embed_title = 'System Message'
 
-        sys_embed = discord.Embed(title=f"{emoji} System Message {emoji}",
+        sys_embed = discord.Embed(title=f"{embed_title}",
                                   description=sys_msg_title,
                                   colour=c)
-        sys_embed.add_field(name='Message',
+        sys_embed.add_field(name=':information_source:',
                             value=message)
 
         if destination == 0:
