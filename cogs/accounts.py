@@ -91,6 +91,11 @@ class UserAccountCommands(commands.Cog):
                 explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
                 for chn in load_channels:
                     await chn.send(content=explorer_msg)
+
+                # Update guild stats on registered users
+                await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
+
+
             else:
                 message = f'Account could not be registered at this moment please try again later.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,

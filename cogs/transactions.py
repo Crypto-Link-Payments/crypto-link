@@ -163,9 +163,12 @@ class TransactionCommands(commands.Cog):
                             load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                              self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                             current_total = self.backoffice.account_mng.count_registrations()
+
                             explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
                             for chn in load_channels:
                                 await chn.send(content=explorer_msg)
+
+                            await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
 
                         if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
                                                                               user_id=ctx.message.author.id,

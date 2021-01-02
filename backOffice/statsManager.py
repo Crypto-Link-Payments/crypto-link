@@ -74,6 +74,10 @@ class StatsManager(object):
         await self.as_cl_guild_profiles.update_one({"guildId": guild_id},
                                                    {f"{CONST_INC}": guild_stats_data})
 
+    async def update_registered_users(self, guild_id: int):
+        await self.as_cl_guild_profiles.update_one({"guildId": guild_id},
+                                                   {f"{CONST_INC}": {"registeredUsers": 1}})
+
     def get_all_stats(self):
         """
         Get all bot stats on request
