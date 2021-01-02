@@ -57,7 +57,6 @@ class GuildOwnerCommands(commands.Cog):
                         "multiTxCount": int(0)}
             }
             await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
-
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message='You have successfully registered guild into the system',
                                                 destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
