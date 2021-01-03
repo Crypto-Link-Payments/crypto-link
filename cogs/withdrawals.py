@@ -289,7 +289,8 @@ class WithdrawalCommands(commands.Cog):
         """
 
         strip_address = address.strip()
-        if self.help_functions.check_public_key(address=address) and not self.help_functions.check_for_special_char(string=strip_address):
+        if self.help_functions.check_public_key(address=address) and not self.help_functions.check_for_special_char(
+                string=strip_address):
             if strip_address != self.bot.backoffice.stellar_wallet.public_key:
                 # Get the fee for stellar withdrawal
                 stellar_fee = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')['fee_list']['xlm']
@@ -390,7 +391,7 @@ class WithdrawalCommands(commands.Cog):
                                         # Update bot stats
                                         bot_stats_data = {
                                             "withdrawalCount": 1,
-                                            "withdrawnAmount": round(stroops / 10000000, 7)
+                                            "withdrawnAmount": stroops / (10 ** 7)
                                         }
                                         await self.backoffice.stats_manager.update_cl_on_chain_stats(ticker='xlm',
                                                                                                      stat_details=bot_stats_data)
@@ -404,6 +405,11 @@ class WithdrawalCommands(commands.Cog):
                                                                                 message=explorer_msg,
                                                                                 tx_type='withdrawal',
                                                                                 on_chain=True)
+
+                                        # Stores in earnings
+                                        await self.backoffice.stats_data.update_cl_earnings(amount=fee_in_stroops,
+                                                                                            system='withdrawal',
+                                                                                            token="xlm")
 
                                 else:
                                     message = 'Funds could not be withdrawn at this point. Please try again later.'
