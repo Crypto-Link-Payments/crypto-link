@@ -95,7 +95,6 @@ class UserAccountCommands(commands.Cog):
                 # Update guild stats on registered users
                 await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
 
-
             else:
                 message = f'Account could not be registered at this moment please try again later.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -148,7 +147,6 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def deposit(self, ctx):
-
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \

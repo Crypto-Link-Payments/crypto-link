@@ -168,6 +168,7 @@ class TransactionCommands(commands.Cog):
                             for chn in load_channels:
                                 await chn.send(content=explorer_msg)
 
+
                             await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
 
                         if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,

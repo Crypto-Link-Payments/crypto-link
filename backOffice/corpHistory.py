@@ -36,8 +36,7 @@ class CorporateHistoryManager:
             "destinationId": int(destination),
             "currency": str(currency),
             "amount": str(amount),
-            "amountAtomic": int(amount_atomic),
-
+            "amountAtomic": int(amount_atomic)
         }
 
         try:
