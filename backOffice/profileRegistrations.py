@@ -16,7 +16,6 @@ class AccountManager(object):
     def __init__(self, connection):
         # main db connection
         self.connection = connection
-
         # Database of bot users
         self.cl_connection = self.connection['CryptoLink']
         self.user_profiles = self.cl_connection.userProfiles
@@ -92,7 +91,7 @@ class AccountManager(object):
 
         self.__create_user_wallet(discord_id=discord_id, discord_username=discord_username,
                                   deposit_id=stellar_deposit_id)
-        new_user = {
+        new_user_stats = {
             "userId": discord_id,
             "userName": discord_username,
             "stellarDepositId": stellar_deposit_id,
@@ -118,7 +117,7 @@ class AccountManager(object):
         }
 
         try:
-            self.user_profiles.insert_one(new_user)
+            self.user_profiles.insert_one(new_user_stats)
             return True
         except errors.PyMongoError:
             return False
