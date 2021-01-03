@@ -99,12 +99,15 @@ class StellarWallet:
         te = TransactionEnvelope.from_xdr(envelope_xdr, Network.TESTNET_NETWORK_PASSPHRASE)
         operations = te.transaction.operations
 
+        #TODO make multiple payments inside one transaction
+        amount = 0
         for op in operations:
             if isinstance(op, Payment):
                 asset = op.asset.to_dict()
                 if asset.get('type') == 'native':
                     asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
                 asset["amount"] = op.to_xdr_amount(op.amount)
+                # TODO count all deposits
                 return asset
 
     def get_incoming_transactions(self, pag=None):
