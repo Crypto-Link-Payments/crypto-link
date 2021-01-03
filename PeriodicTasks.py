@@ -268,7 +268,7 @@ class PeriodicTasks:
             print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
             print('===========================================================')
 
-    def send_marketing_messages(self):
+    async def send_marketing_messages(self):
         stats = self.backoffice.stats_manager.get_all_stats()
         """
                 data = {"xlm": {"offChain": off_chain_xlm,
