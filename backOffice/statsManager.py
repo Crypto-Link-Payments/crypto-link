@@ -34,11 +34,20 @@ class StatsManager(object):
         self.as_on_chain_activities = self.as_cl_connection.CLOnChainStats
         self.as_cl_guild_profiles = self.as_cl_connection.guildProfiles
         self.as_cl_earnings = self.as_cl_connection.CLEarning
+        self.as_user_wallets = self.as_cl_connection.userWallets
+
+    async def count_total_registered_wallets(self):
+        """
+        Return count of registered wallets
+        """
+        data = await self.as_user_wallets.count_documents({})
+        return data
 
     async def update_cl_earnings(self, amount: int, system: str, token: str):
         """
         Appends fee to CL wallet level 1
         """
+        # TODO finish this
         await self.as_cl_earnings.insert_one({"system": system,
                                               "amount": amount,
                                               "token": token})
