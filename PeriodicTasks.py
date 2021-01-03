@@ -30,10 +30,8 @@ def get_time():
 class PeriodicTasks:
     def __init__(self, backoffice, bot):
         self.backoffice = backoffice
-        self.notification_channels = helper.read_json_file(file_name='autoMessagingChannels.json')
         self.bot = bot
         self.twitter_acc = self.backoffice.twitter_details
-
 
     @staticmethod
     def special_character_check(memo):
@@ -155,7 +153,7 @@ class PeriodicTasks:
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
         pag = helper.read_json_file('stellarPag.json')
         new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-        channel_id = self.notification_channels["stellar"]  # Sys channel where details are sent
+        channel_id = self.backoffice.auto_messaging_channels["stellar"]  # Sys channel where details are sent
         if new_transactions:
             # Filter transactions
 
@@ -262,6 +260,54 @@ class PeriodicTasks:
             print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
             print('===========================================================')
 
+    def send_marketing_messages(self):
+        stats = self.backoffice.stats_manager.get_all_stats()
+        """
+                data = {"xlm": {"offChain": off_chain_xlm,
+                                "onChain": on_chain_xlm}}"""
+        off_chain_xlm = stats["xlm"]["offChain"]
+        total_tx = off_chain_xlm["totalTx"]
+        total_moved = off_chain_xlm["totalMoved"]
+
+        on_chain_xlm = stats["xlm"]["onChain"]
+        deposits = on_chain_xlm["depositCount"]
+        withdrawals = on_chain_xlm["withdrawalCount"]
+        deposit_amount = on_chain_xlm["depositAmount"]
+        withdrawal_amount = on_chain_xlm["withdrawalAmount"]
+
+        stats_chn = self.bot.get_channel(id=self.backoffice.auto_messaging_channels["stats"])
+        total_wallets = self.backoffice.stats_manager.count_total_registered_wallets()
+
+        stats = Embed(title="Crypto Link Stats",
+                      description='Snapshot of the system ',
+                      color=Color.green())
+        stats.add_field(name='Live on:',
+                        value=f'{len(self.bot.guilds)} servers',
+                        inline=False)
+        stats.add_field(name='Σ Registered Wallets',
+                        value=f'{total_wallets}',
+                        inline=False)
+        stats.add_field(name='Σ Transactions Level 1',
+                        value=f'{total_moved}',
+                        inline=False)
+        stats.add_field(name='Σ XLM Moved',
+                        value=f'{total_tx}',
+                        inline=False)
+        stats.add_field(name='Σ Deposits',
+                        value=f'{deposits}',
+                        inline=False)
+        stats.add_field(name='Σ XLM Deposits',
+                        value=f'{deposit_amount} XLM',
+                        inline=False)
+        stats.add_field(name='Withdrawals',
+                        value=f'{withdrawals}',
+                        inline=False)
+        stats.add_field(name='Σ XLM Withdrawals ',
+                        value=f'{withdrawal_amount} XLM',
+                        inline=False)
+        await stats_chn.send(embed=stats)
+
+
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
@@ -270,6 +316,10 @@ def start_scheduler(timed_updater):
                       CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
     scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
         second='00'), misfire_grace_time=10, max_instances=20)
+
+    scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
+        hour='00'), misfire_grace_time=10, max_instances=20)
+
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
     return scheduler
