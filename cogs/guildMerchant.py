@@ -543,7 +543,7 @@ class MerchantCommunityOwner(commands.Cog):
                         await notification_channel.send(embed=corp_info)
 
 
-                        # TODO integrate withdrawal data to CL histoory for TAX office to count gains
+                        await self.backoffice.stats_manager.update_cl_earnins(amount=fee_in_stroops,system='merchant',token='xlm')
 
                         # TODO update community merchant wallet stats
 
