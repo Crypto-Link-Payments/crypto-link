@@ -73,26 +73,25 @@ class GuildOwnerCommands(commands.Cog):
         stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
                            timestamp=datetime.utcnow(),
                            colour=Colour.dark_gold())
+        stats_info.add_field(name='Wallets registered',
+                             value=f'`{stats["registeredUsers"]}`',
+                             inline=False)
+        xlm_stats = stats["xlm"]
+        stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
+                             value=f'`{xlm_stats["txCount"]}`')
+        stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
+                             value=f'`{xlm_stats["volume"]}`')
+        stats_info.add_field(name=":cowboy: Public Transactions :cowboy: ",
+                             value=f'`{xlm_stats["publicCount"]}`')
+        stats_info.add_field(name=":detective: Private Transactions :detective:",
+                             value=f'`{xlm_stats["privateCount"]}`')
+        stats_info.add_field(name=":person_juggling: Roles Sold :person_juggling: ",
+                             value=f'`{xlm_stats["roleTxCount"]}`')
+        stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
+                             value=f'`{xlm_stats["emojiTxCount"]}`')
+        stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
+                             value=f'`{xlm_stats["multiTxCount"]}`')
         await ctx.author.send(embed=stats_info)
-        for k, v in stats.items():
-            stats_info = Embed(title=f":bar_chart: __{k.upper()} Stats__ :bar_chart: ",
-                               timestamp=datetime.utcnow(),
-                               colour=Colour.dark_gold())
-            stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
-                                 value=f'{v["txCount"]}')
-            stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
-                                 value=f'{v["volume"]}')
-            stats_info.add_field(name=":cowboy: Public Transactions :cowboy: ",
-                                 value=f'{v["publicCount"]}')
-            stats_info.add_field(name=":detective: Private Transactions :detective:",
-                                 value=f'{v["privateCount"]}')
-            stats_info.add_field(name=":person_juggling: Roles Sold :person_juggling: ",
-                                 value=f'{v["roleTxCount"]}')
-            stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
-                                 value=f'{v["emojiTxCount"]}')
-            stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
-                                 value=f'{v["multiTxCount"]}')
-            await ctx.author.send(embed=stats_info)
 
     @owner.command()
     @commands.check(guild_has_stats)
