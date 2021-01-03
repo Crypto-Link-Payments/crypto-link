@@ -33,6 +33,15 @@ class StatsManager(object):
         self.as_cl_off_chain_stats = self.as_cl_connection.CLOffChainStats  # Connection to CL Off chain stats
         self.as_on_chain_activities = self.as_cl_connection.CLOnChainStats
         self.as_cl_guild_profiles = self.as_cl_connection.guildProfiles
+        self.as_cl_earnings = self.as_cl_connection.CLEarning
+
+    async def update_cl_earnings(self, amount: int, system: str, token: str):
+        """
+        Appends fee to CL wallet level 1
+        """
+        await self.as_cl_earnings.insert_one({"system": system,
+                                              "amount": amount,
+                                              "token": token})
 
     async def update_cl_merchant_stats(self, ticker: str, merchant_stats: dict, ticker_stats: dict):
         await self.as_cl_off_chain_stats.update_one({"ticker": ticker},
