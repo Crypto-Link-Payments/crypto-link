@@ -37,7 +37,7 @@ class PeriodicTasks:
     async def global_bot_stats_update(self, tx):
         bot_stats = {
             "depositCount": 1,
-            "depositAmount": float(round(int(tx['asset_type']["amount"]) / 10000000))
+            "depositAmount": float(round(int(tx['asset_type']["amount"]) / (10 ** 7)))
         }
         await self.backoffice.stats_manager.update_cl_on_chain_stats(ticker=tx['asset_type']['code'].lower(),
                                                                      stat_details=bot_stats)
@@ -45,22 +45,24 @@ class PeriodicTasks:
     def filter_transaction(self, new_transactions: list):
         # Building list of deposits if memo included
         stellar_manager = self.backoffice.stellar_manager
-        tx_with_memo_special = [tx for tx in new_transactions if 'memo' in tx.keys() and helper.check_for_special_char(tx["memo"])]
-        tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys() and not helper.check_for_special_char(tx["memo"])]  # GET Transactions who have memo
+        tx_with_memo_special = [tx for tx in new_transactions if
+                                'memo' in tx.keys() and helper.check_for_special_char(tx["memo"])]
+        tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys() and not helper.check_for_special_char(
+            tx["memo"])]  # GET Transactions who have memo
         tx_with_no_memo = [tx for tx in new_transactions if tx not in tx_with_memo]  # GET transactions without memo
         tx_with_registered_memo = [tx for tx in tx_with_memo if stellar_manager.check_if_stellar_memo_exists(
             tx_memo=tx['memo'])]  # GET tx with registered memo
         tx_with_not_registered_memo = [tx for tx in tx_with_memo if
                                        tx not in tx_with_registered_memo]  # GET tx with not registered memo
-        return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo,tx_with_memo_special
+        return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special
 
     async def process_tx_with_no_memo(self, channel, no_memo_transaction):
         stellar_manager = self.backoffice.stellar_manager
         for tx in no_memo_transaction:
             if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
                 if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
-                    await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
                     await self.global_bot_stats_update(tx=tx)
+                    await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
                 else:
                     print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                      f'HASH{tx["hash"]}')
@@ -85,6 +87,16 @@ class PeriodicTasks:
                             user_id = wallet_manager.get_discord_id_from_memo(memo=tx['memo'])  # Return usr int number
                             dest = await bot.fetch_user(user_id=int(user_id))
 
+                            on_chain_stats = {
+                                f"{tx['asset_type']['code'].lower()}.depositsCount": 1,
+                                f"{tx['asset_type']['code'].lower()}.totalDeposited": round(
+                                    int(tx['asset_type']["amount"]) / 10000000,
+                                    7)}
+
+                            await stats_manager.update_user_on_chain_stats(user_id=dest.id, stats_data=on_chain_stats)
+
+                            await self.global_bot_stats_update(tx=tx)
+
                             await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
 
                             # Channel system message on deposit
@@ -95,22 +107,12 @@ class PeriodicTasks:
                             load_channels = [bot.get_channel(id=int(chn)) for chn in
                                              guild_profiles.get_all_explorer_applied_channels()]
 
-                            explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"] / 10000000, 7)} ' \
+                            explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"] / (10 ** 7), 7)} ' \
                                            f'{tx["asset_type"]["code"].upper()} to {bot.user}'
 
                             await custom_messages.explorer_messages(applied_channels=load_channels,
                                                                     message=explorer_msg,
                                                                     on_chain=True, tx_type='deposit')
-
-                            on_chain_stats = {
-                                f"{tx['asset_type']['code'].lower()}.depositsCount": 1,
-                                f"{tx['asset_type']['code'].lower()}.totalDeposited": round(
-                                    int(tx['asset_type']["amount"]) / 10000000,
-                                    7)}
-
-                            await stats_manager.update_user_on_chain_stats(user_id=dest.id, stats_data=on_chain_stats)
-
-                            await self.global_bot_stats_update(tx=tx)
 
                         else:
                             print(Fore.RED + f'TX Processing error: \n'
@@ -131,8 +133,8 @@ class PeriodicTasks:
             if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
                 if not helper.check_for_special_char(tx["memo"]):
                     if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
-                        await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
                         await self.global_bot_stats_update(tx=tx)
+                        await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
                     else:
                         print(Fore.RED + f'There has been an issue while processing tx with no memo \n'
                                          f'HASH{tx["hash"]}')
@@ -146,7 +148,6 @@ class PeriodicTasks:
     async def process_tx_with_special_chart(self, channel):
         pass
 
-
     async def check_stellar_hot_wallet(self):
         """
         Functions initiates the check for stellar incoming deposits and processes them
@@ -159,7 +160,7 @@ class PeriodicTasks:
         if new_transactions:
             # Filter transactions
 
-            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo,tx_with_memo_special= self.filter_transaction(
+            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
                 new_transactions)
             if tx_with_registered_memo:
                 channel = bot.get_channel(id=int(self.notification_channels['memoRegistered']))
@@ -171,7 +172,7 @@ class PeriodicTasks:
             if tx_with_no_memo:
                 channel = bot.get_channel(id=int(self.notification_channels['memoNone']))
                 await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
-                
+
             if tx_with_memo_special:
                 channel = bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
                 await self.process_tx_with_special_chart(channel=channel)
