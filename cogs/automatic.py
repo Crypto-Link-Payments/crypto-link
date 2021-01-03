@@ -81,8 +81,7 @@ class AutoFunctions(commands.Cog):
     async def on_command(self, ctx):
         try:
             await ctx.message.delete()
-        except Exception as e:
-            print(e)
+        except Exception:
             pass
 
     @commands.Cog.listener()
