@@ -30,12 +30,9 @@ def get_time():
 class PeriodicTasks:
     def __init__(self, backoffice, bot):
         self.backoffice = backoffice
+        self.notification_channels = self.backoffice.auto_messaging_channels["depositNotifications"]
         self.bot = bot
         self.twitter_acc = self.backoffice.twitter_details
-
-    @staticmethod
-    def special_character_check(memo):
-        return search("[~!#$%^&*()_+{}:;\']", memo)
 
     async def global_bot_stats_update(self, tx):
         bot_stats = {
@@ -48,13 +45,14 @@ class PeriodicTasks:
     def filter_transaction(self, new_transactions: list):
         # Building list of deposits if memo included
         stellar_manager = self.backoffice.stellar_manager
-        tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys()]  # GET Transactions who have memo
+        tx_with_memo_special = [tx for tx in new_transactions if 'memo' in tx.keys() and helper.check_for_special_char(tx["memo"])]
+        tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys() and not helper.check_for_special_char(tx["memo"])]  # GET Transactions who have memo
         tx_with_no_memo = [tx for tx in new_transactions if tx not in tx_with_memo]  # GET transactions without memo
         tx_with_registered_memo = [tx for tx in tx_with_memo if stellar_manager.check_if_stellar_memo_exists(
             tx_memo=tx['memo'])]  # GET tx with registered memo
         tx_with_not_registered_memo = [tx for tx in tx_with_memo if
                                        tx not in tx_with_registered_memo]  # GET tx with not registered memo
-        return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo
+        return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo,tx_with_memo_special
 
     async def process_tx_with_no_memo(self, channel, no_memo_transaction):
         stellar_manager = self.backoffice.stellar_manager
@@ -69,7 +67,7 @@ class PeriodicTasks:
             else:
                 print(Fore.YELLOW + 'Unknown processed already')
 
-    async def process_tx_with_memo(self, msg_channel, memo_transactions):
+    async def process_tx_with_memo(self, channel, memo_transactions):
         bot = self.bot
         stellar_manager = self.backoffice.stellar_manager
         stats_manager = self.backoffice.stats_manager
@@ -80,7 +78,7 @@ class PeriodicTasks:
             if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
                 if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
                     # Update balance based on incoming asset
-                    if not self.special_character_check(memo=tx["memo"]):
+                    if not helper.check_for_special_char(tx["memo"]):
                         if wallet_manager.update_coin_balance_by_memo(memo=tx['memo'], coin=tx['asset_type']["code"],
                                                                       amount=int(tx['asset_type']["amount"])):
                             # If balance updated successfully send the message to user of processed deposit
@@ -90,7 +88,7 @@ class PeriodicTasks:
                             await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
 
                             # Channel system message on deposit
-                            await custom_messages.sys_deposit_notifications(channel=msg_channel,
+                            await custom_messages.sys_deposit_notifications(channel=channel,
                                                                             user=dest, tx_details=tx)
 
                             # Explorer messages
@@ -120,7 +118,7 @@ class PeriodicTasks:
                     else:
                         print(Fore.RED + f'Special characters in Memo write to file: \n'
                                          f'{tx}')
-                        await custom_messages.send_special_char_notification(channel=msg_channel, tx=tx)
+                        await custom_messages.send_special_char_notification(channel=channel, tx=tx)
 
                 else:
                     print(Fore.RED + 'Could not store to history')
@@ -131,7 +129,7 @@ class PeriodicTasks:
         stellar_manager = self.backoffice.stellar_manager
         for tx in no_registered_memo:
             if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
-                if not self.special_character_check(memo=tx["memo"]):
+                if not helper.check_for_special_char(tx["memo"]):
                     if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                         await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
                         await self.global_bot_stats_update(tx=tx)
@@ -145,6 +143,10 @@ class PeriodicTasks:
             else:
                 print(Fore.YELLOW + 'Unknown processed already')
 
+    async def process_tx_with_special_chart(self, channel):
+        pass
+
+
     async def check_stellar_hot_wallet(self):
         """
         Functions initiates the check for stellar incoming deposits and processes them
@@ -157,16 +159,22 @@ class PeriodicTasks:
         if new_transactions:
             # Filter transactions
 
-            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo = self.filter_transaction(
+            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo,tx_with_memo_special= self.filter_transaction(
                 new_transactions)
-            channel = bot.get_channel(id=int(channel_id))
             if tx_with_registered_memo:
-                await self.process_tx_with_memo(msg_channel=channel, memo_transactions=tx_with_registered_memo)
+                channel = bot.get_channel(id=int(self.notification_channels['memoRegistered']))
+                await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
             if tx_with_not_registered_memo:
+                channel = bot.get_channel(id=int(self.notification_channels['memoNotRegistered']))
                 await self.process_tx_with_not_registered_memo(channel=channel,
                                                                no_registered_memo=tx_with_not_registered_memo)
             if tx_with_no_memo:
+                channel = bot.get_channel(id=int(self.notification_channels['memoNone']))
                 await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
+                
+            if tx_with_memo_special:
+                channel = bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
+                await self.process_tx_with_special_chart(channel=channel)
 
             last_checked_pag = new_transactions[-1]["paging_token"]
             if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
