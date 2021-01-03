@@ -40,7 +40,7 @@ class GuildOwnerCommands(commands.Cog):
                                                destination=1, c=Colour.dark_gold())
 
     @owner.command()
-    @commands.check(is_owner)
+    @commands.check(has_wallet)
     async def register(self, ctx):
         if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
             new_guild = {
@@ -205,6 +205,23 @@ class GuildOwnerCommands(commands.Cog):
                       f' with command ```{self.command_string}merchant``` or ```{self.command_string}```'
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                 destination=1)
+
+    @owner.error()
+    async def owner_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            message = f'In order to be able to access this category of commands you are required to be ' \
+                      f' owner of the community {ctx.guild} and execute command on one of the ' \
+                      f' public channels.'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+
+    @register.error()
+    async def register_error(self,ctx,error):
+        if isinstance(error, commands.CheckFailure):
+            message = f'In order to be able to register community into Crypto Link system you re required to be ' \
+                      f' have personal wallet registered in the system. You can do so through' \
+                      f' `{self.command_string}register`'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+
 
 
 def setup(bot):
