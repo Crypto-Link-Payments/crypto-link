@@ -37,8 +37,7 @@ class GuildProfileManager:
 
     async def get_guild_stats(self, guild_id: int):
         stats = await self.as_guild_profiles.find_one({"guildId": guild_id},
-                                                      {"_id": 0,
-                                                       "xlm": 1})
+                                                      {"_id": 0})
         return stats
 
     async def update_stellar_community_wallet_stats(self, guild_id: int, data: dict):
