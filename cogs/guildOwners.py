@@ -206,7 +206,7 @@ class GuildOwnerCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                 destination=1)
 
-    @owner.error()
+    @owner.error
     async def owner_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to be able to access this category of commands you are required to be ' \
@@ -214,7 +214,7 @@ class GuildOwnerCommands(commands.Cog):
                       f' public channels.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
 
-    @register.error()
+    @register.error
     async def register_error(self,ctx,error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to be able to register community into Crypto Link system you re required to be ' \
