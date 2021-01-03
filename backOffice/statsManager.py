@@ -71,7 +71,7 @@ class StatsManager(object):
         Update stats when on chain activity happens.
         """
         await self.as_on_chain_activities.update_one({"ticker": ticker},
-                                                     {f"{CONST_INC}": stat_details})
+                                                     {f"$inc": stat_details})
 
     async def update_user_on_chain_stats(self, user_id: int, stats_data: dict):
         """
