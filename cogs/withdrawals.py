@@ -458,6 +458,15 @@ class WithdrawalCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
+    @withdraw.error
+    async def withdrawal_error(self,ctx,error):
+        if isinstance(error,commands.CheckFailure):
+            if isinstance(error, commands.CheckFailure):
+                message = f'First you need to register yourself wallet in Crypto Link system. You can do that ' \
+                          f'though {self.command_string}register'
+                title = f'**__Not registered__** :clipboard:'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title=title)
     @xlm.error
     async def stellar_withdrawal_error(self, ctx, error):
         """
