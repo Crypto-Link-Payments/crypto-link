@@ -34,8 +34,15 @@ class StellarWallet:
         self.root_account = Account(account_id=self.root_keypair.public_key, sequence=1)
         self.server = Server(horizon_url=horizon_url)  # Testnet
 
-    @staticmethod
-    def create_stellar_account():
+        # Decide network type
+        if horizon_url == "https://horizon-testnet.stellar.org":
+            self.networkPhrase = Network.TESTNET_NETWORK_PASSPHRASE
+            self.network_type = 'testnet'
+        else:
+            self.networkPhrase = Network.PUBLIC_NETWORK_PASSPHRASE
+            self.network_type = 'pub-net'
+
+    def create_stellar_account(self):
         """
         Creates inactive stellar account which needs to be activated by depositing lumens
         """
@@ -45,7 +52,7 @@ class StellarWallet:
             private_key = key_pair.secret
             return {f'address': f'{public_key}',
                     f'secret': f'{private_key}',
-                    "network": 'testnet'}
+                    "network": f'{self.network_type}'}
         except NotFoundError:
             return {}
 
@@ -87,8 +94,7 @@ class StellarWallet:
         else:
             return {}
 
-    @staticmethod
-    def decode_transaction_envelope(envelope_xdr):
+    def decode_transaction_envelope(self,envelope_xdr):
         """
         Decode envelope and get details
         Credits to overcat :
@@ -96,15 +102,18 @@ class StellarWallet:
         :param envelope_xdr: Xdr envelope from stellar network
         :return: Decoded transaction details
         """
-        te = TransactionEnvelope.from_xdr(envelope_xdr, Network.TESTNET_NETWORK_PASSPHRASE)
+        te = TransactionEnvelope.from_xdr(envelope_xdr, self.networkPhrase)
         operations = te.transaction.operations
 
+        #TODO make multiple payments inside one transaction
+        amount = 0
         for op in operations:
             if isinstance(op, Payment):
                 asset = op.asset.to_dict()
                 if asset.get('type') == 'native':
                     asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
                 asset["amount"] = op.to_xdr_amount(op.amount)
+                # TODO count all deposits
                 return asset
 
     def get_incoming_transactions(self, pag=None):
@@ -159,7 +168,7 @@ class StellarWallet:
         source_account = self.server.load_account(self.public_key)
         tx = TransactionBuilder(
             source_account=source_account,
-            network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+            network_passphrase=self.networkPhrase,
             base_fee=self.server.fetch_base_fee()).append_payment_op(
             asset_issuer=asset_issuer,
             destination=address, asset_code=token.upper(), amount=amount).set_timeout(30).build()
@@ -199,7 +208,7 @@ class StellarWallet:
             source_account = self.server.load_account(public_key)
             tx = TransactionBuilder(
                 source_account=source_account,
-                network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+                network_passphrase=self.networkPhrase,
                 base_fee=self.server.fetch_base_fee()).append_change_trust_op(asset_code=f'{token.upper()}',
                                                                               asset_issuer=asset_issuer).set_timeout(
                 30).build()

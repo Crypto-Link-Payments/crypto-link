@@ -81,8 +81,7 @@ class AutoFunctions(commands.Cog):
     async def on_command(self, ctx):
         try:
             await ctx.message.delete()
-        except Exception as e:
-            print(e)
+        except Exception:
             pass
 
     @commands.Cog.listener()
@@ -98,7 +97,8 @@ class AutoFunctions(commands.Cog):
             join_info.add_field(name="Welcome!",
                                 value=f"Welcome to the {member.guild}, This discord is powered by "
                                       f" {self.bot.user.name}, where you can make payments,"
-                                      f" donations, or tips over Discord. System Allows as well to purchase guild"
+                                      f" donations, or tips over Discord on Stellar Crypto Currency Chain. "
+                                      f"System Allows as well to purchase guild"
                                       f" roles so contact owner to find more info."
                                       f"and other discord users. To get started use command ***{self.command_string}"
                                       f"help*** or ***{self.command_string}help get_started***.",
@@ -124,7 +124,7 @@ class AutoFunctions(commands.Cog):
                                       " periodically for changes. Your continued use of or access "
                                       "to the bot following the posting of any changes constitutes"
                                       " acceptance of those changes. You agree that the use of this bot "
-                                      "is at your own risk. In no event should Launch Pad Investments "
+                                      "is at your own risk. In no event should Crypto Link "
                                       "discord server or any of its members including the bot creator "
                                       "be liable for any direct or indirect trading losses caused by this "
                                       "bot and its services and features.")
@@ -140,18 +140,20 @@ class AutoFunctions(commands.Cog):
         """
 
         if not member.bot:
-            print(Fore.LIGHTYELLOW_EX + f'{member} left {member.guild}... Notifying him on funds')
+            if self.bot.backoffice.account_mng.check_user_existence(user_id=member.id):
+                print(Fore.LIGHTYELLOW_EX + f'{member} left {member.guild}... Notifying him on funds')
 
-            warning_embed = Embed(title=f':warning:  __{self.bot.user}__ :warning: ',
-                                  description='This is automatic notification from Crypto Link Payment system bot',
-                                  colour=Colour.dark_orange())
-            warning_embed.add_field(name='Notification',
-                                    value=f'You have left the {member.guild} where {self.bot.user} payment system '
-                                          f'is present. Hope you did not have any funds in your wallet.'
-                                          ' Funds can be accessed from any community where the system is present.',
-                                    inline=False)
-            await member.send(embed=warning_embed)
-            print(f'==============DONE=================')
+                warning_embed = Embed(title=f':warning:  __{self.bot.user}__ :warning: ',
+                                      description='This is automatic notification from Crypto Link Payment system bot',
+                                      colour=Colour.dark_orange())
+                warning_embed.add_field(name='Notification',
+                                        value=f'You have left the {member.guild} where {self.bot.user} payment system '
+                                              f'is present. Hope you did not have any funds in your wallet.'
+                                              ' Funds can be accessed from any community where the system is present.',
+                                        inline=False)
+                await member.send(embed=warning_embed)
+            else:
+                print(Fore.LIGHTYELLOW_EX + f'{member} left {member.guild}... Not Registered')
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -190,7 +192,6 @@ class AutoFunctions(commands.Cog):
                                   '===========================')
         guilds = await self.bot.fetch_guilds(limit=150).flatten()
         reach = len(self.bot.users)
-
         print(Fore.LIGHTGREEN_EX + f'Integrated into: {len(guilds)} guilds')
         print(Fore.LIGHTGREEN_EX + f'Member reach: {reach} members')
         print(Fore.LIGHTYELLOW_EX + '===================================')
@@ -201,14 +202,8 @@ class AutoFunctions(commands.Cog):
                 "guildName": f'{guild}',
                 "explorerSettings": {"channelId": int(0)},
                 "txFees": {"xlmFeeValue": int(0)},
+                "registeredUsers": 0,
                 "xlm": {"volume": float(0.0),
-                        "txCount": int(0),
-                        "privateCount": int(0),
-                        "publicCount": int(0),
-                        "roleTxCount": int(0),
-                        "emojiTxCount": int(0),
-                        "multiTxCount": int(0)},
-                "clt": {"volume": float(0.0),
                         "txCount": int(0),
                         "privateCount": int(0),
                         "publicCount": int(0),

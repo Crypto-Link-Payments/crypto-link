@@ -40,7 +40,7 @@ class GuildOwnerCommands(commands.Cog):
                                                destination=1, c=Colour.dark_gold())
 
     @owner.command()
-    @commands.check(is_owner)
+    @commands.check(has_wallet)
     async def register(self, ctx):
         if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
             new_guild = {
@@ -48,6 +48,7 @@ class GuildOwnerCommands(commands.Cog):
                 "guildName": f'{ctx.guild}',
                 "explorerSettings": {"channelId": int(0)},
                 "txFees": {"xlmFeeValue": int(0)},
+                "registeredUsers": 0,
                 "xlm": {"volume": float(0.0),
                         "txCount": int(0),
                         "privateCount": int(0),
@@ -72,26 +73,25 @@ class GuildOwnerCommands(commands.Cog):
         stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
                            timestamp=datetime.utcnow(),
                            colour=Colour.dark_gold())
+        stats_info.add_field(name='Wallets registered',
+                             value=f'`{stats["registeredUsers"]}`',
+                             inline=False)
+        xlm_stats = stats["xlm"]
+        stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
+                             value=f'`{xlm_stats["txCount"]}`')
+        stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
+                             value=f'`{xlm_stats["volume"]}`')
+        stats_info.add_field(name=":cowboy: Public Transactions :cowboy: ",
+                             value=f'`{xlm_stats["publicCount"]}`')
+        stats_info.add_field(name=":detective: Private Transactions :detective:",
+                             value=f'`{xlm_stats["privateCount"]}`')
+        stats_info.add_field(name=":person_juggling: Roles Sold :person_juggling: ",
+                             value=f'`{xlm_stats["roleTxCount"]}`')
+        stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
+                             value=f'`{xlm_stats["emojiTxCount"]}`')
+        stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
+                             value=f'`{xlm_stats["multiTxCount"]}`')
         await ctx.author.send(embed=stats_info)
-        for k, v in stats.items():
-            stats_info = Embed(title=f":bar_chart: __{k.upper()} Stats__ :bar_chart: ",
-                               timestamp=datetime.utcnow(),
-                               colour=Colour.dark_gold())
-            stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
-                                 value=f'{v["txCount"]}')
-            stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
-                                 value=f'{v["volume"]}')
-            stats_info.add_field(name=":cowboy: Public Transactions :cowboy: ",
-                                 value=f'{v["publicCount"]}')
-            stats_info.add_field(name=":detective: Private Transactions :detective:",
-                                 value=f'{v["privateCount"]}')
-            stats_info.add_field(name=":person_juggling: Roles Sold :person_juggling: ",
-                                 value=f'{v["roleTxCount"]}')
-            stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
-                                 value=f'{v["emojiTxCount"]}')
-            stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
-                                 value=f'{v["multiTxCount"]}')
-            await ctx.author.send(embed=stats_info)
 
     @owner.command()
     @commands.check(guild_has_stats)
@@ -205,6 +205,23 @@ class GuildOwnerCommands(commands.Cog):
                       f' with command ```{self.command_string}merchant``` or ```{self.command_string}```'
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                 destination=1)
+
+    @owner.error
+    async def owner_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            message = f'In order to be able to access this category of commands you are required to be ' \
+                      f' owner of the community {ctx.guild} and execute command on one of the ' \
+                      f' public channels.'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+
+    @register.error
+    async def register_error(self,ctx,error):
+        if isinstance(error, commands.CheckFailure):
+            message = f'In order to be able to register community into Crypto Link system you re required to be ' \
+                      f' have personal wallet registered in the system. You can do so through' \
+                      f' `{self.command_string}register`'
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+
 
 
 def setup(bot):

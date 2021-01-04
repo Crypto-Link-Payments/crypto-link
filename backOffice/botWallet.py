@@ -12,10 +12,10 @@ class BotManager:
         """Connection to Database and Crypto Link collections"""
         self.connection = connection
         self.bot_stuff = self.connection['CryptoLink']
-        self.bot_wallet = self.bot_stuff.CLWallets
-        self.bot_fees = self.bot_stuff.CLFees
+        self.bot_wallet = self.bot_stuff.CLWallets  # All cryptoLink wallets
+        self.bot_fees = self.bot_stuff.CLFees  # All crypto link fees
 
-    def update_lpi_wallet_balance_multi(self, fees_data: dict, token: str = None):
+    def update_cl_wallet_balance_multi(self, fees_data: dict, token: str = None):
         xlm_data = fees_data["xlm"]
         token_data = fees_data[f'{token}']
         xlm_result = self.bot_wallet.update_one({"ticker": f"xlm"},
@@ -25,7 +25,7 @@ class BotManager:
         count_modifications = (int(xlm_result.modified_count) + int(token_result.modified_count))
         return count_modifications == 2
 
-    def update_lpi_wallet_balance(self, ticker: str, to_update: dict):
+    def update_cl_wallet_balance(self, ticker: str, to_update: dict):
         """
         manipulating wallet balance when transactions happens
         """

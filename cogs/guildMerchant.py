@@ -53,6 +53,16 @@ class MerchantCommunityOwner(commands.Cog):
                           f' `{self.command_string}merchant manual` '
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                     destination=1)
+
+                merchant_notification = self.bot.get_channel(id=int(self.merchant_channel_info))
+                new_merch = Embed(title=f'New Community Has registered for merchant',
+                                  description=f'New community has registered for merchant service',
+                                  colour=Color.purple())
+                new_merch.add_field(name='Community',
+                                    value=f'{ctx.guild}')
+
+                await merchant_notification.send(embed='New Merchant registered')
+
             else:
                 msg_title = ':warning:  __Merchant Registration Status___ :warning: '
                 message = f'There has been an issue while registering wallet into the system. Please try again later.' \
@@ -543,7 +553,7 @@ class MerchantCommunityOwner(commands.Cog):
                         await notification_channel.send(embed=corp_info)
 
 
-                        # TODO integrate withdrawal data to CL histoory for TAX office to count gains
+                        await self.backoffice.stats_manager.update_cl_earnins(amount=fee_in_stroops,system='merchant',token='xlm')
 
                         # TODO update community merchant wallet stats
 

@@ -151,7 +151,8 @@ class TransactionCommands(commands.Cog):
             if not ctx.message.author == recipient and not recipient.bot:
                 if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins:
                     coin_data = self.backoffice.integrated_coins[ticker]
-                    atomic_value = (int(amount * (10 ** int(coin_data["decimal"]))))
+                    atomic_value = (int(amount * (10 ** 7)))
+
                     # Get user wallet ticker balance
                     wallet_value = self.backoffice.wallet_manager.get_ticker_balance(ticker=ticker,
                                                                                      user_id=ctx.message.author.id)
@@ -160,16 +161,24 @@ class TransactionCommands(commands.Cog):
                         if not self.backoffice.account_mng.check_user_existence(user_id=recipient.id):
                             self.backoffice.account_mng.register_user(discord_id=recipient.id,
                                                                       discord_username=f'{recipient}')
+
+                            # Send up link
                             load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                              self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                             current_total = self.backoffice.account_mng.count_registrations()
+
                             explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
                             for chn in load_channels:
                                 await chn.send(content=explorer_msg)
 
+                            # Update user count in guild system
+                            await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
+
+                        # Deduct balance from sender
                         if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
                                                                               user_id=ctx.message.author.id,
                                                                               amount=int(atomic_value), direction=2):
+                            # Append to recipient
                             if self.backoffice.wallet_manager.update_coin_balance(coin=ticker, user_id=recipient.id,
                                                                                   amount=int(atomic_value),
                                                                                   direction=1):
@@ -183,6 +192,8 @@ class TransactionCommands(commands.Cog):
                                 coin_data["recipientId"] = recipient.id
 
                                 await self.update_stats(ctx=ctx, transaction_data=coin_data, tx_type=tx_type)
+
+                                await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
 
                             else:
                                 self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
@@ -201,7 +212,7 @@ class TransactionCommands(commands.Cog):
                     else:
 
                         message = f'You have insufficient balance! Your current wallet balance is' \
-                                  f' {wallet_value / 10000000} XLM'
+                                  f' {wallet_value / (10**7)} XLM'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                              sys_msg_title=CONST_TX_ERROR_TITLE)
                 else:

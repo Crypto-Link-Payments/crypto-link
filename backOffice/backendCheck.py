@@ -20,6 +20,7 @@ class BotStructureCheck(object):
 
         self.required_collections = ["CLOnChainStats",  # On chain statistics
                                      "CLOffChainStats",  # OFf chain statistics
+                                     "CLEarning",
                                      "CLWallets",
                                      "CLFees",
                                      "CORPFromTransactions",

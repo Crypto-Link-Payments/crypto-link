@@ -25,15 +25,9 @@ class UserAccountCommands(commands.Cog):
     async def me(self, ctx):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
+        xlm_balance = float(wallet_data["xlm"]) / (10 ** 7)
 
-        xlm_balance = round(float(wallet_data["xlm"]) / 10000000, 7)
         rates = get_rates(coin_name='stellar')
-        in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
-        in_usd = rate_converter(xlm_balance, rates["stellar"]["usd"])
-        in_btc = rate_converter(xlm_balance, rates["stellar"]["btc"])
-        in_eth = rate_converter(xlm_balance, rates["stellar"]["eth"])
-        in_rub = rate_converter(xlm_balance, rates["stellar"]["rub"])
-        in_ltc = rate_converter(xlm_balance, rates["stellar"]["ltc"])
 
         acc_details = Embed(title=f':office_worker: {ctx.author} :office_worker:',
                             description=f' ***__Basic details on your Discord account__*** ',
@@ -48,18 +42,26 @@ class UserAccountCommands(commands.Cog):
         acc_details.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag: ',
                               value=f'`{xlm_balance:.7f}` {CONST_STELLAR_EMOJI}',
                               inline=False)
-        acc_details.add_field(name=f':flag_us: USA',
-                              value=f'$ {in_usd:.4f}')
-        acc_details.add_field(name=f':flag_eu: EUR',
-                              value=f'€ {in_eur:.4f}')
-        acc_details.add_field(name=f':flag_ru:  RUB',
-                              value=f'₽ {in_rub:.4f}')
-        acc_details.add_field(name=f'BTC',
-                              value=f'₿ {in_btc:.8f}')
-        acc_details.add_field(name=f'ETH',
-                              value=f'Ξ {in_eth:.8f}')
-        acc_details.add_field(name=f'LTC',
-                              value=f'Ł {in_ltc:.8f}')
+
+        if rates:
+            in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
+            in_usd = rate_converter(xlm_balance, rates["stellar"]["usd"])
+            in_btc = rate_converter(xlm_balance, rates["stellar"]["btc"])
+            in_eth = rate_converter(xlm_balance, rates["stellar"]["eth"])
+            in_rub = rate_converter(xlm_balance, rates["stellar"]["rub"])
+            in_ltc = rate_converter(xlm_balance, rates["stellar"]["ltc"])
+            acc_details.add_field(name=f':flag_us: USA',
+                                  value=f'$ {in_usd:.4f}')
+            acc_details.add_field(name=f':flag_eu: EUR',
+                                  value=f'€ {in_eur:.4f}')
+            acc_details.add_field(name=f':flag_ru:  RUB',
+                                  value=f'₽ {in_rub:.4f}')
+            acc_details.add_field(name=f'BTC',
+                                  value=f'₿ {in_btc:.8f}')
+            acc_details.add_field(name=f'ETH',
+                                  value=f'Ξ {in_eth:.8f}')
+            acc_details.add_field(name=f'LTC',
+                                  value=f'Ł {in_ltc:.8f}')
 
         acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
                               value=f'[Stellar](https://www.stellar.org/)\n'
@@ -89,6 +91,10 @@ class UserAccountCommands(commands.Cog):
                 explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
                 for chn in load_channels:
                     await chn.send(content=explorer_msg)
+
+                # Update guild stats on registered users
+                await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
+
             else:
                 message = f'Account could not be registered at this moment please try again later.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -141,7 +147,6 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.command()
     async def deposit(self, ctx):
-
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
