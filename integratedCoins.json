@@ -5,20 +5,9 @@
     "ticker": "xlm",
     "emoji": "<:stelaremoji:684676687425961994>",
     "coinGeckoListing": true,
-    "minimumWithdrawal": 300000000,
+    "minimumWithdrawal": 10000000,
     "assetIssuer": "Native Currency",
     "expert": "https://stellar.expert/explorer/public",
     "homepage": "https://www.stellar.org/lumens"
-  },
-  "clt": {
-    "name": "Crypto Link Token",
-    "decimal": 7,
-    "ticker": " CLT",
-    "emoji": ":sweat_drops:",
-    "coinGeckoListing": false,
-    "assetIssuer": "GAFYI3RFYQHCEUI73OOY5AO7CIODZ4ZEXON72THANN5M3L5CUNK24E3G",
-    "minimumWithdrawal": 100000000,
-    "expert": "https://stellar.expert/explorer/testnet/asset/CLT-GAFYI3RFYQHCEUI73OOY5AO7CIODZ4ZEXON72THANN5M3L5CUNK24E3G-1?order=desc",
-    "homepage": "https://cryptolink.carrd.co/"
   }
 }
