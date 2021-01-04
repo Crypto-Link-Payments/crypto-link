@@ -187,34 +187,33 @@ class UserAccountCommands(commands.Cog):
     @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
+        print(user_balances)
         coin_data = self.backoffice.integrated_coins
         if user_balances:
             all_wallets = list(user_balances.keys())
-
             # initiate Discord embed
             balance_embed = Embed(title=f":office_worker: Wallet details for {ctx.message.author} :office_worker:",
                                   timestamp=datetime.utcnow(),
                                   colour=Colour.dark_orange())
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
+
             for wallet_ticker in all_wallets:
-                coin_settings = coin_data[wallet_ticker]
+                if wallet_ticker == 'xlm':
+                    coin_settings = coin_data[wallet_ticker]
+                    token_balance = get_normal(value=str(user_balances[wallet_ticker]),
+                                               decimal_point=int(coin_settings["decimal"]))
+                    if coin_settings["coinGeckoListing"]:
+                        token_to_usd = convert_to_usd(amount=float(token_balance), coin_name='stellar')
+                    else:
+                        token_to_usd = {"total": 0,
+                                        "usd": 0}
 
-                token_balance = get_normal(value=str(user_balances[wallet_ticker]),
-                                           decimal_point=int(coin_settings["decimal"]))
-
-                if coin_settings["coinGeckoListing"]:
-                    token_to_usd = convert_to_usd(amount=float(token_balance), coin_name='stellar')
-                else:
-                    token_to_usd = {"total": 0,
-                                    "usd": 0}
-
-                balance_embed.add_field(
-                    name=f"{coin_settings['emoji']} {coin_settings['name']} Balance {coin_settings['emoji']}",
-                    value=f'__Crypto__: \n{token_balance} {coin_settings["emoji"]}\n'
-                          f'__Fiat__: \n${token_to_usd["total"]} ({token_to_usd["usd"]})',
-                    inline=False)
-
-            await ctx.author.send(embed=balance_embed)
+                    balance_embed.add_field(
+                        name=f"{coin_settings['emoji']} {coin_settings['name']} Balance {coin_settings['emoji']}",
+                        value=f'__Crypto__: \n{token_balance} {coin_settings["emoji"]}\n'
+                              f'__Fiat__: \n${token_to_usd["total"]} ({token_to_usd["usd"]})',
+                        inline=False)
+                    await ctx.author.send(embed=balance_embed)
         else:
             title = '__Stellar Wallet Error__'
             message = f'Wallet could not be obtained from the system please try again later'
