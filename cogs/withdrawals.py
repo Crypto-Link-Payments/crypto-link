@@ -289,7 +289,6 @@ class WithdrawalCommands(commands.Cog):
         :param address: Destination address of withdrawal
         :return:
         """
-        print('withdrawal')
         strip_address = address.strip()
         if self.help_functions.check_public_key(address=address) and not self.help_functions.check_for_special_char(
                 string=strip_address):
@@ -388,7 +387,6 @@ class WithdrawalCommands(commands.Cog):
                                     await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
                                                                             fee=f'{stellar_fee} XLM and')
 
-                                    print('Sending notification on successfull withdrawal')
                                     # # System channel notification on withdrawal processed
                                     channel_sys = self.bot.get_channel(id=int(self.with_channel))
                                     await custom_messages.withdrawal_notification_channel(ctx=ctx,
@@ -396,14 +394,11 @@ class WithdrawalCommands(commands.Cog):
                                                                                           withdrawal_data=result)
 
                                     # Notify staff on incoming funds
-                                    print('Sending notification to earning')
                                     incoming_funds = self.bot.get_channel(
                                         id=int(self.earnings))
                                     await custom_messages.cl_staff_incoming_funds_notification(
                                         sys_channel=incoming_funds,
                                         incoming_fees=f'{stellar_fee} {CONST_STELLAR_EMOJI}')
-
-                                    print('Sending sys notification to explorer')
                                     # Message to explorer
                                     in_dollar = convert_to_usd(amount=final_normal, coin_name='stellar')
                                     load_channels = [self.bot.get_channel(id=int(chn)) for chn in
@@ -464,14 +459,15 @@ class WithdrawalCommands(commands.Cog):
                                                  sys_msg_title=CONST_WITHDRAWAL_ERROR)
 
     @withdraw.error
-    async def withdrawal_error(self,ctx,error):
-        if isinstance(error,commands.CheckFailure):
+    async def withdrawal_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
             if isinstance(error, commands.CheckFailure):
                 message = f'First you need to register yourself wallet in Crypto Link system. You can do that ' \
                           f'though {self.command_string}register'
                 title = f'**__Not registered__** :clipboard:'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title=title)
+
     @xlm.error
     async def stellar_withdrawal_error(self, ctx, error):
         """
