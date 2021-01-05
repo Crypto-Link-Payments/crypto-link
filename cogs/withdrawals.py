@@ -20,7 +20,8 @@ class WithdrawalCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
-        self.stellar_channel = bot.backoffice.auto_messaging_channels["stellar"]
+        self.earnings = bot.backoffice.auto_messaging_channels["earnings"]
+        self.sys_channel = bot.backoffice.auto_messaging_channels["sys"]
         self.help_functions = bot.backoffice.helper
 
     @commands.group()
@@ -387,14 +388,16 @@ class WithdrawalCommands(commands.Cog):
                                     await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
                                                                             fee=f'{stellar_fee} XLM and')
 
-                                    # # System channel notification on withdrawal
+                                    # # System channel notification on withdrawal processed
                                     channel_sys = self.bot.get_channel(
-                                        id=int(self.stellar_channel))
+                                        id=int(self.sys_channel))
                                     await custom_messages.withdrawal_notification_channel(ctx=ctx,
                                                                                           channel=channel_sys,
                                                                                           withdrawal_data=result)
 
                                     # Notify staff on incoming funds
+                                    incoming_funds = self.bot.get_channel(
+                                        id=int(self.earnings))
                                     await custom_messages.cl_staff_incoming_funds_notification(
                                         sys_channel=channel_sys,
                                         incoming_fees=f'{stellar_fee} {CONST_STELLAR_EMOJI}')
