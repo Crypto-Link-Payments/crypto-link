@@ -37,8 +37,8 @@ class AutoFunctions(commands.Cog):
             pass
 
         if isinstance(exception, commands.CommandNotFound):
-            title = 'System Command Error'
-            message = f':no_entry: command `{ctx.message.content}` does not exist! Please' \
+            title = '__Command Error__'
+            message = f'Command `{ctx.message.content}` is not implemented/active yet or it does not exist! Please' \
                       f'type `{self.command_string}help` to check available commands.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
