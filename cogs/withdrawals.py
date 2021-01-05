@@ -388,6 +388,7 @@ class WithdrawalCommands(commands.Cog):
                                     await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
                                                                             fee=f'{stellar_fee} XLM and')
 
+                                    print('Sending notification on successfull withdrawal')
                                     # # System channel notification on withdrawal processed
                                     channel_sys = self.bot.get_channel(
                                         id=int(self.sys_channel))
@@ -396,12 +397,14 @@ class WithdrawalCommands(commands.Cog):
                                                                                           withdrawal_data=result)
 
                                     # Notify staff on incoming funds
+                                    print('Sending notification to earning')
                                     incoming_funds = self.bot.get_channel(
                                         id=int(self.earnings))
                                     await custom_messages.cl_staff_incoming_funds_notification(
-                                        sys_channel=channel_sys,
+                                        sys_channel=incoming_funds,
                                         incoming_fees=f'{stellar_fee} {CONST_STELLAR_EMOJI}')
 
+                                    print('Sending sys notification to explorer')
                                     # Message to explorer
                                     in_dollar = convert_to_usd(amount=final_normal, coin_name='stellar')
                                     load_channels = [self.bot.get_channel(id=int(chn)) for chn in
