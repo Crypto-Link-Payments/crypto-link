@@ -31,9 +31,9 @@ horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.paths',
                 'horizonCommands.tradeAggregations']
 
-non_custodial_layer_cmds = ['thirdLevel.thirdLevelAccounts']
-
-custodial_layer = ['secondLevel.secondLevelAccounts']
+# non_custodial_layer_cmds = ['thirdLevel.thirdLevelAccounts']
+#
+# custodial_layer = ['secondLevel.secondLevelAccounts']
 
 
 class DiscordBot(commands.Bot):
@@ -62,34 +62,34 @@ class DiscordBot(commands.Bot):
         notification_str += CONST_SEPARATOR
         print(notification_str)
 
-        notification_str = Fore.BLUE + '+++++++++++++++++++++++++++++++++++++++\n' \
-                                       '           LOADING Commands level 2....        \n'
+        # notification_str = Fore.BLUE + '+++++++++++++++++++++++++++++++++++++++\n' \
+        #                                '           LOADING Commands level 2....        \n'
+        #
+        # for cust_cmd in custodial_layer:
+        #     try:
+        #         self.load_extension(cust_cmd)
+        #         notification_str += f'| {cust_cmd} :smile: \n'
+        #     except Exception as error:
+        #         notification_str += f'| {cust_cmd} --> {error}\n'
+        #         raise
+        # notification_str += CONST_SEPARATOR
+        # print(notification_str)
 
-        for cust_cmd in custodial_layer:
-            try:
-                self.load_extension(cust_cmd)
-                notification_str += f'| {cust_cmd} :smile: \n'
-            except Exception as error:
-                notification_str += f'| {cust_cmd} --> {error}\n'
-                raise
-        notification_str += CONST_SEPARATOR
-        print(notification_str)
+        # notification_str = Fore.WHITE + '+++++++++++++++++++++++++++++++++++++++\n' \
+        #                                 '           LOADING Commands level 3....        \n'
 
-        notification_str = Fore.WHITE + '+++++++++++++++++++++++++++++++++++++++\n' \
-                                        '           LOADING Commands level 3....        \n'
-
-        for cmd in non_custodial_layer_cmds:
-            try:
-                self.load_extension(cmd)
-                notification_str += f'| {cmd} :smile: \n'
-            except Exception as error:
-                notification_str += f'| {cmd} --> {error}\n'
-                raise
-        notification_str += CONST_SEPARATOR
-        print(notification_str)
-
-        notification_str = Fore.CYAN + '+++++++++++++++++++++++++++++++++++++++\n' \
-                                       '           LOADING Horizon commands....        \n'
+        # for cmd in non_custodial_layer_cmds:
+        #     try:
+        #         self.load_extension(cmd)
+        #         notification_str += f'| {cmd} :smile: \n'
+        #     except Exception as error:
+        #         notification_str += f'| {cmd} --> {error}\n'
+        #         raise
+        # notification_str += CONST_SEPARATOR
+        # print(notification_str)
+        #
+        # notification_str = Fore.CYAN + '+++++++++++++++++++++++++++++++++++++++\n' \
+        #                                '           LOADING Horizon commands....        \n'
         for hor in horizon_cogs:
             try:
                 self.load_extension(hor)
