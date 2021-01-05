@@ -207,7 +207,7 @@ class CustomMessages:
                             inline=False)
         if transaction_data["conversion"] != 0:
             tx_report.add_field(name=':currency_exchange: Conversion Rate :currency_exchange: ',
-                                value=f'${transaction_data["conversionRate"]}/{transaction_data["ticker"]}',
+                                value=f'${transaction_data["conversionRate"]:.4f}/{transaction_data["ticker"]}',
                                 inline=False)
         tx_report.set_footer(text='Conversion rates provided by CoinGecko',
                              icon_url='https://static.coingecko.com/s/thumbnail-'
