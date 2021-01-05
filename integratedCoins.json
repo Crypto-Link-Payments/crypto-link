@@ -5,7 +5,7 @@
     "ticker": "xlm",
     "emoji": "<:stelaremoji:684676687425961994>",
     "coinGeckoListing": true,
-    "minimumWithdrawal": 10000000,
+    "minimumWithdrawal": 100000000,
     "assetIssuer": "Native Currency",
     "expert": "https://stellar.expert/explorer/public",
     "homepage": "https://www.stellar.org/lumens"
