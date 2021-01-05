@@ -171,37 +171,37 @@ class HelpCommands(commands.Cog):
                 inline=False)
         await ctx.author.send(embed=available)
 
-    @help.command()
-    async def levels(self, ctx):
-        title = ':office_worker: __Multi Level Wallet system__:office_worker: '
-        description = "Explanation of the multi-level wallet system"
-        list_of_values = [
-            {"name": ":one: Wallet level 1 :one: ",
-             "value": f"Registration for `wallet level 1` is mandatory for all users who would like to "
-                      f"use all the functions Crypto Link has to offer. It is a full custodial wallet "
-                      f"operating on MEMO principles. This allows anyone to receive transaction from sender "
-                      f"instantly, even doe if recipient has not registered yet into the system. Wallet of level 1 "
-                      f"is automatically created and all actions connected with it do not require private key "
-                      f"to be used for signing. Signature for account activity is obtained through unique"
-                      f" ID provided to user upon registration to Discord."},
-            {"name": ":two: Wallet level 2 :two: ",
-             "value": f"`Level 2 wallet` allows for full control of your ***private keys*** and with it, ability to use "
-                      f"Discord wallet as well with other mediums. Upon successful registration and key verification,"
-                      f" Crypto Link safely stores encrypted part of your private key. When making on-chain actions,"
-                      f" user is required to provide second part of the private key in order to make puzzle completed"
-                      f" and afterwards successfully streamed to network."
-                      f"```Access it with: {self.command_string}two```"},
-            {"name": ":three: Wallet level 3 :three: ",
-             "value": "`Level 3 wallet` which utilizes XDR envelopes to make XDR envelopes to be signed either through"
-                      " [Stellar Laboratory](https://laboratory.stellar.org/#?network=public) or any other application"
-                      " allowing to import XDR or than straight through "
-                      "Discord. the only details which are stored into Crypto Link system are unique user id and "
-                      "user public address so XDR can be successfully built."
-                      f"```Access it with: {self.command_string}three```"}
-        ]
-
-        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                            destination=1, c=Colour.blue())
+    # @help.command()
+    # async def levels(self, ctx):
+    #     title = ':office_worker: __Multi Level Wallet system__:office_worker: '
+    #     description = "Explanation of the multi-level wallet system"
+    #     list_of_values = [
+    #         {"name": ":one: Wallet level 1 :one: ",
+    #          "value": f"Registration for `wallet level 1` is mandatory for all users who would like to "
+    #                   f"use all the functions Crypto Link has to offer. It is a full custodial wallet "
+    #                   f"operating on MEMO principles. This allows anyone to receive transaction from sender "
+    #                   f"instantly, even doe if recipient has not registered yet into the system. Wallet of level 1 "
+    #                   f"is automatically created and all actions connected with it do not require private key "
+    #                   f"to be used for signing. Signature for account activity is obtained through unique"
+    #                   f" ID provided to user upon registration to Discord."},
+    #         {"name": ":two: Wallet level 2 :two: ",
+    #          "value": f"`Level 2 wallet` allows for full control of your ***private keys*** and with it, ability to use "
+    #                   f"Discord wallet as well with other mediums. Upon successful registration and key verification,"
+    #                   f" Crypto Link safely stores encrypted part of your private key. When making on-chain actions,"
+    #                   f" user is required to provide second part of the private key in order to make puzzle completed"
+    #                   f" and afterwards successfully streamed to network."
+    #                   f"```Access it with: {self.command_string}two```"},
+    #         {"name": ":three: Wallet level 3 :three: ",
+    #          "value": "`Level 3 wallet` which utilizes XDR envelopes to make XDR envelopes to be signed either through"
+    #                   " [Stellar Laboratory](https://laboratory.stellar.org/#?network=public) or any other application"
+    #                   " allowing to import XDR or than straight through "
+    #                   "Discord. the only details which are stored into Crypto Link system are unique user id and "
+    #                   "user public address so XDR can be successfully built."
+    #                   f"```Access it with: {self.command_string}three```"}
+    #     ]
+    #
+    #     await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+    #                                         destination=1, c=Colour.blue())
 
     @help.command(aliases=['tx', 'pay'])
     async def transactions(self, ctx):
@@ -209,10 +209,10 @@ class HelpCommands(commands.Cog):
         description = f"Forms of transactions available on {self.bot.user.name}"
         list_of_values = [
             {"name": f":cowboy: Public P-2-P transactions :cowboy:",
-             "value": f"`{self.command_string}send <amount> <ticker> <Discord User> <message=optional>`\n"
+             "value": f"`{self.command_string}send <@Discord User> <amount> <ticker> <message=optional>`\n"
                       f"Example:`{self.command_string}send 10 xlm @animus Have a nice day`"},
             {"name": f":detective: Private transactions :detective:  ",
-             "value": f"`{self.command_string}private <amount> <ticker> <Discord User> <message=optional>`\n"
+             "value": f"`{self.command_string}private <@Discord User> <amount> <ticker> <message=optional>`\n"
                       f"Example: `{self.command_string}private 10 xlm @animus Dont tell anyone`"}
         ]
 
