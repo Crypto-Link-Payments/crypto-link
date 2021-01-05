@@ -21,7 +21,7 @@ class WithdrawalCommands(commands.Cog):
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(integrated_coins.keys())
         self.earnings = bot.backoffice.auto_messaging_channels["earnings"]
-        self.sys_channel = bot.backoffice.auto_messaging_channels["sys"]
+        self.with_channel = bot.backoffice.auto_messaging_channels["withdrawals"]
         self.help_functions = bot.backoffice.helper
 
     @commands.group()
@@ -390,8 +390,7 @@ class WithdrawalCommands(commands.Cog):
 
                                     print('Sending notification on successfull withdrawal')
                                     # # System channel notification on withdrawal processed
-                                    channel_sys = self.bot.get_channel(
-                                        id=int(self.sys_channel))
+                                    channel_sys = self.bot.get_channel(id=int(self.with_channel))
                                     await custom_messages.withdrawal_notification_channel(ctx=ctx,
                                                                                           channel=channel_sys,
                                                                                           withdrawal_data=result)
