@@ -26,61 +26,61 @@ class AutoFunctions(commands.Cog):
         self.animus_id = bot.backoffice.creator_id
         self.command_string = bot.get_command_str()
 
-    # @commands.Cog.listener()
-    # async def on_command_error(self, ctx, exception):
-    #     """
-    #     Global error for on command error
-    #     """
-    #     try:
-    #         await ctx.message.delete()
-    #     except Exception:
-    #         pass
-    #
-    #     if isinstance(exception, commands.CommandNotFound):
-    #         title = 'System Command Error'
-    #         message = f':no_entry: command `{ctx.message.content}` does not exist! Please' \
-    #                   f'type `{self.command_string}help` to check available commands.'
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-    #                                              sys_msg_title=title)
-    #     elif isinstance(exception, commands.CommandOnCooldown):
-    #         message = f'`{exception}`. In order to prevent abuse and unwanted delays, we have implemented cool down ' \
-    #                   f' into various commands. Thank you for your understanding.'
-    #         await custom_messages.system_message(ctx=ctx, color_code=Colour.blue(), message=message, destination=0,
-    #                                              sys_msg_title=':sweat_drops: Cool-Down :sweat_drops: ')
-    #
-    #     elif isinstance(exception, commands.MissingRequiredArgument):
-    #         await custom_messages.system_message(ctx=ctx, color_code=Colour.orange(), message=f'{exception}',
-    #                                              destination=0,
-    #                                              sys_msg_title=':sweat_drops: Missing Required Argument :sweat_drops: ')
-    #     elif isinstance(exception, HTTPException):
-    #         title = 'Discord API Error'
-    #         message = f'We could not process your command due to the connection error with Discord API server. ' \
-    #                   f'Please try again later'
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-    #                                              sys_msg_title=title)
-    #     else:
-    #         if isinstance(exception, commands.CheckFailure):
-    #             pass
-    #         else:
-    #             bug_channel = self.bot.get_channel(id=int(self.bot_channels["bug"]))
-    #
-    #             animus = await self.bot.fetch_user(user_id=int(self.animus_id))
-    #             bug_info = Embed(title=f':new: :bug: :warning: ',
-    #                              description='New command error found',
-    #                              colour=Colour.red(),
-    #                              timestamp=datetime.utcnow())
-    #             bug_info.add_field(name=f'Command Author',
-    #                                value=f'{ctx.message.author}')
-    #             bug_info.add_field(name=f'Channel',
-    #                                value=ctx.message.channel)
-    #             bug_info.add_field(name=f':joystick: Command Executed :joystick:',
-    #                                value=f'```{ctx.message.content}```',
-    #                                inline=False)
-    #             bug_info.add_field(name=f':interrobang: Error Details :interrobang: ',
-    #                                value=f'```{exception}```',
-    #                                inline=False)
-    #
-    #             await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, exception):
+        """
+        Global error for on command error
+        """
+        try:
+            await ctx.message.delete()
+        except Exception:
+            pass
+
+        if isinstance(exception, commands.CommandNotFound):
+            title = 'System Command Error'
+            message = f':no_entry: command `{ctx.message.content}` does not exist! Please' \
+                      f'type `{self.command_string}help` to check available commands.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+        elif isinstance(exception, commands.CommandOnCooldown):
+            message = f'`{exception}`. In order to prevent abuse and unwanted delays, we have implemented cool down ' \
+                      f' into various commands. Thank you for your understanding.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.blue(), message=message, destination=0,
+                                                 sys_msg_title=':sweat_drops: Cool-Down :sweat_drops: ')
+
+        elif isinstance(exception, commands.MissingRequiredArgument):
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.orange(), message=f'{exception}',
+                                                 destination=0,
+                                                 sys_msg_title=':sweat_drops: Missing Required Argument :sweat_drops: ')
+        elif isinstance(exception, HTTPException):
+            title = 'Discord API Error'
+            message = f'We could not process your command due to the connection error with Discord API server. ' \
+                      f'Please try again later'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+        else:
+            if isinstance(exception, commands.CheckFailure):
+                pass
+            else:
+                bug_channel = self.bot.get_channel(id=int(self.bot_channels["bug"]))
+
+                animus = await self.bot.fetch_user(user_id=int(self.animus_id))
+                bug_info = Embed(title=f':new: :bug: :warning: ',
+                                 description='New command error found',
+                                 colour=Colour.red(),
+                                 timestamp=datetime.utcnow())
+                bug_info.add_field(name=f'Command Author',
+                                   value=f'{ctx.message.author}')
+                bug_info.add_field(name=f'Channel',
+                                   value=ctx.message.channel)
+                bug_info.add_field(name=f':joystick: Command Executed :joystick:',
+                                   value=f'```{ctx.message.content}```',
+                                   inline=False)
+                bug_info.add_field(name=f':interrobang: Error Details :interrobang: ',
+                                   value=f'```{exception}```',
+                                   inline=False)
+
+                await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
