@@ -193,8 +193,6 @@ class TransactionCommands(commands.Cog):
 
                                 await self.update_stats(ctx=ctx, transaction_data=coin_data, tx_type=tx_type)
 
-                                await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
-
                             else:
                                 self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
                                                                                    user_id=ctx.message.author.id,
