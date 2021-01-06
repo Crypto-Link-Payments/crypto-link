@@ -114,13 +114,14 @@ class UserAccountCommands(commands.Cog):
             description = "All commands available to operate execute wallet related actions.\n" \
                           "`Aliases: one, st, first, 1`"
             list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
-                               "value": f"`{self.command_string}wallet balance`"},
+                               "value": f"```{self.command_string}wallet balance```\n"
+                                        f"`Aliases: bal, balances,b`"},
                               {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
-                               "value": f"`{self.command_string}wallet stats`"},
+                               "value": f"```{self.command_string}wallet stats```"},
                               {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
-                               "value": f"`{self.command_string}wallet deposit`"},
+                               "value": f"```{self.command_string}wallet deposit```"},
                               {"name": ":outbox_tray: Get Withdrawal Instructions :outbox_tray: ",
-                               "value": f"`{self.command_string}withdraw`"}]
+                               "value": f"```{self.command_string}withdraw```"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
