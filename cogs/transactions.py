@@ -52,7 +52,7 @@ class TransactionCommands(commands.Cog):
                          "guildStats": {
                              f'{transaction_data["ticker"]}.publicCount': 1,
                              f"{transaction_data['ticker']}.txCount": 1,
-                             f"{transaction_data['ticker']}.volume": 1
+                             f"{transaction_data['ticker']}.volume": transaction_data["amount"]
                          }
                          }
 
@@ -71,7 +71,7 @@ class TransactionCommands(commands.Cog):
                          "guildStats": {
                              f'{transaction_data["ticker"]}.privateCount': 1,
                              f"{transaction_data['ticker']}.txCount": 1,
-                             f"{transaction_data['ticker']}.volume": 1
+                             f"{transaction_data['ticker']}.volume": transaction_data["amount"]
                          }
                          }
 
