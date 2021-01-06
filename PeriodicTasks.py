@@ -271,9 +271,6 @@ class PeriodicTasks:
 
     async def send_marketing_messages(self):
         stats = self.backoffice.stats_manager.get_all_stats()
-        """
-                data = {"xlm": {"offChain": off_chain_xlm,
-                                "onChain": on_chain_xlm}}"""
         off_chain_xlm = stats["xlm"]["offChain"]
         total_tx = off_chain_xlm["totalTx"]
         total_moved = off_chain_xlm["totalMoved"]
@@ -282,10 +279,10 @@ class PeriodicTasks:
         deposits = on_chain_xlm["depositCount"]
         withdrawals = on_chain_xlm["withdrawalCount"]
         deposit_amount = on_chain_xlm["depositAmount"]
-        withdrawal_amount = on_chain_xlm["withdrawalAmount"]
+        withdrawal_amount = on_chain_xlm["withdrawnAmount"]
 
         stats_chn = self.bot.get_channel(id=self.backoffice.auto_messaging_channels["stats"])
-        total_wallets = self.backoffice.stats_manager.count_total_registered_wallets()
+        total_wallets = await self.backoffice.stats_manager.count_total_registered_wallets()
 
         stats = Embed(title="Crypto Link Stats",
                       description='Snapshot of the system ',
@@ -327,7 +324,7 @@ def start_scheduler(timed_updater):
         second='00'), misfire_grace_time=10, max_instances=20)
 
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
-        hour='01'), misfire_grace_time=10, max_instances=20)
+        hour='00'), misfire_grace_time=10, max_instances=20)
 
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')

@@ -52,7 +52,7 @@ class TransactionCommands(commands.Cog):
                          "guildStats": {
                              f'{transaction_data["ticker"]}.publicCount': 1,
                              f"{transaction_data['ticker']}.txCount": 1,
-                             f"{transaction_data['ticker']}.volume": 1
+                             f"{transaction_data['ticker']}.volume": transaction_data["amount"]
                          }
                          }
 
@@ -71,7 +71,7 @@ class TransactionCommands(commands.Cog):
                          "guildStats": {
                              f'{transaction_data["ticker"]}.privateCount': 1,
                              f"{transaction_data['ticker']}.txCount": 1,
-                             f"{transaction_data['ticker']}.volume": 1
+                             f"{transaction_data['ticker']}.volume": transaction_data["amount"]
                          }
                          }
 
@@ -192,8 +192,6 @@ class TransactionCommands(commands.Cog):
                                 coin_data["recipientId"] = recipient.id
 
                                 await self.update_stats(ctx=ctx, transaction_data=coin_data, tx_type=tx_type)
-
-                                await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
 
                             else:
                                 self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
