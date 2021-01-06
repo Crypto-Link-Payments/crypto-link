@@ -235,14 +235,14 @@ class TransactionCommands(commands.Cog):
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def send(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
-        await self.send_impl(ctx, amount, ticker, recipient, tx_type="public", message=message)
+        await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="public", message=message)
 
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def private(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
-        await self.send_impl(ctx, amount, ticker, recipient, tx_type="private", message=message)
+        await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="private", message=message)
 
     @send.error
     async def send_error(self, ctx, error):
