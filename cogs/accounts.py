@@ -188,7 +188,6 @@ class UserAccountCommands(commands.Cog):
     @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
-        print(user_balances)
         coin_data = self.backoffice.integrated_coins
         if user_balances:
             all_wallets = list(user_balances.keys())
@@ -211,8 +210,8 @@ class UserAccountCommands(commands.Cog):
 
                     balance_embed.add_field(
                         name=f"{coin_settings['emoji']} {coin_settings['name']} Balance {coin_settings['emoji']}",
-                        value=f'__Crypto__: \n{token_balance} {coin_settings["emoji"]}\n'
-                              f'__Fiat__: \n${token_to_usd["total"]} ({token_to_usd["usd"]})',
+                        value=f'{token_balance} {coin_settings["emoji"]} (${token_to_usd["total"]}) \n'
+                              f'Rate: ${token_to_usd["usd"]}/XLM',
                         inline=False)
                     await ctx.author.send(embed=balance_embed)
         else:
