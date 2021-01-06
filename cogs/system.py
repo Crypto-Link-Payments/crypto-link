@@ -106,26 +106,23 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=ctx.message.author, thumbnail=self.bot.user.avatar_url)
 
-    @cl.command()
-    @commands.check(is_one_of_gods)
-    async def balance(self, ctx):
+    @cl.command(aliases=['balance'])
+    async def bal(self, ctx):
         """
         Check the off-chain balance status of Crypto Link system
         """
-        print(f'CL BALANCE : {ctx.author} -> {ctx.message.content}')
         data = self.backoffice.bot_manager.get_bot_wallets_balance()
         values = Embed(title="Balance of Crypto-Link Off chain balance",
                        description="Current state of Crypto Link Lumen wallet",
                        color=Colour.blurple())
         for bal in data:
             ticker = bal['ticker']
-            print(ticker)
             conversion = int(bal["balance"])
             normal = get_normal(conversion, 7)
             values.add_field(name=ticker.upper(),
                              value=f'{normal}',
                              inline=False)
-        await ctx.channel.send(embed=values, delete_after=100)
+        await ctx.channel.send(embed=values)
 
     @cl.command()
     async def stats(self, ctx):
@@ -472,8 +469,6 @@ class BotManagementCommands(commands.Cog):
     @commands.command()
     async def fees(self, ctx):
         fees = self.backoffice.bot_manager.get_all_fees()
-        from pprint import pprint
-        pprint(fees)
         fee_info = Embed(title='Applied fees for system',
                          description='State of fees for each segment of the bot',
                          colour=Colour.blue())
