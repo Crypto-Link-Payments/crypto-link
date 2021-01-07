@@ -174,6 +174,9 @@ class TransactionCommands(commands.Cog):
                             # Update user count in guild system
                             await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
 
+                            # Increase bridge
+                            await self.backoffice.stats_manager.create_bridge(user_id=ctx.message.author.id)
+
                         # Deduct balance from sender
                         if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
                                                                               user_id=ctx.message.author.id,
