@@ -75,7 +75,8 @@ class AccountManager(object):
         result = self.user_profiles.find_one({"userId": discord_id},
                                              {"_id": 0,
                                               "xlm": 1,
-                                              "clt": 1})
+                                              "clt": 1,
+                                              "bridges": 1})
 
         return result
 
@@ -95,6 +96,7 @@ class AccountManager(object):
             "userId": discord_id,
             "userName": discord_username,
             "stellarDepositId": stellar_deposit_id,
+            "bridges": int(0),
             "xlm": {"depositsCount": int(0),
                     "totalDeposited": float(0.0),
                     "withdrawalsCount": int(0),
