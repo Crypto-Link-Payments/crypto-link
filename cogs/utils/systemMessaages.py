@@ -427,35 +427,36 @@ class CustomMessages:
         await ctx.author.send(embed=building_bridges)
 
         for k, v in coin_stats.items():
-            coin_stats = Embed(title=f'{k.upper()} wallet statistics',
-                               description=f':bar_chart: ***__Statistical Data on Stellar Lumen Discord Wallet__*** '
-                                           f':bar_chart:',
-                               colour=Colour.light_grey(),
-                               timestamp=utc_now)
-            coin_stats.add_field(name=f':inbox_tray: Total Deposits :inbox_tray:',
-                                 value=f'Deposited ***{v["depositsCount"]}*** with total '
-                                       f'***{v["totalDeposited"]}*** ')
-            coin_stats.add_field(name=f'\u200b',
-                                 value='\u200b')
-            coin_stats.add_field(name=f':outbox_tray: Total Withdrawals :outbox_tray: ',
-                                 value=f'Withdrawn ***{v["withdrawalsCount"]}*** withdrawals with '
-                                       f'total ***{v["totalWithdrawn"]}*** ')
-            coin_stats.add_field(name=f':family_man_woman_boy: Public Tx :family_man_woman_boy:',
-                                 value=f':incoming_envelope: `{v["publicTxSendCount"]}`\n'
-                                       f':money_with_wings: `{(int(v["publicSent"] * (10 ** 7))) / (10 ** 7):.7f}`\n'
-                                       f':envelope_with_arrow: `{v["publicTxReceivedCount"]}`\n'
-                                       f':money_mouth: `{(int(v["publicReceived"] * (10 ** 7))) / (10 ** 7):.7f}`')
-            coin_stats.add_field(name=f':detective: Private Tx :detective:',
-                                 value=f':incoming_envelope: `{v["privateTxSendCount"]}`\n'
-                                       f':money_with_wings: `{(int(v["privateSent"] * (10 ** 7))) / (10 ** 7):.7f}`\n'
-                                       f':envelope_with_arrow: `{v["privateTxReceivedCount"]}`\n'
-                                       f':money_mouth: `{(int(v["privateReceived"] * (10 ** 7))) / (10 ** 7):.7f}` ')
-            coin_stats.add_field(name=f':convenience_store: Merchant purchases :convenience_store: ',
-                                 value=f':man_juggling: {v["roleTxCount"]}\n'
-                                       f':money_with_wings: {(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}\n',
+            if k in ["xlm"]:
+                coin_stats = Embed(title=f'{k.upper()} wallet statistics',
+                                   description=f':bar_chart: ***__Statistical Data on Stellar Lumen Discord Wallet__*** '
+                                               f':bar_chart:',
+                                   colour=Colour.light_grey(),
+                                   timestamp=utc_now)
+                coin_stats.add_field(name=f':inbox_tray: Total Deposits :inbox_tray:',
+                                     value=f'Deposited ***{v["depositsCount"]}*** with total '
+                                           f'***{v["totalDeposited"]}*** ')
+                coin_stats.add_field(name=f'\u200b',
+                                     value='\u200b')
+                coin_stats.add_field(name=f':outbox_tray: Total Withdrawals :outbox_tray: ',
+                                     value=f'Withdrawn ***{v["withdrawalsCount"]}*** withdrawals with '
+                                           f'total ***{v["totalWithdrawn"]}*** ')
+                coin_stats.add_field(name=f':family_man_woman_boy: Public Tx :family_man_woman_boy:',
+                                     value=f':incoming_envelope: `{v["publicTxSendCount"]}`\n'
+                                           f':money_with_wings: `{(int(v["publicSent"] * (10 ** 7))) / (10 ** 7):.7f}`\n'
+                                           f':envelope_with_arrow: `{v["publicTxReceivedCount"]}`\n'
+                                           f':money_mouth: `{(int(v["publicReceived"] * (10 ** 7))) / (10 ** 7):.7f}`')
+                coin_stats.add_field(name=f':detective: Private Tx :detective:',
+                                     value=f':incoming_envelope: `{v["privateTxSendCount"]}`\n'
+                                           f':money_with_wings: `{(int(v["privateSent"] * (10 ** 7))) / (10 ** 7):.7f}`\n'
+                                           f':envelope_with_arrow: `{v["privateTxReceivedCount"]}`\n'
+                                           f':money_mouth: `{(int(v["privateReceived"] * (10 ** 7))) / (10 ** 7):.7f}` ')
+                coin_stats.add_field(name=f':convenience_store: Merchant purchases :convenience_store: ',
+                                     value=f':man_juggling: {v["roleTxCount"]}\n'
+                                           f':money_with_wings: {(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}\n',
 
-                                 inline=False)
-            await ctx.author.send(embed=coin_stats)
+                                     inline=False)
+                await ctx.author.send(embed=coin_stats)
 
     async def explorer_messages(self, applied_channels: list, message: str, tx_type: str, on_chain: bool = None):
         """
