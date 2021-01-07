@@ -411,13 +411,19 @@ class CustomMessages:
 
     @staticmethod
     async def stellar_wallet_overall(ctx, coin_stats: dict, utc_now):
+
+        try:
+            bridges = coin_stats['bridges']
+        except KeyError:
+            bridges = 0
+
         building_bridges = Embed(title=f':construction_site:  Building Bridges :construction_site:',
                                  description="Your Input on bridging the Stellar Network with Discord "
                                              "Users through Crypto Link.",
                                  colour=Colour.gold(),
                                  timestamp=utc_now)
         building_bridges.add_field(name=f':bridge_at_night: Created Bridges :bridge_at_night: ',
-                                   value=f'{coin_stats["bridges"]}')
+                                   value=f'{bridges}')
         await ctx.author.send(embed=building_bridges)
 
         for k, v in coin_stats.items():
