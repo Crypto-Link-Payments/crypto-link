@@ -114,13 +114,14 @@ class UserAccountCommands(commands.Cog):
             description = "All commands available to operate execute wallet related actions.\n" \
                           "`Aliases: one, st, first, 1`"
             list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
-                               "value": f"`{self.command_string}wallet balance`"},
+                               "value": f"```{self.command_string}wallet balance```\n"
+                                        f"`Aliases: bal, balances,b`"},
                               {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
-                               "value": f"`{self.command_string}wallet stats`"},
+                               "value": f"```{self.command_string}wallet stats```"},
                               {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
-                               "value": f"`{self.command_string}wallet deposit`"},
+                               "value": f"```{self.command_string}wallet deposit```"},
                               {"name": ":outbox_tray: Get Withdrawal Instructions :outbox_tray: ",
-                               "value": f"`{self.command_string}withdraw`"}]
+                               "value": f"```{self.command_string}withdraw```"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
@@ -187,7 +188,6 @@ class UserAccountCommands(commands.Cog):
     @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
-        print(user_balances)
         coin_data = self.backoffice.integrated_coins
         if user_balances:
             all_wallets = list(user_balances.keys())
@@ -210,8 +210,8 @@ class UserAccountCommands(commands.Cog):
 
                     balance_embed.add_field(
                         name=f"{coin_settings['emoji']} {coin_settings['name']} Balance {coin_settings['emoji']}",
-                        value=f'__Crypto__: \n{token_balance} {coin_settings["emoji"]}\n'
-                              f'__Fiat__: \n${token_to_usd["total"]} ({token_to_usd["usd"]})',
+                        value=f'{token_balance} {coin_settings["emoji"]} (${token_to_usd["total"]}) \n'
+                              f'Rate: ${token_to_usd["usd"]}/XLM',
                         inline=False)
                     await ctx.author.send(embed=balance_embed)
         else:

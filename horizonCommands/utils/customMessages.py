@@ -14,11 +14,9 @@ async def horizon_error_msg(destination, error):
 
 
 async def account_create_msg(destination, details):
-    new_account = Embed(title=f':new: Stellar Testnet Account Created :new:',
-                        description=f'You have successfully created new in-active account on {details["network"]}. Do'
-                                    f' not deposit real XLM as this account has been created on testnet. '
-                                    f'Head to [Stellar Laboratory](https://laboratory.stellar.org/#account-creator?network=test)'
-                                    f' and use Friend bot to activate account',
+    new_account = Embed(title=f':new: In-Active Stellar Account Created :new:',
+                        description=f'You have successfully created new in-active account on Stellar ***{details["network"]}***.'
+                                    f' Before you can use this account, you are required to deposit some XLM to it.',
                         colour=Colour.lighter_gray()
                         )
     new_account.add_field(name=f':map: Public Address :map: ',

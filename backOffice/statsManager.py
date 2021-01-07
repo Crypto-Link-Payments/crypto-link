@@ -37,6 +37,13 @@ class StatsManager(object):
         self.as_cl_earnings = self.as_cl_connection.CLEarning
         self.as_user_wallets = self.as_cl_connection.userWallets
 
+    async def create_bridge(self, user_id: int):
+        """
+        Increase user stats on bridges
+        """
+        await self.as_user_profiles.update_one({"userId": user_id},
+                                               {f"{CONST_INC}": {"bridges": 1}})
+
     async def count_total_registered_wallets(self):
         """
         Return count of registered wallets
@@ -44,7 +51,7 @@ class StatsManager(object):
         data = await self.as_user_wallets.count_documents({})
         return data
 
-    async def update_cl_earnings(self, time: int, amount: int, system: str, token: str, user:int):
+    async def update_cl_earnings(self, time: int, amount: int, system: str, token: str, user: int):
         """
         Appends fee to CL wallet level 1
         """
@@ -52,7 +59,7 @@ class StatsManager(object):
         result = await self.as_cl_earnings.insert_one({"time": int(time), "system": system,
                                                        "amount": amount,
                                                        "token": token,
-                                                       "user":user})
+                                                       "user": user})
         if result.inserted_id:
             return True
         else:

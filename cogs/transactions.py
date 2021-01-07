@@ -174,6 +174,9 @@ class TransactionCommands(commands.Cog):
                             # Update user count in guild system
                             await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
 
+                            # Increase bridge
+                            await self.backoffice.stats_manager.create_bridge(user_id=ctx.message.author.id)
+
                         # Deduct balance from sender
                         if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
                                                                               user_id=ctx.message.author.id,
@@ -235,14 +238,14 @@ class TransactionCommands(commands.Cog):
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def send(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
-        await self.send_impl(ctx, amount, ticker, recipient, tx_type="public", message=message)
+        await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="public", message=message)
 
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def private(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
-        await self.send_impl(ctx, amount, ticker, recipient, tx_type="private", message=message)
+        await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="private", message=message)
 
     @send.error
     async def send_error(self, ctx, error):

@@ -128,7 +128,8 @@ class CustomMessages:
             await ctx.channel.send(embed=embed)
 
     @staticmethod
-    async def system_message(ctx, message: str, color_code, destination: int, sys_msg_title: str = None, embed_title:str = None):
+    async def system_message(ctx, message: str, color_code, destination: int, sys_msg_title: str = None,
+                             embed_title: str = None):
         """
         Custom System Messages
         """
@@ -410,6 +411,21 @@ class CustomMessages:
 
     @staticmethod
     async def stellar_wallet_overall(ctx, coin_stats: dict, utc_now):
+
+        try:
+            bridges = coin_stats['bridges']
+        except KeyError:
+            bridges = 0
+
+        building_bridges = Embed(title=f':construction_site:  Building Bridges :construction_site:',
+                                 description="Your Input on bridging the Stellar Network with Discord "
+                                             "Users through Crypto Link.",
+                                 colour=Colour.gold(),
+                                 timestamp=utc_now)
+        building_bridges.add_field(name=f':bridge_at_night: Created Bridges :bridge_at_night: ',
+                                   value=f'{bridges}')
+        await ctx.author.send(embed=building_bridges)
+
         for k, v in coin_stats.items():
             coin_stats = Embed(title=f'{k.upper()} wallet statistics',
                                description=f':bar_chart: ***__Statistical Data on Stellar Lumen Discord Wallet__*** '
