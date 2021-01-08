@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import time
 from datetime import datetime
 import tweepy
@@ -30,6 +32,7 @@ def get_time():
 class PeriodicTasks:
     def __init__(self, backoffice, bot):
         self.backoffice = backoffice
+        self.twitter_cred = self.backoffice.twitter_details
         self.notification_channels = self.backoffice.auto_messaging_channels["depositNotifications"]
         self.bot = bot
         self.twitter_acc = self.backoffice.twitter_details
@@ -294,10 +297,10 @@ class PeriodicTasks:
                         value=f'{total_wallets}',
                         inline=False)
         stats.add_field(name='Σ Transactions Level 1',
-                        value=f'{total_moved}',
+                        value=f'{total_tx}',
                         inline=False)
         stats.add_field(name='Σ XLM Moved',
-                        value=f'{total_tx}',
+                        value=f'{total_moved}',
                         inline=False)
         stats.add_field(name='Σ Deposits',
                         value=f'{deposits}',
@@ -313,6 +316,27 @@ class PeriodicTasks:
                         inline=False)
         await stats_chn.send(embed=stats)
 
+        # Twitter message
+        rocket = '\U0001F680'
+        bridges = '\U0001F309'
+        sent_transactions = '\U0001F4E8'
+        total_xlm_moved = '\U0001F4B8'
+        calendar = '\U0001F4C5'
+        total_reach = len(self.bot.users)
+        utc_now = datetime.utcnow()
+        reach_performance = round((total_wallets / total_reach) * 100, 2)
+
+        auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
+        auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
+        twitter_messages = tweepy.API(auth)
+        twitter_messages.update_status(f"{rocket} Crypto Link Metrics{rocket}\n"
+                                       f"{calendar}: {utc_now.year}.{utc_now.month}.{utc_now.day} @ {utc_now.hour}:{utc_now.minute}"
+                                       f"System is currently integrate into {len(self.bot.guilds)} #DiscordServer and "
+                                       f"has potential reach to {total_reach} #Discord users. Current coverage is {reach_performance}% "
+                                       f"through {total_wallets} {bridges} built to #StellarFamily. "
+                                       f"{sent_transactions} {total_tx} payments has been processed and moved {total_xlm_moved}"
+                                       f" {total_moved} $XLM in total! #Stellar #StellarGlobal #XLM")
+
 
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
@@ -324,7 +348,7 @@ def start_scheduler(timed_updater):
         second='00'), misfire_grace_time=10, max_instances=20)
 
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
-        hour='00'), misfire_grace_time=10, max_instances=20)
+        hour='17'), misfire_grace_time=10, max_instances=20)
 
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
