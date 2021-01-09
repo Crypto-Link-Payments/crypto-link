@@ -351,7 +351,7 @@ def start_scheduler(timed_updater):
         second='00'), misfire_grace_time=10, max_instances=20)
 
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
-        hour='00'), misfire_grace_time=10, max_instances=20)
+        hour='17'), misfire_grace_time=10, max_instances=20)
 
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
