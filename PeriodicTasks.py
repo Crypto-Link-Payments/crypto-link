@@ -273,6 +273,7 @@ class PeriodicTasks:
             print('===========================================================')
 
     async def send_marketing_messages(self):
+        print(Fore.GREEN + f"{get_time()} --> Sending report to Discord ")
         stats = self.backoffice.stats_manager.get_all_stats()
         off_chain_xlm = stats["xlm"]["offChain"]
         total_tx = off_chain_xlm["totalTx"]
@@ -316,6 +317,7 @@ class PeriodicTasks:
                         inline=False)
         await stats_chn.send(embed=stats)
 
+        print(Fore.GREEN + f"{get_time()} --> Sending Twitter")
         # Twitter message
         rocket = '\U0001F680'
         bridges = '\U0001F309'
@@ -325,30 +327,32 @@ class PeriodicTasks:
         total_reach = len(self.bot.users)
         utc_now = datetime.utcnow()
         reach_performance = round((total_wallets / total_reach) * 100, 2)
-
-        auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
-        auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
-        twitter_messages = tweepy.API(auth)
-        twitter_messages.update_status(f"{rocket} Crypto Link Metrics{rocket}\n"
-                                       f"{calendar}: {utc_now.year}.{utc_now.month}.{utc_now.day} @ {utc_now.hour}:{utc_now.minute}"
-                                       f"System is currently integrate into {len(self.bot.guilds)} #DiscordServer and "
-                                       f"has potential reach to {total_reach} #Discord users. Current coverage is {reach_performance}% "
-                                       f"through {total_wallets} {bridges} built to #StellarFamily. "
-                                       f"{sent_transactions} {total_tx} payments has been processed and moved {total_xlm_moved}"
-                                       f" {total_moved} $XLM in total! #Stellar #StellarGlobal #XLM")
+        try:
+            auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
+            auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
+            twitter_messages = tweepy.API(auth)
+            twitter_messages.update_status(f"{rocket} Crypto Link Metrics{rocket}\n"
+                                           f"{calendar}: {utc_now.year}.{utc_now.month}.{utc_now.day} @ {utc_now.hour}:{utc_now.minute}"
+                                           f"System is currently integrate into {len(self.bot.guilds)} #DiscordServer and "
+                                           f"has potential reach to {total_reach} #Discord users. Current coverage is {reach_performance}% "
+                                           f"through {total_wallets} {bridges} built to #StellarFamily. "
+                                           f"{sent_transactions} {total_tx} payments has been processed and moved {total_xlm_moved}"
+                                           f" {total_moved} $XLM in total! #Stellar #StellarGlobal #XLM")
+        except Exception as e:
+            print(Fore.RED + f"{e} ")
 
 
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
 
-    scheduler.add_job(timed_updater.check_stellar_hot_wallet,
-                      CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
-    scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
-        second='00'), misfire_grace_time=10, max_instances=20)
+    # scheduler.add_job(timed_updater.check_stellar_hot_wallet,
+    #                   CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
+    # scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
+    #     second='00'), misfire_grace_time=10, max_instances=20)
 
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
-        hour='17'), misfire_grace_time=10, max_instances=20)
+        second='00'), misfire_grace_time=10, max_instances=20)
 
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
