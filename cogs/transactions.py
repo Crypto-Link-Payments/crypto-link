@@ -162,6 +162,13 @@ class TransactionCommands(commands.Cog):
                             self.backoffice.account_mng.register_user(discord_id=recipient.id,
                                                                       discord_username=f'{recipient}')
 
+                            # Update user count in guild system
+                            await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
+
+                            # Increase bridge
+                            await self.backoffice.stats_manager.create_bridge(user_id=ctx.message.author.id)
+
+
                             # Send up link
                             load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                              self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
@@ -171,11 +178,9 @@ class TransactionCommands(commands.Cog):
                             for chn in load_channels:
                                 await chn.send(content=explorer_msg)
 
-                            # Update user count in guild system
-                            await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
+                            await custom_messages.bridge_notification(ctx,recipient=recipient)
 
-                            # Increase bridge
-                            await self.backoffice.stats_manager.create_bridge(user_id=ctx.message.author.id)
+
 
                         # Deduct balance from sender
                         if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,

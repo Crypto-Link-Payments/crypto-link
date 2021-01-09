@@ -129,9 +129,17 @@ class CustomMessages:
     @staticmethod
     async def bridge_notification(ctx, recipient):
         bridge_info = Embed(title=f':bridge_at_night: New Bridge Created :bridge_at_night: ',
-                            description="New bridge has been created",
+                            description=f":construction_worker: You have successfully created new bridge between "
+                                        f"Discord user and Stellar. ",
                             colour=Colour.green())
-
+        bridge_info.add_field(name=f'Destination',
+                              value=f'{recipient} (ID: {recipient.id})',
+                              inline=False)
+        bridge_info.add_field(name=f':information_source: Explanation :information_source: ',
+                              value=f'Since recipient did not have wallet yet in the system, it has been '
+                                    f'automatically created in order for the payment to reach its destination. '
+                                    f'With every new account bridges are established and adoption of Stellar increased.'
+                                    f' Keep on building')
         await ctx.author.send(embed=bridge_info)
 
     @staticmethod
