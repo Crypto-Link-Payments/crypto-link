@@ -331,9 +331,9 @@ class PeriodicTasks:
             auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
             auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
             twitter_messages = tweepy.API(auth)
-            twitter_messages.update_status(f"{rocket} Crypto Link Metrics{rocket}\n"
-                                           f"{calendar}: {utc_now.year}.{utc_now.month}.{utc_now.day} @ {utc_now.hour}:{utc_now.minute}"
-                                           f"System is currently integrate into {len(self.bot.guilds)} #DiscordServer and "
+            twitter_messages.update_status(f"{rocket}Crypto Link Metrics{rocket}\n"
+                                           f"{calendar}: {utc_now.year}.{utc_now.month}.{utc_now.day}"
+                                           f"Serving {len(self.bot.guilds)} #DiscordServer and "
                                            f"has potential reach to {total_reach} #Discord users. Current coverage is {reach_performance}% "
                                            f"through {total_wallets} {bridges} built to #StellarFamily. "
                                            f"{sent_transactions} {total_tx} payments has been processed and moved {total_xlm_moved}"
