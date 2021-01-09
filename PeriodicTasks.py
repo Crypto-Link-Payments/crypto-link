@@ -323,7 +323,6 @@ class PeriodicTasks:
         bridges = '\U0001F309'
         sent_transactions = '\U0001F4E8'
         total_xlm_moved = '\U0001F4B8'
-        calendar = '\U0001F4C5'
         total_reach = len(self.bot.users)
         utc_now = datetime.utcnow()
         reach_performance = round((total_wallets / total_reach) * 100, 2)
@@ -331,12 +330,13 @@ class PeriodicTasks:
             auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
             auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
             twitter_messages = tweepy.API(auth)
-            twitter_messages.update_status(f"{rocket}Crypto Link Status on {utc_now.year}.{utc_now.month}.{utc_now.day}{rocket}\n"
-                                           f"Serving {len(self.bot.guilds)} #DiscordServer with "
-                                           f"potential reach to {total_reach} #Discord users. Current coverage is {reach_performance}% "
-                                           f"with {total_wallets} {bridges} built to #StellarFamily."
-                                           f"{sent_transactions} {total_tx} payments have been processed and moved {total_xlm_moved}"
-                                           f" {total_moved} $XLM in total! #Stellar #StellarGlobal #XLM")
+            twitter_messages.update_status(
+                f"{rocket}Crypto Link Status on {utc_now.year}.{utc_now.month}.{utc_now.day}{rocket}\n"
+                f"Serving {len(self.bot.guilds)} #DiscordServer with "
+                f"potential reach to {total_reach} #Discord users. Current coverage is {reach_performance}% "
+                f"with {total_wallets} {bridges} built to #StellarFamily."
+                f"{sent_transactions} {total_tx} payments have been processed and moved {total_xlm_moved}"
+                f" {total_moved} $XLM in total! #Stellar #StellarGlobal #XLM")
         except Exception as e:
             print(Fore.RED + f"{e} ")
 
@@ -345,13 +345,13 @@ def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
 
-    # scheduler.add_job(timed_updater.check_stellar_hot_wallet,
-    #                   CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
-    # scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
-    #     second='00'), misfire_grace_time=10, max_instances=20)
+    scheduler.add_job(timed_updater.check_stellar_hot_wallet,
+                      CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
+    scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
+        second='00'), misfire_grace_time=10, max_instances=20)
 
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
-        second='00'), misfire_grace_time=10, max_instances=20)
+        hour='00'), misfire_grace_time=10, max_instances=20)
 
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
