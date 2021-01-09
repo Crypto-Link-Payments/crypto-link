@@ -1,8 +1,7 @@
 from datetime import datetime
 
-import discord
 from discord import errors
-from discord import Role, Embed, Colour, TextChannel
+from discord import Role, Embed, Colour, TextChannel, User
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_HASH_STR = ':hash: Transaction Hash :hash: '
@@ -54,14 +53,14 @@ class CustomMessages:
         return emoji
 
     @staticmethod
-    async def sys_deposit_notifications(channel, user: discord.User, tx_details: dict):
+    async def sys_deposit_notifications(channel, user: User, tx_details: dict):
         """
         Sending message to user on successful processed deposit
         """
 
-        notify = discord.Embed(title='System Deposit Notification',
-                               description='Deposit has been processed',
-                               timestamp=datetime.utcnow())
+        notify = Embed(title='System Deposit Notification',
+                       description='Deposit has been processed',
+                       timestamp=datetime.utcnow())
         notify.set_thumbnail(url=user.avatar_url)
         notify.add_field(name='User details',
                          value=f'{user} ID; {user.id}',
@@ -81,10 +80,10 @@ class CustomMessages:
         deposit or memo could not be identifies
         """
 
-        notify = discord.Embed(title=':warning: System Deposit Notification :warning:',
-                               description='Unidentified Deposit',
-                               timestamp=datetime.utcnow(),
-                               colour=Colour.red())
+        notify = Embed(title=':warning: System Deposit Notification :warning:',
+                       description='Unidentified Deposit',
+                       timestamp=datetime.utcnow(),
+                       colour=Colour.red())
         notify.add_field(name='From',
                          value=f'{tx_details["source_account"]}', inline=False)
         notify.add_field(name='Tx hash',
@@ -108,11 +107,11 @@ class CustomMessages:
         """
 
         if not c:
-            c = discord.Colour.gold()
+            c = Colour.gold()
 
-        embed = discord.Embed(title=title,
-                              description=description,
-                              colour=c)
+        embed = Embed(title=title,
+                      description=description,
+                      colour=c)
         for d in data:
             embed.add_field(name=d['name'],
                             value=d['value'],
@@ -126,6 +125,14 @@ class CustomMessages:
                 await ctx.channel.send(embed=embed, delete_after=40)
         except Exception:
             await ctx.channel.send(embed=embed)
+
+    @staticmethod
+    async def bridge_notification(ctx, recipient):
+        bridge_info = Embed(title=f':bridge_at_night: New Bridge Created :bridge_at_night: ',
+                            description="New bridge has been created",
+                            colour=Colour.green())
+
+        await ctx.author.send(embed=bridge_info)
 
     @staticmethod
     async def system_message(ctx, message: str, color_code, destination: int, sys_msg_title: str = None,
@@ -142,15 +149,15 @@ class CustomMessages:
                 c = 0x319f6b
                 emoji = ":robot: "
             else:
-                c = discord.Colour.red()
+                c = Colour.red()
                 emoji = ":warning:"
 
         if embed_title is None:
             embed_title = 'System Message'
 
-        sys_embed = discord.Embed(title=f"{embed_title}",
-                                  description=sys_msg_title,
-                                  colour=c)
+        sys_embed = Embed(title=f"{embed_title}",
+                          description=sys_msg_title,
+                          colour=c)
         sys_embed.add_field(name=':information_source:',
                             value=message)
 
@@ -178,21 +185,21 @@ class CustomMessages:
 
         if direction == 0:
             title = f':outbox_tray: Outgoing {tx_type_emoji} **__{tx_type.title()}__** transaction :outbox_tray: '
-            col = discord.Colour.red()
+            col = Colour.red()
             destination_txt = f'{tx_type_emoji} Recipient {tx_type_emoji} '
             value_emoji = ":money_with_wings: "
             avatar = user.avatar_url
 
         elif direction == 1:
             title = f':inbox_tray: Incoming {tx_type_emoji} {tx_type.title()} transaction :inbox_tray: '
-            col = discord.Colour.green()
+            col = Colour.green()
             destination_txt = ':postbox: Sender :postbox: '
             avatar = destination.avatar_url
             value_emoji = ":moneybag: "
 
-        tx_report = discord.Embed(title=title,
-                                  colour=col,
-                                  timestamp=datetime.utcnow())
+        tx_report = Embed(title=title,
+                          colour=col,
+                          timestamp=datetime.utcnow())
         tx_report.set_thumbnail(url=avatar)
         tx_report.add_field(name=f'{destination_txt}',
                             value=f'`{user}`',
@@ -221,12 +228,12 @@ class CustomMessages:
             print('========================')
 
     @staticmethod
-    async def deposit_notification_message(recipient: discord.User, tx_details: dict):
+    async def deposit_notification_message(recipient: User, tx_details: dict):
 
-        sys_embed = discord.Embed(title=":inbox_tray: __Deposit Processed__ :inbox_tray: ",
-                                  description=f'Deposit processed successfully!',
-                                  colour=Colour.dark_purple(),
-                                  timestamp=datetime.utcnow())
+        sys_embed = Embed(title=":inbox_tray: __Deposit Processed__ :inbox_tray: ",
+                          description=f'Deposit processed successfully!',
+                          colour=Colour.dark_purple(),
+                          timestamp=datetime.utcnow())
         sys_embed.add_field(name=':map: From :map: ',
                             value=f'{tx_details["source_account"]}', inline=False)
         sys_embed.add_field(name=CONST_HASH_STR,
@@ -241,10 +248,10 @@ class CustomMessages:
 
     @staticmethod
     async def withdrawal_notify(ctx, withdrawal_data: dict, fee):
-        notify = discord.Embed(title=":outbox_tray: Withdrawal Notification :outbox_tray:",
-                               description=f'Withdrawal Successfully processed',
-                               timestamp=datetime.utcnow(),
-                               colour=discord.Colour.green())
+        notify = Embed(title=":outbox_tray: Withdrawal Notification :outbox_tray:",
+                       description=f'Withdrawal Successfully processed',
+                       timestamp=datetime.utcnow(),
+                       colour=Colour.green())
 
         notify.add_field(name=":calendar: Time of withdrawal :calendar: ",
                          value=str(datetime.utcnow()),
@@ -270,12 +277,12 @@ class CustomMessages:
             await ctx.author.send(embed=notify)
 
         except errors.DiscordException:
-            error_msg = discord.Embed(title=f':warning: Withdrawal Notification :warning:',
-                                      description=f'You have received this message because'
-                                                  f' withdrawal notification could not be'
-                                                  f' send to DM. Please allow bot to send'
-                                                  f' you messages',
-                                      colour=discord.Colour.green())
+            error_msg = Embed(title=f':warning: Withdrawal Notification :warning:',
+                              description=f'You have received this message because'
+                                          f' withdrawal notification could not be'
+                                          f' send to DM. Please allow bot to send'
+                                          f' you messages',
+                              colour=Colour.green())
             error_msg.add_field(name=':compass: Explorer Link :compass:',
                                 value=withdrawal_data['explorer'])
             error_msg.set_footer(text='This message will self-destruct in 360 seconds')
@@ -285,9 +292,9 @@ class CustomMessages:
     @staticmethod
     async def withdrawal_notification_channel(ctx, channel, withdrawal_data):
         # create withdrawal notification for channel
-        notify = discord.Embed(title='Stellar Withdrawal Notification',
-                               description='Withdrawal has been processed',
-                               colour=discord.Colour.gold())
+        notify = Embed(title='Stellar Withdrawal Notification',
+                       description='Withdrawal has been processed',
+                       colour=Colour.gold())
         if isinstance(ctx.channel, TextChannel):
             notify.add_field(name='Origin',
                              value=f'{ctx.message.guild} ID; {ctx.message.guild.id}',
@@ -307,11 +314,11 @@ class CustomMessages:
         await channel.send(embed=notify)
 
     @staticmethod
-    async def cl_staff_incoming_funds_notification(sys_channel: discord.TextChannel, incoming_fees: str):
-        notify = discord.Embed(title='Bot Stellar Wallet Activity',
-                               description='Bot Wallet has been credited because user '
-                                           'has initiated on-chain withdrawal',
-                               color=discord.Colour.blurple())
+    async def cl_staff_incoming_funds_notification(sys_channel: TextChannel, incoming_fees: str):
+        notify = Embed(title='Bot Stellar Wallet Activity',
+                       description='Bot Wallet has been credited because user '
+                                   'has initiated on-chain withdrawal',
+                       color=Colour.blurple())
         notify.add_field(name='Value',
                          value=f'{incoming_fees}')
         await sys_channel.send(embed=notify)
@@ -319,11 +326,11 @@ class CustomMessages:
     @staticmethod
     async def user_role_purchase_msg(ctx, role: Role, role_details: dict):
         # Send notification to user
-        role_embed = discord.Embed(name=':shopping_cart: __Membership purchase successful__ :shopping_cart: ',
-                                   title='Congratulations on '
-                                         'obtaining the role',
-                                   description='Details on obtained role',
-                                   colour=Colour.magenta())
+        role_embed = Embed(name=':shopping_cart: __Membership purchase successful__ :shopping_cart: ',
+                           title='Congratulations on '
+                                 'obtaining the role',
+                           description='Details on obtained role',
+                           colour=Colour.magenta())
         role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
         role_embed.add_field(name=':convenience_store: Community :convenience_store:',
                              value=f'{ctx.message.guild}  \n'
@@ -350,7 +357,7 @@ class CustomMessages:
 
     @staticmethod
     async def guild_owner_role_purchase_msg(ctx, role: Role, role_details: dict):
-        incoming_funds = discord.Embed(
+        incoming_funds = Embed(
             name=':convenience_store: __Merchant system funds credited__ :convenience_store: ',
             title='__Incoming funds to corporate '
                   'wallet___',
