@@ -134,8 +134,8 @@ class HelpCommands(commands.Cog):
                                     f' deposit` and deposit XLM.',
                               inline=False)
         start_embed.add_field(name=':three: Make P-2-P Transaction :three:',
-                              value=f'`{self.command_string}send <amount> <ticker> <@discord.Member>`\n'
-                                    f'Example: `{self.command_string}send 10 xlm @animus`',
+                              value=f'`{self.command_string}send <@discord.Member> <amount> <ticker>`\n'
+                                    f'Example: `{self.command_string}send @animus 10 xlm`',
                               inline=False)
         start_embed.add_field(name=':sos: Explore Crypto Link :sos: ',
                               value=f'```{self.command_string}help```',
