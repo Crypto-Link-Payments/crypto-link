@@ -160,7 +160,7 @@ class UserAccountCommands(commands.Cog):
                                   description=description)
 
             deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
-                                    value='Be sure to include and provide appropriate  **__deposit ID__** and Wallet '
+                                    value='Be sure to include and provide appropriate  **__MEMO__** as text and Wallet '
                                           'address for each currency , otherwise your deposit will be lost!',
                                     inline=False)
             deposit_embed.add_field(
