@@ -476,17 +476,18 @@ class BotManagementCommands(commands.Cog):
         rates = get_rates(coin_name='stellar')
         for data in fees:
             if not data.get('fee_list'):
-                conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
-                fee_type = self.filter_db_keys(fee_type=data['type'])
-
-                fee_info.add_field(name=fee_type,
-                                   value=f"XLM = {conversion['total']} {CONST_STELLAR_EMOJI}\n"
-                                         f"Dollar = {data['fee']}$",
-                                   inline=False)
+                # conversion = convert_to_currency(amount=float(data['fee']), coin_name='stellar')
+                # fee_type = self.filter_db_keys(fee_type=data['type'])
+                #
+                # fee_info.add_field(name=fee_type,
+                #                    value=f"XLM = {conversion['total']} {CONST_STELLAR_EMOJI}\n"
+                #                          f"Dollar = {data['fee']}$",
+                #                    inline=False)
+                pass
             else:
                 fee_type = self.filter_db_keys(fee_type=data['type'])
                 fee_info.add_field(name=fee_type,
-                                   value=f"{data['fee_list']}",
+                                   value=f"{data['fee_list']['xlm']} XLM",
                                    inline=False)
 
         fee_info.add_field(name='Conversion rates',
