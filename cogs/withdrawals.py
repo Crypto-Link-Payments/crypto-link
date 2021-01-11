@@ -32,13 +32,13 @@ class WithdrawalCommands(commands.Cog):
             description = "All commands available to withdraw funds from Discord Wallet"
             list_of_values = [
                 {"name": f":outbox_tray: Withdraw Stellar (XLM) from Discord wallet :outbox_tray:",
-                 "value": f"```{self.command_string}withdraw xlm <amount> <destination address>```\n"
+                 "value": f"```{self.command_string}withdraw xlm <amount> <destination address>```"
                           f"\nexample:\n"
-                          f"```{self.command_string}withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"},
-                {"name": f" Withdraw Tokens",
-                 "value": f"```{self.command_string}withdraw <ticker> <amount> <destination address>```\n"
-                          f"\nexample:\n"
-                          f"```{self.command_string}withdraw clt 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"}]
+                          f"```{self.command_string}withdraw xlm 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"}]
+            # {"name": f" Withdraw Tokens",
+            #  "value": f"```{self.command_string}withdraw <ticker> <amount> <destination address>```\n"
+            #           f"\nexample:\n"
+            #           f"```{self.command_string}withdraw clt 100 GBAGTMSNZLAJJWTBAJM2EVN5BQO7YTQLYCMQWRZT2JLKKXP3OMQ36IK7```"}
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1)
