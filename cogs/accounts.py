@@ -220,6 +220,10 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
+    @wallet.command()
+    async def qr(self,ctx):
+        pass
+
     @balance.error
     async def balance_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
