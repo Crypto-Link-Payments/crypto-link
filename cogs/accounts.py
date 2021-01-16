@@ -1,10 +1,11 @@
 from datetime import datetime
-from discord import Embed, Colour
+from discord import Embed, Colour, File
 from discord.ext import commands
 from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal
 from cogs.utils.systemMessaages import CustomMessages
+import qrcode
 
 custom_messages = CustomMessages()
 # Move this to class
@@ -221,8 +222,26 @@ class UserAccountCommands(commands.Cog):
                                                  sys_msg_title=title)
 
     @wallet.command()
-    async def qr(self,ctx):
-        pass
+    async def qr(self, ctx):
+        user_id = int(ctx.message.author.id)
+        user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
+        if user_profile:
+            hot_wallet_addr = self.backoffice.stellar_wallet.public_key
+            memo = user_profile["stellarDepositId"]
+
+            qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L,
+                               box_size=10, border=4)
+            # TODO make uri
+            uri_link = ""
+            qr.add_data(uri_link)
+            qr.make(fit=True)
+
+            img = qr.make_image(fill_color='black', back_color='white')
+
+            file_to_send = File(img)
+            await ctx.channel.send(file=file_to_send)
+        else:
+            print("Not registered yet")
 
     @balance.error
     async def balance_error(self, ctx, error):
