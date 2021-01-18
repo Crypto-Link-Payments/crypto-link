@@ -277,7 +277,7 @@ class PeriodicTasks:
         stats = self.backoffice.stats_manager.get_all_stats()
         off_chain_xlm = stats["xlm"]["offChain"]
         total_tx = off_chain_xlm["totalTx"]
-        total_moved = off_chain_xlm["totalMoved"]
+        total_moved = round(off_chain_xlm["totalMoved"],7)
 
         on_chain_xlm = stats["xlm"]["onChain"]
         deposits = on_chain_xlm["depositCount"]
