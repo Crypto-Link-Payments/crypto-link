@@ -87,7 +87,7 @@ class StatsManager(object):
             result = await self.as_on_chain_activities.update_one({"ticker": ticker},
                                                                   {f"$inc": stat_details})
             return result.matched_count > 0
-        except errors.PyMongoError as e:
+        except errors.PyMongoError:
             return False
 
     async def update_user_on_chain_stats(self, user_id: int, stats_data: dict):
@@ -103,7 +103,7 @@ class StatsManager(object):
             result = await self.as_user_profiles.update_one({"userId": user_id},
                                                             {f"{CONST_INC}": tx_stats_data})
             return result.matched_count > 0
-        except errors.PyMongoError as e:
+        except errors.PyMongoError:
             return False
 
     async def as_update_role_purchase_stats(self, user_id: int, merchant_data: dict):
