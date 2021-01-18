@@ -9,7 +9,8 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions
-
+from stellar_sdk.sep import stellar_uri
+from stellar_sdk import TextMemo, Asset
 from stellar_sdk.exceptions import NotFoundError
 
 from utils.tools import Helpers
@@ -56,6 +57,19 @@ class StellarWallet:
         except NotFoundError:
             return {}
 
+    def generate_uri(self, address: str, memo: str):
+
+        """
+        Returns Transaction as envelope
+        """
+
+        return stellar_uri.PayStellarUri(destination=address,
+                                         memo=TextMemo(text=memo),
+                                         asset=Asset.native(),
+                                         network_passphrase=self.networkPhrase,
+                                         message='Deposit to Discord',
+                                         ).to_uri()
+
     @staticmethod
     def __filter_error(result_code):
         if 'op_no_trust' in result_code:
@@ -94,7 +108,7 @@ class StellarWallet:
         else:
             return {}
 
-    def decode_transaction_envelope(self,envelope_xdr):
+    def decode_transaction_envelope(self, envelope_xdr):
         """
         Decode envelope and get details
         Credits to overcat :
@@ -105,7 +119,7 @@ class StellarWallet:
         te = TransactionEnvelope.from_xdr(envelope_xdr, self.networkPhrase)
         operations = te.transaction.operations
 
-        #TODO make multiple payments inside one transaction
+        # TODO make multiple payments inside one transaction
         amount = 0
         for op in operations:
             if isinstance(op, Payment):

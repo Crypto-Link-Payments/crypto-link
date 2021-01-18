@@ -1,10 +1,13 @@
 from datetime import datetime
-from discord import Embed, Colour
+from discord import Embed, Colour, File
 from discord.ext import commands
 from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal
 from cogs.utils.systemMessaages import CustomMessages
+import os
+import pyqrcode
+
 
 custom_messages = CustomMessages()
 # Move this to class
@@ -19,6 +22,17 @@ class UserAccountCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.list_of_coins = list(self.backoffice.integrated_coins.keys())
+
+    @staticmethod
+    def clean_qr_image(author_id):
+        if os.path.exists(f'{author_id}.png'):
+            try:
+                os.remove(f'{author_id}.png')
+                print("deleted successfully")
+            except Exception as e:
+                print(f'Exceptin: {e}')
+        else:
+            print("The file does not exist")
 
     @commands.command()
     @commands.check(has_wallet)
@@ -146,38 +160,94 @@ class UserAccountCommands(commands.Cog):
         await ctx.author.send(embed=stats_info)
         await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
 
-    @wallet.command()
+    @wallet.group()
     async def deposit(self, ctx):
+        """
+        Returns deposit information to user
+        """
+        if ctx.invoked_subcommand is None:
+            user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
+            if user_profile:
+                coins_string = ', '.join([str(coin.upper()) for coin in self.list_of_coins])
+                description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
+                              ' wallet(GUI, CLI) to the address and deposit ID provided below. Of them will result in ' \
+                              'funds being lost to which staff of Launch Pad Investments is not ' \
+                              'responsible for. :warning:'
+
+                deposit_embed = Embed(title='How to deposit',
+                                      colour=Colour.dark_orange(),
+                                      description=description)
+                deposit_embed.add_field(name=':gem: Supported CryptoCurrencies:gem: ',
+                                        value=f'```{coins_string}```',
+                                        inline=False)
+                deposit_embed.add_field(
+                    name=f' {CONST_STELLAR_EMOJI} Deposit Details {CONST_STELLAR_EMOJI}',
+                    value=f'\n:map: Public Address :map: \n'
+                          f'```{self.backoffice.stellar_wallet.public_key}```\n'
+                          f':compass: MEMO :compass:\n'
+                          f'```{user_profile["stellarDepositId"]}```',
+                    inline=False)
+                deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
+                                        value='Be sure to include and provide appropriate  **__MEMO__** as text and Wallet '
+                                              'address for each currency , otherwise your deposit will be lost!',
+                                        inline=False)
+                deposit_embed.add_field(name="Currently available currencies on Crypto Link",
+                                        value=f'```{coins_string}```',
+                                        inline=False)
+                deposit_embed.add_field(name=":printer: QR Code :printer: ",
+                                        value=f'Bellow is your personal QR code including your deposit address and '
+                                              f'MEMO. Scan it with mobile application supporting QR. Be sure to '
+                                              f'recheck the data once you scan it.',
+                                        inline=False)
+
+                memo = user_profile["stellarDepositId"]
+                uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
+                                                                  memo=memo)
+                image = pyqrcode.create(content=uri, error='L')
+                image.png(file=f'{ctx.message.author.id}.png', scale=6, module_color=[0, 255, 255, 128],
+                          background=[17, 17, 17],
+                          quiet_zone=4)
+                qr_to_send = File(f'{ctx.message.author.id}.png')
+
+                deposit_embed.set_image(url=f"attachment://{ctx.message.author.id}.png")
+                deposit_embed.set_footer(text=f'{self.command_string}wallet deposit qr -> Only QR')
+                await ctx.author.send(file=qr_to_send, embed=deposit_embed)
+
+                self.clean_qr_image(author_id=ctx.message.author.id)
+            else:
+                title = '__Deposit information error__'
+                message = f'Deposit details for your account could not be obtained at this moment from the system. ' \
+                          f'Please try again later, or contact one of the staff members. '
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                     sys_msg_title=title)
+
+    @deposit.command()
+    async def qr(self, ctx):
+        """
+        Send the QR only to user
+        """
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
-            description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
-                          ' wallet(GUI, CLI) to the address and deposit ID provided below. Of them will result in ' \
-                          'funds being lost to which staff of Launch Pad Investments is not ' \
-                          'responsible for. :warning:'
-
-            deposit_embed = Embed(title='How to deposit',
-                                  colour=Colour.dark_orange(),
-                                  description=description)
-
-            deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
-                                    value='Be sure to include and provide appropriate  **__MEMO__** as text and Wallet '
-                                          'address for each currency , otherwise your deposit will be lost!',
-                                    inline=False)
-            deposit_embed.add_field(
-                name=f' {CONST_STELLAR_EMOJI} Stellar wallet Deposit Details {CONST_STELLAR_EMOJI}',
-                value=f'\n:map: Public Address :map: \n'
-                      f'```{self.backoffice.stellar_wallet.public_key}```\n'
-                      f':compass: MEMO :compass:\n'
-                      f'> {user_profile["stellarDepositId"]}',
-                inline=False)
-
             coins_string = ', '.join([str(coin.upper()) for coin in self.list_of_coins])
 
-            deposit_embed.add_field(name="Currently available currencies on Crypto Link",
-                                    value=f'{coins_string}')
+            deposit_embed = Embed(title='Deposit QR code',
+                                  colour=Colour.dark_orange())
+            deposit_embed.add_field(name=':gem: Supported CryptoCurrencies:gem: ',
+                                    value=f'```{coins_string}```',
+                                    inline=False)
+            memo = user_profile["stellarDepositId"]
+            uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
+                                                              memo=memo)
+            image = pyqrcode.create(content=uri, error='L')
+            image.png(file=f'{ctx.message.author.id}.png', scale=6, module_color=[0, 255, 255, 128],
+                      background=[17, 17, 17],
+                      quiet_zone=4)
+            qr_to_send = File(f'{ctx.message.author.id}.png')
 
-            deposit_embed.set_thumbnail(url=ctx.message.author.avatar_url)
-            await ctx.author.send(embed=deposit_embed)
+            deposit_embed.set_image(url=f"attachment://{ctx.message.author.id}.png")
+            deposit_embed.set_footer(text=f'{self.command_string}wallet deposit qr -> Only QR')
+            await ctx.author.send(file=qr_to_send, embed=deposit_embed)
+            self.clean_qr_image(author_id=ctx.message.author.id)
         else:
             title = '__Deposit information error__'
             message = f'Deposit details for your account could not be obtained at this moment from the system. ' \
