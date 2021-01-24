@@ -163,15 +163,15 @@ class BotManagementCommands(commands.Cog):
         off_chain.add_field(name=f'Total Transactions done',
                             value=f'{cl_off_chain["totalTx"]}')
         off_chain.add_field(name=f'Total XLM moved',
-                            value=f'{round(cl_off_chain["totalMoved"],7)}')
+                            value=f'{round(cl_off_chain["totalMoved"], 7)}')
         off_chain.add_field(name=f'Total Public TX',
                             value=f'{cl_off_chain["totalPublicCount"]}')
         off_chain.add_field(name=f'Total Public Moved',
-                            value=f'{round(cl_off_chain["totalPublicMoved"],7)}')
+                            value=f'{round(cl_off_chain["totalPublicMoved"], 7)}')
         off_chain.add_field(name=f'Total Private TX',
                             value=f'{cl_off_chain["totalPrivateCount"]}')
         off_chain.add_field(name=f'Total Private Moved',
-                            value=f'{round(cl_off_chain["totalPrivateMoved"],7)}')
+                            value=f'{round(cl_off_chain["totalPrivateMoved"], 7)}')
         off_chain.add_field(name=f'Total Emoji Tx',
                             value=f'{cl_off_chain["totalEmojiTx"]}')
         off_chain.add_field(name=f'Total Emoji Moved',
@@ -185,6 +185,29 @@ class BotManagementCommands(commands.Cog):
         off_chain.add_field(name=f'Total Merchant moved',
                             value=f'{cl_off_chain["merchantMoved"]}')
         await ctx.author.send(embed=off_chain)
+
+    @cl.command()
+    async def bridges(self, ctx):
+        print("finding bridges")
+        stats = self.backoffice.stats_manager.get_top_builders()
+
+        bridges = '\U0001F309'
+        string = ''
+        rank = 1
+        for u in stats:
+            try:
+                username = u['userName']
+                brdiges = u["bridges"]
+                line = f'{rank}.' + ' ' + f'***{username}***' + ' ' + f'\n{brdiges}' + ' \n'
+                string += line
+                rank += 1
+            except KeyError:
+                pass
+
+        bridges_embed = Embed(title=f'Stats')
+        bridges_embed.add_field(name="Top 5",
+                                value=f"{bridges} Bridge Builders Hall of Fame {bridges}\n" + f'{string}')
+        await ctx.author.send(embed=bridges_embed)
 
     @cl.command()
     @commands.check(is_one_of_gods)
