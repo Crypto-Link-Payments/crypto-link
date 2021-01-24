@@ -28,19 +28,10 @@ class CustomMessages:
             msg_streamed += ":detective:"
 
         elif tx_type == 'emoji':
-            pass
+            msg_streamed += ":nerd:"
 
         elif tx_type == 'multi':
-            pass
-
-        elif tx_type == 'squad':
-            pass
-
-        elif tx_type == 'role_purchase':
-            pass
-
-        elif tx_type == 'registration':
-            pass
+            msg_streamed += ":parachute: "
 
         return msg_streamed
 

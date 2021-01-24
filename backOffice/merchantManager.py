@@ -134,7 +134,7 @@ class MerchantManager:
                 self.community_stellar_wallets.update_one({"communityId": community_id},
                                                           {"$inc": {"xlm": amount}})
                 return True
-            except errors.PyMongoError as e:
+            except errors.PyMongoError:
                 return False
         else:
             return False
