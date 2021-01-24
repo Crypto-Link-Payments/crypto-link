@@ -36,6 +36,9 @@ class PeriodicTasks:
         self.notification_channels = self.backoffice.auto_messaging_channels["depositNotifications"]
         self.bot = bot
         self.twitter_acc = self.backoffice.twitter_details
+        auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
+        auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
+        self.twitter_messages = tweepy.API(auth)
 
     async def global_bot_stats_update(self, tx):
         bot_stats = {
@@ -276,7 +279,7 @@ class PeriodicTasks:
         stats = self.backoffice.stats_manager.get_all_stats()
         off_chain_xlm = stats["xlm"]["offChain"]
         total_tx = off_chain_xlm["totalTx"]
-        total_moved = round(off_chain_xlm["totalMoved"],7)
+        total_moved = round(off_chain_xlm["totalMoved"], 7)
 
         on_chain_xlm = stats["xlm"]["onChain"]
         deposits = on_chain_xlm["depositCount"]
@@ -326,10 +329,7 @@ class PeriodicTasks:
         utc_now = datetime.utcnow()
         reach_performance = round((total_wallets / total_reach) * 100, 2)
         try:
-            auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
-            auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
-            twitter_messages = tweepy.API(auth)
-            twitter_messages.update_status(
+            self.twitter_messages.update_status(
                 f"{rocket}Crypto Link Status on {utc_now.year}.{utc_now.month}.{utc_now.day}{rocket}\n"
                 f"Serving {len(self.bot.guilds)} #DiscordServer with "
                 f"potential reach to {total_reach} #Discord users. Current coverage is {reach_performance}% "
@@ -338,6 +338,22 @@ class PeriodicTasks:
                 f" {total_moved} $XLM in total! #Stellar #StellarGlobal #XLM")
         except Exception as e:
             print(Fore.RED + f"{e} ")
+
+    async def send_builder_ranks(self):
+        stats = self.backoffice.stats_manager.get_top_builders(limit=5)
+        bridges = '\U0001F309'
+        string = ''
+        rank = 1
+        for user in stats:
+            try:
+                username = user['userName']
+                brdiges = user["bridges"]
+                line = f'{rank}.' + ' ' + f'***{username}***' + ' ' + f'\n{brdiges}' + ' \n'
+                string += line
+                rank += 1
+            except KeyError:
+                pass
+        self.twitter_messages.update_status(f"{bridges} Bridge Builders Hall of Fame {bridges}\n" + f'{string}')
 
 
 def start_scheduler(timed_updater):
@@ -352,6 +368,9 @@ def start_scheduler(timed_updater):
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
         hour='17'), misfire_grace_time=10, max_instances=20)
 
+    scheduler.add_job(timed_updater.send_builder_ranks,
+                      CronTrigger(day_of_week='mon', hour='01', minute='00', second='00'),
+                      misfire_grace_time=7, max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
     return scheduler
