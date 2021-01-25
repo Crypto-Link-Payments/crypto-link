@@ -4,7 +4,7 @@ Script to handle statistics of the bot
 
 import os
 import sys
-from pymongo import errors
+from pymongo import errors, DESCENDING
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
@@ -131,3 +131,9 @@ class StatsManager(object):
                         "onChain": on_chain_xlm}}
 
         return data
+
+    def get_top_builders(self, limit:int):
+        top_list = self.user_profiles.find({}).sort(
+            "bridges", DESCENDING).limit(limit)
+        return top_list
+
