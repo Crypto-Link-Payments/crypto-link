@@ -355,6 +355,15 @@ class PeriodicTasks:
                 pass
         self.twitter_messages.update_status(f"{bridges} Bridge Builders Hall of Fame {bridges}\n" + f'{string}')
 
+        stats_chn = self.bot.get_channel(id=self.backoffice.auto_messaging_channels["stats"])
+        stats = Embed(title="Builders Hall of Fame",
+                      description='Top 5 bridge builders of all time',
+                      color=Color.green())
+        stats.add_field(name=':tools: Ranks :tools:  ',
+                        value=f'{string}',
+                        inline=False)
+        await stats_chn.send(embed=stats)
+
 
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
