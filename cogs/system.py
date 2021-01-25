@@ -188,8 +188,7 @@ class BotManagementCommands(commands.Cog):
 
     @cl.command()
     async def bridges(self, ctx):
-        print("finding bridges")
-        stats = self.backoffice.stats_manager.get_top_builders()
+        stats = self.backoffice.stats_manager.get_top_builders(limit=10)
 
         bridges = '\U0001F309'
         string = ''
