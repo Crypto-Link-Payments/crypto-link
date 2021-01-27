@@ -224,20 +224,21 @@ class PeriodicTasks:
                                 await member.remove_roles(role, reason='Merchant notification -> Role expired')
                                 if merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
                                                                              role_id=mem_role_id, user_id=mem_id):
-                                    expired = discord.Embed(name='Expired Role',
+                                    expired = discord.Embed(name=':timer: Expired Role :timer: ',
                                                             title='__Role Expiration Notification__',
-                                                            description=' You have received this notification, '
-                                                                        'because the role you have purchased has expired'
-                                                                        ' and has been therefore removed. More details '
-                                                                        'bellow.')
+                                                            description='Your membership has expired. Please check '
+                                                                        'details below.',
+                                                            color=Color.dark_red())
 
                                     expired.set_thumbnail(url=bot.user.avatar_url)
-                                    expired.add_field(name='Community',
+                                    expired.add_field(name=':bank: Origin of role expiration:bank: ',
                                                       value=guild.name,
                                                       inline=False)
-                                    expired.add_field(name="Expired Role",
-                                                      value=role.name)
-
+                                    expired.add_field(name=":man_juggling: Expired Role :man_juggling: ",
+                                                      value=f'```{role.name}```')
+                                    expired.add_field(name=":information_source: Information :information_source: ",
+                                                      value=" In order to obtain back all privileges please re-purchase"
+                                                            " the role directly from the community.")
                                     await member.send(embed=expired)
                                 else:
                                     channel_sys = channels["merchant"]
