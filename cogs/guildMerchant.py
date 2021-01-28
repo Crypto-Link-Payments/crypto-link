@@ -113,7 +113,11 @@ class MerchantCommunityOwner(commands.Cog):
                                f'> :white_check_mark:  At least one of the time parameters needs to be greater than 0\n'
                                f'> :white_check_mark:  Dollar value of the role required to be greater than 0.00 $',
                          inline=False)
-        manual.add_field(name=':two: Inform members :two:',
+        manual.add_field(name=':two: Additional setup :two:',
+                         value=f'> Allow role to be mentioned by everyone'
+                               f'> assign rights to created role ',
+                         inline=False)
+        manual.add_field(name=':three: Inform members :three:',
                          value=f'Once role successfully created, it can be purchased by your members with command\n'
                                f'```{self.command_string}membership subscribe @discord.Role```',
                          inline=False)
