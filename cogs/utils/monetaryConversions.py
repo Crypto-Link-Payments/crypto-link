@@ -5,26 +5,20 @@ gecko = CoinGeckoAPI()
 
 def convert_to_currency(amount, coin_name):
     """
-    Function which converts fro
-    :param amount:
-    :param coin_name:
-    :return:
+    Converts the amount to specific currency
     """
     try:
-        data = gecko.get_price(ids=coin_name, vs_currencies='usd,eur')
+        data = gecko.get_price(ids=coin_name, vs_currencies='usd')
         details = dict()
         if coin_name == 'stellar':
             usd_stellar = data['stellar']['usd']
-            eur_stellar = data['stellar']['eur']
             details = {
                 "usd": usd_stellar,
-                "total": round(float(amount / usd_stellar), 3),
-                'eur': eur_stellar,
-                'total_eur': round(float(amount / eur_stellar), 3)
+                "total": round(float(amount / usd_stellar), 3)
             }
         return details
     except Exception:
-        return {"error","Some error with api"}
+        return {"error", "Some error with api"}
 
 
 def get_rates(coin_name):
@@ -35,7 +29,7 @@ def get_rates(coin_name):
         data = gecko.get_price(ids=coin_name, vs_currencies='usd,eur,rub,btc,eth,ltc')
         return data
     except Exception:
-        return{}
+        return {}
 
 
 def convert_to_usd(amount, coin_name):
@@ -60,6 +54,7 @@ def convert_to_usd(amount, coin_name):
 
         }
         return details
+
 
 def get_normal(value, decimal_point: int):
     """
