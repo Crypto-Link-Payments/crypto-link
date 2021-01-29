@@ -9,8 +9,7 @@ from datetime import datetime
 from discord import Embed, Colour
 from discord.ext import commands
 from git import Repo, InvalidGitRepositoryError
-from cogs.utils.monetaryConversions import get_normal, get_rates, convert_to_currency
-
+from cogs.utils.monetaryConversions import get_normal, get_rates
 from utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
