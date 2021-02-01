@@ -9,14 +9,15 @@ def convert_to_currency(amount, coin_name):
     """
     try:
         data = gecko.get_price(ids=coin_name, vs_currencies='usd')
-        details = dict()
         if coin_name == 'stellar':
             usd_stellar = data['stellar']['usd']
+            conversion_to_xlm = amount / usd_stellar
+            xlm_to_stroops = int(conversion_to_xlm * (10 ** 7))
             details = {
                 "usd": usd_stellar,
-                "total": round(float(amount / usd_stellar), 3)
+                "total": xlm_to_stroops
             }
-        return details
+            return details
     except Exception:
         return {"error", "Some error with api"}
 

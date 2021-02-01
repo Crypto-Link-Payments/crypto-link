@@ -458,62 +458,66 @@ class MerchantCommunityOwner(commands.Cog):
         ticker = 'xlm'
 
         # Details of the author
-        author_id = ctx.message.author.id
-        author_name = ctx.message.author
         current_time = datetime.utcnow()
 
         # Fee limits on Crypto Link system for merchant
+        withdrawal_min = self.backoffice.bot_manager.get_fees_by_category(key='merchant_min')  # Minimum withdrawal in $
+        withdrawal_min_dollar = withdrawal_min['fee']  # #TODO set high minimum in db after deployment
 
-        wallet_transfer_min = self.backoffice.bot_manager.get_fees_by_category(key='wallet_transfer')
-        withdrawal_min = self.backoffice.bot_manager.get_fees_by_category(key='merchant_min')
+        min_in_xlm = convert_to_currency(withdrawal_min_dollar,
+                                         coin_name='stellar')  # Returns dict of usd and total stroop
 
-        fee_value_dollar = wallet_transfer_min['fee']  # Fee
-        withdrawal_min_dollar = withdrawal_min['fee']  # Get out fee
-
-        fee_in_xlm = convert_to_currency(fee_value_dollar, coin_name='stellar')  # Coingecko API live conversion
-        min_in_xlm = convert_to_currency(withdrawal_min_dollar, coin_name='stellar')  # Coingecko API live conversion
-
-        # Checks if both fees successfully obtained
+        # Checks if conversion rates obtained
         conversion_rates_obtained = False
-        if not fee_in_xlm.get("error") and not min_in_xlm.get("error"):
+        if not min_in_xlm.get("error"):
             conversion_rates_obtained = True
 
-        if conversion_rates_obtained:  # check if both conversions obtained
-
-            final_fee_xlm = fee_in_xlm['total']  # Get total in lumen
-            final_fee_stroops = int(final_fee_xlm * (10 ** 7))  # Convert to stroops
-
-            final_with_limit_xlm = min_in_xlm['total']
-            final_with_limit_stroops = int(final_with_limit_xlm * (10 ** 7))  # Convert to stroops
+        # Check if conversion obtained from the coingecko
+        if conversion_rates_obtained:  # Check if conversion rates obtained
+            withdrawal_limit_stroops = min_in_xlm['total']  # Stroop value of minimal withdrawal limit
 
             # community wallet balance in stroops
             com_balance_stroops = self.merchant.get_balance_based_on_ticker(community_id=ctx.message.guild.id,
-                                                                            ticker=ticker)
+                                                                            ticker=ticker)  # Stroops returned
 
-            if com_balance_stroops >= final_with_limit_stroops and com_balance_stroops > final_fee_stroops:
+            # balance of community needs to be greater than final withdrawal limit and final fee stroops
+            if com_balance_stroops >= withdrawal_limit_stroops:
+
+                wallet_transfer_fee = self.backoffice.bot_manager.get_fees_by_category(
+                    key='wallet_transfer')  # Percentage as INT
+
+                fee_perc = wallet_transfer_fee['fee']
+
+                # Make all calculations fo rowner and cl earnings
+                fee_as_dec = fee_perc / (10 ** 2)  # 1% get converted to 0,01
+                cl_earnings = com_balance_stroops * fee_as_dec  # Earning for the system
+                net_owner = com_balance_stroops - cl_earnings  # Earning for the community wallet
+
+                # Empty the community wallet
                 if self.merchant.modify_funds_in_community_merchant_wallet(direction=1,
                                                                            community_id=ctx.message.guild.id,
                                                                            wallet_tick='xlm',
                                                                            amount=com_balance_stroops):
-                    # TODO fix bug where it could happen that fee in stroops is greater than the available balance
-                    for_owner = com_balance_stroops - final_fee_stroops
 
                     # Notification channel
                     notification_channel = self.bot.get_channel(id=int(self.merchant_channel_info))
                     # credit fee to launch pad investment wallet
-                    CL_wallet_update = {
-                        "balance": final_fee_stroops
-                    }
-                    if self.backoffice.bot_manager.update_cl_wallet_balance(to_update=CL_wallet_update, ticker='xlm'):
+
+                    if self.backoffice.bot_manager.update_cl_wallet_balance(to_update={"balance": cl_earnings},
+                                                                            ticker='xlm'):
 
                         # Append withdrawal amount to the community owner personal wallet
-                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=author_id, ticker='xlm',
+                        if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.author.id,
+                                                                                  ticker='xlm',
+                                                                                  # TODO fix this when multi
                                                                                   direction=0,
-                                                                                  amount=for_owner):
+                                                                                  amount=net_owner):
+
                             info_embed = Embed(
-                                title=' :money_with_wings: __Corporate account Transaction details__  :money_with_wings:',
+                                title=' :money_with_wings: __Community account Transaction details__  '
+                                      ':money_with_wings:',
                                 description="Here are the details on withdrawal from Merchant "
-                                            "Corporate Account to your personal account.",
+                                            "Community Account to your personal account.",
                                 colour=Color.purple())
                             info_embed.add_field(name=':clock: Time of withdrawal :clock: ',
                                                  value=f"{current_time} (UTC)",
@@ -526,15 +530,14 @@ class MerchantCommunityOwner(commands.Cog):
                             info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
                                                  value=f'```Total: {com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}\n'
                                                        f'-\n'
-                                                       f'Merchant Fee: {final_fee_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}\n'
+                                                       f'Merchant Fee: {cl_earnings / (10 ** 7)} {CONST_STELLAR_EMOJI}\n'
                                                        f'------------------------\n'
-                                                       f'Net: {for_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}```',
+                                                       f'Net: {net_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}```',
                                                  inline=False)
 
                             await ctx.author.send(embed=info_embed)
 
-                            # Send information to corporate account channel
-
+                            # Send information to crypto link staff sys channel on incoming funds
                             corp_info = Embed(
                                 title=":convenience_store: __ Merchant withdrawal fee incoming to Corp"
                                       " Wallet__ :convenience_store:",
@@ -553,20 +556,18 @@ class MerchantCommunityOwner(commands.Cog):
                                                 value=f"{ctx.message.author}",
                                                 inline=False)
                             corp_info.add_field(name=":money_mouth: Income amount to corporate wallet :money_mouth: ",
-                                                value=f"Amount: {final_fee_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}\n"
+                                                value=f"Amount: {cl_earnings / (10 ** 7)} {CONST_STELLAR_EMOJI}\n"
                                                       f"Amount is 0 if community has purchased monthly license",
                                                 inline=False)
                             corp_info.add_field(name=":receipt: Transaction Slip :receipt: ",
-                                                value=f":moneybag: balance:{com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}\n"
-                                                      f":atm: Net withdrawal: {for_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}",
+                                                value=f":moneybag: balance:{com_balance_stroops / (10 ** 7)} "
+                                                      f"{CONST_STELLAR_EMOJI}\n:atm: Net withdrawal:"
+                                                      f" {net_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}",
                                                 inline=False)
                             await notification_channel.send(embed=corp_info)
 
-                            await self.backoffice.stats_manager.update_cl_earnins(amount=final_fee_stroops,
+                            await self.backoffice.stats_manager.update_cl_earnins(amount=cl_earnings,
                                                                                   system='merchant', token='xlm')
-
-                            # TODO update community merchant wallet stats
-
                         else:
                             sys_msg_title = '__System Withdrawal error__'
                             message = 'There has been an issue with withdrawal from Merchant Corporate ' \
@@ -584,7 +585,7 @@ class MerchantCommunityOwner(commands.Cog):
                         merch_fee.add_field(name='Discord Details',
                                             value=f"Guild: {ctx.message.guild}\n"
                                                   f"ID: {ctx.message.guild.id}\n"
-                                                  f"Owner:{author_name}\n"
+                                                  f"Owner:{ctx.message.author}\n"
                                                   f"ID: {ctx.message.author.id}")
                         merch_fee.add_field(name='Command',
                                             value=f"{self.command_string}corp transfer_xlm",
@@ -594,9 +595,9 @@ class MerchantCommunityOwner(commands.Cog):
                                                   'wallet.',
                                             inline=False)
                         merch_fee.add_field(name='Details',
-                                            value=f"To Withdraw: {com_balance_stroops / 10000000} {CONST_STELLAR_EMOJI}\n"
-                                                  f"Fees: {final_fee_stroops / 10000000}{CONST_STELLAR_EMOJI}\n"
-                                                  f"To owner: {for_owner / 10000000}{CONST_STELLAR_EMOJI}",
+                                            value=f"To Withdraw: {com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}\n"
+                                                  f"Fees: {cl_earnings / (10 ** 7)}{CONST_STELLAR_EMOJI}\n"
+                                                  f"To owner: {net_owner / (10 ** 7)}{CONST_STELLAR_EMOJI}",
                                             inline=False)
                         merch_fee.add_field(name='Action Required',
                                             value='Try Again later')
@@ -615,8 +616,9 @@ class MerchantCommunityOwner(commands.Cog):
                                                         sys_msg_title=CONST_SYSTEM_ERROR)
             else:
                 message = f'You have insufficient balance in Stellar Merchant Community wallet, to initiate withdrawal ' \
-                          f'system. Current minimum balance for withdrawal is set to {final_with_limit_xlm} {CONST_STELLAR_EMOJI}' \
-                          f' XLM and your balance is {com_balance_stroops / 10000000} {CONST_STELLAR_EMOJI}'
+                          f'system. Current minimum balance for withdrawal is set to ' \
+                          f'{withdrawal_limit_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}' \
+                          f' XLM and your balance is {com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}'
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                     sys_msg_title=CONST_SYSTEM_ERROR)
         else:
