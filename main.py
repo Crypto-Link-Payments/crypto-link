@@ -7,11 +7,15 @@ from colorama import Fore, init
 from DiscordBot import DiscordBot
 from backOffice.backOffice import BackOffice
 from PeriodicTasks import PeriodicTasks, start_scheduler
-
 init(autoreset=True)
+
+import logging
+
+
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     backoffice = BackOffice()
 
     # Check file system
