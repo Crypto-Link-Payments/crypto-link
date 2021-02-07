@@ -579,7 +579,7 @@ class MerchantCommunityOwner(commands.Cog):
                         merch_fee = Embed(title="__Merchant Transfer error__",
                                           description='This is error notification as funds from '
                                                       'corporate Merchant wallet could not be transferred to'
-                                                      'Launchpad Investment Corp Wallet. Details bellow ',
+                                                      'Crypto Link wallet. Details bellow ',
                                           colour=Color.red())
                         merch_fee.set_footer(text=f"{current_time}")
                         merch_fee.add_field(name='Discord Details',
@@ -609,21 +609,20 @@ class MerchantCommunityOwner(commands.Cog):
                         await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                             sys_msg_title=sys_msg_title)
                 else:
-                    message = 'There has been an error while trying to withdraw total balance from Stellar Merchant ' \
-                              'Community Wallet. Please try again later and if the issue persists contact support ' \
-                              'staff.'
+                    message = 'There has been an internal error while trying to withdraw total balance from Stellar ' \
+                              'Merchant Community Wallet. Please try again later and if the issue persists' \
+                              ' contact support staff.'
                     await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                         sys_msg_title=CONST_SYSTEM_ERROR)
             else:
-                message = f'You have insufficient balance in Stellar Merchant Community wallet, to initiate withdrawal ' \
-                          f'system. Current minimum balance for withdrawal is set to ' \
-                          f'{withdrawal_limit_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}' \
-                          f' XLM and your balance is {com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}'
+                message = f'Minimum withdrawal requirements not met. Current minimum balance for withdrawal is set to ' \
+                          f'***{withdrawal_limit_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}***' \
+                          f' XLM and your balance is ***{com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}***'
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                     sys_msg_title=CONST_SYSTEM_ERROR)
         else:
             message = f'Withdrawal could not be processed at this moment, as live conversion rates from Coingecko' \
-                      f' could not be obtained. Please try again later. Thank you for your understanding'
+                      f' could not be obtained. Please try again later. Thank you for your understanding.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                 sys_msg_title=CONST_SYSTEM_ERROR)
 
