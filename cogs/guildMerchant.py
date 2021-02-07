@@ -490,7 +490,7 @@ class MerchantCommunityOwner(commands.Cog):
 
                 # Make all calculations fo rowner and cl earnings
                 fee_as_dec = fee_perc / (10 ** 2)  # 1% get converted to 0,01
-                cl_earnings = com_balance_stroops * fee_as_dec  # Earning for the system
+                cl_earnings = int(com_balance_stroops * fee_as_dec)  # Earning for the system
                 net_owner = com_balance_stroops - cl_earnings  # Earning for the community wallet
 
                 # Empty the community wallet
