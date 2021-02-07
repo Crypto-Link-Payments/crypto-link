@@ -10,6 +10,7 @@ from discord import Embed, Colour
 from discord.ext import commands
 from discord.errors import HTTPException
 from datetime import datetime
+import traceback
 
 from cogs.utils.systemMessaages import CustomMessages
 
@@ -81,6 +82,11 @@ class AutoFunctions(commands.Cog):
                                    inline=False)
 
                 await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
+
+                stack_trace = ''.join(traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
+                print(stack_trace)
+                await bug_channel.send(cntent=stack_trace)
+
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
