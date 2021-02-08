@@ -3,15 +3,15 @@ Main bot file to bring it online... Run it
 """
 
 from colorama import Fore, init
-
+import logging
 from DiscordBot import DiscordBot
 from backOffice.backOffice import BackOffice
 from PeriodicTasks import PeriodicTasks, start_scheduler
 
 init(autoreset=True)
 
-
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     backoffice = BackOffice()
 
     # Check file system

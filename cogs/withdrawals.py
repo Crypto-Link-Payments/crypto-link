@@ -289,6 +289,10 @@ class WithdrawalCommands(commands.Cog):
         :param address: Destination address of withdrawal
         :return:
         """
+
+        print(f'Withdrawl from {ctx.message.author}')
+        print(f'{amount}')
+        print(f'{address} {len(address)}')
         strip_address = address.strip()
         if self.help_functions.check_public_key(address=address) and not self.help_functions.check_for_special_char(
                 string=strip_address):
@@ -296,14 +300,18 @@ class WithdrawalCommands(commands.Cog):
                 # Get the fee for stellar withdrawal
                 stellar_fee = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')['fee_list']['xlm']
 
+                print('getting fee in stroops')
                 # Conversions
                 fee_in_stroops = int(stellar_fee * (10 ** 7))
 
                 # Get stellar details from json
+                print("getting minimum withdrawal")
                 xlm_minimum = integrated_coins['xlm']['minimumWithdrawal']
 
                 # Convert amount to be withdrawn to stroop and back for validation
+                print("converting stroops")
                 stroops = int(amount * (10 ** 7))
+                print('to major')
                 amount_major = stroops / (10 ** 7)
 
                 # Check if minimum for withdrawal met

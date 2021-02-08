@@ -9,8 +9,7 @@ from datetime import datetime
 from discord import Embed, Colour
 from discord.ext import commands
 from git import Repo, InvalidGitRepositoryError
-from cogs.utils.monetaryConversions import get_normal, get_rates, convert_to_currency
-
+from cogs.utils.monetaryConversions import get_normal, get_rates
 from utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
@@ -600,6 +599,7 @@ class BotManagementCommands(commands.Cog):
         :param value:
         :return:
         """
+
         # Get value in in pennies
         penny = (int(value * (10 ** 2)))
         rounded = round(penny / 100, 2)
@@ -616,55 +616,33 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
 
-    @change.command()
-    async def merchant_license_fee(self, ctx, value: float):
-        """
-        Change merchant license fee
-        :param ctx: Discord Context
-        :param value:
-        :return:
-        """
-        # Get value in in pennies
-        penny = (int(value * (10 ** 2)))
-        rounded = round(penny / 100, 2)
-        merch_data = {
-            f"fee": rounded
-        }
-        if self.backoffice.bot_manager.manage_fees_and_limits(key='license', data_to_update=merch_data):
-            message = f'You have successfully set merchant monthly license fee to be {rounded}$.'
-            await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
-                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
-        else:
-            message = f'There has been an error while trying to set monthly merchant license fee to {rounded}$.' \
-                      f'Please try again later or contact system administrator!'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
-
-    @change.command()
-    async def merchant_wallet_transfer_fee(self, ctx, value: float):
-        """
-        Change fee for merchant wallet transfer in $
-        :param ctx: Discord Context
-        :param value:
-        :return:
-        """
-        # Get value in in pennies
-        penny = (int(value * (10 ** 2)))
-        rounded = round(penny / 100, 2)
-        merch_data = {
-            f"fee": rounded
-        }
-        if self.backoffice.bot_manager.manage_fees_and_limits(key='wallet_transfer', data_to_update=merch_data):
-            message = f'You have successfully set merchant wallet transfer fee to be {rounded}$.'
-            title = '__Merchant wallet transfer fee information__'
-            await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
-                                                 sys_msg_title=title)
-        else:
-            message = f'There has been an error while trying to set merchant wallet transfer fee to {rounded}$.' \
-                      f'Please try again later or contact system administrator!'
-            title = '__Merchant wallet transfer fee information__'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
+    # @change.command()
+    # async def merchant_wallet_transfer_fee(self, ctx, perc: int):
+    #     """
+    #     Change fee for merchant wallet transfer in $
+    #     :param ctx: Discord Context
+    #     :param value:
+    #     :return:
+    #     """
+    #
+    #     # TODO reqrite this
+    #     # Get value in in pennies
+    #     penny = (int(value * (10 ** 2)))
+    #     rounded = round(penny / 100, 2)
+    #     merch_data = {
+    #         f"fee": rounded
+    #     }
+    #     if self.backoffice.bot_manager.manage_fees_and_limits(key='wallet_transfer', data_to_update=merch_data):
+    #         message = f'You have successfully set merchant wallet transfer fee to be {rounded}$.'
+    #         title = '__Merchant wallet transfer fee information__'
+    #         await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
+    #                                              sys_msg_title=title)
+    #     else:
+    #         message = f'There has been an error while trying to set merchant wallet transfer fee to {rounded}$.' \
+    #                   f'Please try again later or contact system administrator!'
+    #         title = '__Merchant wallet transfer fee information__'
+    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+    #                                              sys_msg_title=title)
 
     @cl.error
     async def cl_error(self, ctx, error):

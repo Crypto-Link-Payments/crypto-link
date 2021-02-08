@@ -10,11 +10,8 @@ CONST_SEPARATOR = '+++++++++++++++++++++++++++++++++++++++'
 init(autoreset=True)
 
 cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
-           'cogs.system', 'cogs.withdrawals', 'cogs.automatic', 'cogs.guildOwners']
-
-# cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
-#            'cogs.system', 'cogs.withdrawals',
-#            'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners']
+           'cogs.system', 'cogs.withdrawals',
+           'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners']
 
 
 horizon_cogs = ['horizonCommands.horizonMain',
