@@ -447,12 +447,12 @@ class WithdrawalCommands(commands.Cog):
                             await ctx.channel.delete_messages([verification, msg_usr])
 
                     else:
-                        message = f'Amount you are willing to withdraw is greater than your current wallet balance.\n' \
-                                  f'Wallet balance: {wallet_details["balance"] / (10 ** 7):.7f} {CONST_STELLAR_EMOJI}'
+                        message = f'Amount you are willing to withdraw is greater than your current wallet balance'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                              sys_msg_title=CONST_WITHDRAWAL_ERROR)
                 else:
-                    message = f'Minimum amount to withdraw is set currently to {xlm_minimum / (10 ** 7):.7f} {CONST_STELLAR_EMOJI}'
+                    message = f'Minimum amount to withdraw is set currently to {xlm_minimum / (10 ** 7):.7f} ' \
+                              f'{CONST_STELLAR_EMOJI}'
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                          sys_msg_title=CONST_WITHDRAWAL_ERROR)
             else:
