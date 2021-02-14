@@ -37,10 +37,10 @@ class StellarWallet:
 
         # Decide network type
         if horizon_url == "https://horizon-testnet.stellar.org":
-            self.networkPhrase = Network.TESTNET_NETWORK_PASSPHRASE
+            self.network_phrase = Network.TESTNET_NETWORK_PASSPHRASE
             self.network_type = 'testnet'
         else:
-            self.networkPhrase = Network.PUBLIC_NETWORK_PASSPHRASE
+            self.network_phrase = Network.PUBLIC_NETWORK_PASSPHRASE
             self.network_type = 'pub-net'
 
     def create_stellar_account(self):
@@ -66,7 +66,7 @@ class StellarWallet:
         return stellar_uri.PayStellarUri(destination=address,
                                          memo=TextMemo(text=memo),
                                          asset=Asset.native(),
-                                         network_passphrase=self.networkPhrase,
+                                         network_passphrase=self.network_phrase,
                                          message='Deposit to Discord',
                                          ).to_uri()
 
@@ -116,7 +116,7 @@ class StellarWallet:
         :param envelope_xdr: Xdr envelope from stellar network
         :return: Decoded transaction details
         """
-        te = TransactionEnvelope.from_xdr(envelope_xdr, self.networkPhrase)
+        te = TransactionEnvelope.from_xdr(envelope_xdr, self.network_phrase)
         operations = te.transaction.operations
 
         # TODO make multiple payments inside one transaction
@@ -182,7 +182,7 @@ class StellarWallet:
         source_account = self.server.load_account(self.public_key)
         tx = TransactionBuilder(
             source_account=source_account,
-            network_passphrase=self.networkPhrase,
+            network_passphrase=self.network_phrase,
             base_fee=self.server.fetch_base_fee()).append_payment_op(
             asset_issuer=asset_issuer,
             destination=address, asset_code=token.upper(), amount=amount).set_timeout(30).build()
@@ -222,7 +222,7 @@ class StellarWallet:
             source_account = self.server.load_account(public_key)
             tx = TransactionBuilder(
                 source_account=source_account,
-                network_passphrase=self.networkPhrase,
+                network_passphrase=self.network_phrase,
                 base_fee=self.server.fetch_base_fee()).append_change_trust_op(asset_code=f'{token.upper()}',
                                                                               asset_issuer=asset_issuer).set_timeout(
                 30).build()
