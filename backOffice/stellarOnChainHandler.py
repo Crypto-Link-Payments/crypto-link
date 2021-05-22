@@ -120,7 +120,6 @@ class StellarWallet:
         operations = te.transaction.operations
 
         # TODO make multiple payments inside one transaction
-        amount = 0
         for op in operations:
             if isinstance(op, Payment):
                 asset = op.asset.to_dict()
