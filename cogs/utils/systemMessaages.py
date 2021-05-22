@@ -154,7 +154,7 @@ class CustomMessages:
         if embed_title is None:
             embed_title = 'System Message'
 
-        sys_embed = Embed(title=f"{embed_title}",
+        sys_embed = Embed(title=f"{emoji}{embed_title}",
                           description=sys_msg_title,
                           colour=c)
         sys_embed.add_field(name=':information_source:',

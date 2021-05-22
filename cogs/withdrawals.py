@@ -289,35 +289,23 @@ class WithdrawalCommands(commands.Cog):
         :param address: Destination address of withdrawal
         :return:
         """
-
-        print(f'Withdrawl from {ctx.message.author}')
-        print(f'{amount}')
-        print(f'{address} {len(address)}')
         strip_address = address.strip()
         if self.help_functions.check_public_key(address=address) and not self.help_functions.check_for_special_char(
                 string=strip_address):
             if strip_address != self.bot.backoffice.stellar_wallet.public_key:
                 # Get the fee for stellar withdrawal
                 stellar_fee = self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')['fee_list']['xlm']
-
-                print('getting fee in stroops')
-                # Conversions
                 fee_in_stroops = int(stellar_fee * (10 ** 7))
-
-                # Get stellar details from json
-                print("getting minimum withdrawal")
                 xlm_minimum = integrated_coins['xlm']['minimumWithdrawal']
-
-                # Convert amount to be withdrawn to stroop and back for validation
-                print("converting stroops")
-                stroops = int(amount * (10 ** 7))
-                print('to major')
-                amount_major = stroops / (10 ** 7)
+                stroops_withdrawal = int(amount * (10 ** 7))  # Withdrawal amount request to stroops
+                amount_major = stroops_withdrawal / (10 ** 7)  # Withdrawal amount conversion to XLM
 
                 # Check if minimum for withdrawal met
-                if stroops >= xlm_minimum:
+                if stroops_withdrawal >= xlm_minimum:
                     # Calculate final amount to be withdrawn from users Wallet level 1 (db)
-                    final_stroop = stroops + fee_in_stroops
+
+                    # Deduct the fees from the amount
+                    final_stroop = stroops_withdrawal - fee_in_stroops
                     final_normal = final_stroop / (10 ** 7)
 
                     # Get user balance
@@ -325,11 +313,11 @@ class WithdrawalCommands(commands.Cog):
                                                                                        user_id=ctx.message.author.id)
 
                     #  Check if user has sufficient balance to cover the withdrawal fee + amount
-                    if wallet_details >= final_stroop:
+                    if wallet_details >= stroops_withdrawal:
                         # Confirmation message
-                        message_content = f":robot: {ctx.message.author.mention} Current withdrawal fee which " \
-                                          f"will be appended to your withdrawal amount is " \
-                                          f"{stellar_fee} {CONST_STELLAR_EMOJI}?\n  " \
+                        message_content = f":robot: {ctx.message.author.mention} Current withdrawal fee which will " \
+                                          f"be deducted from requested withdrawal amount is " \
+                                          f" {stellar_fee} {CONST_STELLAR_EMOJI}.\n  " \
                                           f"`Total {final_normal}XLM` \n" \
                                           f"Please answer either with ***yes*** or ***no***."
 
@@ -366,7 +354,7 @@ class WithdrawalCommands(commands.Cog):
                                     # Update user withdrawal stats
                                     withdrawal_data = {
                                         "xlm.withdrawalsCount": 1,
-                                        "xlm.totalWithdrawn": stroops / (10 ** 7),
+                                        "xlm.totalWithdrawn": round(stroops_withdrawal / (10 ** 7), 7),
                                     }
                                     await self.backoffice.stats_manager.update_usr_tx_stats(
                                         user_id=ctx.message.author.id,
@@ -375,7 +363,7 @@ class WithdrawalCommands(commands.Cog):
                                     # Update bot stats
                                     bot_stats_data = {
                                         "withdrawalCount": 1,
-                                        "withdrawnAmount": stroops / (10 ** 7)
+                                        "withdrawnAmount": round(stroops_withdrawal / (10 ** 7), 7)
                                     }
                                     await self.backoffice.stats_manager.update_cl_on_chain_stats(ticker='xlm',
                                                                                                  stat_details=bot_stats_data)
@@ -447,17 +435,17 @@ class WithdrawalCommands(commands.Cog):
                             await ctx.channel.delete_messages([verification, msg_usr])
 
                     else:
-                        message = f'Amount you are willing to withdraw is greater than your current wallet balance.\n' \
-                                  f'Wallet balance: {wallet_details["balance"] / (10 ** 7):.7f} {CONST_STELLAR_EMOJI}'
+                        message = f'Amount you are willing to withdraw is greater than your current wallet balance'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                              sys_msg_title=CONST_WITHDRAWAL_ERROR)
                 else:
-                    message = f'Minimum amount to withdraw is set currently to {xlm_minimum / (10 ** 7):.7f} {CONST_STELLAR_EMOJI}'
+                    message = f'Minimum amount to withdraw is set currently to {xlm_minimum / (10 ** 7)} ' \
+                              f'{CONST_STELLAR_EMOJI}'
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                          sys_msg_title=CONST_WITHDRAWAL_ERROR)
             else:
                 message = f'Withdrawal address you have provided matches the address of the hot wallet used for ' \
-                          f'deposits. There is no sense to withdraw `{amount:.7f} XLM` back ' \
+                          f'deposits. There is no sense to withdraw  back ' \
                           f'to Discord wallet. '
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                      sys_msg_title=CONST_WITHDRAWAL_ERROR)
