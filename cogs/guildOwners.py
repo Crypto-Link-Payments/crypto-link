@@ -77,6 +77,7 @@ class GuildOwnerCommands(commands.Cog):
                              value=f'`{stats["registeredUsers"]}`',
                              inline=False)
         xlm_stats = stats["xlm"]
+        stats_info.set_thumbnail(url=self.bot.user.avatar_url)
         stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
                              value=f'`{xlm_stats["txCount"]}`')
         stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
