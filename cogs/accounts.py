@@ -275,8 +275,9 @@ class UserAccountCommands(commands.Cog):
 
                     balance_embed.add_field(
                         name=f"{coin_settings['emoji']} {coin_settings['name']} Balance {coin_settings['emoji']}",
-                        value=f'{token_balance} {coin_settings["emoji"]} (${token_to_usd["total"]}) \n'
-                              f'Rate: ${token_to_usd["usd"]}/XLM',
+                        value=f'{coin_settings["emoji"]} `{token_balance}`\n'
+                              f':flag_us: `{token_to_usd["total"]}`\n'
+                              f'`Rate: ${token_to_usd["usd"]}/XLM`',
                         inline=False)
                     await ctx.author.send(embed=balance_embed)
         else:
