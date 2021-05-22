@@ -37,7 +37,7 @@ class GuildOwnerCommands(commands.Cog):
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1, c=Colour.dark_gold())
+                                               c=Colour.dark_gold())
 
     @owner.command()
     @commands.check(has_wallet)
@@ -215,13 +215,12 @@ class GuildOwnerCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
 
     @register.error
-    async def register_error(self,ctx,error):
+    async def register_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to be able to register community into Crypto Link system you re required to be ' \
                       f' have personal wallet registered in the system. You can do so through' \
                       f' `{self.command_string}register`'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
-
 
 
 def setup(bot):
