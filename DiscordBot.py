@@ -90,7 +90,7 @@ class DiscordBot(commands.Bot):
             :return:
             """
 
-        await self.change_presence(status=discord.Status.online, activity=discord.Game('Online and ready'))
+        await self.change_presence(status=discord.Status.online, activity=discord.Game('Monitoring Stellar'))
         print(Fore.GREEN + 'DISCORD BOT : Logged in as')
         print(self.user.name)
         print(self.user.id)
