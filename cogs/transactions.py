@@ -168,7 +168,6 @@ class TransactionCommands(commands.Cog):
                             # Increase bridge
                             await self.backoffice.stats_manager.create_bridge(user_id=ctx.message.author.id)
 
-
                             # Send up link
                             load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                              self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
@@ -178,9 +177,7 @@ class TransactionCommands(commands.Cog):
                             for chn in load_channels:
                                 await chn.send(content=explorer_msg)
 
-                            await custom_messages.bridge_notification(ctx,recipient=recipient)
-
-
+                            await custom_messages.bridge_notification(ctx, recipient=recipient)
 
                         # Deduct balance from sender
                         if self.backoffice.wallet_manager.update_coin_balance(coin=ticker,
@@ -218,7 +215,7 @@ class TransactionCommands(commands.Cog):
                     else:
 
                         message = f'You have insufficient balance! Your current wallet balance is' \
-                                  f' {wallet_value / (10**7)} XLM'
+                                  f' {wallet_value / (10 ** 7)} XLM'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                              sys_msg_title=CONST_TX_ERROR_TITLE)
                 else:
