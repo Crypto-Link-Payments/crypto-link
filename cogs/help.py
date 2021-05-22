@@ -120,18 +120,18 @@ class HelpCommands(commands.Cog):
         """
         start_embed = discord.Embed(title=f':rocket: Launch {self.bot.user.name} Experience :rocket:',
                                     colour=Colour.blue())
-        start_embed.add_field(name=':one: Register yourself wallet level 1 :one:',
+        start_embed.add_field(name=':one: Register yourself custodial wallet :one:',
                               value=f'In order for you to be able to make peer to peer transactions and use merchant'
-                                    f' system, you must have registered at least wallet level 1.\n'
-                                    f'You can do that by executing command on any public Discord channel, where system'
-                                    f' is present with command `{self.command_string}register`.\n'
+                                    f' system, you must have registered at least custodial wallet.\n'
+                                    f'You can do that by executing command `{self.command_string}register` on any '
+                                    f'public Discord channel where Crypto Link has access to .\n'
                                     f'Once successful, you will create personal wallet with details which you can use '
                                     f' to move or deposit funds. To further familiarize yourself with other'
                                     f' commands use `{self.command_string}help`',
                               inline=False)
         start_embed.add_field(name=':two: Get Deposit Details :two:',
                               value=f'Get deposit details of your Discord wallet with `{self.command_string}wallet'
-                                    f' deposit` and deposit XLM.',
+                                    f' deposit` and deposit XLM or any other supported Stellar native token',
                               inline=False)
         start_embed.add_field(name=':three: Make P-2-P Transaction :three:',
                               value=f'`{self.command_string}send <@discord.Member> <amount> <ticker>`\n'
