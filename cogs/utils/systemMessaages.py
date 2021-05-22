@@ -158,7 +158,7 @@ class CustomMessages:
                           description=sys_msg_title,
                           colour=c)
         sys_embed.add_field(name=':information_source:',
-                            value=message)
+                            value=f'```{message}```')
 
         if destination == 0:
             await ctx.author.send(embed=sys_embed)
