@@ -37,7 +37,7 @@ class GuildOwnerCommands(commands.Cog):
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1, c=Colour.dark_gold())
+                                               c=Colour.dark_gold())
 
     @owner.command()
     @commands.check(has_wallet)
@@ -77,6 +77,7 @@ class GuildOwnerCommands(commands.Cog):
                              value=f'`{stats["registeredUsers"]}`',
                              inline=False)
         xlm_stats = stats["xlm"]
+        stats_info.set_thumbnail(url=self.bot.user.avatar_url)
         stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
                              value=f'`{xlm_stats["txCount"]}`')
         stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
@@ -91,7 +92,7 @@ class GuildOwnerCommands(commands.Cog):
                              value=f'`{xlm_stats["emojiTxCount"]}`')
         stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
                              value=f'`{xlm_stats["multiTxCount"]}`')
-        await ctx.author.send(embed=stats_info)
+        await ctx.channel.send(embed=stats_info)
 
     @owner.command()
     @commands.check(guild_has_stats)
@@ -101,17 +102,18 @@ class GuildOwnerCommands(commands.Cog):
 
         service_info = Embed(title=":service_dog: __Guild Service Status__ :service_dog: ",
                              timestamp=datetime.utcnow(),
+                             description=f'All activated services on Crypto Link system and their relays',
                              colour=Colour.dark_gold())
         service_info.set_thumbnail(url=self.bot.user.avatar_url)
 
         if explorer_channel:
             service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
-                                   value=f'{explorer_channel} ({explorer_channel.id})')
+                                   value=f'```{explorer_channel} ({explorer_channel.id})```')
         else:
             service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
                                    value=f':red_circle:')
 
-        await ctx.author.send(embed=service_info)
+        await ctx.channel.send(embed=service_info)
 
     @owner.group()
     async def uplink(self, ctx):
@@ -126,7 +128,7 @@ class GuildOwnerCommands(commands.Cog):
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1, c=Colour.dark_gold())
+                                               c=Colour.dark_gold())
 
     @uplink.command()
     async def apply(self, ctx, chn: TextChannel):
@@ -169,7 +171,7 @@ class GuildOwnerCommands(commands.Cog):
     async def merch(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':convenience_store: __Crypto Link Uplink manual__ :convenience_store: '
-            description = "All available commands to operate with guild system"
+            description = "All available commands to activate and operate with merchant service."
             list_of_values = [
                 {"name": ":pencil:  Open/Reigster for Merchant system :pencil:  ",
                  "value": f"```{self.command_string}owner merchant open ```"},
@@ -189,7 +191,7 @@ class GuildOwnerCommands(commands.Cog):
                 msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
                 message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed' \
                           f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
-                          f' commands or have a look at ***merchant system manual on' \
+                          f' commands or have a look at ***merchant system manual*** on' \
                           f' `{self.command_string}merchant manual` '
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                     destination=1)
@@ -215,13 +217,12 @@ class GuildOwnerCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
 
     @register.error
-    async def register_error(self,ctx,error):
+    async def register_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to be able to register community into Crypto Link system you re required to be ' \
                       f' have personal wallet registered in the system. You can do so through' \
                       f' `{self.command_string}register`'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
-
 
 
 def setup(bot):

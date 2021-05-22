@@ -158,7 +158,7 @@ class CustomMessages:
                           description=sys_msg_title,
                           colour=c)
         sys_embed.add_field(name=':information_source:',
-                            value=message)
+                            value=f'```{message}```')
 
         if destination == 0:
             await ctx.author.send(embed=sys_embed)
@@ -201,16 +201,16 @@ class CustomMessages:
                           timestamp=datetime.utcnow())
         tx_report.set_thumbnail(url=avatar)
         tx_report.add_field(name=f'{destination_txt}',
-                            value=f'`{user}`',
+                            value=f'```{user}```',
                             inline=False)
         tx_report.add_field(name=':post_office: Guild Origin :post_office: ',
-                            value=f'{ctx.message.guild} ({ctx.message.guild.id})',
+                            value=f'```{ctx.message.guild} ({ctx.message.guild.id})```',
                             inline=False)
         tx_report.add_field(name=':love_letter: Note :love_letter: ',
-                            value=f'`{message}`')
+                            value=f'```{message}```')
         tx_report.add_field(name=f'{value_emoji} Transaction value {value_emoji}',
-                            value=f'`{transaction_data["amount"]:.7f} {transaction_data["emoji"]} '
-                                  f'(${transaction_data["conversion"]})`',
+                            value=f'```{transaction_data["amount"]:.7f} {transaction_data["emoji"]}\n'
+                                  f'(${transaction_data["conversion"]})```',
                             inline=False)
         if transaction_data["conversion"] != 0:
             tx_report.add_field(name=':currency_exchange: Conversion Rate :currency_exchange: ',
@@ -429,7 +429,7 @@ class CustomMessages:
                                  colour=Colour.gold(),
                                  timestamp=utc_now)
         building_bridges.add_field(name=f':bridge_at_night: Created Bridges :bridge_at_night: ',
-                                   value=f'{bridges}')
+                                   value=f'```{int(bridges)}```')
         await ctx.author.send(embed=building_bridges)
 
         for k, v in coin_stats.items():
@@ -458,8 +458,8 @@ class CustomMessages:
                                            f':envelope_with_arrow: `{v["privateTxReceivedCount"]}`\n'
                                            f':money_mouth: `{(int(v["privateReceived"] * (10 ** 7))) / (10 ** 7):.7f}` ')
                 coin_stats.add_field(name=f':convenience_store: Merchant purchases :convenience_store: ',
-                                     value=f':man_juggling: {v["roleTxCount"]}\n'
-                                           f':money_with_wings: {(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}\n',
+                                     value=f':man_juggling:` `{v["roleTxCount"]}`\n'
+                                           f':money_with_wings: `{(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}`\n',
 
                                      inline=False)
                 await ctx.author.send(embed=coin_stats)
