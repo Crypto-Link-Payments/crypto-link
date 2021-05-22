@@ -206,10 +206,10 @@ class HelpCommands(commands.Cog):
         list_of_values = [
             {"name": f":cowboy: Public P-2-P transactions :cowboy:",
              "value": f"`{self.command_string}send <@Discord User> <amount> <ticker> <message=optional>`\n"
-                      f"Example:`{self.command_string}send 10 xlm @animus Have a nice day`"},
+                      f"__Example__:`{self.command_string}send 10 xlm @animus Have a nice day`"},
             {"name": f":detective: Private transactions :detective:  ",
              "value": f"`{self.command_string}private <@Discord User> <amount> <ticker> <message=optional>`\n"
-                      f"Example: `{self.command_string}private 10 xlm @animus Dont tell anyone`"}
+                      f"__Example__: `{self.command_string}private 10 xlm @animus Dont tell anyone`"}
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
