@@ -59,19 +59,6 @@ class DiscordBot(commands.Bot):
         notification_str += CONST_SEPARATOR
         print(notification_str)
 
-        # notification_str = Fore.BLUE + '+++++++++++++++++++++++++++++++++++++++\n' \
-        #                                '           LOADING Commands level 2....        \n'
-        #
-        # for cust_cmd in custodial_layer:
-        #     try:
-        #         self.load_extension(cust_cmd)
-        #         notification_str += f'| {cust_cmd} :smile: \n'
-        #     except Exception as error:
-        #         notification_str += f'| {cust_cmd} --> {error}\n'
-        #         raise
-        # notification_str += CONST_SEPARATOR
-        # print(notification_str)
-
         # notification_str = Fore.WHITE + '+++++++++++++++++++++++++++++++++++++++\n' \
         #                                 '           LOADING Commands level 3....        \n'
 
@@ -103,7 +90,7 @@ class DiscordBot(commands.Bot):
             :return:
             """
 
-        await self.change_presence(status=discord.Status.online, activity=discord.Game('Online and ready'))
+        await self.change_presence(status=discord.Status.online, activity=discord.Game('Monitoring Stellar'))
         print(Fore.GREEN + 'DISCORD BOT : Logged in as')
         print(self.user.name)
         print(self.user.id)

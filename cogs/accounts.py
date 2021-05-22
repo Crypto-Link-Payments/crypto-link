@@ -40,9 +40,7 @@ class UserAccountCommands(commands.Cog):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
         xlm_balance = float(wallet_data["xlm"]) / (10 ** 7)
-
         rates = get_rates(coin_name='stellar')
-
         acc_details = Embed(title=f':office_worker: {ctx.author} :office_worker:',
                             description=f' ***__Basic details on your Discord account__*** ',
                             colour=Colour.dark_orange(),
@@ -65,18 +63,18 @@ class UserAccountCommands(commands.Cog):
             in_rub = rate_converter(xlm_balance, rates["stellar"]["rub"])
             in_ltc = rate_converter(xlm_balance, rates["stellar"]["ltc"])
             acc_details.add_field(name=f':flag_us: USA',
-                                  value=f'$ {in_usd:.4f}')
+                                  value=f'`$ {in_usd:.4f}`')
             acc_details.add_field(name=f':flag_eu: EUR',
-                                  value=f'€ {in_eur:.4f}')
+                                  value=f'`€ {in_eur:.4f}`')
             acc_details.add_field(name=f':flag_ru:  RUB',
-                                  value=f'₽ {in_rub:.4f}')
+                                  value=f'`₽ {in_rub:.4f}`')
             acc_details.add_field(name=f'BTC',
-                                  value=f'₿ {in_btc:.8f}')
+                                  value=f'`₿ {in_btc:.8f}`')
             acc_details.add_field(name=f'ETH',
-                                  value=f'Ξ {in_eth:.8f}')
+                                  value=f'`Ξ {in_eth:.8f}`')
             acc_details.add_field(name=f'LTC',
-                                  value=f'Ł {in_ltc:.8f}')
-
+                                  value=f'`Ł {in_ltc:.8f}`')
+        acc_details.set_thumbnail(url=ctx.author.avatar_url)
         acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
                               value=f'[Stellar](https://www.stellar.org/)\n'
                                     f'[Stellar Foundation](https://www.stellar.org/foundation)\n'
@@ -177,7 +175,7 @@ class UserAccountCommands(commands.Cog):
                 deposit_embed = Embed(title='How to deposit',
                                       colour=Colour.dark_orange(),
                                       description=description)
-                deposit_embed.add_field(name=':gem: Supported CryptoCurrencies:gem: ',
+                deposit_embed.add_field(name=':gem: Supported Cryptocurrencies/Tokens for deposit:gem: ',
                                         value=f'```{coins_string}```',
                                         inline=False)
                 deposit_embed.add_field(
@@ -190,9 +188,6 @@ class UserAccountCommands(commands.Cog):
                 deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
                                         value='Be sure to include and provide appropriate  **__MEMO__** as text and Wallet '
                                               'address for each currency , otherwise your deposit will be lost!',
-                                        inline=False)
-                deposit_embed.add_field(name="Currently available currencies on Crypto Link",
-                                        value=f'```{coins_string}```',
                                         inline=False)
                 deposit_embed.add_field(name=":printer: QR Code :printer: ",
                                         value=f'Bellow is your personal QR code including your deposit address and '
@@ -232,7 +227,7 @@ class UserAccountCommands(commands.Cog):
 
             deposit_embed = Embed(title='Deposit QR code',
                                   colour=Colour.dark_orange())
-            deposit_embed.add_field(name=':gem: Supported CryptoCurrencies:gem: ',
+            deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited:gem: ',
                                     value=f'```{coins_string}```',
                                     inline=False)
             memo = user_profile["stellarDepositId"]
@@ -280,8 +275,9 @@ class UserAccountCommands(commands.Cog):
 
                     balance_embed.add_field(
                         name=f"{coin_settings['emoji']} {coin_settings['name']} Balance {coin_settings['emoji']}",
-                        value=f'{token_balance} {coin_settings["emoji"]} (${token_to_usd["total"]}) \n'
-                              f'Rate: ${token_to_usd["usd"]}/XLM',
+                        value=f'{coin_settings["emoji"]} `{token_balance}`\n'
+                              f':flag_us: `{token_to_usd["total"]}`\n'
+                              f'`Rate: ${token_to_usd["usd"]}/XLM`',
                         inline=False)
                     await ctx.author.send(embed=balance_embed)
         else:

@@ -162,6 +162,7 @@ class PeriodicTasks:
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
         pag = helper.read_json_file('stellarPag.json')
         new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
+
         if new_transactions:
             # Filter transactions
 
