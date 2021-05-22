@@ -131,7 +131,9 @@ class HelpCommands(commands.Cog):
                               inline=False)
         start_embed.add_field(name=':two: Get Deposit Details :two:',
                               value=f'Get deposit details of your Discord wallet with `{self.command_string}wallet'
-                                    f' deposit` and deposit XLM or any other supported Stellar native token',
+                                    f' deposit` and deposit XLM or any other supported Stellar native token. '
+                                    f'Please use `{self.command_string}help currencies` to check all available '
+                                    f'tokens on the system besides XLM',
                               inline=False)
         start_embed.add_field(name=':three: Make P-2-P Transaction :three:',
                               value=f'`{self.command_string}send <@discord.Member> <amount> <ticker>`\n'
