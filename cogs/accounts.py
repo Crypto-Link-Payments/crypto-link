@@ -227,7 +227,7 @@ class UserAccountCommands(commands.Cog):
 
             deposit_embed = Embed(title='Deposit QR code',
                                   colour=Colour.dark_orange())
-            deposit_embed.add_field(name=':gem: Supported CryptoCurrencies:gem: ',
+            deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited:gem: ',
                                     value=f'```{coins_string}```',
                                     inline=False)
             memo = user_profile["stellarDepositId"]
