@@ -298,7 +298,7 @@ class WithdrawalCommands(commands.Cog):
                 fee_in_stroops = int(stellar_fee * (10 ** 7))
                 xlm_minimum = integrated_coins['xlm']['minimumWithdrawal']
                 stroops_withdrawal = int(amount * (10 ** 7))  # Withdrawal amount request to stroops
-                amount_major = stroops_withdrawal / (10 ** 7) # Withdrawl amount conversion to XLM
+                amount_major = stroops_withdrawal / (10 ** 7)  # Withdrawal amount conversion to XLM
 
                 # Check if minimum for withdrawal met
                 if stroops_withdrawal >= xlm_minimum:
@@ -354,7 +354,7 @@ class WithdrawalCommands(commands.Cog):
                                     # Update user withdrawal stats
                                     withdrawal_data = {
                                         "xlm.withdrawalsCount": 1,
-                                        "xlm.totalWithdrawn": round(stroops_withdrawal / (10 ** 7),7),
+                                        "xlm.totalWithdrawn": round(stroops_withdrawal / (10 ** 7), 7),
                                     }
                                     await self.backoffice.stats_manager.update_usr_tx_stats(
                                         user_id=ctx.message.author.id,
@@ -363,7 +363,7 @@ class WithdrawalCommands(commands.Cog):
                                     # Update bot stats
                                     bot_stats_data = {
                                         "withdrawalCount": 1,
-                                        "withdrawnAmount": round(stroops_withdrawal / (10 ** 7),7)
+                                        "withdrawnAmount": round(stroops_withdrawal / (10 ** 7), 7)
                                     }
                                     await self.backoffice.stats_manager.update_cl_on_chain_stats(ticker='xlm',
                                                                                                  stat_details=bot_stats_data)
