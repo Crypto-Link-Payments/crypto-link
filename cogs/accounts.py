@@ -175,7 +175,7 @@ class UserAccountCommands(commands.Cog):
                 deposit_embed = Embed(title='How to deposit',
                                       colour=Colour.dark_orange(),
                                       description=description)
-                deposit_embed.add_field(name=':gem: Supported CryptoCurrencies:gem: ',
+                deposit_embed.add_field(name=':gem: Supported Cryptocurrencies/Tokens for deposit:gem: ',
                                         value=f'```{coins_string}```',
                                         inline=False)
                 deposit_embed.add_field(
@@ -188,9 +188,6 @@ class UserAccountCommands(commands.Cog):
                 deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
                                         value='Be sure to include and provide appropriate  **__MEMO__** as text and Wallet '
                                               'address for each currency , otherwise your deposit will be lost!',
-                                        inline=False)
-                deposit_embed.add_field(name="Currently available currencies on Crypto Link",
-                                        value=f'```{coins_string}```',
                                         inline=False)
                 deposit_embed.add_field(name=":printer: QR Code :printer: ",
                                         value=f'Bellow is your personal QR code including your deposit address and '
