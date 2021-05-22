@@ -112,7 +112,7 @@ class GuildOwnerCommands(commands.Cog):
             service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
                                    value=f':red_circle:')
 
-        await ctx.author.send(embed=service_info)
+        await ctx.channel.send(embed=service_info)
 
     @owner.group()
     async def uplink(self, ctx):
