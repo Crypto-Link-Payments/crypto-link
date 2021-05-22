@@ -13,11 +13,11 @@ from utils.customCogChecks import user_has_third_level, user_has_no_third_level,
 from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount
 
 from utils.tools import Helpers
-from stellar_sdk import TransactionBuilder, Network, TransactionEnvelope, Asset, Payment, \
-    parse_transaction_envelope_from_xdr
+from stellar_sdk import TransactionBuilder, Network, TransactionEnvelope, Asset, Payment
+from stellar_sdk.helpers import parse_transaction_envelope_from_xdr
 from stellar_sdk.exceptions import NotFoundError, Ed25519PublicKeyInvalidError, BadRequestError, BadResponseError, \
     ConnectionError
-from thirdLevel.utils.thirdLevelCustMsg import third_level_acc_details, new_acc_details, \
+from nonCustodialWallets.utils.thirdLevelCustMsg import third_level_acc_details, new_acc_details, \
     third_level_account_reg_info, third_level_own_reg_info, send_xdr_info, xdr_data_to_embed, user_approval_request, \
     transaction_result, server_error_response
 
