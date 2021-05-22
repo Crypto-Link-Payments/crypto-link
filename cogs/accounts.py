@@ -40,9 +40,7 @@ class UserAccountCommands(commands.Cog):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
         xlm_balance = float(wallet_data["xlm"]) / (10 ** 7)
-
         rates = get_rates(coin_name='stellar')
-
         acc_details = Embed(title=f':office_worker: {ctx.author} :office_worker:',
                             description=f' ***__Basic details on your Discord account__*** ',
                             colour=Colour.dark_orange(),
@@ -65,18 +63,18 @@ class UserAccountCommands(commands.Cog):
             in_rub = rate_converter(xlm_balance, rates["stellar"]["rub"])
             in_ltc = rate_converter(xlm_balance, rates["stellar"]["ltc"])
             acc_details.add_field(name=f':flag_us: USA',
-                                  value=f'$ {in_usd:.4f}')
+                                  value=f'`$ {in_usd:.4f}`')
             acc_details.add_field(name=f':flag_eu: EUR',
-                                  value=f'€ {in_eur:.4f}')
+                                  value=f'`€ {in_eur:.4f}`')
             acc_details.add_field(name=f':flag_ru:  RUB',
-                                  value=f'₽ {in_rub:.4f}')
+                                  value=f'`₽ {in_rub:.4f}`')
             acc_details.add_field(name=f'BTC',
-                                  value=f'₿ {in_btc:.8f}')
+                                  value=f'`₿ {in_btc:.8f}`')
             acc_details.add_field(name=f'ETH',
-                                  value=f'Ξ {in_eth:.8f}')
+                                  value=f'`Ξ {in_eth:.8f}`')
             acc_details.add_field(name=f'LTC',
-                                  value=f'Ł {in_ltc:.8f}')
-
+                                  value=f'`Ł {in_ltc:.8f}`')
+        acc_details.set_thumbnail(url=ctx.author.avatar_url)
         acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
                               value=f'[Stellar](https://www.stellar.org/)\n'
                                     f'[Stellar Foundation](https://www.stellar.org/foundation)\n'
