@@ -91,7 +91,7 @@ class GuildOwnerCommands(commands.Cog):
                              value=f'`{xlm_stats["emojiTxCount"]}`')
         stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
                              value=f'`{xlm_stats["multiTxCount"]}`')
-        await ctx.author.send(embed=stats_info)
+        await ctx.channel.send(embed=stats_info)
 
     @owner.command()
     @commands.check(guild_has_stats)
