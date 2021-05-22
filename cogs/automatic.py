@@ -83,9 +83,9 @@ class AutoFunctions(commands.Cog):
 
                 await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
 
-                stack_trace = ''.join(traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
+                stack_trace = ''.join(
+                    traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
                 await bug_channel.send(content=stack_trace)
-
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
@@ -176,19 +176,19 @@ class AutoFunctions(commands.Cog):
                           description=f'{self.bot.user} has joined new guild',
                           colour=Colour.green())
         new_guild.add_field(name='Guild name and id:',
-                            value=f'{guild} {guild.id}',
+                            value=f'```{guild} {guild.id}```',
                             inline=False)
         new_guild.add_field(name='Guild created:',
-                            value=f'{guild.created_at}',
+                            value=f'```{guild.created_at}```',
                             inline=False)
         new_guild.add_field(name='Guild Owner:',
-                            value=f'{guild.owner} {guild.owner_id}',
+                            value=f'```{guild.owner} {guild.owner_id}```',
                             inline=False)
         new_guild.add_field(name='Guild Region:',
-                            value=f'{guild.region}',
+                            value=f'```{guild.region}```',
                             inline=False)
         new_guild.add_field(name='Member Count',
-                            value=f'{guild.member_count}',
+                            value=f'```{guild.member_count}```',
                             inline=False)
 
         animus = await self.bot.fetch_user(user_id=int(self.animus_id))
