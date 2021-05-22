@@ -102,12 +102,13 @@ class GuildOwnerCommands(commands.Cog):
 
         service_info = Embed(title=":service_dog: __Guild Service Status__ :service_dog: ",
                              timestamp=datetime.utcnow(),
+                             description=f'All activated services on Crypto Link system and their relays',
                              colour=Colour.dark_gold())
         service_info.set_thumbnail(url=self.bot.user.avatar_url)
 
         if explorer_channel:
             service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
-                                   value=f'{explorer_channel} ({explorer_channel.id})')
+                                   value=f'```{explorer_channel} ({explorer_channel.id})```')
         else:
             service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
                                    value=f':red_circle:')
