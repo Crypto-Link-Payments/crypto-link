@@ -201,16 +201,16 @@ class CustomMessages:
                           timestamp=datetime.utcnow())
         tx_report.set_thumbnail(url=avatar)
         tx_report.add_field(name=f'{destination_txt}',
-                            value=f'`{user}`',
+                            value=f'```{user}```',
                             inline=False)
         tx_report.add_field(name=':post_office: Guild Origin :post_office: ',
-                            value=f'{ctx.message.guild} ({ctx.message.guild.id})',
+                            value=f'```{ctx.message.guild} ({ctx.message.guild.id})```',
                             inline=False)
         tx_report.add_field(name=':love_letter: Note :love_letter: ',
-                            value=f'`{message}`')
+                            value=f'```{message}```')
         tx_report.add_field(name=f'{value_emoji} Transaction value {value_emoji}',
-                            value=f'`{transaction_data["amount"]:.7f} {transaction_data["emoji"]} '
-                                  f'(${transaction_data["conversion"]})`',
+                            value=f'```{transaction_data["amount"]:.7f} {transaction_data["emoji"]}\n'
+                                  f'(${transaction_data["conversion"]})```',
                             inline=False)
         if transaction_data["conversion"] != 0:
             tx_report.add_field(name=':currency_exchange: Conversion Rate :currency_exchange: ',
