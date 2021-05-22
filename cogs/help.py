@@ -247,13 +247,13 @@ class HelpCommands(commands.Cog):
 
             list_of_values = [
                 {"name": f":scales:  Register Guild into System :scales: ",
-                 "value": f"`{self.command_string}owner register`"},
+                 "value": f"```{self.command_string}owner register```"},
                 {"name": f":bank: Guild wallet commands :bank:",
-                 "value": f"`{self.command_string}help owner corporate`"},
+                 "value": f"```{self.command_string}help owner corporate```"},
                 {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
-                 "value": f"`{self.command_string}help owner merchant`"},
+                 "value": f"```{self.command_string}help owner merchant```"},
                 {"name": f":satellite_orbital: About Uplink and Setup :satellite_orbital:  ",
-                 "value": f"`{self.command_string}help owner uplink`"}
+                 "value": f"```{self.command_string}help owner uplink```"}
 
             ]
 
