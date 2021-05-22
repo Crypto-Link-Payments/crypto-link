@@ -67,11 +67,11 @@ class HelpCommands(commands.Cog):
                       'allowing for execution of Peer to Peer transactions amongst users, monetization'
                       ' opportunities for Discord guild owners and project promotions/crowdfunding/ICOs activities'
                       ' at low costs for aspiring fintech-companies building with the help of Stellar.'},
-            {"name": ":moneybag:  Interconnected Multi level wallet system :moneybag:  ",
-             "value": f'Crypto Link has integrated and interconnected system of custodial,  '
-                      f'partially custodial and noncustodial wallets. To find more information and explanation '
-                      f'please use `{self.command_string}help levels`. Each user is required to register for level 1 '
-                      f'system in order to be able to use level 2 system.'},
+            {"name": ":moneybag: Wallet Types :moneybag:  ",
+             "value": f'Crypto Link has integrated and interconnected system of custodial, noncustodial wallets.'
+                      f' To find more information and explanation '
+                      f'please use `{self.command_string}help wallets`. Each user is required to register for custodial '
+                      f'system in order to be able to use noncustodial.'},
 
             {"name": ":money_with_wings: Instant Peer to Peer feeless transactions :money_with_wings:  ",
              "value": f"Users are able to execute instant peer-2-peer transactions without fees either with the Stellar"
@@ -173,37 +173,31 @@ class HelpCommands(commands.Cog):
                 inline=False)
         await ctx.author.send(embed=available)
 
-    # @help.command()
-    # async def levels(self, ctx):
-    #     title = ':office_worker: __Multi Level Wallet system__:office_worker: '
-    #     description = "Explanation of the multi-level wallet system"
-    #     list_of_values = [
-    #         {"name": ":one: Wallet level 1 :one: ",
-    #          "value": f"Registration for `wallet level 1` is mandatory for all users who would like to "
-    #                   f"use all the functions Crypto Link has to offer. It is a full custodial wallet "
-    #                   f"operating on MEMO principles. This allows anyone to receive transaction from sender "
-    #                   f"instantly, even doe if recipient has not registered yet into the system. Wallet of level 1 "
-    #                   f"is automatically created and all actions connected with it do not require private key "
-    #                   f"to be used for signing. Signature for account activity is obtained through unique"
-    #                   f" ID provided to user upon registration to Discord."},
-    #         {"name": ":two: Wallet level 2 :two: ",
-    #          "value": f"`Level 2 wallet` allows for full control of your ***private keys*** and with it, ability to use "
-    #                   f"Discord wallet as well with other mediums. Upon successful registration and key verification,"
-    #                   f" Crypto Link safely stores encrypted part of your private key. When making on-chain actions,"
-    #                   f" user is required to provide second part of the private key in order to make puzzle completed"
-    #                   f" and afterwards successfully streamed to network."
-    #                   f"```Access it with: {self.command_string}two```"},
-    #         {"name": ":three: Wallet level 3 :three: ",
-    #          "value": "`Level 3 wallet` which utilizes XDR envelopes to make XDR envelopes to be signed either through"
-    #                   " [Stellar Laboratory](https://laboratory.stellar.org/#?network=public) or any other application"
-    #                   " allowing to import XDR or than straight through "
-    #                   "Discord. the only details which are stored into Crypto Link system are unique user id and "
-    #                   "user public address so XDR can be successfully built."
-    #                   f"```Access it with: {self.command_string}three```"}
-    #     ]
-    #
-    #     await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-    #                                         destination=1, c=Colour.blue())
+    @help.command()
+    async def wallets(self, ctx):
+        title = ':office_worker: __Multi Level Wallet system__:office_worker: '
+        description = "Explanation of the multi-level wallet system"
+        list_of_values = [
+            {"name": ":one: Custodial Wallet :one: ",
+             "value": f"Registration for `custodial wallet level` is mandatory for all users who would like to "
+                      f"use all the functions Crypto Link has to offer. Wallet operates based on MEMO when depositing. "
+                      f"This allows anyone to receive transaction from sender "
+                      f"instantly, even doe if recipient has not registered yet into the system. Custodial wallet is  "
+                      f"is automatically created and all actions connected with it do not require private key "
+                      f"to be used for signing. In order to fully protect your wallet, please activate 2FA for Discord "
+                      f"account. "},
+            {"name": ":two: Non-Custodial wallet support :two: ",
+             "value": "`Noncustodial wallet` which utilizes XDR envelopes to make XDR envelopes to be signed either through"
+                      " [Stellar Laboratory](https://laboratory.stellar.org/#?network=public) or any other application"
+                      " allowing to import XDR or than straight through "
+                      "Discord. the only details which are stored into Crypto Link system are unique user id and "
+                      "user public address so XDR can be successfully built and that others can efficiently transfer "
+                      "tokens to you from Custodial to Non Custodial wallet"
+                      f"```Access it with: {self.command_string}three```"}
+        ]
+
+        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                            destination=1, c=Colour.blue())
 
     @help.command(aliases=['tx', 'pay'])
     async def transactions(self, ctx):
