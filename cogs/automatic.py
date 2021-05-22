@@ -233,13 +233,13 @@ class AutoFunctions(commands.Cog):
                               description=f'{self.bot.user} has left guild',
                               colour=Colour.red())
         removed_guild.add_field(name='Guild name and id:',
-                                value=f'{guild} {guild.id}',
+                                value=f'```{guild} {guild.id}```',
                                 inline=False)
         removed_guild.add_field(name='Guild Owner:',
                                 value=f'{guild.owner} {guild.owner_id}',
                                 inline=False)
         removed_guild.add_field(name='Member Count',
-                                value=f'{guild.member_count}',
+                                value=f'```{guild.member_count}```',
                                 inline=False)
         animus = await self.bot.fetch_user(user_id=int(self.animus_id))
 
