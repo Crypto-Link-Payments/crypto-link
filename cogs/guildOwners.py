@@ -191,7 +191,7 @@ class GuildOwnerCommands(commands.Cog):
                 msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
                 message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed' \
                           f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
-                          f' commands or have a look at ***merchant system manual on' \
+                          f' commands or have a look at ***merchant system manual*** on' \
                           f' `{self.command_string}merchant manual` '
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                     destination=1)
