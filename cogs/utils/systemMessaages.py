@@ -429,7 +429,7 @@ class CustomMessages:
                                  colour=Colour.gold(),
                                  timestamp=utc_now)
         building_bridges.add_field(name=f':bridge_at_night: Created Bridges :bridge_at_night: ',
-                                   value=f'{bridges}')
+                                   value=f'```{int(bridges)}```')
         await ctx.author.send(embed=building_bridges)
 
         for k, v in coin_stats.items():
@@ -458,8 +458,8 @@ class CustomMessages:
                                            f':envelope_with_arrow: `{v["privateTxReceivedCount"]}`\n'
                                            f':money_mouth: `{(int(v["privateReceived"] * (10 ** 7))) / (10 ** 7):.7f}` ')
                 coin_stats.add_field(name=f':convenience_store: Merchant purchases :convenience_store: ',
-                                     value=f':man_juggling: {v["roleTxCount"]}\n'
-                                           f':money_with_wings: {(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}\n',
+                                     value=f':man_juggling:` `{v["roleTxCount"]}`\n'
+                                           f':money_with_wings: `{(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}`\n',
 
                                      inline=False)
                 await ctx.author.send(embed=coin_stats)
