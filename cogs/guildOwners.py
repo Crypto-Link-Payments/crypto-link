@@ -171,7 +171,7 @@ class GuildOwnerCommands(commands.Cog):
     async def merch(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':convenience_store: __Crypto Link Uplink manual__ :convenience_store: '
-            description = "All available commands to operate with guild system"
+            description = "All available commands to activate and operate with merchant service."
             list_of_values = [
                 {"name": ":pencil:  Open/Reigster for Merchant system :pencil:  ",
                  "value": f"```{self.command_string}owner merchant open ```"},
