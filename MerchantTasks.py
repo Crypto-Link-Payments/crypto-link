@@ -1,5 +1,114 @@
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+from colorama import Fore, init
+from datetime import datetime
+from discord import Color, Embed
+from utils.tools import Helpers
+
+import time
+helper = Helpers()
+init(autoreset=True)
+channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 
 class MerchantManager:
-    def __init__(self):
-        pass
+    def __init__(self, backoffice, bot):
+        self.backoffice = backoffice
+        self.twitter_cred = self.backoffice.twitter_details
+        self.bot = bot
+
+    async def check_expired_roles(self):
+        """
+        Function checks for expired users on community nad removes them if necessary
+        """
+        t = time.localtime()
+        current_time = time.strftime("%H:%M:%S", t)
+        print(Fore.GREEN + f"{current_time} --> CHECKING FOR USERS WITH EXPIRED ROLES ")
+
+        now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
+        merchant_manager = self.backoffice.merchant_manager
+        overdue_members = merchant_manager.get_over_due_users(
+            timestamp=int(now))  # Gets all overdue members from database
+        bot = self.bot
+        if overdue_members:
+            bot_guilds = [guild for guild in bot.guilds]  # get all guilds bot has access to
+            for mem in overdue_members:
+                mem_id = mem['userId']
+                mem_role_id = mem['roleId']
+                mem_role_community_id = mem['communityId']
+
+                # Check if community where role was created still has bot
+                if [guild.id for guild in bot_guilds if mem_role_community_id == guild.id]:
+                    # get guild and member
+                    guild = bot.get_guild(id=mem_role_community_id)
+                    member = guild.get_member(mem_id)
+                    # Check if member still exists
+                    if member in guild.members:
+                        role = guild.get_role(role_id=mem_role_id)  # Get the role
+                        if role:
+                            if role in member.roles:
+                                await member.remove_roles(role, reason='Merchant notification -> Role expired')
+                                if merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
+                                                                             role_id=mem_role_id, user_id=mem_id):
+                                    expired = Embed(name=':timer: Expired Role :timer: ',
+                                                            title='__Role Expiration Notification__',
+                                                            description='Your membership has expired. Please check '
+                                                                        'details below.',
+                                                            color=Color.dark_red())
+
+                                    expired.set_thumbnail(url=bot.user.avatar_url)
+                                    expired.add_field(name=':bank: Origin of role expiration:bank: ',
+                                                      value=guild.name,
+                                                      inline=False)
+                                    expired.add_field(name=":man_juggling: Expired Role :man_juggling: ",
+                                                      value=f'```{role.name}```')
+                                    expired.add_field(name=":information_source: Information :information_source: ",
+                                                      value=" In order to obtain back all privileges please re-purchase"
+                                                            " the role directly from the community.")
+                                    await member.send(embed=expired)
+                                else:
+                                    channel_sys = channels["merchant"]
+                                    # send notification to merchant for system if user could not be removed from database
+                                    expired_sys = Embed(
+                                        title='__Expired user could not be removed from system__',
+                                        colour=Color.red())
+                                    expired_sys.set_thumbnail(url=bot.user.avatar_url)
+                                    expired_sys.add_field(name='Community',
+                                                          value=guild.name,
+                                                          inline=False)
+                                    expired_sys.add_field(name="Expired Role",
+                                                          value=role.name)
+                                    expired_sys.add_field(name="User details",
+                                                          value=f'Role ID: {mem_role_id}\n'
+                                                                f'Community ID: {mem_role_community_id}\n'
+                                                                f'Member ID: {mem_id}')
+                                    merch_channel = bot.get_channel(id=int(channel_sys))
+                                    await merch_channel.send(embed=expired_sys)
+                            else:
+                                merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
+                                                                          user_id=mem_id, role_id=mem_role_id)
+                        else:
+                            merchant_manager.remove_monetized_role_from_system(role_id=mem_role_id,
+                                                                               community_id=mem_role_community_id)
+                            merchant_manager.bulk_user_clear(community_id=mem_role_community_id, role_id=mem_role_id)
+                    else:
+                        merchant_manager.delete_user_from_applied(community_id=mem_role_community_id, user_id=mem_id)
+                else:
+                    merchant_manager.bulk_user_clear(community_id=mem_role_community_id, role_id=mem_role_id)
+                    merchant_manager.remove_all_monetized_roles(guild_id=mem_role_community_id)
+
+        else:
+            print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
+            print('===========================================================')
+
+
+def start_scheduler(timed_updater):
+    scheduler = AsyncIOScheduler()
+    print(Fore.LIGHTBLUE_EX + 'Started merchant monitor')
+    scheduler.add_job(timed_updater.check_expired_membership,
+                      CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
+    scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
+        second='00'), misfire_grace_time=10, max_instances=20)
+    scheduler.start()
+    print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
+    return scheduler
