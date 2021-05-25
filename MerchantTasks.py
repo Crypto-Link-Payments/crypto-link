@@ -11,7 +11,7 @@ init(autoreset=True)
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 
-class MerchantManager:
+class MerchantTasks:
     def __init__(self, backoffice, bot):
         self.backoffice = backoffice
         self.twitter_cred = self.backoffice.twitter_details
@@ -102,7 +102,7 @@ class MerchantManager:
             print('===========================================================')
 
 
-def start_scheduler(timed_updater):
+def start_merchant_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started merchant monitor')
     scheduler.add_job(timed_updater.check_expired_membership,
