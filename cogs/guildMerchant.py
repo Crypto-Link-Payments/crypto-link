@@ -61,7 +61,7 @@ class MerchantCommunityOwner(commands.Cog):
                 new_merch.add_field(name='Community',
                                     value=f'{ctx.guild}')
 
-                await merchant_notification.send(embed='New Merchant registered')
+                await merchant_notification.send(embed=new_merch)
 
             else:
                 msg_title = ':warning:  __Merchant Registration Status___ :warning: '
