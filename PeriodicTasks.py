@@ -292,8 +292,6 @@ def start_scheduler(timed_updater):
 
     scheduler.add_job(timed_updater.check_stellar_hot_wallet,
                       CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
-    scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
-        second='00'), misfire_grace_time=10, max_instances=20)
 
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
         hour='17'), misfire_grace_time=10, max_instances=20)

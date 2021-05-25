@@ -107,8 +107,6 @@ def start_merchant_scheduler(timed_updater):
     print(Fore.LIGHTBLUE_EX + 'Started merchant monitor')
     scheduler.add_job(timed_updater.check_expired_membership,
                       CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
-    scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
-        second='00'), misfire_grace_time=10, max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
     return scheduler
