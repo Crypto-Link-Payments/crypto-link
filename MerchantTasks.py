@@ -17,7 +17,7 @@ class MerchantTasks:
         self.twitter_cred = self.backoffice.twitter_details
         self.bot = bot
 
-    async def check_expired_roles(self):
+    async def check_expired_membership(self):
         """
         Function checks for expired users on community nad removes them if necessary
         """
