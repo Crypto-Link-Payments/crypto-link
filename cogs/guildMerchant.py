@@ -105,8 +105,8 @@ class MerchantCommunityOwner(commands.Cog):
         manual = Embed(title=':convenience_store: __Merchant system manual__ :convenience_store: ',
                        colour=Color.purple())
         manual.add_field(name=':one: Create monetized roles :one:',
-                         value=f'```{self.command_string}merchant monetize create_role <role name> <Dollar value of role> '
-                               f'<duration weeks> <days> <hours> <minutes>```\n'
+                         value=f'```{self.command_string}merchant role create <role name> <role value in $> '
+                               f'<weeks> <days> <hours> <minutes>```\n'
                                f'\n:warning: __Required parameters__ :warning: \n'
                                f'\n'
                                f'> :white_check_mark:  No spaces in role name and max length 20 characters\n'
