@@ -27,12 +27,9 @@ class CustomMessages:
         elif tx_type == 'private':
             msg_streamed += ":detective:"
 
-        elif tx_type == 'emoji':
-            msg_streamed += ":nerd:"
-
-        elif tx_type == 'multi':
-            msg_streamed += ":parachute: "
-
+        elif tx_type == 'role_purchase':
+            msg_streamed = f":man_juggling: {message}"
+        print(msg_streamed)
         return msg_streamed
 
     @staticmethod
@@ -468,13 +465,9 @@ class CustomMessages:
         """
         Transactin reports to all explorer applied channels
         """
-        if not on_chain:
-            msg_streamed = self.filter_message(message=message, tx_type=tx_type)
-            for explorer_channel in applied_channels:
-                await explorer_channel.send(msg_streamed)
-        else:
-            for explorer_channel in applied_channels:
-                await explorer_channel.send(message)
+        for explorer_channel in applied_channels:
+            await explorer_channel.send(message)
+
 
     async def transaction_report_to_channel(self, ctx, message: str, tx_type: str):
         """
