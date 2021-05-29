@@ -24,7 +24,7 @@ class ConsumerCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
-    @commands.group(alieases=["subscription","perk","perks"])
+    @commands.group(alieases=["subscription", "perk", "perks"])
     @commands.check(guild_has_merchant)
     @commands.check(has_wallet)
     @commands.check(is_public)
@@ -232,7 +232,7 @@ class ConsumerCommands(commands.Cog):
 
                                 user_stats_update = {
                                     f'{ticker}.spentOnRoles': float(role_value_rounded),
-                                    f'{ticker}.roleTxCount': int(1),
+                                    f'{ticker}.roleTxCount': int(1)
                                 }
 
                                 # Update user purchase stats
