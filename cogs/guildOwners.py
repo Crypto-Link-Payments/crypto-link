@@ -204,8 +204,8 @@ class GuildOwnerCommands(commands.Cog):
                                                     destination=1)
         else:
             msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
-            message = f'You have already registered {ctx.guild} for Merchant system on {self.bot.user.mention}. Proceed' \
-                      f' with command ```{self.command_string}merchant``` or ```{self.command_string}```'
+            message = f'You have already registered Merchant system on {ctx.guild} server. Proceed' \
+                      f'with command {self.command_string}merchant'
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                 destination=1)
 
