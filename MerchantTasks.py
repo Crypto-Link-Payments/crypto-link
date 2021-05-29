@@ -6,6 +6,7 @@ from discord import Color, Embed
 from utils.tools import Helpers
 
 import time
+
 helper = Helpers()
 init(autoreset=True)
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
@@ -50,21 +51,20 @@ class MerchantTasks:
                                 await member.remove_roles(role, reason='Merchant notification -> Role expired')
                                 if merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
                                                                              role_id=mem_role_id, user_id=mem_id):
-                                    expired = Embed(name=':timer: Expired Role :timer: ',
-                                                            title='__Role Expiration Notification__',
-                                                            description='Your membership has expired. Please check '
-                                                                        'details below.',
-                                                            color=Color.dark_red())
+                                    expired = Embed(title=':timer::octagonal_sign:  __Role Expiration Notification__ :octagonal_sign: :timer:',
+                                                    description='Your active membership has expired.',
+                                                    color=Color.dark_red())
 
                                     expired.set_thumbnail(url=bot.user.avatar_url)
                                     expired.add_field(name=':bank: Origin of role expiration:bank: ',
-                                                      value=guild.name,
+                                                      value=f'```{guild.name}```',
                                                       inline=False)
                                     expired.add_field(name=":man_juggling: Expired Role :man_juggling: ",
                                                       value=f'```{role.name}```')
                                     expired.add_field(name=":information_source: Information :information_source: ",
                                                       value=" In order to obtain back all privileges please re-purchase"
-                                                            " the role directly from the community.")
+                                                            " the role directly from the community.",
+                                                      inline=False)
                                     await member.send(embed=expired)
                                 else:
                                     channel_sys = channels["merchant"]
