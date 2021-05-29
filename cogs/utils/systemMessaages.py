@@ -322,28 +322,28 @@ class CustomMessages:
     @staticmethod
     async def user_role_purchase_msg(ctx, role: Role, role_details: dict):
         # Send notification to user
-        role_embed = Embed(name=':shopping_cart: __Membership purchase successful__ :shopping_cart: ',
-                           title='Congratulations on '
+        role_embed = Embed(title=':man_juggling: Congratulations on '
                                  'obtaining the role',
-                           description='Details on obtained role',
+                           description='You have received this notification because you have successfully '
+                                       'purchased role on the community. Please see details below.',
                            colour=Colour.magenta())
         role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
         role_embed.add_field(name=':convenience_store: Community :convenience_store:',
-                             value=f'{ctx.message.guild}  \n'
-                                   f'ID:{ctx.message.guild.id}',
+                             value=f'```{ctx.message.guild}  \n'
+                                   f'ID:{ctx.message.guild.id}```',
                              inline=False)
         role_embed.add_field(name=':japanese_ogre: Role: :japanese_ogre: ',
-                             value=f'{role.name}  ID:{role.id}',
+                             value=f'```Name:{role.name}  \nID:{role.id}```',
                              inline=False)
         role_embed.add_field(name=f':calendar: Role Purchase Date :calendar: ',
-                             value=f'{role_details["roleStart"]}')
+                             value=f'```{role_details["roleStart"]}```')
         role_embed.add_field(name=':timer: Role Expiration :timer: ',
-                             value=f'{role_details["roleEnd"]} (in: {role_details["roleLeft"]})',
+                             value=f'```{role_details["roleEnd"]} (in: {role_details["roleLeft"]})```',
                              inline=False)
-        role_embed.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
-                             value=f'{role_details["dollarValue"]} $ \n'
-                                   f'{role_details["roleRounded"]} {CONST_STELLAR_EMOJI}\n'
-                                   f'{role_details["usdRate"]} / 1{CONST_STELLAR_EMOJI}',
+        role_embed.add_field(name=':money_with_wings: Payment Slip :money_with_wings: ',
+                             value=f'```Fiat:{role_details["dollarValue"]} $ \n'
+                                   f'Crypto: {role_details["roleRounded"]} XLM\n'
+                                   f'Rate: {role_details["usdRate"]} / 1 XLM```',
                              inline=False)
         try:
             await ctx.author.send(embed=role_embed)
