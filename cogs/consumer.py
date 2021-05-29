@@ -257,7 +257,8 @@ class ConsumerCommands(commands.Cog):
 
                                 guild_stats = {
                                     f"{ticker}.roleTxCount": 1,
-                                    f"{ticker}.volume": role_value_rounded
+                                    f"{ticker}.volume": role_value_rounded,
+                                    f'{ticker}.txCount': 1
 
                                 }
                                 # Update guild stats
