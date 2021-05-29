@@ -247,7 +247,9 @@ class ConsumerCommands(commands.Cog):
 
                                 global_ticker_stats = {
                                     "merchantPurchases": 1,
-                                    "merchantMoved": role_value_rounded
+                                    "merchantMoved": role_value_rounded,
+                                    "totalTx": 1,
+                                    "totalMoved": role_value_rounded
                                 }
 
                                 # Update merchant stats of CL
