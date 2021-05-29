@@ -33,7 +33,9 @@ class GuildOwnerCommands(commands.Cog):
                 {"name": ":service_dog: Guild Applied Services :service_dog: ",
                  "value": f"`{self.command_string}owner services`"},
                 {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
-                 "value": f"`{self.command_string}owner uplink`"}
+                 "value": f"`{self.command_string}owner uplink`"},
+                {"name": ":convenience_store:  Operate with merchant :convenience_store:  ",
+                 "value": f"`{self.command_string}owner merchant`"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -179,8 +181,7 @@ class GuildOwnerCommands(commands.Cog):
                  "value": f"```{self.command_string}merchant```"}
             ]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1, c=Colour.dark_gold())
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values, c=Colour.dark_gold())
 
     @merch.command()
     async def open(self, ctx):
