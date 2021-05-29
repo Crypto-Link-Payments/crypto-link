@@ -353,31 +353,29 @@ class CustomMessages:
 
     @staticmethod
     async def guild_owner_role_purchase_msg(ctx, role: Role, role_details: dict):
-        incoming_funds = Embed(
-            name=':convenience_store: __Merchant system funds credited__ :convenience_store: ',
-            title='__Incoming funds to corporate '
-                  'wallet___',
-            description=f'Role has been purchased on your community '
-                        f'at {role_details["roleStart"]}.',
-            colour=Colour.magenta())
+        incoming_funds = Embed(title=':convenience_store:__Incoming funds to corporate '
+                                     'wallet___:convenience_store:',
+                               description=f'Role has been purchased on your community '
+                                           f'at __{role_details["roleStart"]}__.',
+                               colour=Colour.magenta())
 
         incoming_funds.add_field(name=':japanese_ogre: Role Purchased :japanese_ogre: ',
-                                 value=f"Name: {role.name}\n"
-                                       f"Id: {role.id}",
+                                 value=f"```Name: {role.name}\n"
+                                       f"Id: {role.id}```",
                                  inline=False)
         incoming_funds.set_thumbnail(url=f'{ctx.message.author.avatar_url}')
         incoming_funds.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
-                                 value=f'${role_details["dollarValue"]}\n'
-                                       f'{role_details["roleRounded"]} {CONST_STELLAR_EMOJI}\n'
-                                       f'{role_details["usdRate"]} / 1{CONST_STELLAR_EMOJI}',
+                                 value=f'```Fiat: ${role_details["dollarValue"]}\n'
+                                       f'Crypto: {role_details["roleRounded"]} XLM\n'
+                                       f'Rate: {role_details["usdRate"]} / 1 XLM```',
                                  inline=False)
         incoming_funds.add_field(name=':cowboy: User Details :cowboy: ',
-                                 value=f"User: {ctx.message.author}\n"
-                                       f"Id: {ctx.message.author.id}",
+                                 value=f"```User: {ctx.message.author}\n"
+                                       f"Id: {ctx.message.author.id}```",
                                  inline=False)
 
         incoming_funds.add_field(name=':clipboard: Role Duration Details :clipboard:  ',
-                                 value=f'{role_details["roleDetails"]}',
+                                 value=f'```{role_details["roleDetails"]}```',
                                  inline=False)
 
         await ctx.message.guild.owner.send(embed=incoming_funds)
@@ -467,7 +465,6 @@ class CustomMessages:
         """
         for explorer_channel in applied_channels:
             await explorer_channel.send(message)
-
 
     async def transaction_report_to_channel(self, ctx, message: str, tx_type: str):
         """
