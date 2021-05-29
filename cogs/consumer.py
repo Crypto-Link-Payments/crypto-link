@@ -265,7 +265,6 @@ class ConsumerCommands(commands.Cog):
                                 await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
                                                                                        guild_stats_data=guild_stats)
 
-                                # TODO integrate guild overall transaction count once role purchased
                                 data = {
                                     "overallGained": role_value_rounded,
                                     "rolesObtained": 1
