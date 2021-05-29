@@ -109,14 +109,14 @@ class ConsumerCommands(commands.Cog):
                 value = float(role["pennyValues"] / 100)
                 value_in_stellar = value / dollar_xlm['stellar']['usd']
                 values = [{"name": ':person_juggling: Role :person_juggling: ',
-                           "value": f'{role["roleName"]} ID({role["roleId"]})'},
-                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": role["status"]},
-                          {"name": ':dollar: Fiat value :dollar: ', "value": f"{value} $"},
+                           "value": f'```{role["roleName"]} ID({role["roleId"]})```'},
+                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": f'```{role["status"]}```'},
+                          {"name": ':dollar: Fiat value :dollar: ', "value": f"```{value} $```"},
                           {"name": ':currency_exchange: Conversion to crypto :currency_exchange: ',
-                           "value": f"{value_in_stellar:.7} {CONST_STELLAR_EMOJI}"},
+                           "value": f"```{value_in_stellar:.7} XLM```"},
                           {"name": ':timer: Role Length:timer:  ',
-                           "value": f"{role['weeks']} week/s {role['days']} day/s {role['hours']} "
-                                    f"hour/s {role['minutes']} minute/s"}]
+                           "value": f"```{role['weeks']} week/s \n{role['days']} day/s \n{role['hours']}"
+                                    f" hour/s \n{role['minutes']} minute/s```"}]
                 description = "Role details"
                 await custom_messages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
                                                     data=values, c=Colour.magenta())
