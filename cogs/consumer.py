@@ -110,7 +110,8 @@ class ConsumerCommands(commands.Cog):
                 value_in_stellar = value / dollar_xlm['stellar']['usd']
                 values = [{"name": ':person_juggling: Role :person_juggling: ',
                            "value": f'```{role["roleName"]} ID({role["roleId"]})```'},
-                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": f'```{role["status"]}```'},
+                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:',
+                           "value": f'```{role["status"]}```'},
                           {"name": ':dollar: Fiat value :dollar: ', "value": f"```{value} $```"},
                           {"name": ':currency_exchange: Conversion to crypto :currency_exchange: ',
                            "value": f"```{value_in_stellar:.7} XLM```"},
