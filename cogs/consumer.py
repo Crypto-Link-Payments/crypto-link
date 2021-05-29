@@ -90,7 +90,7 @@ class ConsumerCommands(commands.Cog):
                 await ctx.author.send(embed=role_embed)
         else:
             message = f"You have no active roles on {ctx.message.guild}, or all of them have expired."
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
     @membership.command(aliases=['rls'])
@@ -263,6 +263,7 @@ class ConsumerCommands(commands.Cog):
                                 await self.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
                                                                                        guild_stats_data=guild_stats)
 
+                                # TODO integrate guild overall transaction count once role purchased
                                 data = {
                                     "overallGained": role_value_rounded,
                                     "rolesObtained": 1
