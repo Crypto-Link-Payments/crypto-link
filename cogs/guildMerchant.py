@@ -547,22 +547,21 @@ class MerchantCommunityOwner(commands.Cog):
                                 colour=Color.green()
                             )
                             corp_info.add_field(name=':clock: Time of initiated withdrawal :clock:',
-                                                value=f"{current_time} UTC",
+                                                value=f"```{current_time} UTC```",
                                                 inline=False)
                             corp_info.add_field(name=" :bank: Merchant Corp Account :bank:",
-                                                value=f"{ctx.message.guild}",
+                                                value=f"```{ctx.message.guild}```",
                                                 inline=False)
                             corp_info.add_field(name=":crown: Guild Owner :crown: ",
-                                                value=f"{ctx.message.author}",
+                                                value=f"```{ctx.message.author}```",
                                                 inline=False)
                             corp_info.add_field(name=":money_mouth: Income amount to corporate wallet :money_mouth: ",
-                                                value=f"Amount: {cl_earnings / (10 ** 7)} {CONST_STELLAR_EMOJI}\n"
-                                                      f"Amount is 0 if community has purchased monthly license",
+                                                value=f"```Amount: {cl_earnings / (10 ** 7)} XLM```",
                                                 inline=False)
                             corp_info.add_field(name=":receipt: Transaction Slip :receipt: ",
-                                                value=f":moneybag: balance:{com_balance_stroops / (10 ** 7)} "
+                                                value=f"```:moneybag: balance:{com_balance_stroops / (10 ** 7)} "
                                                       f"{CONST_STELLAR_EMOJI}\n:atm: Net withdrawal:"
-                                                      f" {net_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}",
+                                                      f" {net_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}```",
                                                 inline=False)
                             await notification_channel.send(embed=corp_info)
 
