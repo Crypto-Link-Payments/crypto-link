@@ -488,7 +488,7 @@ class MerchantCommunityOwner(commands.Cog):
 
                 fee_perc = wallet_transfer_fee['fee']
 
-                # Make all calculations fo rowner and cl earnings
+                # Make all calculations for owner and cl earnings
                 fee_as_dec = fee_perc / (10 ** 2)  # 1% get converted to 0,01
                 cl_earnings = int(com_balance_stroops * fee_as_dec)  # Earning for the system
                 net_owner = com_balance_stroops - cl_earnings  # Earning for the community wallet
@@ -566,8 +566,12 @@ class MerchantCommunityOwner(commands.Cog):
                                                 inline=False)
                             await notification_channel.send(embed=corp_info)
 
-                            await self.backoffice.stats_manager.update_cl_earnins(amount=cl_earnings,
-                                                                                  system='merchant', token='xlm')
+                            await self.backoffice.stats_manager.update_cl_earnings(amount=cl_earnings,
+                                                                                   system='merchant',
+                                                                                   token='xlm',
+                                                                                   time=current_time,
+                                                                                   user=f'{ctx.author}',
+                                                                                   user_id = int(ctx.author.id))
                         else:
                             sys_msg_title = '__System Withdrawal error__'
                             message = 'There has been an issue with withdrawal from Merchant Corporate ' \
