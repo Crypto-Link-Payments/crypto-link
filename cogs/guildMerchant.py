@@ -520,17 +520,17 @@ class MerchantCommunityOwner(commands.Cog):
                                             "Community Account to your personal account.",
                                 colour=Color.purple())
                             info_embed.add_field(name=':clock: Time of withdrawal :clock: ',
-                                                 value=f"{current_time} (UTC)",
+                                                 value=f"```{current_time} (UTC)```",
                                                  inline=False)
                             info_embed.add_field(name=":moneybag: Wallet Balance Before Withdrawal :moneybag: ",
-                                                 value=f"{com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}",
+                                                 value=f"```{com_balance_stroops / (10 ** 7)} XLM```",
                                                  inline=False)
 
                             # Info according to has license or does not have license
                             info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
-                                                 value=f'```Total: {com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}\n'
-                                                       f'-\n'
-                                                       f'Merchant Fee: {cl_earnings / (10 ** 7)} {CONST_STELLAR_EMOJI}\n'
+                                                 value=f'```Total: {com_balance_stroops / (10 ** 7)} XLM\n'
+                                                       f'\n'
+                                                       f'Merchant Fee: {cl_earnings / (10 ** 7)} XLM\n'
                                                        f'------------------------\n'
                                                        f'Net: {net_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}```',
                                                  inline=False)
