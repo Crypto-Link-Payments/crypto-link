@@ -326,7 +326,7 @@ class CustomMessages:
                                  'obtaining the role',
                            description='You have received this notification because you have successfully '
                                        'purchased role on the community. Please see details below.',
-                           colour=Colour.magenta())
+                           colour=Colour.blue())
         role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
         role_embed.add_field(name=':convenience_store: Community :convenience_store:',
                              value=f'```{ctx.message.guild}  \n'
