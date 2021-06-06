@@ -618,8 +618,8 @@ class MerchantCommunityOwner(commands.Cog):
                                                         sys_msg_title=CONST_SYSTEM_ERROR)
             else:
                 message = f'Minimum withdrawal requirements not met. Current minimum balance for withdrawal is set to ' \
-                          f'***{withdrawal_limit_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}***' \
-                          f' XLM and your balance is ***{com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}***'
+                          f'{withdrawal_limit_stroops / (10 ** 7)}' \
+                          f' XLM and your balance is {com_balance_stroops / (10 ** 7)}XLM'
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                     sys_msg_title=CONST_SYSTEM_ERROR)
         else:
