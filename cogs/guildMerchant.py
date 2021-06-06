@@ -428,10 +428,10 @@ class MerchantCommunityOwner(commands.Cog):
             stellar_real = get_normal(value=str(stellar_balance), decimal_point=7)
 
             wallet_details = Embed(title=' :bank: __Merchant Wallet Balance__ :bank:',
-                                   description=f"Current balance of the {ctx.guild}",
+                                   description=f"Current balance of the ***{ctx.guild}*** wallet",
                                    colour=Color.gold())
             wallet_details.add_field(name=f':moneybag:  Stellar Lumen :moneybag: ',
-                                     value=f"***__{stellar_real} {CONST_STELLAR_EMOJI}__***",
+                                     value=f"```{stellar_real} XLM```",
                                      inline=False)
             wallet_details.add_field(name=f':warning: Withdrawal from merchant wallet :warning: ',
                                      value=f"Please use command ```{self.command_string}merchant wallet sweep``` to withdraw all"
