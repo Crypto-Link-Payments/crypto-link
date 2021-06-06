@@ -357,7 +357,7 @@ class CustomMessages:
                                      'wallet___:convenience_store:',
                                description=f'Role has been purchased on your community '
                                            f'at __{role_details["roleStart"]}__.',
-                               colour=Colour.magenta())
+                               colour=Colour.green())
 
         incoming_funds.add_field(name=':japanese_ogre: Role Purchased :japanese_ogre: ',
                                  value=f"```Name: {role.name}\n"
