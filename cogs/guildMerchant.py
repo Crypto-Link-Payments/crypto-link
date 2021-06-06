@@ -509,7 +509,6 @@ class MerchantCommunityOwner(commands.Cog):
                         # Append withdrawal amount to the community owner personal wallet
                         if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.author.id,
                                                                                   ticker='xlm',
-                                                                                  # TODO fix this when multi
                                                                                   direction=0,
                                                                                   amount=net_owner):
 
