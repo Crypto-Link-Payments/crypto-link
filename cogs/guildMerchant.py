@@ -462,7 +462,7 @@ class MerchantCommunityOwner(commands.Cog):
 
         # Fee limits on Crypto Link system for merchant
         withdrawal_min = self.backoffice.bot_manager.get_fees_by_category(key='merchant_min')  # Minimum withdrawal in $
-        withdrawal_min_dollar = withdrawal_min['fee']  # #TODO set high minimum in db after deployment
+        withdrawal_min_dollar = withdrawal_min['fee']
 
         min_in_xlm = convert_to_currency(withdrawal_min_dollar,
                                          coin_name='stellar')  # Returns dict of usd and total stroop
