@@ -486,12 +486,10 @@ class MerchantCommunityOwner(commands.Cog):
                 wallet_transfer_fee = self.backoffice.bot_manager.get_fees_by_category(
                     key='wallet_transfer')  # Percentage as INT
 
-                fee_perc = wallet_transfer_fee['fee']
-
-                # Make all calculations for owner and cl earnings
+                fee_perc = wallet_transfer_fee['fee']  # Atomic representation of fees
                 fee_as_dec = fee_perc / (10 ** 2)  # 1% get converted to 0,01
                 cl_earnings = int(com_balance_stroops * fee_as_dec)  # Earning for the system
-                net_owner = com_balance_stroops - cl_earnings  # Earning for the community wallet
+                net_owner = com_balance_stroops - cl_earnings  #
 
                 # Empty the community wallet
                 if self.merchant.modify_funds_in_community_merchant_wallet(direction=1,
@@ -569,7 +567,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                                                    token='xlm',
                                                                                    time=current_time,
                                                                                    user=f'{ctx.author}',
-                                                                                   user_id = int(ctx.author.id))
+                                                                                   user_id=int(ctx.author.id))
                         else:
                             sys_msg_title = '__System Withdrawal error__'
                             message = 'There has been an issue with withdrawal from Merchant Corporate ' \
