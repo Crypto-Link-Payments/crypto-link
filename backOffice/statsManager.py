@@ -51,15 +51,16 @@ class StatsManager(object):
         data = await self.as_user_wallets.count_documents({})
         return data
 
-    async def update_cl_earnings(self, time: int, amount: int, system: str, token: str, user: int):
+    async def update_cl_earnings(self, time, amount: int, system: str, token: str, user: str,user_id:int):
         """
         Appends fee to CL wallet level 1
         """
 
-        result = await self.as_cl_earnings.insert_one({"time": int(time), "system": system,
+        result = await self.as_cl_earnings.insert_one({"time": time, "system": system,
                                                        "amount": amount,
                                                        "token": token,
-                                                       "user": user})
+                                                       "user": user,
+                                                       "userId":user_id})
         if result.inserted_id:
             return True
         else:
