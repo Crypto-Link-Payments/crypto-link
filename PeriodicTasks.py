@@ -370,12 +370,9 @@ class PeriodicTasks:
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
-
     scheduler.add_job(timed_updater.check_stellar_hot_wallet,
-                      CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
-    scheduler.add_job(timed_updater.check_expired_roles, CronTrigger(
-        second='00'), misfire_grace_time=10, max_instances=20)
-
+                      CronTrigger(minute='05, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55'), misfire_grace_time=10,
+                      max_instances=20)
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
         hour='17'), misfire_grace_time=10, max_instances=20)
 
