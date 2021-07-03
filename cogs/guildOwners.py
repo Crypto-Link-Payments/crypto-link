@@ -33,7 +33,9 @@ class GuildOwnerCommands(commands.Cog):
                 {"name": ":service_dog: Guild Applied Services :service_dog: ",
                  "value": f"`{self.command_string}owner services`"},
                 {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
-                 "value": f"`{self.command_string}owner uplink`"}
+                 "value": f"`{self.command_string}owner uplink`"},
+                {"name": ":convenience_store:  Operate with merchant :convenience_store:  ",
+                 "value": f"`{self.command_string}owner merchant`"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
@@ -179,8 +181,7 @@ class GuildOwnerCommands(commands.Cog):
                  "value": f"```{self.command_string}merchant```"}
             ]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               destination=1, c=Colour.dark_gold())
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values, c=Colour.dark_gold())
 
     @merch.command()
     async def open(self, ctx):
@@ -189,9 +190,9 @@ class GuildOwnerCommands(commands.Cog):
                                                        community_owner_id=ctx.message.author.id,
                                                        community_name=f'{ctx.message.guild}'):  # register community wallet
                 msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
-                message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed' \
+                message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed ' \
                           f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
-                          f' commands or have a look at ***merchant system manual*** on' \
+                          f' commands or have a look at ***merchant system manual*** accessible through command ' \
                           f' `{self.command_string}merchant manual` '
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                     destination=1)
@@ -203,8 +204,8 @@ class GuildOwnerCommands(commands.Cog):
                                                     destination=1)
         else:
             msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
-            message = f'You have already registered {ctx.guild} for Merchant system on {self.bot.user.mention}. Proceed' \
-                      f' with command ```{self.command_string}merchant``` or ```{self.command_string}```'
+            message = f'You have already registered Merchant system on {ctx.guild} server. Proceed' \
+                      f'with command {self.command_string}merchant'
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                 destination=1)
 

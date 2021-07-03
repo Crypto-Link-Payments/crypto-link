@@ -27,12 +27,9 @@ class CustomMessages:
         elif tx_type == 'private':
             msg_streamed += ":detective:"
 
-        elif tx_type == 'emoji':
-            msg_streamed += ":nerd:"
-
-        elif tx_type == 'multi':
-            msg_streamed += ":parachute: "
-
+        elif tx_type == 'role_purchase':
+            msg_streamed = f":man_juggling: {message}"
+        print(msg_streamed)
         return msg_streamed
 
     @staticmethod
@@ -325,28 +322,28 @@ class CustomMessages:
     @staticmethod
     async def user_role_purchase_msg(ctx, role: Role, role_details: dict):
         # Send notification to user
-        role_embed = Embed(name=':shopping_cart: __Membership purchase successful__ :shopping_cart: ',
-                           title='Congratulations on '
+        role_embed = Embed(title=':man_juggling: Congratulations on '
                                  'obtaining the role',
-                           description='Details on obtained role',
-                           colour=Colour.magenta())
+                           description='You have received this notification because you have successfully '
+                                       'purchased role on the community. Please see details below.',
+                           colour=Colour.blue())
         role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
         role_embed.add_field(name=':convenience_store: Community :convenience_store:',
-                             value=f'{ctx.message.guild}  \n'
-                                   f'ID:{ctx.message.guild.id}',
+                             value=f'```{ctx.message.guild}  \n'
+                                   f'ID:{ctx.message.guild.id}```',
                              inline=False)
         role_embed.add_field(name=':japanese_ogre: Role: :japanese_ogre: ',
-                             value=f'{role.name}  ID:{role.id}',
+                             value=f'```Name:{role.name}  \nID:{role.id}```',
                              inline=False)
         role_embed.add_field(name=f':calendar: Role Purchase Date :calendar: ',
-                             value=f'{role_details["roleStart"]}')
+                             value=f'```{role_details["roleStart"]}```')
         role_embed.add_field(name=':timer: Role Expiration :timer: ',
-                             value=f'{role_details["roleEnd"]} (in: {role_details["roleLeft"]})',
+                             value=f'```{role_details["roleEnd"]} (in: {role_details["roleLeft"]})```',
                              inline=False)
-        role_embed.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
-                             value=f'{role_details["dollarValue"]} $ \n'
-                                   f'{role_details["roleRounded"]} {CONST_STELLAR_EMOJI}\n'
-                                   f'{role_details["usdRate"]} / 1{CONST_STELLAR_EMOJI}',
+        role_embed.add_field(name=':money_with_wings: Payment Slip :money_with_wings: ',
+                             value=f'```Fiat:{role_details["dollarValue"]} $ \n'
+                                   f'Crypto: {role_details["roleRounded"]} XLM\n'
+                                   f'Rate: {role_details["usdRate"]} / 1 XLM```',
                              inline=False)
         try:
             await ctx.author.send(embed=role_embed)
@@ -356,31 +353,29 @@ class CustomMessages:
 
     @staticmethod
     async def guild_owner_role_purchase_msg(ctx, role: Role, role_details: dict):
-        incoming_funds = Embed(
-            name=':convenience_store: __Merchant system funds credited__ :convenience_store: ',
-            title='__Incoming funds to corporate '
-                  'wallet___',
-            description=f'Role has been purchased on your community '
-                        f'at {role_details["roleStart"]}.',
-            colour=Colour.magenta())
+        incoming_funds = Embed(title=':convenience_store:__Incoming funds to corporate '
+                                     'wallet___:convenience_store:',
+                               description=f'Role has been purchased on your community '
+                                           f'at __{role_details["roleStart"]}__.',
+                               colour=Colour.green())
 
         incoming_funds.add_field(name=':japanese_ogre: Role Purchased :japanese_ogre: ',
-                                 value=f"Name: {role.name}\n"
-                                       f"Id: {role.id}",
+                                 value=f"```Name: {role.name}\n"
+                                       f"Id: {role.id}```",
                                  inline=False)
         incoming_funds.set_thumbnail(url=f'{ctx.message.author.avatar_url}')
         incoming_funds.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
-                                 value=f'${role_details["dollarValue"]}\n'
-                                       f'{role_details["roleRounded"]} {CONST_STELLAR_EMOJI}\n'
-                                       f'{role_details["usdRate"]} / 1{CONST_STELLAR_EMOJI}',
+                                 value=f'```Fiat: ${role_details["dollarValue"]}\n'
+                                       f'Crypto: {role_details["roleRounded"]} XLM\n'
+                                       f'Rate: {role_details["usdRate"]} / 1 XLM```',
                                  inline=False)
         incoming_funds.add_field(name=':cowboy: User Details :cowboy: ',
-                                 value=f"User: {ctx.message.author}\n"
-                                       f"Id: {ctx.message.author.id}",
+                                 value=f"```User: {ctx.message.author}\n"
+                                       f"Id: {ctx.message.author.id}```",
                                  inline=False)
 
         incoming_funds.add_field(name=':clipboard: Role Duration Details :clipboard:  ',
-                                 value=f'{role_details["roleDetails"]}',
+                                 value=f'```{role_details["roleDetails"]}```',
                                  inline=False)
 
         await ctx.message.guild.owner.send(embed=incoming_funds)
@@ -468,13 +463,8 @@ class CustomMessages:
         """
         Transactin reports to all explorer applied channels
         """
-        if not on_chain:
-            msg_streamed = self.filter_message(message=message, tx_type=tx_type)
-            for explorer_channel in applied_channels:
-                await explorer_channel.send(msg_streamed)
-        else:
-            for explorer_channel in applied_channels:
-                await explorer_channel.send(message)
+        for explorer_channel in applied_channels:
+            await explorer_channel.send(message)
 
     async def transaction_report_to_channel(self, ctx, message: str, tx_type: str):
         """

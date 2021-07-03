@@ -24,7 +24,7 @@ class ConsumerCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
-    @commands.group(alieases=["Subscription"])
+    @commands.group(alieases=["subscription", "perk", "perks"])
     @commands.check(guild_has_merchant)
     @commands.check(has_wallet)
     @commands.check(is_public)
@@ -90,7 +90,7 @@ class ConsumerCommands(commands.Cog):
                 await ctx.author.send(embed=role_embed)
         else:
             message = f"You have no active roles on {ctx.message.guild}, or all of them have expired."
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
     @membership.command(aliases=['rls'])
@@ -109,14 +109,15 @@ class ConsumerCommands(commands.Cog):
                 value = float(role["pennyValues"] / 100)
                 value_in_stellar = value / dollar_xlm['stellar']['usd']
                 values = [{"name": ':person_juggling: Role :person_juggling: ',
-                           "value": f'{role["roleName"]} ID({role["roleId"]})'},
-                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:', "value": role["status"]},
-                          {"name": ':dollar: Fiat value :dollar: ', "value": f"{value} $"},
+                           "value": f'```{role["roleName"]} ID({role["roleId"]})```'},
+                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:',
+                           "value": f'```{role["status"]}```'},
+                          {"name": ':dollar: Fiat value :dollar: ', "value": f"```{value} $```"},
                           {"name": ':currency_exchange: Conversion to crypto :currency_exchange: ',
-                           "value": f"{value_in_stellar:.7} {CONST_STELLAR_EMOJI}"},
+                           "value": f"```{value_in_stellar:.7} XLM```"},
                           {"name": ':timer: Role Length:timer:  ',
-                           "value": f"{role['weeks']} week/s {role['days']} day/s {role['hours']} "
-                                    f"hour/s {role['minutes']} minute/s"}]
+                           "value": f"```{role['weeks']} week/s \n{role['days']} day/s \n{role['hours']}"
+                                    f" hour/s \n{role['minutes']} minute/s```"}]
                 description = "Role details"
                 await custom_messages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
                                                     data=values, c=Colour.magenta())
@@ -231,7 +232,7 @@ class ConsumerCommands(commands.Cog):
 
                                 user_stats_update = {
                                     f'{ticker}.spentOnRoles': float(role_value_rounded),
-                                    f'{ticker}.roleTxCount': int(1),
+                                    f'{ticker}.roleTxCount': int(1)
                                 }
 
                                 # Update user purchase stats
@@ -246,7 +247,9 @@ class ConsumerCommands(commands.Cog):
 
                                 global_ticker_stats = {
                                     "merchantPurchases": 1,
-                                    "merchantMoved": role_value_rounded
+                                    "merchantMoved": role_value_rounded,
+                                    "totalTx": 1,
+                                    "totalMoved": role_value_rounded
                                 }
 
                                 # Update merchant stats of CL
@@ -256,7 +259,8 @@ class ConsumerCommands(commands.Cog):
 
                                 guild_stats = {
                                     f"{ticker}.roleTxCount": 1,
-                                    f"{ticker}.volume": role_value_rounded
+                                    f"{ticker}.volume": role_value_rounded,
+                                    f'{ticker}.txCount': 1
 
                                 }
                                 # Update guild stats

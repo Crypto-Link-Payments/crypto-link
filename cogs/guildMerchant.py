@@ -61,7 +61,7 @@ class MerchantCommunityOwner(commands.Cog):
                 new_merch.add_field(name='Community',
                                     value=f'{ctx.guild}')
 
-                await merchant_notification.send(embed='New Merchant registered')
+                await merchant_notification.send(embed=new_merch)
 
             else:
                 msg_title = ':warning:  __Merchant Registration Status___ :warning: '
@@ -105,8 +105,8 @@ class MerchantCommunityOwner(commands.Cog):
         manual = Embed(title=':convenience_store: __Merchant system manual__ :convenience_store: ',
                        colour=Color.purple())
         manual.add_field(name=':one: Create monetized roles :one:',
-                         value=f'```{self.command_string}merchant monetize create_role <role name> <Dollar value of role> '
-                               f'<duration weeks> <days> <hours> <minutes>```\n'
+                         value=f'```{self.command_string}merchant role create <role name> <role value in $> '
+                               f'<weeks> <days> <hours> <minutes>```\n'
                                f'\n:warning: __Required parameters__ :warning: \n'
                                f'\n'
                                f'> :white_check_mark:  No spaces in role name and max length 20 characters\n'
@@ -428,10 +428,10 @@ class MerchantCommunityOwner(commands.Cog):
             stellar_real = get_normal(value=str(stellar_balance), decimal_point=7)
 
             wallet_details = Embed(title=' :bank: __Merchant Wallet Balance__ :bank:',
-                                   description=f"Current balance of the {ctx.guild}",
+                                   description=f"Current balance of the ***{ctx.guild}*** wallet",
                                    colour=Color.gold())
             wallet_details.add_field(name=f':moneybag:  Stellar Lumen :moneybag: ',
-                                     value=f"***__{stellar_real} {CONST_STELLAR_EMOJI}__***",
+                                     value=f"```{stellar_real} XLM```",
                                      inline=False)
             wallet_details.add_field(name=f':warning: Withdrawal from merchant wallet :warning: ',
                                      value=f"Please use command ```{self.command_string}merchant wallet sweep``` to withdraw all"
@@ -462,7 +462,7 @@ class MerchantCommunityOwner(commands.Cog):
 
         # Fee limits on Crypto Link system for merchant
         withdrawal_min = self.backoffice.bot_manager.get_fees_by_category(key='merchant_min')  # Minimum withdrawal in $
-        withdrawal_min_dollar = withdrawal_min['fee']  # #TODO set high minimum in db after deployment
+        withdrawal_min_dollar = withdrawal_min['fee']
 
         min_in_xlm = convert_to_currency(withdrawal_min_dollar,
                                          coin_name='stellar')  # Returns dict of usd and total stroop
@@ -486,12 +486,10 @@ class MerchantCommunityOwner(commands.Cog):
                 wallet_transfer_fee = self.backoffice.bot_manager.get_fees_by_category(
                     key='wallet_transfer')  # Percentage as INT
 
-                fee_perc = wallet_transfer_fee['fee']
-
-                # Make all calculations fo rowner and cl earnings
+                fee_perc = wallet_transfer_fee['fee']  # Atomic representation of fees
                 fee_as_dec = fee_perc / (10 ** 2)  # 1% get converted to 0,01
                 cl_earnings = int(com_balance_stroops * fee_as_dec)  # Earning for the system
-                net_owner = com_balance_stroops - cl_earnings  # Earning for the community wallet
+                net_owner = com_balance_stroops - cl_earnings  #
 
                 # Empty the community wallet
                 if self.merchant.modify_funds_in_community_merchant_wallet(direction=1,
@@ -509,7 +507,6 @@ class MerchantCommunityOwner(commands.Cog):
                         # Append withdrawal amount to the community owner personal wallet
                         if self.backoffice.account_mng.update_user_wallet_balance(discord_id=ctx.author.id,
                                                                                   ticker='xlm',
-                                                                                  # TODO fix this when multi
                                                                                   direction=0,
                                                                                   amount=net_owner):
 
@@ -520,17 +517,17 @@ class MerchantCommunityOwner(commands.Cog):
                                             "Community Account to your personal account.",
                                 colour=Color.purple())
                             info_embed.add_field(name=':clock: Time of withdrawal :clock: ',
-                                                 value=f"{current_time} (UTC)",
+                                                 value=f"```{current_time} (UTC)```",
                                                  inline=False)
                             info_embed.add_field(name=":moneybag: Wallet Balance Before Withdrawal :moneybag: ",
-                                                 value=f"{com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}",
+                                                 value=f"```{com_balance_stroops / (10 ** 7)} XLM```",
                                                  inline=False)
 
                             # Info according to has license or does not have license
                             info_embed.add_field(name=":atm: Final Withdrawal Amount :atm: ",
-                                                 value=f'```Total: {com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}\n'
-                                                       f'-\n'
-                                                       f'Merchant Fee: {cl_earnings / (10 ** 7)} {CONST_STELLAR_EMOJI}\n'
+                                                 value=f'```Total: {com_balance_stroops / (10 ** 7)} XLM\n'
+                                                       f'\n'
+                                                       f'Merchant Fee: {cl_earnings / (10 ** 7)} XLM\n'
                                                        f'------------------------\n'
                                                        f'Net: {net_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}```',
                                                  inline=False)
@@ -547,27 +544,30 @@ class MerchantCommunityOwner(commands.Cog):
                                 colour=Color.green()
                             )
                             corp_info.add_field(name=':clock: Time of initiated withdrawal :clock:',
-                                                value=f"{current_time} UTC",
+                                                value=f"```{current_time} UTC```",
                                                 inline=False)
                             corp_info.add_field(name=" :bank: Merchant Corp Account :bank:",
-                                                value=f"{ctx.message.guild}",
+                                                value=f"```{ctx.message.guild}```",
                                                 inline=False)
                             corp_info.add_field(name=":crown: Guild Owner :crown: ",
-                                                value=f"{ctx.message.author}",
+                                                value=f"```{ctx.message.author}```",
                                                 inline=False)
                             corp_info.add_field(name=":money_mouth: Income amount to corporate wallet :money_mouth: ",
-                                                value=f"Amount: {cl_earnings / (10 ** 7)} {CONST_STELLAR_EMOJI}\n"
-                                                      f"Amount is 0 if community has purchased monthly license",
+                                                value=f"```Amount: {cl_earnings / (10 ** 7)} XLM```",
                                                 inline=False)
                             corp_info.add_field(name=":receipt: Transaction Slip :receipt: ",
-                                                value=f":moneybag: balance:{com_balance_stroops / (10 ** 7)} "
+                                                value=f"```:moneybag: balance:{com_balance_stroops / (10 ** 7)} "
                                                       f"{CONST_STELLAR_EMOJI}\n:atm: Net withdrawal:"
-                                                      f" {net_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}",
+                                                      f" {net_owner / (10 ** 7)} {CONST_STELLAR_EMOJI}```",
                                                 inline=False)
                             await notification_channel.send(embed=corp_info)
 
-                            await self.backoffice.stats_manager.update_cl_earnins(amount=cl_earnings,
-                                                                                  system='merchant', token='xlm')
+                            await self.backoffice.stats_manager.update_cl_earnings(amount=cl_earnings,
+                                                                                   system='merchant',
+                                                                                   token='xlm',
+                                                                                   time=current_time,
+                                                                                   user=f'{ctx.author}',
+                                                                                   user_id=int(ctx.author.id))
                         else:
                             sys_msg_title = '__System Withdrawal error__'
                             message = 'There has been an issue with withdrawal from Merchant Corporate ' \
@@ -616,8 +616,8 @@ class MerchantCommunityOwner(commands.Cog):
                                                         sys_msg_title=CONST_SYSTEM_ERROR)
             else:
                 message = f'Minimum withdrawal requirements not met. Current minimum balance for withdrawal is set to ' \
-                          f'***{withdrawal_limit_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}***' \
-                          f' XLM and your balance is ***{com_balance_stroops / (10 ** 7)} {CONST_STELLAR_EMOJI}***'
+                          f'{withdrawal_limit_stroops / (10 ** 7)}' \
+                          f' XLM and your balance is {com_balance_stroops / (10 ** 7)}XLM'
                 await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                     sys_msg_title=CONST_SYSTEM_ERROR)
         else:

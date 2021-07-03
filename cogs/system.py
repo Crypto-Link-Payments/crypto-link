@@ -616,33 +616,35 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
 
-    # @change.command()
-    # async def merchant_wallet_transfer_fee(self, ctx, perc: int):
-    #     """
-    #     Change fee for merchant wallet transfer in $
-    #     :param ctx: Discord Context
-    #     :param value:
-    #     :return:
-    #     """
-    #
-    #     # TODO reqrite this
-    #     # Get value in in pennies
-    #     penny = (int(value * (10 ** 2)))
-    #     rounded = round(penny / 100, 2)
-    #     merch_data = {
-    #         f"fee": rounded
-    #     }
-    #     if self.backoffice.bot_manager.manage_fees_and_limits(key='wallet_transfer', data_to_update=merch_data):
-    #         message = f'You have successfully set merchant wallet transfer fee to be {rounded}$.'
-    #         title = '__Merchant wallet transfer fee information__'
-    #         await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
-    #                                              sys_msg_title=title)
-    #     else:
-    #         message = f'There has been an error while trying to set merchant wallet transfer fee to {rounded}$.' \
-    #                   f'Please try again later or contact system administrator!'
-    #         title = '__Merchant wallet transfer fee information__'
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-    #                                              sys_msg_title=title)
+    @change.command()
+    async def merchant_wallet_transfer_fee(self, ctx, value: float):
+        """
+        Change fee for merchant wallet transfer in $
+        :param ctx: Discord Context
+        :param value:
+        :return:
+
+        1% = 0.01 == 10
+        """
+
+
+        # Store percentage as micro
+        percent_micro = int(value*(10**2))
+
+        merch_data = {
+            f"fee": percent_micro
+        }
+        if self.backoffice.bot_manager.manage_fees_and_limits(key='wallet_transfer', data_to_update=merch_data):
+            message = f'You have successfully set merchant wallet transfer fee to be {percent_micro/(10**2)}%.'
+            title = '__Merchant wallet transfer fee information__'
+            await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
+                                                 sys_msg_title=title)
+        else:
+            message = f'There has been an error while trying to set merchant wallet transfer fee to {percent_micro/(10**2)}%.' \
+                      f'Please try again later or contact system administrator!'
+            title = '__Merchant wallet transfer fee information__'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
 
     @cl.error
     async def cl_error(self, ctx, error):

@@ -121,6 +121,9 @@ class TransactionCommands(commands.Cog):
             total_dollar_value = 0
             conversion_rate = 0
 
+        if tx_type == 'private':
+            explorer_msg = ":detective: "
+
         await custom_messages.transaction_report_to_channel(ctx=ctx, message=tx_report_msg, tx_type=tx_type)
 
         tx_details["conversion"] = total_dollar_value
