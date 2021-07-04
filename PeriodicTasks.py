@@ -14,6 +14,7 @@ from colorama import Fore, init
 
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
+import requests
 
 init(autoreset=True)
 custom_messages = CustomMessages()
@@ -64,10 +65,11 @@ class PeriodicTasks:
         return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special
 
     async def process_tx_with_no_memo(self, channel, no_memo_transaction):
-        stellar_manager = self.backoffice.stellar_manager
+
         for tx in no_memo_transaction:
-            if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
-                if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
+            if not self.bot.backoffice.stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(
+                    tx_hash=tx['hash']):
+                if self.bot.backoffice.stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                     await self.global_bot_stats_update(tx=tx)
                     await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
                 else:
@@ -77,22 +79,20 @@ class PeriodicTasks:
                 print(Fore.YELLOW + 'Unknown processed already')
 
     async def process_tx_with_memo(self, channel, memo_transactions):
-        bot = self.bot
-        stellar_manager = self.backoffice.stellar_manager
-        stats_manager = self.backoffice.stats_manager
-        wallet_manager = self.backoffice.wallet_manager
-        guild_profiles = self.backoffice.guild_profiles
         for tx in memo_transactions:
             # check if processed if not process them
-            if not stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
-                if stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
+            if not self.bot.backoffice.stellar_manager.check_if_deposit_hash_processed_succ_deposits(tx['hash']):
+                if self.bot.backoffice.stellar_manager.stellar_deposit_history(deposit_type=1, tx_data=tx):
                     # Update balance based on incoming asset
                     if not helper.check_for_special_char(tx["memo"]):
-                        if wallet_manager.update_coin_balance_by_memo(memo=tx['memo'], coin=tx['asset_type']["code"],
-                                                                      amount=int(tx['asset_type']["amount"])):
+                        if self.bot.backoffice.wallet_manager.update_coin_balance_by_memo(memo=tx['memo'],
+                                                                                          coin=tx['asset_type']["code"],
+                                                                                          amount=int(tx['asset_type'][
+                                                                                                         "amount"])):
                             # If balance updated successfully send the message to user of processed deposit
-                            user_id = wallet_manager.get_discord_id_from_memo(memo=tx['memo'])  # Return usr int number
-                            dest = await bot.fetch_user(user_id=int(user_id))
+                            user_id = self.bot.backoffice.wallet_manager.get_discord_id_from_memo(
+                                memo=tx['memo'])  # Return usr int number
+                            dest = await self.bot.fetch_user(user_id=int(user_id))
 
                             on_chain_stats = {
                                 f"{tx['asset_type']['code'].lower()}.depositsCount": 1,
@@ -100,7 +100,8 @@ class PeriodicTasks:
                                     int(tx['asset_type']["amount"]) / 10000000,
                                     7)}
 
-                            await stats_manager.update_user_on_chain_stats(user_id=dest.id, stats_data=on_chain_stats)
+                            await self.bot.backoffice.stats_manager.update_user_on_chain_stats(user_id=dest.id,
+                                                                                               stats_data=on_chain_stats)
 
                             await self.global_bot_stats_update(tx=tx)
 
@@ -111,11 +112,11 @@ class PeriodicTasks:
                                                                             user=dest, tx_details=tx)
 
                             # Explorer messages
-                            load_channels = [bot.get_channel(id=int(chn)) for chn in
-                                             guild_profiles.get_all_explorer_applied_channels()]
+                            load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                             self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
                             explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"] / (10 ** 7), 7)} ' \
-                                           f'{tx["asset_type"]["code"].upper()} to {bot.user}'
+                                           f'{tx["asset_type"]["code"].upper()} to {self.bot.user}'
 
                             await custom_messages.explorer_messages(applied_channels=load_channels,
                                                                     message=explorer_msg,
@@ -135,11 +136,11 @@ class PeriodicTasks:
                 print(Fore.LIGHTCYAN_EX + 'No new legit tx')
 
     async def process_tx_with_not_registered_memo(self, channel, no_registered_memo):
-        stellar_manager = self.backoffice.stellar_manager
         for tx in no_registered_memo:
-            if not stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(tx_hash=tx['hash']):
+            if not self.bot.backoffice.stellar_manager.check_if_deposit_hash_processed_unprocessed_deposits(
+                    tx_hash=tx['hash']):
                 if not helper.check_for_special_char(tx["memo"]):
-                    if stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
+                    if self.bot.backoffice.stellar_manager.stellar_deposit_history(deposit_type=2, tx_data=tx):
                         await self.global_bot_stats_update(tx=tx)
                         await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
                     else:
@@ -159,67 +160,51 @@ class PeriodicTasks:
         """
         Functions initiates the check for stellar incoming deposits and processes them
         """
+        # server = Server(horizon_url=self.bot.bot_settings["horizonServer"])
+        # data = server.transactions().for_account(account_id=self.bot.hot_wallets["xlm"]).include_failed(False).order(
+        #     desc=False).cursor(cursor=pag['pag']).limit(200).call()
+        # pprint(data)
+
+        # new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
+        # pprint(new_transactions)
 
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
         pag = helper.read_json_file('stellarPag.json')
-        try:
-            # data = server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
-            #     desc=False).cursor(cursor=pag).limit(200).call()
+        new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
 
-            from pprint import pprint
-            import requests
-
-            # server = Server(horizon_url=self.bot.bot_settings["horizonServer"])
-            # data = server.transactions().for_account(account_id=self.bot.hot_wallets["xlm"]).include_failed(False).order(
-            #     desc=False).cursor(cursor=pag['pag']).limit(200).call()
-            # pprint(data)
-            try:
-                data = requests.get(f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=50&order=desc&include_failed=false").json()
-
-                if data:
-                    processed = self.backoffice.stellar_wallet.filter_transactions(stellar_data = data)
-                    pprint(processed)
-                else:
-                    print("No new deposits")
-            except requests.exceptions as e:
-                print(Fore.RED + f'{e}')
-
-            # new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-            # pprint(new_transactions)
-
-
-        except Exception as e:
-            print(Fore.red + f"Exception: {e}")
-
-        # if new_transactions:
-        #     # Filter transactions
-        #     print("NONEWDEPOSITS")
-
-            # tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
-            #     new_transactions)
-            # if tx_with_registered_memo:
-            #     channel = bot.get_channel(id=int(self.notification_channels['memoRegistered']))
-            #     await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
-            # if tx_with_not_registered_memo:
-            #     channel = bot.get_channel(id=int(self.notification_channels['memoNotRegistered']))
-            #     await self.process_tx_with_not_registered_memo(channel=channel,
-            #                                                    no_registered_memo=tx_with_not_registered_memo)
-            # if tx_with_no_memo:
-            #     channel = bot.get_channel(id=int(self.notification_channels['memoNone']))
-            #     await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
-            #
-            # if tx_with_memo_special:
-            #     channel = bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
-            #     await self.process_tx_with_special_chart(channel=channel)
-            #
-            # last_checked_pag = new_transactions[-1]["paging_token"]
-            # if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
-            #     print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
-            # else:
-            #     print(Fore.RED + 'There was an issue with updating pag')
-            #
-            # print(Fore.GREEN + '==============DONE=================\n'
-            #                    '==========GOING TO SLEEP FOR 1 MINUTE=====')
+        # data = requests.get(
+        #     f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=50&order=desc&include_failed=false")
+        #
+        # if data.status_code == 200 and data.json():
+        #     processed = self.backoffice.stellar_wallet.filter_transactions(stellar_data=data)
+        #
+        #     tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
+        #         processed)
+        #
+        #     if tx_with_registered_memo:
+        #         channel = self.bot.get_channel(id=int(self.notification_channels['memoRegistered']))
+        #         await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
+        #     if tx_with_not_registered_memo:
+        #         channel = self.bot.get_channel(id=int(self.notification_channels['memoNotRegistered']))
+        #         await self.process_tx_with_not_registered_memo(channel=channel,
+        #                                                        no_registered_memo=tx_with_not_registered_memo)
+        #     if tx_with_no_memo:
+        #         channel = self.bot.get_channel(id=int(self.notification_channels['memoNone']))
+        #         await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
+        #
+        #     if tx_with_memo_special:
+        #         channel = self.bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
+        #         await self.process_tx_with_special_chart(channel=channel)
+        #
+        #     last_checked_pag = processed[-1]["paging_token"]  # TODO fix this as they get returned in reversed order
+        #
+        #     if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
+        #         print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
+        #     else:
+        #         print(Fore.RED + 'There was an issue with updating pag')
+        #
+        #     print(Fore.GREEN + '==============DONE=================\n'
+        #                        '==========GOING TO SLEEP FOR 1 MINUTE=====')
         # else:
         #     print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
         #     print('==============================================')

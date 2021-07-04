@@ -140,28 +140,44 @@ class StellarWallet:
         """
         try:
             from pprint import pprint
-            data = self.server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
-                desc=False).cursor(cursor=pag).limit(200).call()
-            pprint(data)
-            to_process = list()
-            for tx in data['_embedded']['records']:
-                # Get transaction envelope
-                if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
-                    tx.pop('_links')
-                    tx.pop('fee_charged')
-                    tx.pop('id')
-                    tx.pop('fee_account')
-                    tx.pop('fee_meta_xdr')
-                    tx.pop('ledger')
-                    tx.pop('max_fee')
-                    tx.pop('operation_count')
-                    tx.pop('result_meta_xdr')
-                    tx.pop('result_xdr')
-                    tx.pop('signatures')
-                    tx['asset_type'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
-                    tx.pop('envelope_xdr')
-                    to_process.append(tx)
-            return to_process
+            # data = self.server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
+            #     desc=False).cursor(cursor=pag).limit(200)
+            # data = self.server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
+            #     desc=False).cursor(cursor=pag).limit(200).call()
+
+            from stellar_sdk import Server
+            import os
+
+            server = Server("https://horizon.stellar.org/")
+
+            builder = server.transactions().for_account(
+                account_id=self.public_key).include_failed(False).order(
+                desc=False).cursor(154450799240826880).limit(200)
+            print(Fore.YELLOW + f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
+            print(f"params: {builder.params}")
+            # data = builder.call()
+            # print(f"data: {data}")
+
+
+        #     to_process = list()
+        #     for tx in data['_embedded']['records']:
+        #         # Get transaction envelope
+        #         if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
+        #             tx.pop('_links')
+        #             tx.pop('fee_charged')
+        #             tx.pop('id')
+        #             tx.pop('fee_account')
+        #             tx.pop('fee_meta_xdr')
+        #             tx.pop('ledger')
+        #             tx.pop('max_fee')
+        #             tx.pop('operation_count')
+        #             tx.pop('result_meta_xdr')
+        #             tx.pop('result_xdr')
+        #             tx.pop('signatures')
+        #             tx['asset_type'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
+        #             tx.pop('envelope_xdr')
+        #             to_process.append(tx)
+        #     return to_process
         except Exception as e:
             print(Fore.RED+ f'{e}')
             return e
