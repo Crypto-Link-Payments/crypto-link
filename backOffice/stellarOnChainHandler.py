@@ -145,37 +145,37 @@ class StellarWallet:
             print(f'Pag var value passed through: {pag}')
             print(f"Pag var type {type(pag)}")
 
-            # Working
-            print(Fore.BLUE + "___________Hardcoded pag_____________________")
-            server = Server("https://horizon.stellar.org/")
-
-            builder = server.transactions().for_account(
-                account_id=self.public_key).include_failed(False).order(
-                desc=False).cursor(154450799240826880).limit(200)
-            print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
-            print(f"params: {builder.params}")
-            data = builder.call()
-
-            # Working
-            print(Fore.YELLOW + "___________Server initiated inside function______")
-            server = Server("https://horizon.stellar.org/")
-
-            builder = server.transactions().for_account(
-                account_id=self.public_key).include_failed(False).order(
-                desc=False).cursor(154450799240826880).limit(200)
-            print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
-            print(f"params: {builder.params}")
-            data = builder.call()
-
-            print(Fore.GREEN + " ------Server as part of the class hardcoded pag------")
-
-            builder_two = self.server.transactions().for_account(
-                account_id=self.public_key).include_failed(False).order(
-                desc=False).cursor(154450799240826880).limit(200)
-
-            print(Fore.YELLOW + f"endpoint: {os.path.join(builder_two.horizon_url, builder_two.endpoint)}")
-            print(f"params: {builder_two.params}")
-            data_two = builder_two.call()
+            # # Working
+            # print(Fore.BLUE + "___________Hardcoded pag_____________________")
+            # server = Server("https://horizon.stellar.org/")
+            #
+            # builder = server.transactions().for_account(
+            #     account_id=self.public_key).include_failed(False).order(
+            #     desc=False).cursor(154450799240826880).limit(200)
+            # print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
+            # print(f"params: {builder.params}")
+            # data = builder.call()
+            #
+            # # Working
+            # print(Fore.YELLOW + "___________Server initiated inside function______")
+            # server = Server("https://horizon.stellar.org/")
+            #
+            # builder = server.transactions().for_account(
+            #     account_id=self.public_key).include_failed(False).order(
+            #     desc=False).cursor(154450799240826880).limit(200)
+            # print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
+            # print(f"params: {builder.params}")
+            # data = builder.call()
+            #
+            # print(Fore.GREEN + " ------Server as part of the class hardcoded pag------")
+            #
+            # builder_two = self.server.transactions().for_account(
+            #     account_id=self.public_key).include_failed(False).order(
+            #     desc=False).cursor(154450799240826880).limit(200)
+            #
+            # print(Fore.YELLOW + f"endpoint: {os.path.join(builder_two.horizon_url, builder_two.endpoint)}")
+            # print(f"params: {builder_two.params}")
+            # data_two = builder_two.call()
 
             print(Fore.GREEN + " ---------Server as part of the class ------")
 
@@ -187,32 +187,25 @@ class StellarWallet:
             print(f"params: {builder_two.params}")
             data_two = builder_two.call()
 
-            #
-            # builder = self.server.transactions().for_account(
-            #     account_id=self.public_key).include_failed(False).order(
-            #     desc=False).cursor(int(pag)).limit(200)
-
-
-            # to_process = list()
-            # for tx in data['_embedded']['records']:
-            #     # Get transaction envelope
-            #     if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
-            #         tx.pop('_links')
-            #         tx.pop('fee_charged')
-            #         tx.pop('id')
-            #         tx.pop('fee_account')
-            #         tx.pop('fee_meta_xdr')
-            #         tx.pop('ledger')
-            #         tx.pop('max_fee')
-            #         tx.pop('operation_count')
-            #         tx.pop('result_meta_xdr')
-            #         tx.pop('result_xdr')
-            #         tx.pop('signatures')
-            #         tx['asset_type'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
-            #         tx.pop('envelope_xdr')
-            #         to_process.append(tx)
-            # return to_process
-            return []
+            to_process = list()
+            for tx in data_two['_embedded']['records']:
+                # Get transaction envelope
+                if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
+                    tx.pop('_links')
+                    tx.pop('fee_charged')
+                    tx.pop('id')
+                    tx.pop('fee_account')
+                    tx.pop('fee_meta_xdr')
+                    tx.pop('ledger')
+                    tx.pop('max_fee')
+                    tx.pop('operation_count')
+                    tx.pop('result_meta_xdr')
+                    tx.pop('result_xdr')
+                    tx.pop('signatures')
+                    tx['asset_type'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
+                    tx.pop('envelope_xdr')
+                    to_process.append(tx)
+            return to_process
         except Exception as e:
             print(Fore.RED+ f'{e}')
             return e
