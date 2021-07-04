@@ -155,11 +155,9 @@ class StellarWallet:
             print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
             print(f"params: {builder.params}")
             data = builder.call()
-            pprint(self.filter_transactions(data)[0])
-            print(Fore.BLUE + "________________________________")
 
             # Working
-            print(Fore.YELLOW + "___________Server initiated inside function________________")
+            print(Fore.YELLOW + "___________Server initiated inside function______")
             server = Server("https://horizon.stellar.org/")
 
             builder = server.transactions().for_account(
@@ -168,10 +166,8 @@ class StellarWallet:
             print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
             print(f"params: {builder.params}")
             data = builder.call()
-            pprint(self.filter_transactions(data)[0])
-            print(Fore.YELLOW + "________________________________")
 
-            print(Fore.GREEN + " ---------Server as part of the class hardcoded pag------")
+            print(Fore.GREEN + " ------Server as part of the class hardcoded pag------")
 
             builder_two = self.server.transactions().for_account(
                 account_id=self.public_key).include_failed(False).order(
@@ -180,8 +176,6 @@ class StellarWallet:
             print(Fore.YELLOW + f"endpoint: {os.path.join(builder_two.horizon_url, builder_two.endpoint)}")
             print(f"params: {builder_two.params}")
             data_two = builder_two.call()
-            pprint(self.filter_transactions(data_two)[0])
-
 
             print(Fore.GREEN + " ---------Server as part of the class ------")
 
@@ -191,9 +185,7 @@ class StellarWallet:
 
             print(Fore.YELLOW + f"endpoint: {os.path.join(builder_two.horizon_url, builder_two.endpoint)}")
             print(f"params: {builder_two.params}")
-            data_two = builder_two.call()
-            pprint(self.filter_transactions(data_two)[0])
-
+            # data_two = builder_two.call()
 
             #
             # builder = self.server.transactions().for_account(
