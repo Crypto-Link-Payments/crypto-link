@@ -12,6 +12,8 @@ from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, 
 from stellar_sdk.sep import stellar_uri
 from stellar_sdk import TextMemo, Asset
 from stellar_sdk.exceptions import NotFoundError
+from pprint import pprint
+import os
 from colorama import Fore, init
 from utils.tools import Helpers
 
@@ -139,20 +141,21 @@ class StellarWallet:
         :return: List of incoming transfers
         """
         try:
-            from pprint import pprint
             # data = self.server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
             #     desc=False).cursor(cursor=pag).limit(200)
             # data = self.server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
             #     desc=False).cursor(cursor=pag).limit(200).call()
 
-            from stellar_sdk import Server
-            import os
-
-            server = Server("https://horizon.stellar.org/")
-
-            builder = server.transactions().for_account(
+            builder = self.server.transactions().for_account(
                 account_id=self.public_key).include_failed(False).order(
-                desc=False).cursor(154450799240826880).limit(200)
+                desc=False).cursor(int(pag)).limit(200)
+
+            # Working
+            # server = Server("https://horizon.stellar.org/")
+            # builder = self.server.transactions().for_account(
+            #     account_id=self.public_key).include_failed(False).order(
+            #     desc=False).cursor(154450799240826880).limit(200)
+
             print(Fore.YELLOW + f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
             print(f"params: {builder.params}")
             data = builder.call()
