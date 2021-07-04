@@ -142,8 +142,11 @@ class StellarWallet:
         """
         try:
 
+            print(f'Pag var value passed through: {pag}')
+            print(f"Pag var type {type(pag)}")
+
             # Working
-            print(Fore.YELLOW + "________________________________")
+            print(Fore.BLUE + "___________Hardcoded pag_____________________")
             server = Server("https://horizon.stellar.org/")
 
             builder = server.transactions().for_account(
@@ -152,10 +155,23 @@ class StellarWallet:
             print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
             print(f"params: {builder.params}")
             data = builder.call()
-            print(f"data: {data}")
+            pprint(self.filter_transactions(data)[0])
+            print(Fore.BLUE + "________________________________")
+
+            # Working
+            print(Fore.YELLOW + "___________Server initiated inside function________________")
+            server = Server("https://horizon.stellar.org/")
+
+            builder = server.transactions().for_account(
+                account_id=self.public_key).include_failed(False).order(
+                desc=False).cursor(154450799240826880).limit(200)
+            print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
+            print(f"params: {builder.params}")
+            data = builder.call()
+            pprint(self.filter_transactions(data)[0])
             print(Fore.YELLOW + "________________________________")
 
-            print(Fore.GREEN + "________________________________")
+            print(Fore.GREEN + " ---------Server as part of the class hardcoded pag------")
 
             builder_two = self.server.transactions().for_account(
                 account_id=self.public_key).include_failed(False).order(
@@ -164,7 +180,20 @@ class StellarWallet:
             print(Fore.YELLOW + f"endpoint: {os.path.join(builder_two.horizon_url, builder_two.endpoint)}")
             print(f"params: {builder_two.params}")
             data_two = builder_two.call()
-            print(f"data: {data_two}")
+            pprint(self.filter_transactions(data_two)[0])
+
+
+            print(Fore.GREEN + " ---------Server as part of the class ------")
+
+            builder_two = self.server.transactions().for_account(
+                account_id=self.public_key).include_failed(False).order(
+                desc=False).cursor(pag).limit(200)
+
+            print(Fore.YELLOW + f"endpoint: {os.path.join(builder_two.horizon_url, builder_two.endpoint)}")
+            print(f"params: {builder_two.params}")
+            data_two = builder_two.call()
+            pprint(self.filter_transactions(data_two)[0])
+
 
             #
             # builder = self.server.transactions().for_account(
