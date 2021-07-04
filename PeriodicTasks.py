@@ -158,123 +158,50 @@ class PeriodicTasks:
         """
         Functions initiates the check for stellar incoming deposits and processes them
         """
-        bot = self.bot
+
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
+        print("reading json")
         pag = helper.read_json_file('stellarPag.json')
-        new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
+        print(pag)
+        try:
+            from pprint import pprint
+            new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
+            pprint(new_transactions)
+        except Exception as e:
+            print(Fore.red + f"Exception: {e}")
 
-        if new_transactions:
-            # Filter transactions
+        # if new_transactions:
+        #     # Filter transactions
+        #     print("NONEWDEPOSITS")
 
-            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
-                new_transactions)
-            if tx_with_registered_memo:
-                channel = bot.get_channel(id=int(self.notification_channels['memoRegistered']))
-                await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
-            if tx_with_not_registered_memo:
-                channel = bot.get_channel(id=int(self.notification_channels['memoNotRegistered']))
-                await self.process_tx_with_not_registered_memo(channel=channel,
-                                                               no_registered_memo=tx_with_not_registered_memo)
-            if tx_with_no_memo:
-                channel = bot.get_channel(id=int(self.notification_channels['memoNone']))
-                await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
-
-            if tx_with_memo_special:
-                channel = bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
-                await self.process_tx_with_special_chart(channel=channel)
-
-            last_checked_pag = new_transactions[-1]["paging_token"]
-            if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
-                print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
-            else:
-                print(Fore.RED + 'There was an issue with updating pag')
-
-            print(Fore.GREEN + '==============DONE=================\n'
-                               '==========GOING TO SLEEP FOR 1 MINUTE=====')
-        else:
-            print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
-            print('==============================================')
-
-    async def check_expired_roles(self):
-        """
-        Function checks for expired users on community nad removes them if necessary
-        """
-        print(Fore.GREEN + f"{get_time()} --> CHECKING FOR USERS WITH EXPIRED ROLES ")
-        now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
-        merchant_manager = self.backoffice.merchant_manager
-        overdue_members = merchant_manager.get_over_due_users(
-            timestamp=int(now))  # Gets all overdue members from database
-        bot = self.bot
-        if overdue_members:
-            bot_guilds = [guild for guild in bot.guilds]  # get all guilds bot has access to
-            for mem in overdue_members:
-                mem_id = mem['userId']
-                mem_role_id = mem['roleId']
-                mem_role_community_id = mem['communityId']
-
-                # Check if community where role was created still has bot
-                if [guild.id for guild in bot_guilds if mem_role_community_id == guild.id]:
-                    # get guild and member
-                    guild = bot.get_guild(id=mem_role_community_id)
-                    member = guild.get_member(mem_id)
-                    # Check if member still exists
-                    if member in guild.members:
-                        role = guild.get_role(role_id=mem_role_id)  # Get the role
-                        if role:
-                            if role in member.roles:
-                                await member.remove_roles(role, reason='Merchant notification -> Role expired')
-                                if merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
-                                                                             role_id=mem_role_id, user_id=mem_id):
-                                    expired = discord.Embed(name=':timer: Expired Role :timer: ',
-                                                            title='__Role Expiration Notification__',
-                                                            description='Your membership has expired. Please check '
-                                                                        'details below.',
-                                                            color=Color.dark_red())
-
-                                    expired.set_thumbnail(url=bot.user.avatar_url)
-                                    expired.add_field(name=':bank: Origin of role expiration:bank: ',
-                                                      value=guild.name,
-                                                      inline=False)
-                                    expired.add_field(name=":man_juggling: Expired Role :man_juggling: ",
-                                                      value=f'```{role.name}```')
-                                    expired.add_field(name=":information_source: Information :information_source: ",
-                                                      value=" In order to obtain back all privileges please re-purchase"
-                                                            " the role directly from the community.")
-                                    await member.send(embed=expired)
-                                else:
-                                    channel_sys = channels["merchant"]
-                                    # send notification to merchant for system if user could not be removed from database
-                                    expired_sys = discord.Embed(
-                                        title='__Expired user could not be removed from system__',
-                                        colour=discord.Color.red())
-                                    expired_sys.set_thumbnail(url=bot.user.avatar_url)
-                                    expired_sys.add_field(name='Community',
-                                                          value=guild.name,
-                                                          inline=False)
-                                    expired_sys.add_field(name="Expired Role",
-                                                          value=role.name)
-                                    expired_sys.add_field(name="User details",
-                                                          value=f'Role ID: {mem_role_id}\n'
-                                                                f'Community ID: {mem_role_community_id}\n'
-                                                                f'Member ID: {mem_id}')
-                                    merch_channel = bot.get_channel(id=int(channel_sys))
-                                    await merch_channel.send(embed=expired_sys)
-                            else:
-                                merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
-                                                                          user_id=mem_id, role_id=mem_role_id)
-                        else:
-                            merchant_manager.remove_monetized_role_from_system(role_id=mem_role_id,
-                                                                               community_id=mem_role_community_id)
-                            merchant_manager.bulk_user_clear(community_id=mem_role_community_id, role_id=mem_role_id)
-                    else:
-                        merchant_manager.delete_user_from_applied(community_id=mem_role_community_id, user_id=mem_id)
-                else:
-                    merchant_manager.bulk_user_clear(community_id=mem_role_community_id, role_id=mem_role_id)
-                    merchant_manager.remove_all_monetized_roles(guild_id=mem_role_community_id)
-
-        else:
-            print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
-            print('===========================================================')
+            # tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
+            #     new_transactions)
+            # if tx_with_registered_memo:
+            #     channel = bot.get_channel(id=int(self.notification_channels['memoRegistered']))
+            #     await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
+            # if tx_with_not_registered_memo:
+            #     channel = bot.get_channel(id=int(self.notification_channels['memoNotRegistered']))
+            #     await self.process_tx_with_not_registered_memo(channel=channel,
+            #                                                    no_registered_memo=tx_with_not_registered_memo)
+            # if tx_with_no_memo:
+            #     channel = bot.get_channel(id=int(self.notification_channels['memoNone']))
+            #     await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
+            #
+            # if tx_with_memo_special:
+            #     channel = bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
+            #     await self.process_tx_with_special_chart(channel=channel)
+            #
+            # last_checked_pag = new_transactions[-1]["paging_token"]
+            # if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
+            #     print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
+            # else:
+            #     print(Fore.RED + 'There was an issue with updating pag')
+            #
+            # print(Fore.GREEN + '==============DONE=================\n'
+            #                    '==========GOING TO SLEEP FOR 1 MINUTE=====')
+        # else:
+        #     print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
+        #     print('==============================================')
 
     async def send_marketing_messages(self):
         print(Fore.GREEN + f"{get_time()} --> Sending report to Discord ")
@@ -371,7 +298,7 @@ def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
     scheduler.add_job(timed_updater.check_stellar_hot_wallet,
-                      CronTrigger(minute='05, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55'), misfire_grace_time=10,
+                      CronTrigger(second='00'), misfire_grace_time=10,
                       max_instances=20)
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
         hour='17'), misfire_grace_time=10, max_instances=20)
