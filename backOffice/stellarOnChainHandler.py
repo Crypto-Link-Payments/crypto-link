@@ -185,7 +185,7 @@ class StellarWallet:
 
             print(Fore.YELLOW + f"endpoint: {os.path.join(builder_two.horizon_url, builder_two.endpoint)}")
             print(f"params: {builder_two.params}")
-            # data_two = builder_two.call()
+            data_two = builder_two.call()
 
             #
             # builder = self.server.transactions().for_account(
