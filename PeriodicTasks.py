@@ -169,11 +169,21 @@ class PeriodicTasks:
             from pprint import pprint
             import requests
 
-            server = Server(horizon_url=self.bot.bot_settings["horizonServer"])
-            data = server.transactions().for_account(account_id=self.bot.hot_wallets["xlm"]).include_failed(False).order(
-                desc=False).cursor(cursor=pag['pag']).limit(200).call()
-            pprint(data)
-            # data = requests.get(f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=10&order=desc&include_failed=false").json()
+            # server = Server(horizon_url=self.bot.bot_settings["horizonServer"])
+            # data = server.transactions().for_account(account_id=self.bot.hot_wallets["xlm"]).include_failed(False).order(
+            #     desc=False).cursor(cursor=pag['pag']).limit(200).call()
+            # pprint(data)
+            try:
+                data = requests.get(f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=50&order=desc&include_failed=false").json()
+
+                if data:
+                    processed = self.backoffice.stellar_wallet.filter_transactions(stellar_data = data)
+                    pprint(processed)
+                else:
+                    print("No new deposits")
+            except requests.exceptions as e:
+                print(Fore.RED + f'{e}')
+
             # new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
             # pprint(new_transactions)
 
