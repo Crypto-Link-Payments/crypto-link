@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 import tweepy
 from re import search
+from stellar_sdk import Server
 
 import discord
 from discord import Embed, Color
@@ -160,7 +161,6 @@ class PeriodicTasks:
         """
 
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
-        print("reading json")
         pag = helper.read_json_file('stellarPag.json')
         try:
             # data = server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
@@ -168,10 +168,16 @@ class PeriodicTasks:
 
             from pprint import pprint
             import requests
-            print(pag)
+
+            server = Server(horizon_url=self.bot.bot_settings["horizonServer"])
+            data = server.transactions().for_account(account_id=self.bot.hot_wallets["xlm"]).include_failed(False).order(
+                desc=False).cursor(cursor=pag).limit(200).call()
+            pprint(data)
             # data = requests.get(f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=10&order=desc&include_failed=false").json()
-            new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-            pprint(new_transactions)
+            # new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
+            # pprint(new_transactions)
+
+
         except Exception as e:
             print(Fore.red + f"Exception: {e}")
 
