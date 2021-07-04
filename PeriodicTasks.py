@@ -171,7 +171,8 @@ class PeriodicTasks:
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
         pag = helper.read_json_file('stellarPag.json')
         new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-
+        from pprint import pprint
+        pprint(new_transactions)
         # data = requests.get(
         #     f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=50&order=desc&include_failed=false")
         #
