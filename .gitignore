@@ -134,7 +134,7 @@ botSetup.json
 hotWallets.json
 moneroPag.json
 stellarPag.json
-walletSecret.json
+walletSecrets.json
 .vscode/
 __pycache__
 .__pycache__
