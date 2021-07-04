@@ -1,4 +1,4 @@
-aiohttp==3.6.2
+aiohttp==3.7.4
 aiohttp-sse-client==0.1.6
 APScheduler==3.6.3
 astroid==2.3.3
