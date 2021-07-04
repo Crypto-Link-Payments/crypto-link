@@ -162,11 +162,13 @@ class PeriodicTasks:
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
         print("reading json")
         pag = helper.read_json_file('stellarPag.json')
-        print(pag)
         try:
             from pprint import pprint
-            new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-            pprint(new_transactions)
+            import requests
+            print(pag)
+            data = requests.get(f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=10&order=desc&include_failed=false").json()
+            # new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
+            pprint(data)
         except Exception as e:
             print(Fore.red + f"Exception: {e}")
 
@@ -300,12 +302,12 @@ def start_scheduler(timed_updater):
     scheduler.add_job(timed_updater.check_stellar_hot_wallet,
                       CronTrigger(second='00'), misfire_grace_time=10,
                       max_instances=20)
-    scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
-        hour='17'), misfire_grace_time=10, max_instances=20)
-
-    scheduler.add_job(timed_updater.send_builder_ranks,
-                      CronTrigger(day_of_week='mon', hour='01', minute='00', second='00'),
-                      misfire_grace_time=7, max_instances=20)
+    # scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
+    #     hour='17'), misfire_grace_time=10, max_instances=20)
+    #
+    # scheduler.add_job(timed_updater.send_builder_ranks,
+    #                   CronTrigger(day_of_week='mon', hour='01', minute='00', second='00'),
+    #                   misfire_grace_time=7, max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
     return scheduler
