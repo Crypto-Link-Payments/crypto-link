@@ -38,6 +38,7 @@ class DiscordBot(commands.Bot):
         helper = Helpers()
         self.bot_settings = helper.read_json_file(file_name='botSetup.json')
         self.integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
+        self.hot_wallets = helper.read_json_file(file_name = "hotWallets.json")
         self.list_of_coins = list(self.integrated_coins.keys())
         super().__init__(
             command_prefix=commands.when_mentioned_or(self.bot_settings['command']),
