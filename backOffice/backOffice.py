@@ -32,7 +32,7 @@ class BackOffice:
         self.backend_check = BotStructureCheck(self.connection)
         self.second_level_manager = SecondLevelWalletManager(self.connection)
         self.third_level_manager = ThirdLevelWalletManager(self.connection)
-        self.stellar_wallet = StellarWallet(horizon_url=self.horizon_url, integrated_coins=self.integrated_coins)
+        self.stellar_wallet = StellarWallet(network_type=bot_data["mainNet"], integrated_coins=self.integrated_coins)
         self.merchant_manager = MerchantManager(self.connection)
         self.stellar_manager = StellarManager(self.connection, self.as_connection)
         self.stats_manager = StatsManager(self.connection, self.as_connection)

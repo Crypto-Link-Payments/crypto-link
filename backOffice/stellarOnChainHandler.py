@@ -12,9 +12,10 @@ from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, 
 from stellar_sdk.sep import stellar_uri
 from stellar_sdk import TextMemo, Asset
 from stellar_sdk.exceptions import NotFoundError
-
+from colorama import Fore, init
 from utils.tools import Helpers
 
+init (autoreset=True)
 
 class StellarWallet:
     """
@@ -23,7 +24,7 @@ class StellarWallet:
 
     """
 
-    def __init__(self, horizon_url: str, integrated_coins):
+    def __init__(self, network_type, integrated_coins):
         helpers = Helpers()
         secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
         public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
@@ -33,15 +34,18 @@ class StellarWallet:
         self.private_key = secret_details['stellar']
         self.root_keypair = Keypair.from_secret(self.private_key)
         self.root_account = Account(account_id=self.root_keypair.public_key, sequence=1)
-        self.server = Server(horizon_url=horizon_url)  # Testnet
 
         # Decide network type
-        if horizon_url == "https://horizon-testnet.stellar.org":
+        if not network_type:
             self.network_phrase = Network.TESTNET_NETWORK_PASSPHRASE
             self.network_type = 'testnet'
+            self.server = Server(horizon_url="https://horizon-testnet.stellar.org")
+
         else:
             self.network_phrase = Network.PUBLIC_NETWORK_PASSPHRASE
             self.network_type = 'pub-net'
+            self.server = Server(horizon_url="https://horizon.stellar.org")
+        print(Fore.YELLOW + f' Connected to {self.network_type}')
 
     def create_stellar_account(self):
         """
@@ -134,27 +138,30 @@ class StellarWallet:
         Gets all incoming transactions and removes certain values
         :return: List of incoming transfers
         """
-        data = self.server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
-            desc=False).cursor(cursor=pag).limit(200).call()
-        to_process = list()
-        for tx in data['_embedded']['records']:
-            # Get transaction envelope
-            if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
-                tx.pop('_links')
-                tx.pop('fee_charged')
-                tx.pop('id')
-                tx.pop('fee_account')
-                tx.pop('fee_meta_xdr')
-                tx.pop('ledger')
-                tx.pop('max_fee')
-                tx.pop('operation_count')
-                tx.pop('result_meta_xdr')
-                tx.pop('result_xdr')
-                tx.pop('signatures')
-                tx['asset_type'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
-                tx.pop('envelope_xdr')
-                to_process.append(tx)
-        return to_process
+        try:
+            data = self.server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
+                desc=False).cursor(cursor=pag).limit(200).call()
+            to_process = list()
+            for tx in data['_embedded']['records']:
+                # Get transaction envelope
+                if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
+                    tx.pop('_links')
+                    tx.pop('fee_charged')
+                    tx.pop('id')
+                    tx.pop('fee_account')
+                    tx.pop('fee_meta_xdr')
+                    tx.pop('ledger')
+                    tx.pop('max_fee')
+                    tx.pop('operation_count')
+                    tx.pop('result_meta_xdr')
+                    tx.pop('result_xdr')
+                    tx.pop('signatures')
+                    tx['asset_type'] = self.decode_transaction_envelope(envelope_xdr=tx['envelope_xdr'])
+                    tx.pop('envelope_xdr')
+                    to_process.append(tx)
+            return to_process
+        except Exception as e:
+            return e
 
     @staticmethod
     def check_if_memo(memo):
