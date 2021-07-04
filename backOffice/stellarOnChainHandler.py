@@ -155,8 +155,8 @@ class StellarWallet:
                 desc=False).cursor(154450799240826880).limit(200)
             print(Fore.YELLOW + f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
             print(f"params: {builder.params}")
-            # data = builder.call()
-            # print(f"data: {data}")
+            data = builder.call()
+            print(f"data: {data}")
 
 
         #     to_process = list()
