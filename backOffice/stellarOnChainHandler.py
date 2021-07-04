@@ -145,7 +145,8 @@ class StellarWallet:
             #     desc=False).cursor(cursor=pag).limit(200)
             # data = self.server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
             #     desc=False).cursor(cursor=pag).limit(200).call()
-
+            print(self.public_key)
+            print(pag)
             builder = self.server.transactions().for_account(
                 account_id=self.public_key).include_failed(False).order(
                 desc=False).cursor(int(pag)).limit(200)
@@ -158,11 +159,11 @@ class StellarWallet:
 
             print(Fore.YELLOW + f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
             print(f"params: {builder.params}")
-            data = builder.call()
+            builder = builder.call()
             # print(f"data: {data}")
 
             to_process = list()
-            for tx in data['_embedded']['records']:
+            for tx in builder['_embedded']['records']:
                 # Get transaction envelope
                 if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
                     tx.pop('_links')
