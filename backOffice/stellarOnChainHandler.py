@@ -133,14 +133,16 @@ class StellarWallet:
                 # TODO count all deposits
                 return asset
 
-    def get_incoming_transactions(self, pag=None):
+    def get_incoming_transactions(self, pag):
         """
         Gets all incoming transactions and removes certain values
         :return: List of incoming transfers
         """
         try:
+            from pprint import pprint
             data = self.server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
                 desc=False).cursor(cursor=pag).limit(200).call()
+            pprint(data)
             to_process = list()
             for tx in data['_embedded']['records']:
                 # Get transaction envelope
@@ -161,6 +163,7 @@ class StellarWallet:
                     to_process.append(tx)
             return to_process
         except Exception as e:
+            print(Fore.RED+ f'{e}')
             return e
 
     @staticmethod

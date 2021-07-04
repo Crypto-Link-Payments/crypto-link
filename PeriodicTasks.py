@@ -163,12 +163,15 @@ class PeriodicTasks:
         print("reading json")
         pag = helper.read_json_file('stellarPag.json')
         try:
+            # data = server.transactions().for_account(account_id=self.public_key).include_failed(False).order(
+            #     desc=False).cursor(cursor=pag).limit(200).call()
+
             from pprint import pprint
             import requests
             print(pag)
-            data = requests.get(f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=10&order=desc&include_failed=false").json()
-            # new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-            pprint(data)
+            # data = requests.get(f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=10&order=desc&include_failed=false").json()
+            new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
+            pprint(new_transactions)
         except Exception as e:
             print(Fore.red + f"Exception: {e}")
 

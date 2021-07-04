@@ -26,10 +26,10 @@ if __name__ == '__main__':
     # Activate periodic tasks
     periodic_tasks = PeriodicTasks(backoffice, bot)
     scheduler = start_scheduler(periodic_tasks)
-
-    # Activate merchant tasks
-    merchant_tasks = MerchantTasks(backoffice, bot)
-    merchant_scheduler = start_merchant_scheduler(merchant_tasks)
+    #
+    # # Activate merchant tasks
+    # merchant_tasks = MerchantTasks(backoffice, bot)
+    # merchant_scheduler = start_merchant_scheduler(merchant_tasks)
 
     # Discord Token
     bot.run()
