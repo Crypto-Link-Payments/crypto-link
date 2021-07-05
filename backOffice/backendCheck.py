@@ -22,6 +22,7 @@ class BotStructureCheck(object):
                                      "CLOffChainStats",  # OFf chain statistics
                                      "CLEarning",
                                      "CLWallets",
+                                     "TokenProfiles",
                                      "CLFees",
                                      "CORPFromTransactions",
                                      "MerchantCommunityProfile",
@@ -48,9 +49,8 @@ class BotStructureCheck(object):
         for collection in self.required_collections:
             if collection not in bot_collections:
                 self.crypto_link.create_collection(name=collection)
-                print(Fore.YELLOW + f"{collection.upper()} has been created!")
             else:
-                print(Fore.GREEN + f'{collection.upper()} already exists')
+                pass
         print(Fore.LIGHTGREEN_EX + "====DONE====")
 
     def checking_stats_documents(self):
@@ -65,7 +65,6 @@ class BotStructureCheck(object):
         stats_off_chain = len(list(off_chain.find()))
         print(Fore.LIGHTBLUE_EX + "=====Checking STATS backend===")
         if stats_on_chain == 0:
-            print(Fore.YELLOW + "MAKING ON CHAIN DOCUMENT ENTRY")
             global_stats = [{
                 "ticker": "xlm",
                 "depositCount": int(0),
