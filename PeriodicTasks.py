@@ -14,7 +14,6 @@ from colorama import Fore, init
 
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
-import requests
 
 init(autoreset=True)
 custom_messages = CustomMessages()
@@ -160,55 +159,41 @@ class PeriodicTasks:
         """
         Functions initiates the check for stellar incoming deposits and processes them
         """
-        # server = Server(horizon_url=self.bot.bot_settings["horizonServer"])
-        # data = server.transactions().for_account(account_id=self.bot.hot_wallets["xlm"]).include_failed(False).order(
-        #     desc=False).cursor(cursor=pag['pag']).limit(200).call()
-        # pprint(data)
-
-        # new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-        # pprint(new_transactions)
 
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
         pag = helper.read_json_file('stellarPag.json')
         new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
-        from pprint import pprint
-        pprint(new_transactions)
-        # data = requests.get(
-        #     f"https://horizon.stellar.org/accounts/{self.bot.hot_wallets['xlm']}/transactions?cursor={pag['pag']}&limit=50&order=desc&include_failed=false")
-        #
-        # if data.status_code == 200 and data.json():
-        #     processed = self.backoffice.stellar_wallet.filter_transactions(stellar_data=data)
-        #
-        #     tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
-        #         processed)
-        #
-        #     if tx_with_registered_memo:
-        #         channel = self.bot.get_channel(id=int(self.notification_channels['memoRegistered']))
-        #         await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
-        #     if tx_with_not_registered_memo:
-        #         channel = self.bot.get_channel(id=int(self.notification_channels['memoNotRegistered']))
-        #         await self.process_tx_with_not_registered_memo(channel=channel,
-        #                                                        no_registered_memo=tx_with_not_registered_memo)
-        #     if tx_with_no_memo:
-        #         channel = self.bot.get_channel(id=int(self.notification_channels['memoNone']))
-        #         await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
-        #
-        #     if tx_with_memo_special:
-        #         channel = self.bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
-        #         await self.process_tx_with_special_chart(channel=channel)
-        #
-        #     last_checked_pag = processed[-1]["paging_token"]  # TODO fix this as they get returned in reversed order
-        #
-        #     if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
-        #         print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
-        #     else:
-        #         print(Fore.RED + 'There was an issue with updating pag')
-        #
-        #     print(Fore.GREEN + '==============DONE=================\n'
-        #                        '==========GOING TO SLEEP FOR 1 MINUTE=====')
-        # else:
-        #     print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
-        #     print('==============================================')
+
+        if new_transactions and isinstance(new_transactions, list):
+            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
+                new_transactions)
+            if tx_with_registered_memo:
+                channel = self.bot.get_channel(id=int(self.notification_channels['memoRegistered']))
+                await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
+            if tx_with_not_registered_memo:
+                channel = self.bot.get_channel(id=int(self.notification_channels['memoNotRegistered']))
+                await self.process_tx_with_not_registered_memo(channel=channel,
+                                                               no_registered_memo=tx_with_not_registered_memo)
+            if tx_with_no_memo:
+                channel = self.bot.get_channel(id=int(self.notification_channels['memoNone']))
+                await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
+
+            if tx_with_memo_special:
+                channel = self.bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
+                await self.process_tx_with_special_chart(channel=channel)
+
+            last_checked_pag = new_transactions[-1]["paging_token"]
+
+            if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
+                print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
+            else:
+                print(Fore.RED + 'There was an issue with updating pag')
+
+            print(Fore.GREEN + '==============DONE=================\n'
+                               '==========GOING TO SLEEP FOR 1 MINUTE=====')
+        else:
+            print(Fore.CYAN + 'No new incoming transactions in range...Going to sleep for 60 seconds')
+            print('==============================================')
 
     async def send_marketing_messages(self):
         print(Fore.GREEN + f"{get_time()} --> Sending report to Discord ")
@@ -307,12 +292,12 @@ def start_scheduler(timed_updater):
     scheduler.add_job(timed_updater.check_stellar_hot_wallet,
                       CronTrigger(second='00'), misfire_grace_time=10,
                       max_instances=20)
-    # scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
-    #     hour='17'), misfire_grace_time=10, max_instances=20)
-    #
-    # scheduler.add_job(timed_updater.send_builder_ranks,
-    #                   CronTrigger(day_of_week='mon', hour='01', minute='00', second='00'),
-    #                   misfire_grace_time=7, max_instances=20)
+    scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
+        hour='17'), misfire_grace_time=10, max_instances=20)
+
+    scheduler.add_job(timed_updater.send_builder_ranks,
+                      CronTrigger(day_of_week='mon', hour='01', minute='00', second='00'),
+                      misfire_grace_time=7, max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
     return scheduler
