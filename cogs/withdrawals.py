@@ -318,7 +318,7 @@ class WithdrawalCommands(commands.Cog):
                         message_content = f":robot: {ctx.message.author.mention} Current withdrawal fee which will " \
                                           f"be deducted from requested withdrawal amount is " \
                                           f" {stellar_fee} {CONST_STELLAR_EMOJI}.\n  " \
-                                          f"`Total {final_normal}XLM` \n" \
+                                          f"`Total {final_normal} XLM with additional fee of {fee_in_stroops/(10**7)} XLM\n" \
                                           f"Please answer either with ***yes*** or ***no***."
 
                         verification = await ctx.channel.send(content=message_content)
@@ -340,7 +340,7 @@ class WithdrawalCommands(commands.Cog):
                                 # Initiate on chain withdrawal
                                 result = self.backoffice.stellar_wallet.token_withdrawal(address=strip_address,
                                                                                          token='xlm',
-                                                                                         amount=str(amount_major))
+                                                                                         amount=str(final_normal))
                                 if result.get("hash"):
                                     # Store withdrawal details to database
                                     result['userId'] = int(ctx.message.author.id)
@@ -373,7 +373,8 @@ class WithdrawalCommands(commands.Cog):
                                                                                            amount=fee_in_stroops,
                                                                                            system='withdrawal',
                                                                                            token="xlm",
-                                                                                           user=ctx.message.author.id)
+                                                                                           user=f'{ctx.author}',
+                                                                                           user_id=ctx.message.author.id)
 
                                     self.backoffice.bot_manager.update_cl_wallet_balance(ticker='xlm',
                                                                                          to_update={'balance': int(
