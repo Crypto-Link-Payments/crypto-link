@@ -261,7 +261,7 @@ class CustomMessages:
         notify.add_field(name=':receipt: Withdrawal asset details :receipt: ',
                          value=f'`{round(withdrawal_data["amount"] / 10000000, 7):.7f} {withdrawal_data["asset"]}`',
                          inline=False)
-        notify.add_field(name=':money_mouth: Crypto Link Fee :money_mouth: ',
+        notify.add_field(name=':money_mouth: Crypto Link Fee charged :money_mouth: ',
                          value=f'`{fee}`',
                          inline=False)
         notify.add_field(name=':sunrise: Horizon Access Link :sunrise: ',
