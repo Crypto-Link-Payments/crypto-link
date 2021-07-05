@@ -4,20 +4,19 @@ Handling Stellar chain
 
 import os
 import sys
-
-project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(project_path)
-
 from stellar_sdk import Account, Server, Keypair, TransactionEnvelope, Payment, Network, TransactionBuilder, exceptions
 from stellar_sdk.sep import stellar_uri
 from stellar_sdk import TextMemo, Asset
 from stellar_sdk.exceptions import NotFoundError
-from pprint import pprint
-import os
+# from pprint import pprint
 from colorama import Fore, init
 from utils.tools import Helpers
 
-init (autoreset=True)
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(project_path)
+
+init(autoreset=True)
+
 
 class StellarWallet:
     """
@@ -42,11 +41,10 @@ class StellarWallet:
             self.network_phrase = Network.TESTNET_NETWORK_PASSPHRASE
             self.network_type = 'testnet'
             self.server = Server(horizon_url="https://horizon-testnet.stellar.org/")
-
         else:
             self.network_phrase = Network.PUBLIC_NETWORK_PASSPHRASE
             self.network_type = 'pub-net'
-            self.server = Server(horizon_url="https://horizon.stellar.org/")
+            self.server = Server(horizon_url="https://horizon.publicnode.org/")
         print(Fore.YELLOW + f' Connected to {self.network_type}')
 
     def create_stellar_account(self):
@@ -141,56 +139,20 @@ class StellarWallet:
         :return: List of incoming transfers
         """
         try:
-
-            print(f'Pag var value passed through: {pag}')
-            print(f"Pag var type {type(pag)}")
-
-            # # Working
-            # print(Fore.BLUE + "___________Hardcoded pag_____________________")
-            # server = Server("https://horizon.stellar.org/")
-            #
-            # builder = server.transactions().for_account(
-            #     account_id=self.public_key).include_failed(False).order(
-            #     desc=False).cursor(154450799240826880).limit(200)
-            # print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
-            # print(f"params: {builder.params}")
-            # data = builder.call()
-            #
-            # # Working
-            # print(Fore.YELLOW + "___________Server initiated inside function______")
-            # server = Server("https://horizon.stellar.org/")
-            #
-            # builder = server.transactions().for_account(
-            #     account_id=self.public_key).include_failed(False).order(
-            #     desc=False).cursor(154450799240826880).limit(200)
-            # print(f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
-            # print(f"params: {builder.params}")
-            # data = builder.call()
-            #
-            # print(Fore.GREEN + " ------Server as part of the class hardcoded pag------")
-            #
-            # builder_two = self.server.transactions().for_account(
-            #     account_id=self.public_key).include_failed(False).order(
-            #     desc=False).cursor(154450799240826880).limit(200)
-            #
-            # print(Fore.YELLOW + f"endpoint: {os.path.join(builder_two.horizon_url, builder_two.endpoint)}")
-            # print(f"params: {builder_two.params}")
-            # data_two = builder_two.call()
-
-            print(Fore.GREEN + " ---------Server as part of the class ------")
-
-            builder_two = self.server.transactions().for_account(
+            builder = self.server.transactions().for_account(
                 account_id=self.public_key).include_failed(False).order(
                 desc=False).cursor(pag).limit(200)
+            data = builder.call()
 
-            print(Fore.YELLOW + f"endpoint: {os.path.join(builder_two.horizon_url, builder_two.endpoint)}")
-            print(f"params: {builder_two.params}")
-            data_two = builder_two.call()
+            # getting URI
+            # print(Fore.YELLOW + f"endpoint: {os.path.join(builder.horizon_url, builder.endpoint)}")
+            # print(f"params: {builder.params}")
 
             to_process = list()
-            for tx in data_two['_embedded']['records']:
+            for tx in data['_embedded']['records']:
                 # Get transaction envelope
-                if tx['source_account'] != self.public_key and tx['successful'] is True:  # Get only incoming transactions
+                if tx['source_account'] != self.public_key and tx[
+                    'successful'] is True:  # Get only incoming transactions
                     tx.pop('_links')
                     tx.pop('fee_charged')
                     tx.pop('id')
@@ -207,10 +169,9 @@ class StellarWallet:
                     to_process.append(tx)
             return to_process
         except Exception as e:
-            print(Fore.RED+ f'{e}')
             return e
 
-    def filter_transactions(self,stellar_data):
+    def filter_transactions(self, stellar_data):
         to_process = list()
         for tx in stellar_data['_embedded']['records']:
             # Get transaction envelope
@@ -230,7 +191,6 @@ class StellarWallet:
                 tx.pop('envelope_xdr')
                 to_process.append(tx)
         return to_process
-
 
     @staticmethod
     def check_if_memo(memo):
