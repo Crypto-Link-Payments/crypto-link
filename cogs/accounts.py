@@ -39,7 +39,12 @@ class UserAccountCommands(commands.Cog):
     async def me(self, ctx):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
-        xlm_balance = float(wallet_data["xlm"]) / (10 ** 7)
+
+        try:
+            xlm_balance = float(wallet_data["xlm"]) / (10 ** 7)
+        except ZeroDivisionError:
+            xlm_balance = 0
+
         rates = get_rates(coin_name='stellar')
         acc_details = Embed(title=f':office_worker: {ctx.author} :office_worker:',
                             description=f' ***__Basic details on your Discord account__*** ',
@@ -55,7 +60,7 @@ class UserAccountCommands(commands.Cog):
                               value=f'`{xlm_balance:.7f}` {CONST_STELLAR_EMOJI}',
                               inline=False)
 
-        if rates:
+        if rates and float(wallet_data["xlm"]) > 0:
             in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
             in_usd = rate_converter(xlm_balance, rates["stellar"]["usd"])
             in_btc = rate_converter(xlm_balance, rates["stellar"]["btc"])
@@ -74,6 +79,7 @@ class UserAccountCommands(commands.Cog):
                                   value=f'`Ξ {in_eth:.8f}`')
             acc_details.add_field(name=f'LTC',
                                   value=f'`Ł {in_ltc:.8f}`')
+
         acc_details.set_thumbnail(url=ctx.author.avatar_url)
         acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
                               value=f'[Stellar](https://www.stellar.org/)\n'
