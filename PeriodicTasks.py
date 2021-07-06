@@ -31,11 +31,12 @@ def get_time():
 
 
 class PeriodicTasks:
-    def __init__(self, backoffice, bot):
+    def __init__(self, backoffice, bot, main_net: bool):
         self.backoffice = backoffice
         self.twitter_cred = self.backoffice.twitter_details
         self.notification_channels = self.backoffice.auto_messaging_channels["depositNotifications"]
         self.bot = bot
+        self.main_net = main_net
         self.twitter_acc = self.backoffice.twitter_details
         auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
         auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
@@ -161,7 +162,13 @@ class PeriodicTasks:
         """
 
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
-        pag = helper.read_json_file('stellarPag.json')
+        if not self.main_net:
+            file_name = 'stellarPagTest.json'
+            pag = helper.read_json_file(file_name)
+        else:
+            file_name = 'stellarPag.json'
+            pag = helper.read_json_file(file_name)
+
         new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
 
         if new_transactions and isinstance(new_transactions, list):
@@ -184,7 +191,7 @@ class PeriodicTasks:
 
             last_checked_pag = new_transactions[-1]["paging_token"]
 
-            if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
+            if helper.update_json_file(file_name=file_name, key='pag', value=int(last_checked_pag)):
                 print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
             else:
                 print(Fore.RED + 'There was an issue with updating pag')
