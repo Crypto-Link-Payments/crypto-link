@@ -138,3 +138,11 @@ class StatsManager(object):
             "bridges", DESCENDING).limit(limit)
         return top_list
 
+    def register_new_bot_stat(self, data:dict):
+        result = self.off_chain_activities.insert_one(data)
+        if result.inserted_id:
+            return True
+        else:
+            return False
+
+
