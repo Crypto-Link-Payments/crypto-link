@@ -15,6 +15,7 @@ from backOffice.botWallet import BotManager
 from backOffice.corpHistory import CorporateHistoryManager
 from backOffice.secondLevelWalletManager import SecondLevelWalletManager
 from backOffice.thirdLevelWalletManager import ThirdLevelWalletManager
+from backOffice.tokenManager import TokenManager
 
 
 class BackOffice:
@@ -41,6 +42,7 @@ class BackOffice:
         self.account_mng = AccountManager(self.connection)
         self.bot_manager = BotManager(self.connection)
         self.corporate_hist_mng = CorporateHistoryManager(self.connection)
+        self.token_manager = TokenManager(self.connection)
 
     def check_backend(self):
         self.backend_check.check_collections()
