@@ -19,21 +19,19 @@ from backOffice.tokenManager import TokenManager
 
 
 class BackOffice:
-    def __init__(self):
+    def __init__(self, bot_settings: dict):
         self.helper = Helpers()
         self.integrated_coins = self.helper.read_json_file(file_name='integratedCoins.json')
-        bot_data = self.helper.read_json_file(file_name='botSetup.json')
-        self.connection = MongoClient(bot_data['database']['connection'], maxPoolSize=20)
-        self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(bot_data['database']['connection'])
-        self.twitter_details = bot_data["twitter"]
-        self.horizon_url = bot_data['horizonServer']
-        self.creator_id = bot_data["creator"]
         self.auto_messaging_channels = self.helper.read_json_file(file_name='autoMessagingChannels.json')
-
+        self.connection = MongoClient(bot_settings['database']['connection'], maxPoolSize=20)
+        self.as_connection = motor.motor_asyncio.AsyncIOMotorClient(bot_settings['database']['connection'])
+        self.twitter_details = bot_settings["twitter"]
+        self.creator_id = bot_settings["creator"]
         self.backend_check = BotStructureCheck(self.connection)
         self.second_level_manager = SecondLevelWalletManager(self.connection)
         self.third_level_manager = ThirdLevelWalletManager(self.connection)
-        self.stellar_wallet = StellarWallet(network_type=bot_data["mainNet"], integrated_coins=self.integrated_coins)
+        self.stellar_wallet = StellarWallet(network_type=bot_settings["mainNet"],
+                                            integrated_coins=self.integrated_coins)
         self.merchant_manager = MerchantManager(self.connection)
         self.stellar_manager = StellarManager(self.connection, self.as_connection)
         self.stats_manager = StatsManager(self.connection, self.as_connection)
