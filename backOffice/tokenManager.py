@@ -12,3 +12,9 @@ class TokenManager:
             return True
         else:
             return False
+
+    def get_registered_tokens(self):
+        result = list(self.token_profiles.find({},
+                                               {"_id":0,
+                                                "ticker":1}))
+        return result
