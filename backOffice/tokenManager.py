@@ -13,6 +13,9 @@ class TokenManager:
         else:
             return False
 
+    def get_token_details_by_code(self, code):
+        return self.token_profiles.find({"ticker":code})
+
     def get_registered_tokens(self):
         result = list(self.token_profiles.find({},
                                                {"_id":0,
