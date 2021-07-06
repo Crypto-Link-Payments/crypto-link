@@ -344,100 +344,213 @@ class BotManagementCommands(commands.Cog):
                               inline=False)
         await ctx.author.send(embed=load_status)
 
-    #############################  Crypto Link COGS Management #############################
-
+    #############################  Token management #############################
     @commands.group()
     @commands.check(is_one_of_gods)
-    async def cogs(self, ctx):
+    async def tokens(self, ctx):
         if ctx.invoked_subcommand is None:
-            value = [{'name': '__List all cogs__',
-                      'value': f"***{self.command_string}cogs list*** "},
-                     {'name': '__Loading specific cog__',
-                      'value': f"***{self.command_string}cogs load <cog name>*** "},
-                     {'name': '__Unloading specific cog__',
-                      'value': f"***{self.command_string}cogs unload <cog name>*** "},
-                     {'name': '__Reload all cogs__',
-                      'value': f"***{self.command_string}cogs reload*** "}
+            value = [{'name': '__Add new support__',
+                      'value': f"***{self.command_string}system tokens new <issuer> <tick>*** "}
                      ]
 
             await custom_messages.embed_builder(ctx, title='Available sub commands for system',
                                                 description='Available commands under category ***system***',
                                                 data=value)
 
-    @cogs.command()
-    async def load(self, ctx, extension: str):
-        """
-        Load specific COG == Turn ON
-        :param ctx: Context
-        :param extension: Extension Name as str
-        :return:
-        """
+    @tokens.command()
+    async def new(self, ctx, asset_issuer: str, asset_code: str):
+        from pprint import pprint
         try:
-            self.bot.load_extension(f'cogs.{extension}')
-            embed_unload = Embed(name='Boom',
-                                 title='Cogs management',
-                                 colour=Colour.green())
-            embed_unload.add_field(name='Extension',
-                                   value=f'You have loaded ***{extension}*** COGS')
+            assets = self.bot.backoffice.stellar_wallet.server.assets()
+            asset = assets.for_code(asset_code=asset_code.upper()).for_issuer(
+                asset_issuer=asset_issuer.upper()).call()
+            asset_data = asset["_embedded"]['records']
+            if asset_data:
+                data = self.bot.backoffice.stellar_wallet.establish_trust(asset_issuer, asset_code)
+                pprint(data)
+                if data[0]:
+                    token = {
+                        "toml": asset_data[0]["_links"]["toml"]["href"],
+                        "assetCode": asset_data[0]["asset_code"],
+                        "assetIssuer": asset_data[0]["asset_issuer"],
+                        "assetType": asset_data[0]["asset_type"],
+                        "pagingToken": asset_data[0]["paging_token"],
+                        'webPage': None,
+                        "ownerId": None,
+                        "ownerName": None,
+                        "expert": None,
+                        "homepage": None
+                    }
 
-            await ctx.channel.send(embed=embed_unload)
-        except Exception as error:
-            await ctx.channel.send(content=error)
+                    # insert new token into database
+                    if self.bot.backoffice.token_manager.insert_new_token(token):
+                        await ctx.author.send(content="Details of new token to db created")
+                        # Create CL wallet for fee collections
+                        if self.bot.backoffice.bot_manager.create_cl_wallet(
+                                {"ticker": asset_data[0]["asset_code"].lower(), "balance": 0}):
+                            await ctx.author.send(content="Cl wallet for fees created successfully")
+                            # fee category
+                            # Update fee categories
+                            if self.bot.backoffice.bot_manager.manage_fees_and_limits(key="withdrawal_fees",
+                                                                                      data={
+                                                                                          f"fee_list.{asset_data[0]['asset_code'].lower()}": 1.0}):
+                                await ctx.author.send(content="New fee category created")
 
-    @cogs.command()
-    async def unload(self, ctx, extension: str):
-        """
-        Unloads COG == Turns OFF commands under certain COG
-        :param ctx: Context
-        :param extension: COG Name
-        :return:
-        """
-        try:
-            self.bot.unload_extension(f'cogs.{extension}')
-            embed_unload = Embed(name='Boom',
-                                 title='Cogs management',
-                                 colour=Colour.red())
-            embed_unload.add_field(name='Extension',
-                                   value=f'You have unloaded ***{extension}*** COGS')
+                                all_guild_ids = self.bot.backoffice.guild_profiles.get_all_guild_ids()
 
-            await ctx.channel.send(embed=embed_unload)
-        except Exception as error:
-            await ctx.channel.send(content=error)
+                                if all_guild_ids:
+                                    guild_stats_data = {
+                                        f"{asset_data[0]['asset_code'].lower()}": {"volume": float(0.0),
+                                                                                   "txCount": int(0),
+                                                                                   "privateCount": int(0),
+                                                                                   "publicCount": int(0),
+                                                                                   "roleTxCount": int(0),
+                                                                                   "emojiTxCount": int(0),
+                                                                                   "multiTxCount": int(0)}
+                                    }
 
-    @cogs.command()
-    async def list(self, ctx):
-        """
-        List all cogs implemented in the system
-        """
-        cog_list_embed = Embed(title='All available COGS',
-                               description='All available cogs and their description',
-                               colour=Colour.green())
-        for cg in extensions:
-            cog_list_embed.add_field(name=cg,
-                                     value='==============',
-                                     inline=False)
-        await ctx.channel.send(embed=cog_list_embed)
+                                    # For every registered guild add new token for stats collections
+                                    for g_id in all_guild_ids:
+                                        await self.bot.backoffice.guild_profiles.update_guild_profile(
+                                            guild_id=int(g_id),
+                                            data_to_update=guild_stats_data)
 
-    @cogs.command()
-    async def reload(self, ctx):
-        """
-         Reload all cogs
-        """
-        notification_str = ''
-        ext_load_embed = Embed(title='System message',
-                               description='Status of the cogs after reload',
-                               colour=Colour.blue())
-        for extension in extensions:
-            try:
-                self.bot.unload_extension(f'{extension}')
-                self.bot.load_extension(f'{extension}')
-                notification_str += f'{extension} :smile: \n'
-            except Exception as e:
-                notification_str += f'{extension} :angry: {e}\n'
+                                    await ctx.author.send(content="All guilds have been updated with stats")
 
-        ext_load_embed.add_field(name='Status',
-                                 value=notification_str)
-        await ctx.channel.send(embed=ext_load_embed)
+                                # update crypot link stats
+                                stats_off = {
+                                    "ticker": asset_data[0]['asset_code'].lower(),
+                                    "totalTx": int(0),
+                                    "totalMoved": float(0.0),
+                                    "totalPrivateCount": int(0),
+                                    "totalPrivateMoved": float(0.0),
+                                    "totalPublicCount": int(0),
+                                    "totalPublicMoved": float(0.0),
+                                    "totalEmojiTx": int(0),
+                                    "totalEmojiMoved": float(0),
+                                    "multiTxCount": int(0),
+                                    "multiTxMoved": float(0.0),
+                                    "merchantPurchases": int(0),
+                                    "merchantMoved": float(0)
+                                }
+
+                                if self.bot.backoffice.stats_manager.register_new_bot_stat(stats_off):
+                                    await ctx.author.send(content="Global off chain stats for token created")
+
+                                    # Send to explorer the support information for new coin
+                                    load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                     self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+
+                                    explorer_msg = f':new: :coin: New token integrated with asset code ***{asset_data[0]["asset_code"]}***' \
+                                                   f'from issuer {asset_data[0]["asset_issuer"]} :rocket:'
+
+                                    await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                                            message=explorer_msg,
+                                                                            on_chain=True, tx_type='deposit')
+                            else:
+                                print("There has has been error in creating fees into database")
+                    else:
+                        print("we could not store into the file")
+                else:
+                    await ctx.channel.send(content='There has been an issue with executing the trust op in package')
+                    await ctx.channel.send(content=f'{data[1]}')
+            else:
+                await ctx.send(content=f'Asset was not found please recheck issuer and asset code')
+        except Exception as e:
+            await ctx.send(content=f'It seems like there hass been an issue\n'
+                                   f'```{e}```')
+
+    # @commands.check(is_one_of_gods)
+    # async def cogs(self, ctx):
+    #     if ctx.invoked_subcommand is None:
+    #         value = [{'name': '__List all cogs__',
+    #                   'value': f"***{self.command_string}cogs list*** "},
+    #                  {'name': '__Loading specific cog__',
+    #                   'value': f"***{self.command_string}cogs load <cog name>*** "},
+    #                  {'name': '__Unloading specific cog__',
+    #                   'value': f"***{self.command_string}cogs unload <cog name>*** "},
+    #                  {'name': '__Reload all cogs__',
+    #                   'value': f"***{self.command_string}cogs reload*** "}
+    #                  ]
+    #
+    #         await custom_messages.embed_builder(ctx, title='Available sub commands for system',
+    #                                             description='Available commands under category ***system***',
+    #                                             data=value)
+
+    # @cogs.command()
+    # async def load(self, ctx, extension: str):
+    #     """
+    #     Load specific COG == Turn ON
+    #     :param ctx: Context
+    #     :param extension: Extension Name as str
+    #     :return:
+    #     """
+    #     try:
+    #         self.bot.load_extension(f'cogs.{extension}')
+    #         embed_unload = Embed(name='Boom',
+    #                              title='Cogs management',
+    #                              colour=Colour.green())
+    #         embed_unload.add_field(name='Extension',
+    #                                value=f'You have loaded ***{extension}*** COGS')
+    #
+    #         await ctx.channel.send(embed=embed_unload)
+    #     except Exception as error:
+    #         await ctx.channel.send(content=error)
+
+    # @cogs.command()
+    # async def unload(self, ctx, extension: str):
+    #     """
+    #     Unloads COG == Turns OFF commands under certain COG
+    #     :param ctx: Context
+    #     :param extension: COG Name
+    #     :return:
+    #     """
+    #     try:
+    #         self.bot.unload_extension(f'cogs.{extension}')
+    #         embed_unload = Embed(name='Boom',
+    #                              title='Cogs management',
+    #                              colour=Colour.red())
+    #         embed_unload.add_field(name='Extension',
+    #                                value=f'You have unloaded ***{extension}*** COGS')
+    #
+    #         await ctx.channel.send(embed=embed_unload)
+    #     except Exception as error:
+    #         await ctx.channel.send(content=error)
+    #
+    # @cogs.command()
+    # async def list(self, ctx):
+    #     """
+    #     List all cogs implemented in the system
+    #     """
+    #     cog_list_embed = Embed(title='All available COGS',
+    #                            description='All available cogs and their description',
+    #                            colour=Colour.green())
+    #     for cg in extensions:
+    #         cog_list_embed.add_field(name=cg,
+    #                                  value='==============',
+    #                                  inline=False)
+    #     await ctx.channel.send(embed=cog_list_embed)
+    #
+    # @cogs.command()
+    # async def reload(self, ctx):
+    #     """
+    #      Reload all cogs
+    #     """
+    #     notification_str = ''
+    #     ext_load_embed = Embed(title='System message',
+    #                            description='Status of the cogs after reload',
+    #                            colour=Colour.blue())
+    #     for extension in extensions:
+    #         try:
+    #             self.bot.unload_extension(f'{extension}')
+    #             self.bot.load_extension(f'{extension}')
+    #             notification_str += f'{extension} :smile: \n'
+    #         except Exception as e:
+    #             notification_str += f'{extension} :angry: {e}\n'
+    #
+    #     ext_load_embed.add_field(name='Status',
+    #                              value=notification_str)
+    #     await ctx.channel.send(embed=ext_load_embed)
 
     #############################  Crypto Link Hot Wallet #############################
 
@@ -627,20 +740,19 @@ class BotManagementCommands(commands.Cog):
         1% = 0.01 == 10
         """
 
-
         # Store percentage as micro
-        percent_micro = int(value*(10**2))
+        percent_micro = int(value * (10 ** 2))
 
         merch_data = {
             f"fee": percent_micro
         }
         if self.backoffice.bot_manager.manage_fees_and_limits(key='wallet_transfer', data_to_update=merch_data):
-            message = f'You have successfully set merchant wallet transfer fee to be {percent_micro/(10**2)}%.'
+            message = f'You have successfully set merchant wallet transfer fee to be {percent_micro / (10 ** 2)}%.'
             title = '__Merchant wallet transfer fee information__'
             await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=1,
                                                  sys_msg_title=title)
         else:
-            message = f'There has been an error while trying to set merchant wallet transfer fee to {percent_micro/(10**2)}%.' \
+            message = f'There has been an error while trying to set merchant wallet transfer fee to {percent_micro / (10 ** 2)}%.' \
                       f'Please try again later or contact system administrator!'
             title = '__Merchant wallet transfer fee information__'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
@@ -658,11 +770,11 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
 
-    @cogs.error
-    async def mng_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
-                                                 sys_msg_title=CONST_WARNING_MESSAGE)
+    # @cogs.error
+    # async def mng_error(self, ctx, error):
+    #     if isinstance(error, commands.CheckFailure):
+    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+    #                                              sys_msg_title=CONST_WARNING_MESSAGE)
 
     @hot.error
     async def h_error(self, ctx, error):
