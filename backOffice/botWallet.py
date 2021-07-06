@@ -54,7 +54,7 @@ class BotManager:
                                           {"$set": data_to_update})
         return result.modified_count > 0
 
-    def get_fees_by_category(self, key: str ):
+    def get_fees_by_category(self, key: str):
         """
         Return details on the fees from database
         :param key: Key names
@@ -70,3 +70,11 @@ class BotManager:
         """
         data = list(self.bot_fees.find({}))
         return data
+
+    def create_cl_wallet(self, data):
+        "Make new off chain bot wallet for fees"
+        result = self.bot_wallet.insert_one(data)
+        if result.inserted_id:
+            return True
+        else:
+            return False
