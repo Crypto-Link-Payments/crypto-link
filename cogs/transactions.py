@@ -31,7 +31,6 @@ class TransactionCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.backoffice = bot.backoffice
-        self.list_of_coins = list(self.backoffice.integrated_coins.keys())
 
     def build_stats(self, transaction_data: dict, tx_type: str):
         """
