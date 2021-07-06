@@ -243,14 +243,25 @@ class TransactionCommands(commands.Cog):
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def send(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
-        await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="public", message=message)
+        if not re.search("[~!#$%^&*()_+{}:;\']", ticker.lower()):
+            await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="public", message=message)
+        else:
+            message = 'Special characters are not allowed in token code'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
+
 
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def private(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
-        await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="private", message=message)
+        if not re.search("[~!#$%^&*()_+{}:;\']", ticker.lower()):
+            await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="private", message=message)
+        else:
+            message = 'Special characters are not allowed in token code'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
 
     @send.error
     async def send_error(self, ctx, error):
