@@ -13,7 +13,6 @@ cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
            'cogs.system', 'cogs.withdrawals',
            'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners']
 
-
 horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.accounts',
                 'horizonCommands.payments',
@@ -28,17 +27,18 @@ horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.paths',
                 'horizonCommands.tradeAggregations']
 
+
 # non_custodial_layer_cmds = ['thirdLevel.thirdLevelAccounts']
 #
 # custodial_layer = ['secondLevel.secondLevelAccounts']
 
 
 class DiscordBot(commands.Bot):
-    def __init__(self, backoffice):
+    def __init__(self, backoffice, bot_settings: dict):
         helper = Helpers()
-        self.bot_settings = helper.read_json_file(file_name='botSetup.json')
+        self.bot_settings = bot_settings
         self.integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
-        self.hot_wallets = helper.read_json_file(file_name = "hotWallets.json")
+        self.hot_wallets = backoffice.stellar_wallet.public_key
         self.list_of_coins = list(self.integrated_coins.keys())
         super().__init__(
             command_prefix=commands.when_mentioned_or(self.bot_settings['command']),
@@ -47,13 +47,14 @@ class DiscordBot(commands.Bot):
         self.backoffice = backoffice
         self.load_cogs()
 
+        print(Fore.CYAN + f'{self.hot_wallets}')
+
     def load_cogs(self):
         notification_str = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
                                         '           LOADING Crypto Link COGS....        \n'
         for extension in cl_cogs:
             try:
                 self.load_extension(extension)
-                notification_str += f'| {extension} :smile: \n'
             except Exception as error:
                 notification_str += f'| {extension} --> {error}\n'
                 raise
@@ -78,7 +79,6 @@ class DiscordBot(commands.Bot):
         for hor in horizon_cogs:
             try:
                 self.load_extension(hor)
-                notification_str += f'| {hor} :smile: \n'
             except Exception as error:
                 notification_str += f'| {hor} --> {error}\n'
                 raise
