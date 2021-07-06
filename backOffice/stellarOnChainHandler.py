@@ -27,24 +27,32 @@ class StellarWallet:
 
     def __init__(self, network_type, integrated_coins):
         helpers = Helpers()
-        secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
-        public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
         self.integrated_coins = integrated_coins
-        self.public_key = public_details["xlm"]
-        self.dev_key = public_details["xlmDev"]
-        self.private_key = secret_details['stellar']
-        self.root_keypair = Keypair.from_secret(self.private_key)
-        self.root_account = Account(account_id=self.root_keypair.public_key, sequence=1)
 
         # Decide network type
         if not network_type:
+            secret_details = helpers.read_json_file(file_name="walletSecretsTest.json")  # Load Stellar wallet secrets
+            public_details = helpers.read_json_file(file_name="hotWalletsTest.json")  # Load hot wallet details
             self.network_phrase = Network.TESTNET_NETWORK_PASSPHRASE
             self.network_type = 'testnet'
             self.server = Server(horizon_url="https://horizon-testnet.stellar.org/")
+            self.public_key = public_details["xlm"]
+            self.dev_key = public_details["xlmDev"]
+            self.private_key = secret_details['stellar']
+
         else:
+            secret_details = helpers.read_json_file(file_name="walletSecrets.json")  # Load Stellar wallet secrets
+            public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
             self.network_phrase = Network.PUBLIC_NETWORK_PASSPHRASE
             self.network_type = 'pub-net'
             self.server = Server(horizon_url="https://horizon.publicnode.org/")
+            self.public_key = public_details["xlm"]
+            self.dev_key = public_details["xlmDev"]
+            self.private_key = secret_details['stellar']
+
+        self.root_keypair = Keypair.from_secret(self.private_key)
+        self.root_account = Account(account_id=self.root_keypair.public_key, sequence=1)
+
         print(Fore.YELLOW + f' Connected to {self.network_type}')
 
     def create_stellar_account(self):
@@ -242,16 +250,17 @@ class StellarWallet:
                 "error": f'{error} with {token.upper()} issuer'
             }
 
-    def establish_trust(self, private_key, token):
+    def establish_trust(self, token, asset_issuer:str, private_key=None):
         """
         Amount as full
         """
         # Load user secret and get account
+        if not private_key:
+            private_key = self.private_key
 
         user_key_pair = Keypair.from_secret(private_key)
         root_account = Account(account_id=user_key_pair.public_key, sequence=1)
         public_key = root_account.account_id
-        asset_issuer = self.integrated_coins[token.lower()]["assetIssuer"]
 
         try:
             source_account = self.server.load_account(public_key)
@@ -263,7 +272,9 @@ class StellarWallet:
                 30).build()
             tx.sign(private_key)
 
-            self.server.submit_transaction(tx)
-            return True
-        except exceptions.NotFoundError:
-            return False
+            data = self.server.submit_transaction(tx)
+            from pprint import pprint
+            pprint(data)
+            return True, data
+        except exceptions.NotFoundError as e:
+            return False, e
