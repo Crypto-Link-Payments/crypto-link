@@ -52,14 +52,14 @@ class PeriodicTasks:
 
     def filter_transaction(self, new_transactions: list):
         # Building list of deposits if memo included
-        stellar_manager = self.backoffice.stellar_manager
         tx_with_memo_special = [tx for tx in new_transactions if
                                 'memo' in tx.keys() and helper.check_for_special_char(tx["memo"])]
         tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys() and not helper.check_for_special_char(
             tx["memo"])]  # GET Transactions who have memo
         tx_with_no_memo = [tx for tx in new_transactions if tx not in tx_with_memo]  # GET transactions without memo
-        tx_with_registered_memo = [tx for tx in tx_with_memo if stellar_manager.check_if_stellar_memo_exists(
-            tx_memo=tx['memo'])]  # GET tx with registered memo
+        tx_with_registered_memo = [tx for tx in tx_with_memo if
+                                   self.backoffice.stellar_manager.check_if_stellar_memo_exists(
+                                       tx_memo=tx['memo'])]  # GET tx with registered memo
         tx_with_not_registered_memo = [tx for tx in tx_with_memo if
                                        tx not in tx_with_registered_memo]  # GET tx with not registered memo
         return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special
@@ -86,7 +86,7 @@ class PeriodicTasks:
                     # Update balance based on incoming asset
                     if not helper.check_for_special_char(tx["memo"]):
                         if self.bot.backoffice.wallet_manager.update_coin_balance_by_memo(memo=tx['memo'],
-                                                                                          coin=tx['asset_type']["code"],
+                                                                                          coin=tx['asset_type']["code"].lower(),
                                                                                           amount=int(tx['asset_type'][
                                                                                                          "amount"])):
                             # If balance updated successfully send the message to user of processed deposit
