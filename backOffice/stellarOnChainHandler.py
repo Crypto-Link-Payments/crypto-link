@@ -273,8 +273,6 @@ class StellarWallet:
             tx.sign(private_key)
 
             data = self.server.submit_transaction(tx)
-            from pprint import pprint
-            pprint(data)
             return True, data
         except exceptions.NotFoundError as e:
             return False, e
