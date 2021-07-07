@@ -52,7 +52,8 @@ class BotManager:
 
         result = self.bot_fees.update_one({"key": key},
                                           {"$set": data_to_update})
-        return result.modified_count > 0
+
+        return result.matched_count > 0
 
     def get_fees_by_category(self, key: str):
         """
