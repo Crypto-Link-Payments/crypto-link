@@ -51,7 +51,7 @@ class StatsManager(object):
         data = await self.as_user_wallets.count_documents({})
         return data
 
-    async def update_cl_earnings(self, time, amount: int, system: str, token: str, user: str,user_id:int):
+    async def update_cl_earnings(self, time, amount: int, system: str, token: str, user: str, user_id: int):
         """
         Appends fee to CL wallet level 1
         """
@@ -60,7 +60,7 @@ class StatsManager(object):
                                                        "amount": amount,
                                                        "token": token,
                                                        "user": user,
-                                                       "userId":user_id})
+                                                       "userId": user_id})
         if result.inserted_id:
             return True
         else:
@@ -133,16 +133,21 @@ class StatsManager(object):
 
         return data
 
-    def get_top_builders(self, limit:int):
+    def get_top_builders(self, limit: int):
         top_list = self.user_profiles.find({}).sort(
             "bridges", DESCENDING).limit(limit)
         return top_list
 
-    def register_new_bot_stat(self, data:dict):
+    def register_new_off_chain_bot_stat(self, data: dict):
         result = self.off_chain_activities.insert_one(data)
         if result.inserted_id:
             return True
         else:
             return False
 
-
+    def register_new_on_chain_bot_stats(self, data: dict):
+        result = self.chain_activities.insert_one(data)
+        if result.inserted_id:
+            return True
+        else:
+            return False

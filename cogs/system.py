@@ -394,7 +394,7 @@ class BotManagementCommands(commands.Cog):
                             await ctx.author.send(content="Cl wallet for fees created successfully")
                             # fee category
                             # Update fee categories
-                            await ctx.author.send(content="Trying toupdate fee structuress")
+                            await ctx.author.send(content="Trying to update fee structures")
                             if self.bot.backoffice.bot_manager.manage_fees_and_limits(key="withdrawals",
                                                                                       data_to_update={
                                                                                           f"fee_list.{asset_data['asset_code'].lower()}": 1.0}):
@@ -437,20 +437,30 @@ class BotManagementCommands(commands.Cog):
                                     "merchantPurchases": int(0),
                                     "merchantMoved": float(0)
                                 }
-                                await ctx.author.send(content="Updating crypto link stats")
-                                if self.bot.backoffice.stats_manager.register_new_bot_stat(stats_off):
+                                await ctx.author.send(content="Updating crypto link stats off chain")
+                                if self.bot.backoffice.stats_manager.register_new_off_chain_bot_stat(stats_off):
                                     await ctx.author.send(content="Global off chain stats for token created")
 
-                                    # Send to explorer the support information for new coin
-                                    load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                     self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                                    stats_on_chain = {
 
-                                    explorer_msg = f':new: :coin: New token integrated with asset code ***{asset_data["asset_code"]}***' \
-                                                   f'from issuer ***{asset_data["asset_issuer"]}*** :rocket:'
+                                        "ticker": asset_data['asset_code'].lower(),
+                                        "depositCount": 0,
+                                        "withdrawalCount": 0,
+                                        "depositAmount": 0.0,
+                                        "withdrawnAmount": 0.0
+                                    }
+                                    if self.bot.backoffice.stats_manager.register_new_on_chain_bot_stats(stats_on_chain):
 
-                                    await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                            message=explorer_msg,
-                                                                            on_chain=True, tx_type='deposit')
+                                        # Send to explorer the support information for new coin
+                                        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                         self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+
+                                        explorer_msg = f':new: :coin: New token integrated with asset code ***{asset_data["asset_code"]}***' \
+                                                       f'from issuer ***{asset_data["asset_issuer"]}*** :rocket:'
+
+                                        await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                                                message=explorer_msg,
+                                                                                on_chain=True, tx_type='deposit')
                             else:
                                 print("There has has been error in creating fees into database")
                     else:
