@@ -151,14 +151,15 @@ class TransactionCommands(commands.Cog):
         coin = ticker.lower()
         if amount > 0:
             if not ctx.message.author == recipient and not recipient.bot:
-                if not re.search("[~!#$%^&*()_+{}:;\']", coin) and coin in self.list_of_coins:
-                    coin_data = self.backoffice.integrated_coins[ticker]
+                if coin in self.bot.token_manager.get_registered_tokens() or coin == 'xlm':
+                    coin_data = self.backoffice.token_manager.get_token_details_by_code(coin)
                     atomic_value = (int(amount * (10 ** 7)))
 
                     # Get user wallet ticker balance
                     wallet_value = self.backoffice.wallet_manager.get_ticker_balance(ticker=ticker,
                                                                                      user_id=ctx.message.author.id)
                     if wallet_value >= atomic_value:
+
                         # Check if recipient has wallet or not
                         if not self.backoffice.account_mng.check_user_existence(user_id=recipient.id):
                             self.backoffice.account_mng.register_user(discord_id=recipient.id,
