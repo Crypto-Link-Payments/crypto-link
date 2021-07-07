@@ -359,22 +359,22 @@ class BotManagementCommands(commands.Cog):
 
     @tokens.command()
     async def new(self, ctx, asset_issuer: str, asset_code: str):
-        from pprint import pprint
+        """Ads support for ne token"""
         try:
             assets = self.bot.backoffice.stellar_wallet.server.assets()
             asset = assets.for_code(asset_code=asset_code.upper()).for_issuer(
                 asset_issuer=asset_issuer.upper()).call()
-            asset_data = asset["_embedded"]['records']
+            asset_data = asset["_embedded"]['records'][0]
             if asset_data:
-                data = self.bot.backoffice.stellar_wallet.establish_trust(asset_issuer, asset_code)
-                pprint(data)
+                data = self.bot.backoffice.stellar_wallet.establish_trust(asset_issuer=asset_data["asset_issuer"],
+                                                                          token=asset_data["asset_code"])
                 if data[0]:
                     token = {
-                        "toml": asset_data[0]["_links"]["toml"]["href"],
-                        "assetCode": asset_data[0]["asset_code"],
-                        "assetIssuer": asset_data[0]["asset_issuer"],
-                        "assetType": asset_data[0]["asset_type"],
-                        "pagingToken": asset_data[0]["paging_token"],
+                        "toml": asset_data["_links"]["toml"]["href"],
+                        "assetCode": asset_data["asset_code"].lower(),
+                        "assetIssuer": asset_data["asset_issuer"],
+                        "assetType": asset_data["asset_type"],
+                        "pagingToken": asset_data["paging_token"],
                         'webPage': None,
                         "ownerId": None,
                         "ownerName": None,
@@ -383,43 +383,47 @@ class BotManagementCommands(commands.Cog):
                     }
 
                     # insert new token into database
+                    await ctx.author.send(content="Trying to insert new token data")
                     if self.bot.backoffice.token_manager.insert_new_token(token):
                         await ctx.author.send(content="Details of new token to db created")
                         # Create CL wallet for fee collections
+                        await ctx.author.send(content="Trying to create cl wallets")
                         if self.bot.backoffice.bot_manager.create_cl_wallet(
-                                {"ticker": asset_data[0]["asset_code"].lower(), "balance": 0}):
+                                {"ticker": asset_data["asset_code"].lower(), "balance": int(0),
+                                 "issuer": asset_data["asset_issuer"]}):
                             await ctx.author.send(content="Cl wallet for fees created successfully")
                             # fee category
                             # Update fee categories
-                            if self.bot.backoffice.bot_manager.manage_fees_and_limits(key="withdrawal_fees",
-                                                                                      data={
-                                                                                          f"fee_list.{asset_data[0]['asset_code'].lower()}": 1.0}):
+                            await ctx.author.send(content="Trying toupdate fee structuress")
+                            if self.bot.backoffice.bot_manager.manage_fees_and_limits(key="withdrawals",
+                                                                                      data_to_update={
+                                                                                          f"fee_list.{asset_data['asset_code'].lower()}": 1.0}):
                                 await ctx.author.send(content="New fee category created")
 
                                 all_guild_ids = self.bot.backoffice.guild_profiles.get_all_guild_ids()
 
                                 if all_guild_ids:
-                                    guild_stats_data = {
-                                        f"{asset_data[0]['asset_code'].lower()}": {"volume": float(0.0),
-                                                                                   "txCount": int(0),
-                                                                                   "privateCount": int(0),
-                                                                                   "publicCount": int(0),
-                                                                                   "roleTxCount": int(0),
-                                                                                   "emojiTxCount": int(0),
-                                                                                   "multiTxCount": int(0)}
-                                    }
+                                    guild_stats_data = {f"{asset_data['asset_code'].lower()}": {"volume": float(0.0),
+                                                                                                "txCount": int(0),
+                                                                                                "privateCount": int(0),
+                                                                                                "publicCount": int(0),
+                                                                                                "roleTxCount": int(0),
+                                                                                                "emojiTxCount": int(0),
+                                                                                                "multiTxCount": int(0)}
+                                                        }
 
                                     # For every registered guild add new token for stats collections
+                                    await ctx.author.send(content="Trying to update guild stats")
                                     for g_id in all_guild_ids:
                                         await self.bot.backoffice.guild_profiles.update_guild_profile(
-                                            guild_id=int(g_id),
+                                            guild_id=int(g_id["guildId"]),
                                             data_to_update=guild_stats_data)
 
                                     await ctx.author.send(content="All guilds have been updated with stats")
 
                                 # update crypot link stats
                                 stats_off = {
-                                    "ticker": asset_data[0]['asset_code'].lower(),
+                                    "ticker": asset_data['asset_code'].lower(),
                                     "totalTx": int(0),
                                     "totalMoved": float(0.0),
                                     "totalPrivateCount": int(0),
@@ -433,7 +437,7 @@ class BotManagementCommands(commands.Cog):
                                     "merchantPurchases": int(0),
                                     "merchantMoved": float(0)
                                 }
-
+                                await ctx.author.send(content="Updating crypto link stats")
                                 if self.bot.backoffice.stats_manager.register_new_bot_stat(stats_off):
                                     await ctx.author.send(content="Global off chain stats for token created")
 
@@ -441,8 +445,8 @@ class BotManagementCommands(commands.Cog):
                                     load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                                      self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
-                                    explorer_msg = f':new: :coin: New token integrated with asset code ***{asset_data[0]["asset_code"]}***' \
-                                                   f'from issuer {asset_data[0]["asset_issuer"]} :rocket:'
+                                    explorer_msg = f':new: :coin: New token integrated with asset code ***{asset_data["asset_code"]}***' \
+                                                   f'from issuer ***{asset_data["asset_issuer"]}*** :rocket:'
 
                                     await custom_messages.explorer_messages(applied_channels=load_channels,
                                                                             message=explorer_msg,
