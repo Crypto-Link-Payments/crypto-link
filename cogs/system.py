@@ -447,7 +447,8 @@ class BotManagementCommands(commands.Cog):
                                         "depositCount": 0,
                                         "withdrawalCount": 0,
                                         "depositAmount": 0.0,
-                                        "withdrawnAmount": 0.0
+                                        "withdrawnAmount": 0.0,
+                                        "issuer":asset_data["asset_issuer"]
                                     }
                                     if self.bot.backoffice.stats_manager.register_new_on_chain_bot_stats(stats_on_chain):
 
