@@ -190,7 +190,7 @@ class TransactionCommands(commands.Cog):
                                 if self.backoffice.wallet_manager.update_coin_balance(coin=ticker, user_id=recipient.id,
                                                                                       amount=int(atomic_value),
                                                                                       direction=1):
-                                    coin_data["amount"] = (atomic_value / (10 ** 7))
+                                    coin_data["amount"] = atomic_value
                                     coin_data["ticker"] = ticker
 
                                     # Produce dict for streamer
