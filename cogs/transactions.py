@@ -228,7 +228,6 @@ class TransactionCommands(commands.Cog):
                                                          destination=1,
                                                          sys_msg_title=CONST_TX_ERROR_TITLE)
             else:
-
                 message = f'You are not allowed to send {amount} xlm to either yourself or the bot.'
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
                                                      destination=1,
@@ -242,22 +241,31 @@ class TransactionCommands(commands.Cog):
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def send(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
-        if not re.search("[~!#$%^&*()_+{}:;\']", ticker.lower()):
-            await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="public", message=message)
+    async def send(self, ctx, recipient: User, amount: float, asset_code: str, *, message: str = None):
+        if not re.search("[~!#$%^&*()_+{}:;\']", asset_code.lower()):
+            if amount > 0:
+                await self.send_impl(ctx, amount, asset_code.lower(), recipient, tx_type="public", message=message)
+            else:
+                message = f'Amount needs to be greater than 0.0000000  {asset_code.upper()}'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                     sys_msg_title=CONST_TX_ERROR_TITLE)
         else:
             message = 'Special characters are not allowed in token code'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
 
-
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 60, commands.BucketType.user)
-    async def private(self, ctx, recipient: User, amount: float, ticker: str, *, message: str = None):
-        if not re.search("[~!#$%^&*()_+{}:;\']", ticker.lower()):
-            await self.send_impl(ctx, amount, ticker.lower(), recipient, tx_type="private", message=message)
+    async def private(self, ctx, recipient: User, amount: float, asset_code: str, *, message: str = None):
+        if not re.search("[~!#$%^&*()_+{}:;\']", asset_code.lower()):
+            if amount > 0:
+                await self.send_impl(ctx, amount, asset_code.lower(), recipient, tx_type="private", message=message)
+            else:
+                message = f'Amount needs to be greater than 0.0000000 {asset_code.upper()}'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                     sys_msg_title=CONST_TX_ERROR_TITLE)
         else:
             message = 'Special characters are not allowed in token code'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
