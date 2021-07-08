@@ -51,7 +51,10 @@ class UserWalletManager:
         result = self.user_wallets.find_one({"userId": user_id},
                                             {"_id": 0,
                                              f"{asset_cde}": 1})
-        return result[f"{asset_cde}"]
+        if result:
+            return result[f"{asset_cde}"]
+        else:
+            return None
 
     def get_balances(self, user_id: int):
         """
