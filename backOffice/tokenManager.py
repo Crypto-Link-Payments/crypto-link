@@ -19,5 +19,6 @@ class TokenManager:
     def get_registered_tokens(self):
         result = list(self.token_profiles.find({},
                                                {"_id":0,
-                                                "ticker":1}))
+                                                "assetCode":1}))
+        print(result)
         return result
