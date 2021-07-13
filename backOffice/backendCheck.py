@@ -16,7 +16,7 @@ init(autoreset=True)
 class BotStructureCheck(object):
     def __init__(self, connection):
         self.connection = connection
-        self.crypto_link = self.connection["CryptoLink"]  #
+        self.crypto_link = self.connection["CryptoLink"]
 
         self.required_collections = ["CLOnChainStats",  # On chain statistics
                                      "CLOffChainStats",  # OFf chain statistics
@@ -52,6 +52,21 @@ class BotStructureCheck(object):
             else:
                 pass
         print(Fore.LIGHTGREEN_EX + "====DONE====")
+
+    def check_xlm_integration(self):
+        result = self.crypto_link.TokenProfiles.find_one({"assetCode": 'xlm'})
+        if not result:
+            xlm_profile = {
+                "assetCode":'xlm',
+                "emoji": "<:stelaremoji:684676687425961994>",
+                "coinGeckoListing": True,
+                "minimumWithdrawal": 100000000,
+                "assetIssuer": "Native Currency",
+                "expert": "https://stellar.expert/explorer/public",
+                "homepage": "https://www.stellar.org/lumens"
+            }
+            self.crypto_link.TokenProfiles.insert_one(xlm_profile)
+            print("stellar entry created")
 
     def checking_stats_documents(self):
         """
@@ -137,7 +152,6 @@ class BotStructureCheck(object):
             print(Fore.YELLOW + "MAKING BOT OFF CHAIN WALLET")
             my_list = [
                 {"ticker": "xlm", "balance": 0},
-                {"ticker": "clt", "balance": 0}
             ]
             bot_wallets.insert_many(my_list)
             print(Fore.GREEN + "DONE")
@@ -149,7 +163,6 @@ class BotStructureCheck(object):
             print(Fore.YELLOW + "MAKING FEE STRUCTURE DOCS")
             token_fees = {
                 "xlm": float(1.0),
-                'clt': float(1.0)
             }
             fee_list = [
                 {"type": "withdrawal_fees", "key": 'withdrawals', 'fee_list': token_fees},
