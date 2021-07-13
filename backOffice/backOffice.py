@@ -46,3 +46,4 @@ class BackOffice:
         self.backend_check.check_collections()
         self.backend_check.checking_stats_documents()
         self.backend_check.checking_bot_wallets()
+        self.backend_check.check_xlm_integration()
