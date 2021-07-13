@@ -47,12 +47,12 @@ class UserWalletManager:
                                               {"$inc": {f"{coin}": amount}})
         return result.modified_count > 0
 
-    def get_ticker_balance(self, asset_cde, user_id: int):
+    def get_ticker_balance(self, asset_code, user_id: int):
         result = self.user_wallets.find_one({"userId": user_id},
                                             {"_id": 0,
-                                             f"{asset_cde}": 1})
+                                             f"{asset_code}": 1})
         if result:
-            return result[f"{asset_cde}"]
+            return result[f"{asset_code}"]
         else:
             return None
 
