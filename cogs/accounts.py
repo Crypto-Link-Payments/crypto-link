@@ -26,7 +26,6 @@ class UserAccountCommands(commands.Cog):
         if os.path.exists(f'{author_id}.png'):
             try:
                 os.remove(f'{author_id}.png')
-                print("deleted successfully")
             except Exception as e:
                 print(f'Exceptin: {e}')
         else:
