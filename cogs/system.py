@@ -465,6 +465,7 @@ class BotManagementCommands(commands.Cog):
                                         await custom_messages.explorer_messages(applied_channels=load_channels,
                                                                                 message=explorer_msg,
                                                                                 on_chain=True, tx_type='deposit')
+                                        await ctx.author.send(content='Integration completed')
                                     else:
                                         msg = "On chain stats collector document could not be created"
                                         await ctx.author.send(content=msg)
