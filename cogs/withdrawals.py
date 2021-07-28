@@ -88,7 +88,7 @@ class WithdrawalCommands(commands.Cog):
                                                                                                  asset_issuer=asset_issuer)
 
                                         if result.get("hash"):
-                                            to_deduct = {f'{token}': int(micro_units)}
+                                            to_deduct = {f'{token}': int(micro_units) * (-1)}
                                             if self.backoffice.wallet_manager.update_user_balance_off_chain(
                                                     user_id=int(ctx.author.id),
                                                     coin_details=to_deduct):
@@ -115,7 +115,7 @@ class WithdrawalCommands(commands.Cog):
                                                 # Update bot stats
                                                 bot_stats_data = {
                                                     "withdrawalCount": 1,
-                                                    "withdrawnAmount": macro_units
+                                                    "withdrawnAmount": for_owner_macro
                                                 }
                                                 await self.backoffice.stats_manager.update_cl_on_chain_stats(
                                                     ticker=token,
