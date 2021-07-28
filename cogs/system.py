@@ -450,9 +450,10 @@ class BotManagementCommands(commands.Cog):
                                         "withdrawalCount": 0,
                                         "depositAmount": 0.0,
                                         "withdrawnAmount": 0.0,
-                                        "issuer":asset_data["asset_issuer"]
+                                        "issuer": asset_data["asset_issuer"]
                                     }
-                                    if self.bot.backoffice.stats_manager.register_new_on_chain_bot_stats(stats_on_chain):
+                                    if self.bot.backoffice.stats_manager.register_new_on_chain_bot_stats(
+                                            stats_on_chain):
 
                                         # Send to explorer the support information for new coin
                                         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
@@ -464,10 +465,18 @@ class BotManagementCommands(commands.Cog):
                                         await custom_messages.explorer_messages(applied_channels=load_channels,
                                                                                 message=explorer_msg,
                                                                                 on_chain=True, tx_type='deposit')
+                                    else:
+                                        msg = "On chain stats collector document could not be created"
+                                        await ctx.author.send(content=msg)
                             else:
-                                print("There has has been error in creating fees into database")
+                                msg = "There has has been error in creating fees into database"
+                                await ctx.author.send(content=msg)
+                        else:
+                            msg = "Crypto Link off-chain wallet could not be created"
+                            await ctx.author.send(content=msg)
                     else:
-                        print("we could not store into the file")
+                        msg = ("System could not store token data into database")
+                        await ctx.author.send(content=msg)
                 else:
                     await ctx.channel.send(content='There has been an issue with executing the trust op in package')
                     await ctx.channel.send(content=f'{data[1]}')
