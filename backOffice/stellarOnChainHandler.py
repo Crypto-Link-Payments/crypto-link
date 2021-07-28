@@ -212,24 +212,24 @@ class StellarWallet:
         else:
             return False
 
-    def token_withdrawal(self, address, token, amount: str):
+    def token_withdrawal(self, address, token, amount: str, asset_issuer: str = None):
         """
         Amount as full
         """
-
-        if token != 'xlm':
-            asset_issuer = self.integrated_coins[token.lower()]["assetIssuer"]
-        else:
-            asset_issuer = None
-
         source_account = self.server.load_account(self.public_key)
+        base_fee = self.server.fetch_base_fee()
+
         tx = TransactionBuilder(
             source_account=source_account,
             network_passphrase=self.network_phrase,
-            base_fee=self.server.fetch_base_fee()).append_payment_op(
-            asset_issuer=asset_issuer,
-            destination=address, asset_code=token.upper(), amount=amount).set_timeout(30).build()
-        tx.sign(self.root_keypair)
+            base_fee=base_fee) \
+            .append_payment_op(asset_issuer=asset_issuer,
+                               destination=address,
+                               asset_code=token.upper(),
+                               amount=amount) \
+            .set_timeout(30) \
+            .build()
+        tx.sign(self.private_key)
         try:
             resp = self.server.submit_transaction(tx)
             details = self.decode_transaction_envelope(envelope_xdr=resp['envelope_xdr'])
@@ -250,7 +250,7 @@ class StellarWallet:
                 "error": f'{error} with {token.upper()} issuer'
             }
 
-    def establish_trust(self, token, asset_issuer:str, private_key=None):
+    def establish_trust(self, token, asset_issuer: str, private_key=None):
         """
         Amount as full
         """
