@@ -8,7 +8,6 @@ from cogs.utils.systemMessaages import CustomMessages
 import os
 import pyqrcode
 
-
 custom_messages = CustomMessages()
 # Move this to class
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -21,7 +20,6 @@ class UserAccountCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.list_of_coins = list(self.backoffice.integrated_coins.keys())
 
     @staticmethod
     def clean_qr_image(author_id):
@@ -172,7 +170,9 @@ class UserAccountCommands(commands.Cog):
         if ctx.invoked_subcommand is None:
             user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
             if user_profile:
-                coins_string = ', '.join([str(coin.upper()) for coin in self.list_of_coins])
+                coins_string = ', '.join(
+                    [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
+
                 description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
                               ' wallet(GUI, CLI) to the address and deposit ID provided below. Of them will result in ' \
                               'funds being lost to which staff of Launch Pad Investments is not ' \
