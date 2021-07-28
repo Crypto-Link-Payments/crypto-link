@@ -25,9 +25,8 @@ class StellarWallet:
 
     """
 
-    def __init__(self, network_type, integrated_coins):
+    def __init__(self, network_type):
         helpers = Helpers()
-        self.integrated_coins = integrated_coins
 
         # Decide network type
         if not network_type:
