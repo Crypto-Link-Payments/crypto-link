@@ -269,16 +269,6 @@ class UserAccountCommands(commands.Cog):
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
 
             for wallet in all_wallets:
-
-                if wallet == 'xlm':
-                    token_balance = int(user_balances["xlm"])/(10**7)
-
-                    balance_embed.add_field(
-                        name=f"{wallet.upper()}",
-                        value=f'```{token_balance:,.7f} {wallet.upper()}```',
-                        inline=False)
-                    await ctx.author.send(embed=balance_embed)
-                else:
                     token_balance = int(user_balances[wallet]/(10**7))
                     balance_embed.add_field(
                         name=f"{wallet.upper()}",
