@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import Intents
 from colorama import Fore, init
-
+import json
 from utils.tools import Helpers
 
 CONST_SEPARATOR = '+++++++++++++++++++++++++++++++++++++++'
@@ -32,6 +32,11 @@ horizon_cogs = ['horizonCommands.horizonMain',
 #
 # custodial_layer = ['secondLevel.secondLevelAccounts']
 
+def get_prefix(client,message):
+    with open("prefixe.json","r") as f:
+        prefixes = json.load(f)
+    return prefixes[str(message.guild.id)]
+
 
 class DiscordBot(commands.Bot):
     def __init__(self, backoffice, bot_settings: dict):
@@ -40,8 +45,11 @@ class DiscordBot(commands.Bot):
         self.integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
         self.hot_wallets = backoffice.stellar_wallet.public_key
         self.list_of_coins = list(self.integrated_coins.keys())
+        # super().__init__(
+        #     command_prefix=commands.when_mentioned_or(self.bot_settings['command']),
+        #     intents=Intents.all())
         super().__init__(
-            command_prefix=commands.when_mentioned_or(self.bot_settings['command']),
+            command_prefix=commands.when_mentioned_or(get_prefix),
             intents=Intents.all())
         self.remove_command('help')  # removing the old help command
         self.backoffice = backoffice
