@@ -11,7 +11,7 @@ from discord.ext import commands
 from discord.errors import HTTPException
 from datetime import datetime
 import traceback
-
+import json
 from cogs.utils.systemMessaages import CustomMessages
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -196,6 +196,15 @@ class AutoFunctions(commands.Cog):
         channel_id = self.bot_channels["sys"]
         dest = self.bot.get_channel(id=int(channel_id))
         await dest.send(embed=new_guild, content=f'{animus.mention}')
+
+        with open("prefixes.json","r") as f:
+            prefixes = json.load(f)
+
+        prefixes[str(guild.id)] = "!"
+
+        with open("prefixes.json","w") as f:
+            json.dump(prefixes, f)
+
 
         print(
             Fore.LIGHTYELLOW_EX + '===================================\nGlobal Stats Updated after join...\n========'
