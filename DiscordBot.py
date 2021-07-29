@@ -99,6 +99,16 @@ class DiscordBot(commands.Bot):
             :return:
             """
 
+        for g in self.guilds:
+            check_guild_prefix = self.backoffice.guild_profiles.check_guild_prefix(guild_id=int(g.id))
+            if not check_guild_prefix:
+                if self.backoffice.guild_profiles.set_guild_prefix(guild_id=int(g.id), prefix="!"):
+                    print(Fore.YELLOW + f"Default prefix registered for {g}")
+                else:
+                    print(Fore.RED + f"Could not register prefix for {g}")
+            else:
+                print(Fore.GREEN + f"{g} Prefix ....OK")
+
         await self.change_presence(status=discord.Status.online, activity=discord.Game('Monitoring Stellar'))
         print(Fore.GREEN + 'DISCORD BOT : Logged in as')
         print(self.user.name)
