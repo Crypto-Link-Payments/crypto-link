@@ -62,3 +62,6 @@ class GuildProfileManager:
                                              {"_id":0,
                                               "guildId":1}))
 
+    def custom_guild_prefix(self):
+        pass
+
