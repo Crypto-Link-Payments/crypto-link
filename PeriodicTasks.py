@@ -31,11 +31,12 @@ def get_time():
 
 
 class PeriodicTasks:
-    def __init__(self, backoffice, bot):
+    def __init__(self, backoffice, bot, main_net: bool):
         self.backoffice = backoffice
         self.twitter_cred = self.backoffice.twitter_details
         self.notification_channels = self.backoffice.auto_messaging_channels["depositNotifications"]
         self.bot = bot
+        self.main_net = main_net
         self.twitter_acc = self.backoffice.twitter_details
         auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
         auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
@@ -51,14 +52,14 @@ class PeriodicTasks:
 
     def filter_transaction(self, new_transactions: list):
         # Building list of deposits if memo included
-        stellar_manager = self.backoffice.stellar_manager
         tx_with_memo_special = [tx for tx in new_transactions if
                                 'memo' in tx.keys() and helper.check_for_special_char(tx["memo"])]
         tx_with_memo = [tx for tx in new_transactions if 'memo' in tx.keys() and not helper.check_for_special_char(
             tx["memo"])]  # GET Transactions who have memo
         tx_with_no_memo = [tx for tx in new_transactions if tx not in tx_with_memo]  # GET transactions without memo
-        tx_with_registered_memo = [tx for tx in tx_with_memo if stellar_manager.check_if_stellar_memo_exists(
-            tx_memo=tx['memo'])]  # GET tx with registered memo
+        tx_with_registered_memo = [tx for tx in tx_with_memo if
+                                   self.backoffice.stellar_manager.check_if_stellar_memo_exists(
+                                       tx_memo=tx['memo'])]  # GET tx with registered memo
         tx_with_not_registered_memo = [tx for tx in tx_with_memo if
                                        tx not in tx_with_registered_memo]  # GET tx with not registered memo
         return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special
@@ -85,7 +86,7 @@ class PeriodicTasks:
                     # Update balance based on incoming asset
                     if not helper.check_for_special_char(tx["memo"]):
                         if self.bot.backoffice.wallet_manager.update_coin_balance_by_memo(memo=tx['memo'],
-                                                                                          coin=tx['asset_type']["code"],
+                                                                                          coin=tx['asset_type']["code"].lower(),
                                                                                           amount=int(tx['asset_type'][
                                                                                                          "amount"])):
                             # If balance updated successfully send the message to user of processed deposit
@@ -161,7 +162,13 @@ class PeriodicTasks:
         """
 
         print(Fore.GREEN + f"{get_time()} --> CHECKING STELLAR CHAIN FOR DEPOSITS")
-        pag = helper.read_json_file('stellarPag.json')
+        if not self.main_net:
+            file_name = 'stellarPagTest.json'
+            pag = helper.read_json_file(file_name)
+        else:
+            file_name = 'stellarPag.json'
+            pag = helper.read_json_file(file_name)
+
         new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
 
         if new_transactions and isinstance(new_transactions, list):
@@ -184,7 +191,7 @@ class PeriodicTasks:
 
             last_checked_pag = new_transactions[-1]["paging_token"]
 
-            if helper.update_json_file(file_name='stellarPag.json', key='pag', value=int(last_checked_pag)):
+            if helper.update_json_file(file_name=file_name, key='pag', value=int(last_checked_pag)):
                 print(Fore.GREEN + f'Peg updated successfully from {pag} --> {last_checked_pag}')
             else:
                 print(Fore.RED + 'There was an issue with updating pag')

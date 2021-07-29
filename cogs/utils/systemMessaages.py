@@ -206,12 +206,12 @@ class CustomMessages:
         tx_report.add_field(name=':love_letter: Note :love_letter: ',
                             value=f'```{message}```')
         tx_report.add_field(name=f'{value_emoji} Transaction value {value_emoji}',
-                            value=f'```{transaction_data["amount"]:.7f} {transaction_data["emoji"]}\n'
+                            value=f'```{transaction_data["amount"]:.7f} {transaction_data["assetCode"].upper()}\n'
                                   f'(${transaction_data["conversion"]})```',
                             inline=False)
         if transaction_data["conversion"] != 0:
             tx_report.add_field(name=':currency_exchange: Conversion Rate :currency_exchange: ',
-                                value=f'${transaction_data["conversionRate"]:.4f}/{transaction_data["ticker"]}',
+                                value=f'${transaction_data["conversionRate"]:.4f}/{transaction_data["assetCode"].upper()}',
                                 inline=False)
         tx_report.set_footer(text='Conversion rates provided by CoinGecko',
                              icon_url='https://static.coingecko.com/s/thumbnail-'
@@ -261,7 +261,7 @@ class CustomMessages:
         notify.add_field(name=':receipt: Withdrawal asset details :receipt: ',
                          value=f'`{round(withdrawal_data["amount"] / 10000000, 7):.7f} {withdrawal_data["asset"]}`',
                          inline=False)
-        notify.add_field(name=':money_mouth: Crypto Link Fee :money_mouth: ',
+        notify.add_field(name=':money_mouth: Crypto Link Fee charged :money_mouth: ',
                          value=f'`{fee}`',
                          inline=False)
         notify.add_field(name=':sunrise: Horizon Access Link :sunrise: ',

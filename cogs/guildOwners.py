@@ -59,6 +59,18 @@ class GuildOwnerCommands(commands.Cog):
                         "emojiTxCount": int(0),
                         "multiTxCount": int(0)}
             }
+
+            all_integrated_tokens = self.bot.backoffice.token_manager.get_registered_tokens()
+
+            for asset_code in all_integrated_tokens:
+                new_guild[asset_code] = {"volume": float(0.0),
+                                         "txCount": int(0),
+                                         "privateCount": int(0),
+                                         "publicCount": int(0),
+                                         "roleTxCount": int(0),
+                                         "emojiTxCount": int(0),
+                                         "multiTxCount": int(0)}
+
             await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message='You have successfully registered guild into the system',
@@ -181,7 +193,8 @@ class GuildOwnerCommands(commands.Cog):
                  "value": f"```{self.command_string}merchant```"}
             ]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values, c=Colour.dark_gold())
+            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                               c=Colour.dark_gold())
 
     @merch.command()
     async def open(self, ctx):

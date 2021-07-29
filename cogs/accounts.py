@@ -8,7 +8,6 @@ from cogs.utils.systemMessaages import CustomMessages
 import os
 import pyqrcode
 
-
 custom_messages = CustomMessages()
 # Move this to class
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -21,14 +20,12 @@ class UserAccountCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.list_of_coins = list(self.backoffice.integrated_coins.keys())
 
     @staticmethod
     def clean_qr_image(author_id):
         if os.path.exists(f'{author_id}.png'):
             try:
                 os.remove(f'{author_id}.png')
-                print("deleted successfully")
             except Exception as e:
                 print(f'Exceptin: {e}')
         else:
@@ -39,7 +36,12 @@ class UserAccountCommands(commands.Cog):
     async def me(self, ctx):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
-        xlm_balance = float(wallet_data["xlm"]) / (10 ** 7)
+
+        try:
+            xlm_balance = float(wallet_data["xlm"]) / (10 ** 7)
+        except ZeroDivisionError:
+            xlm_balance = 0
+
         rates = get_rates(coin_name='stellar')
         acc_details = Embed(title=f':office_worker: {ctx.author} :office_worker:',
                             description=f' ***__Basic details on your Discord account__*** ',
@@ -55,7 +57,7 @@ class UserAccountCommands(commands.Cog):
                               value=f'`{xlm_balance:.7f}` {CONST_STELLAR_EMOJI}',
                               inline=False)
 
-        if rates:
+        if rates and float(wallet_data["xlm"]) > 0:
             in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
             in_usd = rate_converter(xlm_balance, rates["stellar"]["usd"])
             in_btc = rate_converter(xlm_balance, rates["stellar"]["btc"])
@@ -74,6 +76,7 @@ class UserAccountCommands(commands.Cog):
                                   value=f'`Ξ {in_eth:.8f}`')
             acc_details.add_field(name=f'LTC',
                                   value=f'`Ł {in_ltc:.8f}`')
+
         acc_details.set_thumbnail(url=ctx.author.avatar_url)
         acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
                               value=f'[Stellar](https://www.stellar.org/)\n'
@@ -166,7 +169,9 @@ class UserAccountCommands(commands.Cog):
         if ctx.invoked_subcommand is None:
             user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
             if user_profile:
-                coins_string = ', '.join([str(coin.upper()) for coin in self.list_of_coins])
+                coins_string = ', '.join(
+                    [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
+
                 description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
                               ' wallet(GUI, CLI) to the address and deposit ID provided below. Of them will result in ' \
                               'funds being lost to which staff of Launch Pad Investments is not ' \
@@ -223,7 +228,8 @@ class UserAccountCommands(commands.Cog):
         """
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
         if user_profile:
-            coins_string = ', '.join([str(coin.upper()) for coin in self.list_of_coins])
+            coins_string = ', '.join(
+                [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
 
             deposit_embed = Embed(title='Deposit QR code',
                                   colour=Colour.dark_orange())
@@ -253,7 +259,7 @@ class UserAccountCommands(commands.Cog):
     @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
-        coin_data = self.backoffice.integrated_coins
+
         if user_balances:
             all_wallets = list(user_balances.keys())
             # initiate Discord embed
@@ -262,24 +268,13 @@ class UserAccountCommands(commands.Cog):
                                   colour=Colour.dark_orange())
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
 
-            for wallet_ticker in all_wallets:
-                if wallet_ticker == 'xlm':
-                    coin_settings = coin_data[wallet_ticker]
-                    token_balance = get_normal(value=str(user_balances[wallet_ticker]),
-                                               decimal_point=int(coin_settings["decimal"]))
-                    if coin_settings["coinGeckoListing"]:
-                        token_to_usd = convert_to_usd(amount=float(token_balance), coin_name='stellar')
-                    else:
-                        token_to_usd = {"total": 0,
-                                        "usd": 0}
-
+            for wallet in all_wallets:
+                    token_balance = int(user_balances[wallet]/(10**7))
                     balance_embed.add_field(
-                        name=f"{coin_settings['emoji']} {coin_settings['name']} Balance {coin_settings['emoji']}",
-                        value=f'{coin_settings["emoji"]} `{token_balance}`\n'
-                              f':flag_us: `{token_to_usd["total"]}`\n'
-                              f'`Rate: ${token_to_usd["usd"]}/XLM`',
+                        name=f"{wallet.upper()}",
+                        value=f'```{token_balance:,.7f} {wallet.upper()}```',
                         inline=False)
-                    await ctx.author.send(embed=balance_embed)
+            await ctx.author.send(embed=balance_embed)
         else:
             title = '__Stellar Wallet Error__'
             message = f'Wallet could not be obtained from the system please try again later'

@@ -56,3 +56,9 @@ class GuildProfileManager:
                                                      {"_id": 0,
                                                       "explorerSettings": 1,
                                                       "txFees": 1})
+
+    def get_all_guild_ids(self):
+        return list(self.guild_profiles.find({},
+                                             {"_id":0,
+                                              "guildId":1}))
+
