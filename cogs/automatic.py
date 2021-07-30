@@ -197,14 +197,8 @@ class AutoFunctions(commands.Cog):
         dest = self.bot.get_channel(id=int(channel_id))
         await dest.send(embed=new_guild, content=f'{animus.mention}')
 
-        with open("prefixes.json","r") as f:
-            prefixes = json.load(f)
-
-        prefixes[str(guild.id)] = "!"
-
-        with open("prefixes.json","w") as f:
-            json.dump(prefixes, f)
-
+        # Register default prefix
+        self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=guild.id, prefix="!")
 
         print(
             Fore.LIGHTYELLOW_EX + '===================================\nGlobal Stats Updated after join...\n========'
