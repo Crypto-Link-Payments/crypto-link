@@ -51,7 +51,10 @@ class DiscordBot(commands.Bot):
         print(Fore.CYAN + f'{self.hot_wallets}')
 
     async def get_prefix(self, message):
-        return self.backoffice.guild_profiles.get_guild_prefix(guild_id=message.guild.id)
+        try:
+            return self.backoffice.guild_profiles.get_guild_prefix(guild_id=message.guild.id)
+        except Exception:
+            return "!"
 
     def load_cogs(self):
         notification_str = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
