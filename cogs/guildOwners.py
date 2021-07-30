@@ -47,18 +47,25 @@ class GuildOwnerCommands(commands.Cog):
 
     @owner.command()
     async def changeprefix(self, ctx, prefix):
-        if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
-            await customMessages.system_message(ctx=ctx, color_code=0,
-                                                message=f'You have successfully set prefix for server {ctx.guild} '
-                                                        f'to {prefix}. In case if you forget the prefix, tag the bot '
-                                                        f'and it will respond as well. Be aware that the prefix does '
-                                                        f'not work over DM therefore a default or bot tag needs'
-                                                        f' to be used.',
-                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
-        else:
+        prefix = prefix.strip()
+        if not len(prefix) >1 and self.bot.backoffice.helper.check_for_special_char(string=prefix):
+            if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
+                await customMessages.system_message(ctx=ctx, color_code=0,
+                                                    message=f'You have successfully set prefix for server {ctx.guild} '
+                                                            f'to {prefix}. In case if you forget the prefix, tag the bot '
+                                                            f'and it will respond as well. Be aware that the prefix does '
+                                                            f'not work over DM therefore a default or bot tag needs'
+                                                            f' to be used.',
+                                                    destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+            else:
 
+                await customMessages.system_message(ctx=ctx, color_code=1,
+                                                    message=f'There has been an issue. please try again later.',
+                                                    destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+        else:
             await customMessages.system_message(ctx=ctx, color_code=1,
-                                                message=f'There has been an issue. please try again later.',
+                                                message=f'Prefix can be only 1 character in length and a special'
+                                                        f' character',
                                                 destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
 
     @owner.command()
