@@ -45,7 +45,7 @@ class GuildOwnerCommands(commands.Cog):
 
     @owner.command()
     async def changeprefix(self, ctx, prefix):
-        if self.bot.backoffice.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
+        if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
             await ctx.channel.send(content=f'You have changed the prefix to {prefix}')
         else:
             await ctx.channel.send(content=f'There has been an issue. please try again later.')
