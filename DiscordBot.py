@@ -50,6 +50,12 @@ class DiscordBot(commands.Bot):
 
         print(Fore.CYAN + f'{self.hot_wallets}')
 
+    def get_prefix_help(self, guild_id):
+        try:
+            return self.backoffice.guild_profiles.get_guild_prefix_norm(guild_id=guild_id)
+        except Exception:
+            return self.bot_settings['command']
+
     async def get_prefix(self, message):
         try:
             return await self.backoffice.guild_profiles.get_guild_prefix(guild_id=message.guild.id)
