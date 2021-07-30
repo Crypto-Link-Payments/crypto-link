@@ -79,7 +79,12 @@ class GuildProfileManager:
 
     async def get_guild_prefix(self, guild_id):
         prefix = await self.as_guild_prefixes.find_one({"guildId": guild_id},
+                                                       {"_id": 0,
+                                                        "prefix": 1})
+        return prefix["prefix"]
+
+    def get_guild_prefix_norm(self, guild_id):
+        prefix = self.guild_prefixes.find_one({"guildId": guild_id},
                                               {"_id": 0,
                                                "prefix": 1})
         return prefix["prefix"]
-
