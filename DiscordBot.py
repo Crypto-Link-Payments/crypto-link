@@ -32,11 +32,6 @@ horizon_cogs = ['horizonCommands.horizonMain',
 #
 # custodial_layer = ['secondLevel.secondLevelAccounts']
 
-def get_prefix(client,message):
-    with open("prefixe.json","r") as f:
-        prefixes = json.load(f)
-    return prefixes[str(message.guild.id)]
-
 
 class DiscordBot(commands.Bot):
     def __init__(self, backoffice, bot_settings: dict):
@@ -45,17 +40,18 @@ class DiscordBot(commands.Bot):
         self.integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
         self.hot_wallets = backoffice.stellar_wallet.public_key
         self.list_of_coins = list(self.integrated_coins.keys())
-        # super().__init__(
-        #     command_prefix=commands.when_mentioned_or(self.bot_settings['command']),
-        #     intents=Intents.all())
+
         super().__init__(
-            command_prefix=commands.when_mentioned_or(get_prefix),
+            command_prefix=commands.when_mentioned_or(self.get_prefix),
             intents=Intents.all())
         self.remove_command('help')  # removing the old help command
         self.backoffice = backoffice
         self.load_cogs()
 
         print(Fore.CYAN + f'{self.hot_wallets}')
+
+    async def get_prefix(self, message):
+        return self.backoffice.guild_profiles.get_guild_prefix(guild_id=message.guild.id)
 
     def load_cogs(self):
         notification_str = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
@@ -138,3 +134,6 @@ class DiscordBot(commands.Bot):
 
     def get_command_str(self):
         return self.bot_settings['command']
+
+    def all_guilds(self):
+        return self.guilds
