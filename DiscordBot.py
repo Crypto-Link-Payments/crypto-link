@@ -52,7 +52,7 @@ class DiscordBot(commands.Bot):
 
     async def get_prefix(self, message):
         try:
-            return self.backoffice.guild_profiles.get_guild_prefix(guild_id=message.guild.id)
+            return await self.backoffice.guild_profiles.get_guild_prefix(guild_id=message.guild.id)
         except Exception:
             return self.bot_settings['command']
 
