@@ -148,6 +148,7 @@ masterKey.json
 utils/securityManager.py
 hotWalletsTest.json
 walletSecretsTest.json\
+test.py
 
 
 
