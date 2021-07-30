@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import json
 from discord.ext import commands
 from discord import TextChannel, Embed, Colour
 from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet
@@ -35,11 +35,20 @@ class GuildOwnerCommands(commands.Cog):
                 {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
                  "value": f"`{self.command_string}owner uplink`"},
                 {"name": ":convenience_store:  Operate with merchant :convenience_store:  ",
-                 "value": f"`{self.command_string}owner merchant`"}
+                 "value": f"`{self.command_string}owner merchant`"},
+                {"name": f":tools: Change {self.bot.user} prefix ",
+                 "value": f"`{self.command_string}owner changeprefix <char>`"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                c=Colour.dark_gold())
+
+    @owner.command()
+    async def changeprefix(self, ctx, prefix):
+        if self.bot.backoffice.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
+            await ctx.channel.send(content=f'You have changed the prefix to {prefix}')
+        else:
+            await ctx.channel.send(content=f'There has been an issue. please try again later.')
 
     @owner.command()
     @commands.check(has_wallet)
