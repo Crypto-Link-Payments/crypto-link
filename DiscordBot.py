@@ -54,7 +54,7 @@ class DiscordBot(commands.Bot):
         try:
             return self.backoffice.guild_profiles.get_guild_prefix(guild_id=message.guild.id)
         except Exception:
-            return "!"
+            return self.bot_settings['command']
 
     def load_cogs(self):
         notification_str = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
@@ -137,6 +137,3 @@ class DiscordBot(commands.Bot):
 
     def get_command_str(self):
         return self.bot_settings['command']
-
-    def all_guilds(self):
-        return self.guilds
