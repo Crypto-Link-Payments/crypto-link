@@ -186,22 +186,23 @@ class WithdrawalCommands(commands.Cog):
                                                                              destination=ctx.message.author,
                                                                              sys_msg_title='Withdrawal error')
                             else:
-                                msg = f"You have not registered your wallet yet into the system or you have not deposit" \
-                                      f" {token.upper()}. Withdrawal request has been canceled"
+                                msg = f"You have not registered your wallet yet into the system or you have not" \
+                                      f" deposit {token.upper()}. Withdrawal request has been canceled"
                                 await custom_messages.system_message(ctx=ctx, color_code=1,
                                                                      message=msg,
                                                                      destination=ctx.message.author,
                                                                      sys_msg_title='Withdrawal error')
                         else:
-                            msg = f"Minimum withdrawal amount has not been met. In order to be able to withdraw {asset_code.upper()}" \
+                            msg = f"Minimum withdrawal amount has not been met. In order to be able to withdraw " \
+                                  f"{asset_code.upper()}" \
                                   f" amount needs to be greater than {minimum_withdrawal / (10 ** 7)}"
                             await custom_messages.system_message(ctx=ctx, color_code=1,
                                                                  message=msg,
                                                                  destination=ctx.message.author,
                                                                  sys_msg_title='Withdrawal error')
                     else:
-                        msg = f'{asset_code.upper()} is not supported yet on the Crypto Link system. Please try different' \
-                              f'asset. '
+                        msg = f'{asset_code.upper()} is not supported yet on the Crypto Link system. Please ' \
+                              f'try different asset. '
                         await custom_messages.system_message(ctx=ctx, color_code=1,
                                                              message=msg,
                                                              destination=ctx.message.author,
