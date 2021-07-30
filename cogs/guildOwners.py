@@ -24,6 +24,7 @@ class GuildOwnerCommands(commands.Cog):
     @commands.check(is_public)
     async def owner(self, ctx):
         if ctx.invoked_subcommand is None:
+            self.command_string = self.bot.get_prefix_help(ctx.guild.id)
             title = ':joystick: __Guild Owner Manual__ :joystick: '
             description = "All available commands to operate with guild system."
             list_of_values = [
@@ -46,9 +47,14 @@ class GuildOwnerCommands(commands.Cog):
     @owner.command()
     async def changeprefix(self, ctx, prefix):
         if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
-            await ctx.channel.send(content=f'You have changed the prefix to {prefix}')
+            await customMessages.system_message(ctx=ctx, color_code=0,
+                                                message=f'You have successfully set prefix for server {ctx.guild} to {prefix}',
+                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
         else:
-            await ctx.channel.send(content=f'There has been an issue. please try again later.')
+
+            await customMessages.system_message(ctx=ctx, color_code=1,
+                                                message=f'There has been an issue. please try again later.',
+                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
 
     @owner.command()
     @commands.check(has_wallet)
