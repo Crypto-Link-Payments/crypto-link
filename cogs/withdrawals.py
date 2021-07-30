@@ -71,7 +71,9 @@ class WithdrawalCommands(commands.Cog):
                                     verification = await ctx.channel.send(content=message_content)
                                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
 
-                                    if str(msg_usr.content.lower() == 'yes'):
+                                    print(msg_usr)
+                                    print()
+                                    if str(msg_usr.content.lower()) == 'yes':
                                         processing_msg = ':robot: Processing withdrawal request, please wait few moments....'
                                         processing_msg = await ctx.channel.send(content=processing_msg)
 
@@ -173,33 +175,55 @@ class WithdrawalCommands(commands.Cog):
                                         else:
                                             msg = f"It seems that there has been error while trying to withdraw. " \
                                                   f"Error: {result['error']}"
-                                            await ctx.author.send(msg)
+                                            await custom_messages.system_message(ctx=ctx, color_code=1,
+                                                                                 message=msg,
+                                                                                 destination=ctx.message.author,
+                                                                                 sys_msg_title='Withdrawal error')
                                     else:
                                         msg = f"You have cancelled withdrawal request"
-                                        await ctx.author.send(msg)
+                                        await custom_messages.system_message(ctx=ctx, color_code=1,
+                                                                             message=msg,
+                                                                             destination=ctx.message.author,
+                                                                             sys_msg_title='Withdrawal error')
                             else:
                                 msg = f"You have not registered your wallet yet into the system or you have not deposit" \
                                       f" {token.upper()}. Withdrawal request has been canceled"
-                                await ctx.author.send(msg)
+                                await custom_messages.system_message(ctx=ctx, color_code=1,
+                                                                     message=msg,
+                                                                     destination=ctx.message.author,
+                                                                     sys_msg_title='Withdrawal error')
                         else:
                             msg = f"Minimum withdrawal amount has not been met. In order to be able to withdraw {asset_code.upper()}" \
                                   f" amount needs to be greater than {minimum_withdrawal / (10 ** 7)}"
-                            await ctx.author.send(content=msg)
+                            await custom_messages.system_message(ctx=ctx, color_code=1,
+                                                                 message=msg,
+                                                                 destination=ctx.message.author,
+                                                                 sys_msg_title='Withdrawal error')
                     else:
                         msg = f'{asset_code.upper()} is not supported yet on the Crypto Link system. Please try different' \
                               f'asset. '
-                        await ctx.author.send(content=msg)
+                        await custom_messages.system_message(ctx=ctx, color_code=1,
+                                                             message=msg,
+                                                             destination=ctx.message.author,
+                                                             sys_msg_title='Withdrawal error')
                 else:
                     msg = "Address you have specified either is not a valid public key address or it includes " \
                           "special characters. Please try again"
-                    await ctx.author.send(content=msg)
+                    await custom_messages.system_message(ctx=ctx, color_code=1,
+                                                         message=msg,
+                                                         destination=ctx.message.author,
+                                                         sys_msg_title='Withdrawal error')
             else:
                 msg = "Withdrawing back to your account does not make any sense. Please choose different " \
                       "destination address."
-                await ctx.author.send(content=msg)
+                await custom_messages.system_message(ctx=ctx, color_code=1,
+                                                     message=msg,
+                                                     destination=ctx.message.author, sys_msg_title='Withdrawal error')
         except Exception as e:
-            await ctx.author.send(content=f'There has been an issue. Please contact support and provide them with the '
-                                          f'error {e}')
+            msg = (f'There has been an issue. Please contact support and provide them with the error {e}')
+            await custom_messages.system_message(ctx=ctx, color_code=1,
+                                                 message=msg,
+                                                 destination=ctx.message.author, sys_msg_title='Withdrawal error')
 
     @withdraw.error
     async def withdrawal_error(self, ctx, error):
