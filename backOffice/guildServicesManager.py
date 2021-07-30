@@ -21,6 +21,7 @@ class GuildProfileManager:
         self.as_cl_db_access = self.as_connection['CryptoLink']
         self.as_guild_profiles = self.as_cl_db_access.guildProfiles  # Connection to user profiles
         self.as_stellar_community_wallets = self.as_cl_db_access.StellarCommunityWallets
+        self.as_guild_prefixes = self.as_cl_db_access.guildPrefixes
 
     def check_guild_registration_stats(self, guild_id: int):
         result = list(self.guild_profiles.find({"guildId": guild_id}))
@@ -76,8 +77,9 @@ class GuildProfileManager:
                                                 {"$set": {"prefix": prefix}})
         return result.matched_count > 0
 
-    def get_guild_prefix(self, guild_id):
-        prefix = self.guild_prefixes.find_one({"guildId": guild_id},
+    async def get_guild_prefix(self, guild_id):
+        prefix = await self.as_guild_prefixes.find_one({"guildId": guild_id},
                                               {"_id": 0,
                                                "prefix": 1})
         return prefix["prefix"]
+
