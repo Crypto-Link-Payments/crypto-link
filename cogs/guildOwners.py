@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import json
 from discord.ext import commands
 from discord import TextChannel, Embed, Colour
 from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet
@@ -18,28 +18,55 @@ class GuildOwnerCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.merchant = self.backoffice.merchant_manager
+        self.guild_string = None
 
     @commands.group()
     @commands.check(is_owner)
     @commands.check(is_public)
     async def owner(self, ctx):
         if ctx.invoked_subcommand is None:
+            self.guild_string = self.bot.get_prefix_help(ctx.guild.id)
             title = ':joystick: __Guild Owner Manual__ :joystick: '
             description = "All available commands to operate with guild system."
             list_of_values = [
-                {"name": ":bellhop: Register Guild :bellhop: ", "value": f"`{self.command_string}owner register`"},
+                {"name": ":bellhop: Register Guild :bellhop: ", "value": f"`{self.guild_string}owner register`"},
                 {"name": ":bar_chart: Guild Crypto Link Stats :bar_chart: ",
-                 "value": f"`{self.command_string}owner stats`"},
+                 "value": f"`{self.guild_string}owner stats`"},
                 {"name": ":service_dog: Guild Applied Services :service_dog: ",
-                 "value": f"`{self.command_string}owner services`"},
+                 "value": f"`{self.guild_string}owner services`"},
                 {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
-                 "value": f"`{self.command_string}owner uplink`"},
+                 "value": f"`{self.guild_string}owner uplink`"},
                 {"name": ":convenience_store:  Operate with merchant :convenience_store:  ",
-                 "value": f"`{self.command_string}owner merchant`"}
+                 "value": f"`{self.guild_string}owner merchant`"},
+                {"name": f":tools: Change {self.bot.user} prefix ",
+                 "value": f"`{self.guild_string}owner changeprefix <char>`"}
             ]
 
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                c=Colour.dark_gold())
+
+    @owner.command()
+    async def changeprefix(self, ctx, prefix):
+        prefix = prefix.strip()
+        if not len(prefix) >1 and self.bot.backoffice.helper.check_for_special_char(string=prefix):
+            if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
+                await customMessages.system_message(ctx=ctx, color_code=0,
+                                                    message=f'You have successfully set prefix for server {ctx.guild} '
+                                                            f'to {prefix}. In case if you forget the prefix, tag the bot '
+                                                            f'and it will respond as well. Be aware that the prefix does '
+                                                            f'not work over DM therefore a default or bot tag needs'
+                                                            f' to be used.',
+                                                    destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+            else:
+
+                await customMessages.system_message(ctx=ctx, color_code=1,
+                                                    message=f'There has been an issue. please try again later.',
+                                                    destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+        else:
+            await customMessages.system_message(ctx=ctx, color_code=1,
+                                                message=f'Prefix can be only 1 character in length and a special'
+                                                        f' character',
+                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
 
     @owner.command()
     @commands.check(has_wallet)

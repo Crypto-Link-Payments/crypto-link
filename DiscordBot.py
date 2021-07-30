@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import Intents
 from colorama import Fore, init
-
+import json
 from utils.tools import Helpers
 
 CONST_SEPARATOR = '+++++++++++++++++++++++++++++++++++++++'
@@ -40,14 +40,27 @@ class DiscordBot(commands.Bot):
         self.integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
         self.hot_wallets = backoffice.stellar_wallet.public_key
         self.list_of_coins = list(self.integrated_coins.keys())
+
         super().__init__(
-            command_prefix=commands.when_mentioned_or(self.bot_settings['command']),
+            command_prefix=commands.when_mentioned_or(self.get_prefix),
             intents=Intents.all())
         self.remove_command('help')  # removing the old help command
         self.backoffice = backoffice
         self.load_cogs()
 
         print(Fore.CYAN + f'{self.hot_wallets}')
+
+    def get_prefix_help(self, guild_id):
+        try:
+            return self.backoffice.guild_profiles.get_guild_prefix_norm(guild_id=guild_id)
+        except Exception:
+            return self.bot_settings['command']
+
+    async def get_prefix(self, message):
+        try:
+            return await self.backoffice.guild_profiles.get_guild_prefix(guild_id=message.guild.id)
+        except Exception:
+            return self.bot_settings['command']
 
     def load_cogs(self):
         notification_str = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
@@ -90,6 +103,16 @@ class DiscordBot(commands.Bot):
             Print out to console once bot logs in
             :return:
             """
+
+        for g in self.guilds:
+            check_guild_prefix = self.backoffice.guild_profiles.check_guild_prefix(guild_id=int(g.id))
+            if not check_guild_prefix:
+                if self.backoffice.guild_profiles.set_guild_prefix(guild_id=int(g.id), prefix="!"):
+                    print(Fore.YELLOW + f"Default prefix registered for {g}")
+                else:
+                    print(Fore.RED + f"Could not register prefix for {g}")
+            else:
+                print(Fore.GREEN + f"{g} Prefix ....OK")
 
         await self.change_presence(status=discord.Status.online, activity=discord.Game('Monitoring Stellar'))
         print(Fore.GREEN + 'DISCORD BOT : Logged in as')
