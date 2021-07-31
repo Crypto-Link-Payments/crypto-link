@@ -355,11 +355,15 @@ class BotManagementCommands(commands.Cog):
     async def new(self, ctx, asset_issuer: str, asset_code: str):
         """Ads support for ne token"""
         try:
+            print("Trying to add")
             assets = self.bot.backoffice.stellar_wallet.server.assets()
+            print("1")
             asset = assets.for_code(asset_code=asset_code.upper()).for_issuer(
                 asset_issuer=asset_issuer.upper()).call()
+            print("2")
             asset_data = asset["_embedded"]['records'][0]
             if asset_data:
+                print("3")
                 data = self.bot.backoffice.stellar_wallet.establish_trust(asset_issuer=asset_data["asset_issuer"],
                                                                           token=asset_data["asset_code"])
                 if data[0]:
