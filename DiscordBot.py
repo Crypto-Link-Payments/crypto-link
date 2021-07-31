@@ -37,9 +37,7 @@ class DiscordBot(commands.Bot):
     def __init__(self, backoffice, bot_settings: dict):
         helper = Helpers()
         self.bot_settings = bot_settings
-        self.integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
         self.hot_wallets = backoffice.stellar_wallet.public_key
-        self.list_of_coins = list(self.integrated_coins.keys())
 
         super().__init__(
             command_prefix=commands.when_mentioned_or(self.get_prefix),
