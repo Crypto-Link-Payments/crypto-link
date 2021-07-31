@@ -22,9 +22,7 @@ from nonCustodialWallets.utils.thirdLevelCustMsg import third_level_acc_details,
     transaction_result, server_error_response
 
 helper = Helpers()
-integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 custom_messages = CustomMessages()
-helper = Helpers()
 CONST_XDR_ERROR = ":exclamation: XDR Creation Error :exclamation: "
 CONST_REG_ERROR_TITLE = "3. level wallet registration error"
 CONST_REG_ERROR = "Account could not be registered into Crypto Link system. Please try again later."
@@ -44,7 +42,6 @@ class LevelThreeAccountCommands(commands.Cog):
         self.hot_wallet = self.backoffice.stellar_wallet
         self.server = self.hot_wallet.server
         self.acc_mng_rd_lvl = self.backoffice.third_level_manager
-        self.supported = list(integrated_coins.keys())
         self.available_levels = [1, 2, 3]
         self.help_functions = self.backoffice.helper
 
