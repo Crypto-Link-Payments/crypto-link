@@ -11,7 +11,6 @@ helper = Helpers()
 custom_messages = CustomMessages()
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_WITHDRAWAL_ERROR = "__Withdrawal error___"
-integrated_coins = helper.read_json_file(file_name='integratedCoins.json')
 
 
 class WithdrawalCommands(commands.Cog):
@@ -19,7 +18,6 @@ class WithdrawalCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
-        self.list_of_coins = list(integrated_coins.keys())
         self.earnings = bot.backoffice.auto_messaging_channels["earnings"]
         self.with_channel = bot.backoffice.auto_messaging_channels["withdrawals"]
         self.help_functions = bot.backoffice.helper
