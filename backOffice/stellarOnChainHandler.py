@@ -277,3 +277,7 @@ class StellarWallet:
         except exceptions.NotFoundError as e:
             print(Fore.RED + f'Error {e}')
             return False, e
+        except Exception as e:
+            print(Fore.RED + f'Error {e}')
+            return False, e
+
