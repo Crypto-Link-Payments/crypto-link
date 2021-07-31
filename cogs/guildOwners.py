@@ -90,7 +90,7 @@ class GuildOwnerCommands(commands.Cog):
             all_integrated_tokens = self.bot.backoffice.token_manager.get_registered_tokens()
 
             for asset_code in all_integrated_tokens:
-                new_guild[asset_code] = {"volume": float(0.0),
+                new_guild[asset_code["assetCode"]] = {"volume": float(0.0),
                                          "txCount": int(0),
                                          "privateCount": int(0),
                                          "publicCount": int(0),
