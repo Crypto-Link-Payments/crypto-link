@@ -256,9 +256,9 @@ class StellarWallet:
         # Load user secret and get account
         if not private_key:
             private_key = self.private_key
-        print("PK")
-        print(private_key)
+
         user_key_pair = Keypair.from_secret(private_key)
+        print(user_key_pair)
         root_account = Account(account_id=user_key_pair.public_key, sequence=1)
         public_key = root_account.account_id
 
@@ -275,4 +275,5 @@ class StellarWallet:
             data = self.server.submit_transaction(tx)
             return True, data
         except exceptions.NotFoundError as e:
+            print(Fore.RED + f'Error {e}')
             return False, e
