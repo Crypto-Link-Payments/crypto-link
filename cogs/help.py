@@ -158,19 +158,19 @@ class HelpCommands(commands.Cog):
                                   colour=Colour.blue())
         await ctx.author.send(embed=available)
 
-        coins = self.helper.read_json_file(file_name='integratedCoins.json')
-        for coin in coins:
-            available.add_field(name=f'====================================',
-                                value='\u200b')
-            available.add_field(
-                name=f"{coins[coin]['emoji']} {coins[coin]['name']} {coins[coin]['emoji']}",
-                value=f'`Symbol:` ***{coins[coin]["ticker"]}***\n'
-                      f'`Issuer:` ***{coins[coin]["assetIssuer"]}***\n'
-                      f'`Decimals:` ***{coins[coin]["decimal"]}***\n'
-                      f'`Min. Withdrawal:` ***{coins[coin]["minimumWithdrawal"] / 10000000}***\n'
-                      f'`Expert Link:` ***{coins[coin]["expert"]}***\n'
-                      f'`Homepage:` ***{coins[coin]["homepage"]}***',
-                inline=False)
+        #TODO update to pull supported from DB
+        # for coin in coins:
+        #     available.add_field(name=f'====================================',
+        #                         value='\u200b')
+        #     available.add_field(
+        #         name=f"{coins[coin]['emoji']} {coins[coin]['name']} {coins[coin]['emoji']}",
+        #         value=f'`Symbol:` ***{coins[coin]["ticker"]}***\n'
+        #               f'`Issuer:` ***{coins[coin]["assetIssuer"]}***\n'
+        #               f'`Decimals:` ***{coins[coin]["decimal"]}***\n'
+        #               f'`Min. Withdrawal:` ***{coins[coin]["minimumWithdrawal"] / 10000000}***\n'
+        #               f'`Expert Link:` ***{coins[coin]["expert"]}***\n'
+        #               f'`Homepage:` ***{coins[coin]["homepage"]}***',
+        #         inline=False)
         await ctx.author.send(embed=available)
 
     @help.command()
