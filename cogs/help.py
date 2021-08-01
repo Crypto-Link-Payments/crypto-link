@@ -124,7 +124,7 @@ class HelpCommands(commands.Cog):
                               value=f'In order for you to be able to make peer to peer transactions and use merchant'
                                     f' system, you must have registered at least custodial wallet.\n'
                                     f'You can do that by executing command `{self.command_string}register` on any '
-                                    f'public Discord channel where Crypto Link has access to .\n'
+                                    f'public Discord channel where Crypto Link has access to.\n'
                                     f'Once successful, you will create personal wallet with details which you can use '
                                     f' to move or deposit funds. To further familiarize yourself with other'
                                     f' commands use `{self.command_string}help`',
