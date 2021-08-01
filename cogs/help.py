@@ -3,7 +3,7 @@ COGS: Help commands for the payment services
 """
 import discord
 from discord.ext import commands
-from discord import Colour
+from discord import Colour, Embed
 from utils.tools import Helpers
 from utils.customCogChecks import is_owner, is_public
 from cogs.utils.systemMessaages import CustomMessages
@@ -158,20 +158,39 @@ class HelpCommands(commands.Cog):
                                   colour=Colour.blue())
         await ctx.author.send(embed=available)
 
-        #TODO update to pull supported from DB
-        # for coin in coins:
-        #     available.add_field(name=f'====================================',
-        #                         value='\u200b')
-        #     available.add_field(
-        #         name=f"{coins[coin]['emoji']} {coins[coin]['name']} {coins[coin]['emoji']}",
-        #         value=f'`Symbol:` ***{coins[coin]["ticker"]}***\n'
-        #               f'`Issuer:` ***{coins[coin]["assetIssuer"]}***\n'
-        #               f'`Decimals:` ***{coins[coin]["decimal"]}***\n'
-        #               f'`Min. Withdrawal:` ***{coins[coin]["minimumWithdrawal"] / 10000000}***\n'
-        #               f'`Expert Link:` ***{coins[coin]["expert"]}***\n'
-        #               f'`Homepage:` ***{coins[coin]["homepage"]}***',
-        #         inline=False)
-        await ctx.author.send(embed=available)
+        coins = self.bot.backoffice.token_manager.get_all_tokens()
+
+        for coin in coins:
+            if coin["assetCode"] == 'xlm':
+                stellar_info = Embed(title='Stellar Network Native Token',
+                                     description="Stellar native token XLM (Lumen)",
+                                     colour=Colour.lighter_gray())
+                stellar_info.add_field(name=f'Minimum Withdrawal',
+                                       value=f'{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} XLM',
+                                       inline=False)
+                stellar_info.add_field(name=f'Links and information',
+                                       value=f'[XLM Stellar Expert]({coin["expert"]})\n'
+                                             f'[Homepage]({coin["homepage"]})',
+                                       inline=False)
+                await ctx.author.send(embed=stellar_info)
+
+
+            else:
+                token_info = Embed(title='Stellar token',
+                                   colour=Colour.lighter_gray())
+                token_info.add_field(name=f'Minimum Withdrawal',
+                                     value=f'{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} {coin["assetCode"].upper()}',
+                                     inline=False)
+                token_info.add_field(name=f'Asset Code',
+                                     value=f'{coin["assetCode"].upper()}',
+                                     inline=False)
+                token_info.add_field(name=f'Asset Type',
+                                     value=f'{coin["assetType"].upper()}',
+                                     inline=False)
+                token_info.add_field(name=f'Asset Issuer',
+                                     value=f'```{coin["assetIssuer"].upper()}```',
+                                     inline=False)
+                await ctx.author.send(embed=token_info)
 
     @help.command()
     async def wallets(self, ctx):

@@ -21,3 +21,7 @@ class TokenManager:
                                                {"_id": 0,
                                                 "assetCode": 1}))
         return result
+
+    def get_all_tokens(self):
+        return list(self.token_profiles.find({}))
+
