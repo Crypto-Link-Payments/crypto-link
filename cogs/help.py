@@ -71,9 +71,9 @@ class HelpCommands(commands.Cog):
              "value": f'Crypto Link has integrated and interconnected system of custodial, noncustodial wallets.'
                       f' To find more information and explanation '
                       f'please use `{self.command_string}help wallets`. Each user is required to register for custodial '
-                      f'system in order to be able to use noncustodial.'},
+                      f'wallet in order to be able to interact and use Crypto Link in full.'},
 
-            {"name": ":money_with_wings: Instant Peer to Peer feeless transactions :money_with_wings:  ",
+            {"name": ":money_with_wings: Instant Peer to Peer feels transactions :money_with_wings:  ",
              "value": f"Users are able to execute instant peer-2-peer transactions without fees either with the Stellar"
                       f" native currency XLM or integrated tokens. Currently system supports public and private types."
                       f" For full list of supported currencies please use command {self.command_string}currencies"},
