@@ -211,7 +211,7 @@ class BotManagementCommands(commands.Cog):
         """
         Transfer funds from Crypto Link to develop wallet
         """
-        #TODO integrate coins check from db
+
         balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
         print(balance)
         if balance > 0:  # Check if balance greater than -
@@ -344,12 +344,28 @@ class BotManagementCommands(commands.Cog):
     async def tokens(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__Add new support__',
-                      'value': f"***{self.command_string}system tokens new <issuer> <tick>*** "}
+                      'value': f"***{self.command_string}system tokens new <issuer> <tick>*** "},
+                     {'name': '__Set minimum withdrawal__',
+                      'value': f"***{self.command_string}system tokens withdrawal <issuer> <amount>*** "},
                      ]
 
             await custom_messages.embed_builder(ctx, title='Available sub commands for system',
                                                 description='Available commands under category ***system***',
                                                 data=value)
+
+    @tokens.command()
+    async def withdrawal(self, ctx, issuer: str, asset_code: str, amount: float):
+        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
+            data = {"minimumWithdrawal": int(amount * (10 ** 7))}
+            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(), code=asset_code.lower(),
+                                                                      data=data):
+                await ctx.channel.send(
+                    content=f'You have successfully updated the minimum withdrawal for token {asset_code} {issuer}')
+            else:
+                await ctx.channel.send(
+                    content="There has been issue in the backend while trying to update token details")
+        else:
+            await ctx.channel.send(content='This token is not registered in DB')
 
     @tokens.command()
     async def new(self, ctx, asset_issuer: str, asset_code: str):
