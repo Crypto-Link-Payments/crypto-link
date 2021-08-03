@@ -355,7 +355,23 @@ class BotManagementCommands(commands.Cog):
                                                 description='Available commands under category ***system***',
                                                 data=value)
 
-    @tokens.command()
+    @tokens.group()
+    async def profile(self, ctx):
+        if ctx.invoked_subcommand is None:
+            value = [{'name': '__Set homepage __',
+                      'value': f"***{self.command_string}tokens profile home <issuer> <tick> <homepage address>*** "},
+                     {'name': '__Set Expert__',
+                      'value': f"***{self.command_string}tokens profile expert <issuer> <tick> <expert address>***"},
+                     {'name': '__Set Token Withdrawal Limit__',
+                      'value': f"***{self.command_string}tokens profile withdrawal <issuer> <tick> <amount limit float>***"}
+                     ]
+
+            await custom_messages.embed_builder(ctx, title='Available sub commands for system',
+                                                description='Available commands under category ***system***',
+                                                data=value)
+        pass
+
+    @profile.command()
     async def withdrawal(self, ctx, issuer: str, asset_code: str, amount: float):
         if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
             data = {"minimumWithdrawal": int(amount * (10 ** 7))}
