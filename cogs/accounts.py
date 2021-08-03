@@ -166,25 +166,29 @@ class UserAccountCommands(commands.Cog):
         else:
             token_stats = self.backoffice.account_mng.get_token_stats(discord_id=ctx.message.author.id,
                                                                       token=token.lower())
-            from pprint import pprint
+            if token_stats:
+                token_stats_info = Embed(title=f'Details for token {token.upper()}',
+                                         description=f'Below are statistical details on account activities for the selected token,'
+                                                     f'till {utc_now} (UTC)',
+                                         colour=Colour.gold())
 
-            token_stats_info = Embed(title=f'Details for token {token.upper()}',
-                                     description=f'Below are statistical details on account activities for the selected token,'
-                                                 f'till {utc_now} (UTC)',
-                                     colour=Colour.gold())
+                for k, v in token_stats[token.lower()].items():
+                    # k = k.capitalize()
+                    itm = sub(r"([A-Z])", r" \1", k).split()
+                    item = ' '.join([str(elem) for elem in itm]).capitalize()
+                    if k in ["depositsCount", "publicTxSendCount", "privateTxSendCount", "withdrawalsCount"]:
+                        token_stats_info.add_field(name=f'{item}',
+                                                   value=f'{v}')
+                    else:
+                        token_stats_info.add_field(name=f'{item}',
+                                                   value=f'{v:,.7f} {token.upper()}')
 
-            for k, v in token_stats[token.lower()].items():
-                # k = k.capitalize()
-                itm = sub(r"([A-Z])", r" \1", k).split()
-                item = ' '.join([str(elem) for elem in itm]).capitalize()
-                if k in ["depositsCount", "publicTxSendCount", "privateTxSendCount", "withdrawalsCount"]:
-                    token_stats_info.add_field(name=f'{item}',
-                                               value=f'{v}')
-                else:
-                    token_stats_info.add_field(name=f'{item}',
-                                               value=f'{v:,.7f} {token.upper()}')
-
-            await ctx.author.send(embed=token_stats_info)
+                await ctx.author.send(embed=token_stats_info)
+            else:
+                title = '__Token statistics__'
+                message = f'You have no activity marked in the wallet for token {token.upper()}'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                     sys_msg_title=title)
 
     @wallet.group()
     async def deposit(self, ctx):
