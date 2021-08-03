@@ -80,6 +80,12 @@ class AccountManager(object):
 
         return result
 
+    def get_token_stats(self, discord_id: int, token: str):
+        result = self.user_profiles.find_one({"userId": discord_id},
+                                             {"_id": 0,
+                                              f"{token}": 1})
+        return result
+
     def register_user(self, discord_id: int, discord_username: str):
         """
         Registers user into the system
