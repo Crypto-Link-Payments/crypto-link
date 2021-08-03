@@ -344,9 +344,11 @@ class BotManagementCommands(commands.Cog):
     async def tokens(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__Add new support__',
-                      'value': f"***{self.command_string}system tokens new <issuer> <tick>*** "},
-                     {'name': '__Set minimum withdrawal__',
-                      'value': f"***{self.command_string}system tokens withdrawal <issuer> <amount>*** "},
+                      'value': f"***{self.command_string}tokens new <issuer> <tick>*** "},
+                     {'name': '__Add new with trust DONE!__',
+                      'value': f"***{self.command_string}tokens trusted <issuer> <amount>*** "},
+                     {'name': '__Update token profiles__',
+                      'value': f"***{self.command_string}tokens profile*** "},
                      ]
 
             await custom_messages.embed_builder(ctx, title='Available sub commands for system',
