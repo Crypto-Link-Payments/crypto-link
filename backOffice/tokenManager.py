@@ -27,9 +27,9 @@ class TokenManager:
         return self.token_profiles.find_one({"assetIssuer": issuer, "assetCode": code},
                                             {"_id"})
 
-    def update_token_profile(self, issuer, code, data: dict):
-        result = self.token_profiles.update_one({"assetIssuer": issuer, "assetCode": code},
-                                                {"$set", data})
+    def update_token_profile(self, asset_code, issuer, to_update):
+        result = self.token_profiles.update_one({"assetIssuer": issuer.upper(), "assetCode": asset_code.lower()},
+                                                {"$set": to_update})
         return result.matched_count > 0
 
     def get_registered_tokens(self):
