@@ -204,15 +204,7 @@ class HelpCommands(commands.Cog):
                       f"instantly, even doe if recipient has not registered yet into the system. Custodial wallet is  "
                       f"is automatically created and all actions connected with it do not require private key "
                       f"to be used for signing. In order to fully protect your wallet, please activate 2FA for Discord "
-                      f"account. "},
-            {"name": ":two: Non-Custodial wallet support :two: ",
-             "value": "`Noncustodial wallet` which utilizes XDR envelopes to make XDR envelopes to be signed either through"
-                      " [Stellar Laboratory](https://laboratory.stellar.org/#?network=public) or any other application"
-                      " allowing to import XDR or than straight through "
-                      "Discord. the only details which are stored into Crypto Link system are unique user id and "
-                      "user public address so XDR can be successfully built and that others can efficiently transfer "
-                      "tokens to you from Custodial to Non Custodial wallet"
-                      f"```Access it with: {self.command_string}three```"}
+                      f"account. "}
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
