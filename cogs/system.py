@@ -374,11 +374,13 @@ class BotManagementCommands(commands.Cog):
     @profile.command()
     async def withdrawal(self, ctx, issuer: str, asset_code: str, amount: float):
         if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
-            data = {"minimumWithdrawal": int(amount * (10 ** 7))}
-            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(), code=asset_code.lower(),
-                                                                      data=data):
+            amount_micro = int(amount * (10 ** 7))
+            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
+                                                                      asset_code= asset_code.lower(),
+                                                                      to_update={"minimumWithdrawal": amount_micro}):
+
                 await ctx.channel.send(
-                    content=f'You have successfully updated the minimum withdrawal for token {asset_code} {issuer}')
+                    content=f'You have successfully updated the minimum withdrawal {amount_micro/(10**7)} for token {asset_code.upper()} {issuer}')
             else:
                 await ctx.channel.send(
                     content="There has been issue in the backend while trying to update token details")
