@@ -30,8 +30,6 @@ class HelpCommands(commands.Cog):
                 {"name": ":rocket: How to get started :rocket:",
                  "value": f"```{self.command_string}get_started```\n"
                           f"`Aliases: start`"},
-                {"name": " :moneybag: Wallet level system information :moneybag: ",
-                 "value": f"```{self.command_string}help levels```"},
                 {"name": ":coin: Available Currencies :coin:",
                  "value": f"```{self.command_string}help currencies```\n"
                           f"`Aliases: tokens, coins`"},
@@ -68,8 +66,8 @@ class HelpCommands(commands.Cog):
                       ' opportunities for Discord guild owners and project promotions/crowdfunding/ICOs activities'
                       ' at low costs for aspiring fintech-companies building with the help of Stellar.'},
             {"name": ":moneybag: Wallet Types :moneybag:  ",
-             "value": f'Crypto Link has integrated and interconnected system of custodial, noncustodial wallets.'
-                      f' To find more information and explanation '
+             "value": f'At this moment Crypto Link supports only custodial wallet which operated based on MEMO '
+                      f'when depositing. '
                       f'please use `{self.command_string}help wallets`. Each user is required to register for custodial '
                       f'wallet in order to be able to interact and use Crypto Link in full.'},
 
@@ -166,7 +164,7 @@ class HelpCommands(commands.Cog):
                                      description="Stellar native token XLM (Lumen)",
                                      colour=Colour.lighter_gray())
                 stellar_info.add_field(name=f'Minimum Withdrawal',
-                                       value=f'{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} XLM',
+                                       value=f'```{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} XLM```',
                                        inline=False)
                 stellar_info.add_field(name=f'Links and information',
                                        value=f'[XLM Stellar Expert]({coin["expert"]})\n'
@@ -174,22 +172,24 @@ class HelpCommands(commands.Cog):
                                        inline=False)
                 await ctx.author.send(embed=stellar_info)
 
-
             else:
+
                 token_info = Embed(title='Stellar token',
                                    colour=Colour.lighter_gray())
-                token_info.add_field(name=f'Minimum Withdrawal',
-                                     value=f'{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} {coin["assetCode"].upper()}',
-                                     inline=False)
                 token_info.add_field(name=f'Asset Code',
-                                     value=f'{coin["assetCode"].upper()}',
+                                     value=f'```{coin["assetCode"].upper()}```',
                                      inline=False)
                 token_info.add_field(name=f'Asset Type',
-                                     value=f'{coin["assetType"].upper()}',
+                                     value=f'```{coin["assetType"].upper()}```',
                                      inline=False)
                 token_info.add_field(name=f'Asset Issuer',
                                      value=f'```{coin["assetIssuer"].upper()}```',
                                      inline=False)
+                token_info.add_field(name=f'Minimum Withdrawal',
+                                     value=f'```{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} {coin["assetCode"].upper()}```',
+                                     inline=False)
+                token_info.add_field(name='Web Links',
+                                     value=f'[Homepage]({coin["homepage"]}) | [Stellar Expert]({coin["expert"]}) | [TOML]({coin["toml"]}) ')
                 await ctx.author.send(embed=token_info)
 
     @help.command()
