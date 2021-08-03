@@ -116,8 +116,8 @@ class TransactionCommands(commands.Cog):
             conversion_rate = in_dollar["usd"]
         else:
 
-            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']} {tx_details['assetCode']}"
-            explorer_msg = f'💵  {tx_details["amount"]} ({tx_details["assetCode"]}) on ' \
+            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']} {tx_details['assetCode'].upper()}"
+            explorer_msg = f'💵  {tx_details["amount"]} {tx_details["assetCode"].upper()} on ' \
                            f'{ctx.message.guild} channel {ctx.message.channel}'
             total_dollar_value = 0
             conversion_rate = 0
