@@ -611,6 +611,13 @@ class BotManagementCommands(commands.Cog):
                                         msg = "On chain stats collector document could not be created"
                                         await ctx.author.send(content=msg)
 
+                            else:
+                                await ctx.author.send(content="Withdrawals and limits could not be created")
+                        else:
+                            await ctx.author.send(content="Wallet could not be created")
+                    else:
+                        await ctx.author.send(content="Data for new token could not be set in DB ")
+
     # @commands.check(is_one_of_gods)
     # async def cogs(self, ctx):
     #     if ctx.invoked_subcommand is None:
