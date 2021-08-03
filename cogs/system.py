@@ -378,8 +378,7 @@ class BotManagementCommands(commands.Cog):
             if asset_data:
                 data = self.bot.backoffice.stellar_wallet.establish_trust(asset_issuer=asset_data["asset_issuer"],
                                                                           token=asset_data["asset_code"])
-                from pprint import pprint
-                pprint(data)
+
                 if data[0]:
                     token = {
                         "toml": asset_data["_links"]["toml"]["href"],
