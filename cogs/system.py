@@ -385,6 +385,38 @@ class BotManagementCommands(commands.Cog):
         else:
             await ctx.channel.send(content='This token is not registered in DB')
 
+    @profile.command()
+    async def expert(self, ctx, issuer: str, asset_code: str, address:str):
+        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
+            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
+                                                                      asset_code= asset_code.lower(),
+                                                                      to_update={"expert": address}):
+
+                await ctx.channel.send(
+                    content=f'You have successfully updated the expert link for token {asset_code.upper()} {issuer}')
+            else:
+                await ctx.channel.send(
+                    content="There has been issue in the backend while trying to update token details")
+        else:
+            await ctx.channel.send(content='This token is not registered in DB')
+
+    @profile.command()
+    async def homepage(self, ctx, issuer: str, asset_code: str, address:str):
+        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
+            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
+                                                                      asset_code= asset_code.lower(),
+                                                                      to_update={"homepage": address}):
+
+                await ctx.channel.send(
+                    content=f'You have successfully updated the hoemapage link for token {asset_code.upper()} {issuer}')
+            else:
+                await ctx.channel.send(
+                    content="There has been issue in the backend while trying to update token details")
+        else:
+            await ctx.channel.send(content='This token is not registered in DB')
+
+
+
     @tokens.command()
     async def new(self, ctx, asset_issuer: str, asset_code: str):
         """Ads support for ne token"""
