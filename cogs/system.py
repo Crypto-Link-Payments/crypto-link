@@ -458,11 +458,10 @@ class BotManagementCommands(commands.Cog):
                         "pagingToken": asset_data["paging_token"],
                         "coingGeckoListing": False,
                         "minimumWithdrawal": 100000000,
-                        'webPage': None,
                         "ownerId": None,
                         "ownerName": None,
                         "expert": None,
-                        "homepage": None
+                        "homepage": None,
                     }
 
                     # insert new token into database
