@@ -149,6 +149,9 @@ class UserAccountCommands(commands.Cog):
         utc_now = datetime.utcnow()
 
         if not token or token.lower() == 'xlm':
+            tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
+                      x['assetCode'] != 'xlm']
+            available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
             account_details = self.backoffice.account_mng.get_account_stats(discord_id=ctx.message.author.id)
             stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
                                description='Below are presented stats which are automatically counted upon successful'
@@ -161,6 +164,10 @@ class UserAccountCommands(commands.Cog):
                                        f':money_mouth: -> `SUM of total amount received per currency` \n'
                                        f':man_juggling: -> `SUM of total roles purchase through merchant system`\n'
                                        f':money_with_wings: -> `SUM of total amount spent on merchant system` \n')
+            stats_info.add_field(name=f':warning: Access token stats:warning: ',
+                                 value=f'Use same command, and add asset code. All currently available are: '
+                                       f'{available_stats}',
+                                 inline=False)
             await ctx.author.send(embed=stats_info)
             await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
         else:
