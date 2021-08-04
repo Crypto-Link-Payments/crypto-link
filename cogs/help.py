@@ -43,7 +43,7 @@ class HelpCommands(commands.Cog):
                  "value": f"```{self.command_string}help account```\n"
                           f"`Aliases: acc, user, profile, wallet`"},
                 {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
-                 "value": f"```{self.command_string}help transactions```\n"
+                 "value": f"```{self.command_string}help payments```\n"
                           f"`Aliases: tx, pay`"}
                 # {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
                 #  "value": f"```{self.command_string}help horizon```\n"
