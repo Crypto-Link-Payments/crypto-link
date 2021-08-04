@@ -39,12 +39,15 @@ class HelpCommands(commands.Cog):
                 {"name": ":office_worker: Accessing personal account :office_worker:",
                  "value": f"```{self.command_string}help account```\n"
                           f"`Aliases: acc, user, profile, wallet`"},
+                {"name": ":money_with_wings: Making P2P payments :money_with_wings:",
+                 "value": f"```{self.command_string}help payments```\n"
+                          f"`Aliases: tx, pay`"},
+                {"name": ":convenience_store: Crypto Link Merchant :convenience_store:  ",
+                 "value": f"```{self.command_string}help membership```\n"
+                          f"`Aliases: tokens, coins`"},
                 {"name": ":crown: Commands for owner system :crown: ",
                  "value": f"```{self.command_string}help owner```\n"
                           f"`Aliases: acc, user, profile, wallet`"},
-                {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
-                 "value": f"```{self.command_string}help payments```\n"
-                          f"`Aliases: tx, pay`"}
                 # {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
                 #  "value": f"```{self.command_string}help horizon```\n"
                 #           f"`Aliases: hor, network, explorer`"},
