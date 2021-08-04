@@ -40,7 +40,7 @@ class HelpCommands(commands.Cog):
                  "value": f"```{self.command_string}help account```\n"
                           f"`Aliases: acc, user, profile, wallet`"},
                 {"name": ":crown: Commands for owner system :crown: ",
-                 "value": f"```{self.command_string}help account```\n"
+                 "value": f"```{self.command_string}help owner```\n"
                           f"`Aliases: acc, user, profile, wallet`"},
                 {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
                  "value": f"```{self.command_string}help payments```\n"
