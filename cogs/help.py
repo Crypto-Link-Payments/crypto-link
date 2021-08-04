@@ -258,23 +258,25 @@ class HelpCommands(commands.Cog):
     async def owner(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':crown: __Available Commands for guild owners__ :crown: '
-            description = "All available commands for you to familiarize yourself with payment and merchant " \
-                          "services available as owner of the community."
+            description = f"This section of command is dedicated only for the owners of the server. "
 
             list_of_values = [
+                {"name": f":crown: Owner panel access :crown:",
+                 "value": f"```{self.command_string}owner```"},
                 {"name": f":scales:  Register Guild into System :scales: ",
                  "value": f"```{self.command_string}owner register```"},
-                {"name": f":bank: Guild wallet commands :bank:",
-                 "value": f"```{self.command_string}help owner corporate```"},
-                {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
-                 "value": f"```{self.command_string}help owner merchant```"},
-                {"name": f":satellite_orbital: About Uplink and Setup :satellite_orbital:  ",
-                 "value": f"```{self.command_string}help owner uplink```"}
-
+                # {"name": f":bank: Guild wallet commands :bank:",
+                #  "value": f"```{self.command_string}help owner corporate```"},
+                # {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
+                #  "value": f"```{self.command_string}help owner merchant```"},
+                {"name": f":satellite_orbital: About Uplink system and Setup :satellite_orbital:  ",
+                 "value": f"```{self.command_string}help owner uplink```"},
+                {"name": f":convenience_store:  About merchant system over Discord :convenience_store: ",
+                 "value": f"```{self.command_string}help owner merchant```"}
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                destination=1, c=Colour.blue())
+                                                c=Colour.blue())
 
     # @owner.command(aliases=['corp', 'business'])
     # async def corporate(self, ctx):
