@@ -4,6 +4,7 @@ from discord.ext import commands
 from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal
+from re import sub
 from cogs.utils.systemMessaages import CustomMessages
 import os
 import pyqrcode
@@ -132,7 +133,7 @@ class UserAccountCommands(commands.Cog):
                                "value": f"```{self.command_string}wallet balance```\n"
                                         f"`Aliases: bal, balances,b`"},
                               {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
-                               "value": f"```{self.command_string}wallet stats```"},
+                               "value": f"```{self.command_string}wallet stats <asset_code=optional for non XLM>```"},
                               {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
                                "value": f"```{self.command_string}wallet deposit```"},
                               {"name": ":outbox_tray: Get Withdrawal Instructions :outbox_tray: ",
@@ -141,25 +142,60 @@ class UserAccountCommands(commands.Cog):
                                                 destination=1, c=Colour.dark_orange())
 
     @wallet.command()
-    async def stats(self, ctx):
+    async def stats(self, ctx, token=None):
         """
         Command which returns statistical information for the wallet
         """
         utc_now = datetime.utcnow()
-        account_details = self.backoffice.account_mng.get_account_stats(discord_id=ctx.message.author.id)
-        stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
-                           description='Below are presented stats which are automatically counted upon successful'
-                                       'execution of the commands dedicated to wallet level :one: ',
-                           colour=Colour.lighter_grey())
-        stats_info.add_field(name=f":symbols: Symbols :symbols: ",
-                             value=f':incoming_envelope: -> `SUM of total incoming transactions` \n'
-                                   f':money_with_wings: -> `SUM of total amount sent per currency` \n'
-                                   f':envelope_with_arrow:  -> `SUM of total outgoing transactions`\n'
-                                   f':money_mouth: -> `SUM of total amount received per currency` \n'
-                                   f':man_juggling: -> `SUM of total roles purchase through merchant system`\n'
-                                   f':money_with_wings: -> `SUM of total amount spent on merchant system` \n')
-        await ctx.author.send(embed=stats_info)
-        await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
+
+        if not token or token.lower() == 'xlm':
+            tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
+                      x['assetCode'] != 'xlm']
+            available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
+            account_details = self.backoffice.account_mng.get_account_stats(discord_id=ctx.message.author.id)
+            stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
+                               description='Below are presented stats which are automatically counted upon successful'
+                                           'execution of the commands dedicated to wallet level :one: ',
+                               colour=Colour.lighter_grey())
+            stats_info.add_field(name=f":symbols: Symbols :symbols: ",
+                                 value=f':incoming_envelope: -> `SUM of total incoming transactions` \n'
+                                       f':money_with_wings: -> `SUM of total amount sent per currency` \n'
+                                       f':envelope_with_arrow:  -> `SUM of total outgoing transactions`\n'
+                                       f':money_mouth: -> `SUM of total amount received per currency` \n'
+                                       f':man_juggling: -> `SUM of total roles purchase through merchant system`\n'
+                                       f':money_with_wings: -> `SUM of total amount spent on merchant system` \n')
+            stats_info.add_field(name=f':warning: Access token stats:warning: ',
+                                 value=f'Use same command, and add asset code. All currently available are: '
+                                       f'{available_stats}',
+                                 inline=False)
+            await ctx.author.send(embed=stats_info)
+            await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
+        else:
+            token_stats = self.backoffice.account_mng.get_token_stats(discord_id=ctx.message.author.id,
+                                                                      token=token.lower())
+            if token_stats:
+                token_stats_info = Embed(title=f'Details for token {token.upper()}',
+                                         description=f'Below are statistical details on account activities for the selected token,'
+                                                     f'till {utc_now} (UTC)',
+                                         colour=Colour.gold())
+
+                for k, v in token_stats[token.lower()].items():
+                    # k = k.capitalize()
+                    itm = sub(r"([A-Z])", r" \1", k).split()
+                    item = ' '.join([str(elem) for elem in itm]).capitalize()
+                    if k in ["depositsCount", "publicTxSendCount", "privateTxSendCount", "withdrawalsCount"]:
+                        token_stats_info.add_field(name=f'{item}',
+                                                   value=f'{v}')
+                    else:
+                        token_stats_info.add_field(name=f'{item}',
+                                                   value=f'{v:,.7f} {token.upper()}')
+
+                await ctx.author.send(embed=token_stats_info)
+            else:
+                title = '__Token statistics__'
+                message = f'You have no activity marked in the wallet for token {token.upper()}'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                     sys_msg_title=title)
 
     @wallet.group()
     async def deposit(self, ctx):
@@ -269,11 +305,11 @@ class UserAccountCommands(commands.Cog):
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
 
             for wallet in all_wallets:
-                    token_balance = int(user_balances[wallet]/(10**7))
-                    balance_embed.add_field(
-                        name=f"{wallet.upper()}",
-                        value=f'```{token_balance:,.7f} {wallet.upper()}```',
-                        inline=False)
+                token_balance = int(user_balances[wallet] / (10 ** 7))
+                balance_embed.add_field(
+                    name=f"{wallet.upper()}",
+                    value=f'```{token_balance:,.7f} {wallet.upper()}```',
+                    inline=False)
             await ctx.author.send(embed=balance_embed)
         else:
             title = '__Stellar Wallet Error__'

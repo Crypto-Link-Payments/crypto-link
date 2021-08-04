@@ -279,3 +279,9 @@ class StellarWallet:
             print(Fore.RED + f'Error {e}')
             return False, e
 
+    def get_account_assets(self):
+        return self.server.accounts().account_id(account_id=self.public_key).call()
+
+    def get_asset_details(self, asset_code, asset_issuer):
+        return self.server.assets().for_code(asset_code=asset_code.upper()).for_issuer(
+            asset_issuer=asset_issuer.upper()).call()

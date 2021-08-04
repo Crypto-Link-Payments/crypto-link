@@ -13,8 +13,24 @@ class TokenManager:
         else:
             return False
 
+    def check_token_existence(self, issuer, code):
+        result = self.token_profiles.find_one({"assetIssuer": issuer, "assetCode": code})
+        if result:
+            return True
+        else:
+            return False
+
     def get_token_details_by_code(self, code):
         return self.token_profiles.find_one({"assetCode": code})
+
+    def get_token_details_by_issuer(self, issuer, code):
+        return self.token_profiles.find_one({"assetIssuer": issuer, "assetCode": code},
+                                            {"_id"})
+
+    def update_token_profile(self, asset_code, issuer, to_update):
+        result = self.token_profiles.update_one({"assetIssuer": issuer.upper(), "assetCode": asset_code.lower()},
+                                                {"$set": to_update})
+        return result.matched_count > 0
 
     def get_registered_tokens(self):
         result = list(self.token_profiles.find({},
@@ -24,4 +40,3 @@ class TokenManager:
 
     def get_all_tokens(self):
         return list(self.token_profiles.find({}))
-

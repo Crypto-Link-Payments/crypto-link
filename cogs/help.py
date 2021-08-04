@@ -30,22 +30,28 @@ class HelpCommands(commands.Cog):
                 {"name": ":rocket: How to get started :rocket:",
                  "value": f"```{self.command_string}get_started```\n"
                           f"`Aliases: start`"},
-                {"name": " :moneybag: Wallet level system information :moneybag: ",
-                 "value": f"```{self.command_string}help levels```"},
                 {"name": ":coin: Available Currencies :coin:",
                  "value": f"```{self.command_string}help currencies```\n"
+                          f"`Aliases: tokens, coins`"},
+                {"name": ":purse: About wallet system :purse: ",
+                 "value": f"```{self.command_string}help wallets```\n"
                           f"`Aliases: tokens, coins`"},
                 {"name": ":office_worker: Accessing personal account :office_worker:",
                  "value": f"```{self.command_string}help account```\n"
                           f"`Aliases: acc, user, profile, wallet`"},
-                {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
-                 "value": f"```{self.command_string}help transactions```\n"
+                {"name": ":money_with_wings: Making P2P payments :money_with_wings:",
+                 "value": f"```{self.command_string}help payments```\n"
                           f"`Aliases: tx, pay`"},
-                {"name": ":crown: Guild Owner Commands :crown:",
-                 "value": f"```{self.command_string}help owner```"},
-                {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
-                 "value": f"```{self.command_string}help horizon```\n"
-                          f"`Aliases: hor, network, explorer`"},
+                {"name": ":convenience_store: Crypto Link Merchant :convenience_store:  ",
+                 "value": f"```{self.command_string}help membership```\n"
+                          f"`Aliases: tokens, coins`"},
+                {"name": ":crown: Commands for owner system :crown: ",
+                 "value": f"```{self.command_string}help owner```\n"
+                          f"`Aliases: acc, user, profile, wallet`"},
+                # {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
+                #  "value": f"```{self.command_string}help horizon```\n"
+                #           f"`Aliases: hor, network, explorer`"},
+
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.blue())
@@ -68,8 +74,8 @@ class HelpCommands(commands.Cog):
                       ' opportunities for Discord guild owners and project promotions/crowdfunding/ICOs activities'
                       ' at low costs for aspiring fintech-companies building with the help of Stellar.'},
             {"name": ":moneybag: Wallet Types :moneybag:  ",
-             "value": f'Crypto Link has integrated and interconnected system of custodial, noncustodial wallets.'
-                      f' To find more information and explanation '
+             "value": f'At this moment Crypto Link supports only custodial wallet which operated based on MEMO '
+                      f'when depositing. '
                       f'please use `{self.command_string}help wallets`. Each user is required to register for custodial '
                       f'wallet in order to be able to interact and use Crypto Link in full.'},
 
@@ -166,7 +172,7 @@ class HelpCommands(commands.Cog):
                                      description="Stellar native token XLM (Lumen)",
                                      colour=Colour.lighter_gray())
                 stellar_info.add_field(name=f'Minimum Withdrawal',
-                                       value=f'{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} XLM',
+                                       value=f'```{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} XLM```',
                                        inline=False)
                 stellar_info.add_field(name=f'Links and information',
                                        value=f'[XLM Stellar Expert]({coin["expert"]})\n'
@@ -174,60 +180,54 @@ class HelpCommands(commands.Cog):
                                        inline=False)
                 await ctx.author.send(embed=stellar_info)
 
-
             else:
+
                 token_info = Embed(title='Stellar token',
                                    colour=Colour.lighter_gray())
-                token_info.add_field(name=f'Minimum Withdrawal',
-                                     value=f'{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} {coin["assetCode"].upper()}',
-                                     inline=False)
                 token_info.add_field(name=f'Asset Code',
-                                     value=f'{coin["assetCode"].upper()}',
+                                     value=f'```{coin["assetCode"].upper()}```',
                                      inline=False)
                 token_info.add_field(name=f'Asset Type',
-                                     value=f'{coin["assetType"].upper()}',
+                                     value=f'```{coin["assetType"].upper()}```',
                                      inline=False)
                 token_info.add_field(name=f'Asset Issuer',
                                      value=f'```{coin["assetIssuer"].upper()}```',
                                      inline=False)
+                token_info.add_field(name=f'Minimum Withdrawal',
+                                     value=f'```{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} {coin["assetCode"].upper()}```',
+                                     inline=False)
+                token_info.add_field(name='Web Links',
+                                     value=f'[Homepage]({coin["homepage"]}) | [Stellar Expert]({coin["expert"]}) | [TOML]({coin["toml"]}) ')
                 await ctx.author.send(embed=token_info)
 
-    @help.command()
+    @help.command(aliases=['w'])
     async def wallets(self, ctx):
         title = ':office_worker: __Multi Level Wallet system__:office_worker: '
-        description = "Explanation of the multi-level wallet system"
+        description = "Explanation of wallet system"
         list_of_values = [
             {"name": ":one: Custodial Wallet :one: ",
              "value": f"Registration for `custodial wallet level` is mandatory for all users who would like to "
                       f"use all the functions Crypto Link has to offer. Wallet operates based on MEMO when depositing. "
                       f"This allows anyone to receive transaction from sender "
-                      f"instantly, even doe if recipient has not registered yet into the system. Custodial wallet is  "
+                      f"instantly, even if recipient has not registered yet into the system. Custodial wallet "
                       f"is automatically created and all actions connected with it do not require private key "
                       f"to be used for signing. In order to fully protect your wallet, please activate 2FA for Discord "
-                      f"account. "},
-            {"name": ":two: Non-Custodial wallet support :two: ",
-             "value": "`Noncustodial wallet` which utilizes XDR envelopes to make XDR envelopes to be signed either through"
-                      " [Stellar Laboratory](https://laboratory.stellar.org/#?network=public) or any other application"
-                      " allowing to import XDR or than straight through "
-                      "Discord. the only details which are stored into Crypto Link system are unique user id and "
-                      "user public address so XDR can be successfully built and that others can efficiently transfer "
-                      "tokens to you from Custodial to Non Custodial wallet"
-                      f"```Access it with: {self.command_string}three```"}
+                      f"account. "}
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
 
     @help.command(aliases=['tx', 'pay'])
-    async def transactions(self, ctx):
-        title = ':money_with_wings: __How to make transactions/payments on level 1__ :money_with_wings: '
-        description = f"Forms of transactions available on {self.bot.user.name}"
+    async def payments(self, ctx):
+        title = ':money_with_wings: __How to make P-2-P payments__ :money_with_wings: '
+        description = f"Available payment types on {self.bot.user.name} System"
         list_of_values = [
-            {"name": f":cowboy: Public P-2-P transactions :cowboy:",
-             "value": f"`{self.command_string}send <@Discord User> <amount> <ticker> <message=optional>`\n"
+            {"name": f":cowboy: Public P-2-P payment :cowboy:",
+             "value": f"`{self.command_string}send <@Discord User> <amount> <asset_code> <message=optional>`\n"
                       f"__Example__:`{self.command_string}send 10 xlm @animus Have a nice day`"},
-            {"name": f":detective: Private transactions :detective:  ",
-             "value": f"`{self.command_string}private <@Discord User> <amount> <ticker> <message=optional>`\n"
+            {"name": f":detective: Private payment :detective:  ",
+             "value": f"`{self.command_string}private <@Discord User> <amount> <asset_code> <message=optional>`\n"
                       f"__Example__: `{self.command_string}private 10 xlm @animus Dont tell anyone`"}
         ]
 
@@ -261,77 +261,57 @@ class HelpCommands(commands.Cog):
     async def owner(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':crown: __Available Commands for guild owners__ :crown: '
-            description = "All available commands for you to familiarize yourself with payment and merchant " \
-                          "services available as owner of the community."
+            description = f"This section of command is dedicated only for the owners of the server. "
 
             list_of_values = [
+                {"name": f":crown: Owner panel access :crown:",
+                 "value": f"```{self.command_string}owner```"},
                 {"name": f":scales:  Register Guild into System :scales: ",
                  "value": f"```{self.command_string}owner register```"},
-                {"name": f":bank: Guild wallet commands :bank:",
-                 "value": f"```{self.command_string}help owner corporate```"},
-                {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
-                 "value": f"```{self.command_string}help owner merchant```"},
-                {"name": f":satellite_orbital: About Uplink and Setup :satellite_orbital:  ",
-                 "value": f"```{self.command_string}help owner uplink```"}
-
+                # {"name": f":bank: Guild wallet commands :bank:",
+                #  "value": f"```{self.command_string}help owner corporate```"},
+                # {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
+                #  "value": f"```{self.command_string}help owner merchant```"},
+                {"name": f":satellite_orbital: About Uplink system and Setup :satellite_orbital:  ",
+                 "value": f"```{self.command_string}help owner uplink```"},
+                {"name": f":convenience_store:  About merchant system over Discord :convenience_store: ",
+                 "value": f"```{self.command_string}help owner merchant```"}
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                destination=1, c=Colour.blue())
+                                                c=Colour.blue())
 
-    # @owner.command(aliases=['corp', 'business'])
-    # async def corporate(self, ctx):
-    #     corp_info = discord.Embed(title=':bank:  __Merchant System Commands__ :bank:',
-    #                               description=' Commands to operate with the guilds own wallet',
-    #                               colour=discord.Color.blue())
-    #     corp_info.add_field(name=':bar_chart: Obtain Statistics on Guild activity',
-    #
-    #                         value=f'`{self.command_string}owner stats`',
-    #                         inline=False)
-    #     corp_info.add_field(name=':service_dog: Get status of activated services :service_dog:  ',
-    #                         value=f'`{self.command_string}owner services`',
-    #                         inline=False)
-    #     corp_info.add_field(name=':moneybag: Merchant wallet balance check :moneybag: ',
-    #                         value=f'`{self.command_string}merchant balance`',
-    #                         inline=False)
-    #
-    #     corp_info.set_thumbnail(url=self.bot.user.avatar_url)
-    #     await ctx.author.send(embed=corp_info, delete_after=500)
-
-    # @owner.command(aliases=['store', 'monetize', 'merch'])
-    # async def merchant(self, ctx):
-    #     """
-    #     Entry point for merchant system
-    #     """
-    #     merchant_nfo = discord.Embed(title=':convenience_store: __Merchant System Commands__ :convenience_store: ',
-    #                                  description='Basic explanation on what is merchant system.',
-    #                                  colour=discord.Color.blue())
-    #     merchant_nfo.add_field(name=':mega: About Merchant System:mega:',
-    #                            value='Merchant is part of the Crypto Link eco system and provides owners of the '
-    #                                  'community opportunity to, automize'
-    #                                  ' and fully automate role system. Once monetized roles are created, '
-    #                                  'Discord members can use available Crypto Link integrated currencies'
-    #                                  ' to purchase roles in various durations and values (determined by community '
-    #                                  'owner). System will than handle distribution on appropriate role'
-    #                                  ', transfer of funds to corporate account, and as well remove it from the user '
-    #                                  'once duration expires.',
-    #                            inline=False)
-    #     merchant_nfo.add_field(name=':scroll: Fees and licensing :scroll: ',
-    #                            value='Activation and integration of merchant system is free of charge, however once '
-    #                                  'owner wants to withdraw funds from merchant account'
-    #                                  'to his own, a dynamic fee is applied. There is an option as well to obtain '
-    #                                  'monthly license, and with it remove the transfer fees.',
-    #                            inline=False)
-    #     merchant_nfo.add_field(name=':rocket: Get Started with Merchant :rocket: ',
-    #                            value=f":one: Register yourself {self.bot.user.name} account with "
-    #                                  f"`{self.command_string}register`\n"
-    #                                  f":two: Register your guild  into the {self.bot.user.name} system "
-    #                                  f"with`{self.command_string}owner register`\n"
-    #                                  f":three: Initiate the merchant with `{self.command_string}merchant_initiate`\n"
-    #                                  f":four: Familiarize yourself with merchant system through command `{self.command_string}merchant`",
-    #                            inline=False)
-    #     merchant_nfo.set_thumbnail(url=self.bot.user.avatar_url)
-    #     await ctx.author.send(embed=merchant_nfo, delete_after=500)
+    @owner.command(aliases=['store', 'monetize', 'merch'])
+    async def merchant(self, ctx):
+        """
+        Entry point for merchant system
+        """
+        merchant_nfo = discord.Embed(title=':convenience_store: __Merchant System Commands__ :convenience_store: ',
+                                     description='Basic explanation on what is merchant system.',
+                                     colour=discord.Color.blue())
+        merchant_nfo.add_field(name=':mega: About Merchant System:mega:',
+                               value='Merchant is part of the Crypto Link eco system and provides owners of the '
+                                     'community an opportunity to monetize perks/roles. Once role, of custom duration'
+                                     ' and value successfully registered and activated, it can be offered to '
+                                     'Discord members for purchase. System handles role management automatically,'
+                                     'transfer of funds to server owners account, and role removal upon expiration'
+                                     ' date (subjected to role length and date of purchase)',
+                               inline=False)
+        merchant_nfo.add_field(name=':scroll: Fees',
+                               value='Activation and integration of merchant system is free of charge, however once '
+                                     'owner wants to withdraw funds from merchant account'
+                                     'to his own, a dynamic fee is applied.',
+                               inline=False)
+        merchant_nfo.add_field(name=':rocket: Get Started with Merchant :rocket: ',
+                               value=f":one: Register yourself {self.bot.user.name} account with "
+                                     f"`{self.command_string}register`\n"
+                                     f":two: Register your guild into the {self.bot.user.name} system "
+                                     f"with`{self.command_string}owner register`\n"
+                                     f":three: Initiate the merchant with `{self.command_string}merchant_initiate`\n"
+                                     f":four: Familiarize yourself with merchant system through command `{self.command_string}merchant`",
+                               inline=False)
+        merchant_nfo.set_thumbnail(url=self.bot.user.avatar_url)
+        await ctx.author.send(embed=merchant_nfo, delete_after=500)
 
     @owner.command(aliases=['link', 'up_link'])
     async def uplink(self, ctx):

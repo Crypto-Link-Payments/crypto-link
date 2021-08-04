@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from re import sub
 from discord.ext import commands
 from discord import TextChannel, Embed, Colour
 from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet
@@ -48,7 +49,7 @@ class GuildOwnerCommands(commands.Cog):
     @owner.command()
     async def changeprefix(self, ctx, prefix):
         prefix = prefix.strip()
-        if not len(prefix) >1 and self.bot.backoffice.helper.check_for_special_char(string=prefix):
+        if not len(prefix) > 1 and self.bot.backoffice.helper.check_for_special_char(string=prefix):
             if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
                 await customMessages.system_message(ctx=ctx, color_code=0,
                                                     message=f'You have successfully set prefix for server {ctx.guild} '
@@ -91,12 +92,12 @@ class GuildOwnerCommands(commands.Cog):
 
             for asset_code in all_integrated_tokens:
                 new_guild[asset_code["assetCode"]] = {"volume": float(0.0),
-                                         "txCount": int(0),
-                                         "privateCount": int(0),
-                                         "publicCount": int(0),
-                                         "roleTxCount": int(0),
-                                         "emojiTxCount": int(0),
-                                         "multiTxCount": int(0)}
+                                                      "txCount": int(0),
+                                                      "privateCount": int(0),
+                                                      "publicCount": int(0),
+                                                      "roleTxCount": int(0),
+                                                      "emojiTxCount": int(0),
+                                                      "multiTxCount": int(0)}
 
             await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
             await customMessages.system_message(ctx=ctx, color_code=0,
@@ -108,32 +109,59 @@ class GuildOwnerCommands(commands.Cog):
 
     @owner.command()
     @commands.check(guild_has_stats)
-    async def stats(self, ctx):
+    async def stats(self, ctx, token=None):
         stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=ctx.guild.id)
+        # available tokens
+        tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
+                  x['assetCode'] != 'xlm']
+        available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
 
-        stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
-                           timestamp=datetime.utcnow(),
-                           colour=Colour.dark_gold())
-        stats_info.add_field(name='Wallets registered',
-                             value=f'`{stats["registeredUsers"]}`',
-                             inline=False)
-        xlm_stats = stats["xlm"]
-        stats_info.set_thumbnail(url=self.bot.user.avatar_url)
-        stats_info.add_field(name=":incoming_envelope: Transactions sent :incoming_envelope:",
-                             value=f'`{xlm_stats["txCount"]}`')
-        stats_info.add_field(name=":money_with_wings: Volume :money_with_wings:",
-                             value=f'`{xlm_stats["volume"]}`')
-        stats_info.add_field(name=":cowboy: Public Transactions :cowboy: ",
-                             value=f'`{xlm_stats["publicCount"]}`')
-        stats_info.add_field(name=":detective: Private Transactions :detective:",
-                             value=f'`{xlm_stats["privateCount"]}`')
-        stats_info.add_field(name=":person_juggling: Roles Sold :person_juggling: ",
-                             value=f'`{xlm_stats["roleTxCount"]}`')
-        stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
-                             value=f'`{xlm_stats["emojiTxCount"]}`')
-        stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
-                             value=f'`{xlm_stats["multiTxCount"]}`')
-        await ctx.channel.send(embed=stats_info)
+        if not token or token == 'xlm':
+            stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
+                               timestamp=datetime.utcnow(),
+                               colour=Colour.dark_gold())
+            stats_info.add_field(name='Wallets registered',
+                                 value=f'`{stats["registeredUsers"]}`',
+                                 inline=False)
+            xlm_stats = stats["xlm"]
+            stats_info.set_thumbnail(url=ctx.guild.icon_url)
+            stats_info.add_field(name=":incoming_envelope: XLM Payments executed ",
+                                 value=f'`{xlm_stats["txCount"]}`')
+            stats_info.add_field(name=":money_with_wings: Total Volume ",
+                                 value=f'`{xlm_stats["volume"]:,.7f} XLM`')
+            stats_info.add_field(name=":cowboy: XLM Public Transactions  ",
+                                 value=f'`{xlm_stats["publicCount"]}`')
+            stats_info.add_field(name=":detective: XLM Private Transactions ",
+                                 value=f'`{xlm_stats["privateCount"]}`')
+            stats_info.add_field(name=":person_juggling: Perks Sold  ",
+                                 value=f'`{xlm_stats["roleTxCount"]}`')
+            # stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
+            #                      value=f'`{xlm_stats["emojiTxCount"]}`')
+            # stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
+            #                      value=f'`{xlm_stats["multiTxCount"]}`')
+            stats_info.add_field(name=':warning: Other token statistics',
+                                 value=f'In order to get statistics of other tokens for you server please use '
+                                       f'same command structure and add one asset code from available: {available_stats.upper()}',
+                                 inline=False)
+            await ctx.channel.send(embed=stats_info)
+        else:
+            tokens = [x["assetCode"] for x in self.backoffice.token_manager.get_registered_tokens() if
+                      x["assetCode"] != 'xlm']
+
+            token_stats_info = Embed(title=f'Token statistics for server')
+
+            for token in tokens:
+                token_stats = stats[f'{token.lower()}']
+                for k, v in token_stats.items():
+                    itm = sub(r"([A-Z])", r" \1", k).split()
+                    item = ' '.join([str(elem) for elem in itm]).capitalize()
+                    if k != 'volume':
+                        token_stats_info.add_field(name=f'{item}',
+                                                   value=f'```{v}```')
+                    else:
+                        token_stats_info.add_field(name=f'{item}',
+                                                   value=f'```{v:,.7f} {token.upper()}```')
+                await ctx.channel.send(embed=token_stats_info)
 
     @owner.command()
     @commands.check(guild_has_stats)

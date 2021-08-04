@@ -211,7 +211,7 @@ class BotManagementCommands(commands.Cog):
         """
         Transfer funds from Crypto Link to develop wallet
         """
-        #TODO integrate coins check from db
+
         balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
         print(balance)
         if balance > 0:  # Check if balance greater than -
@@ -344,12 +344,98 @@ class BotManagementCommands(commands.Cog):
     async def tokens(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__Add new support__',
-                      'value': f"***{self.command_string}system tokens new <issuer> <tick>*** "}
+                      'value': f"***{self.command_string}tokens new <issuer> <tick>*** "},
+                     {'name': '__Add new with trust DONE!__',
+                      'value': f"***{self.command_string}tokens trusted <issuer> <amount>*** "},
+                     {'name': '__Update token profiles__',
+                      'value': f"***{self.command_string}tokens profile*** "},
                      ]
 
             await custom_messages.embed_builder(ctx, title='Available sub commands for system',
                                                 description='Available commands under category ***system***',
                                                 data=value)
+
+    @tokens.group()
+    async def profile(self, ctx):
+        if ctx.invoked_subcommand is None:
+            value = [{'name': '__Set homepage __',
+                      'value': f"***{self.command_string}tokens profile home <issuer> <tick> <homepage address>*** "},
+                     {'name': '__Set Expert__',
+                      'value': f"***{self.command_string}tokens profile expert <issuer> <tick> <expert address>***"},
+                     {'name': '__Set Token Withdrawal Limit__',
+                      'value': f"***{self.command_string}tokens profile withdrawal <issuer> <tick> <amount limit float>***"},
+                     {'name': '__Set Token TOML link__',
+                      'value': f"***{self.command_string}tokens profile toml <issuer> <tick> <toml https>***"}
+                     ]
+
+            await custom_messages.embed_builder(ctx, title='Available sub commands for system',
+                                                description='Available commands under category ***system***',
+                                                data=value)
+        pass
+
+    @profile.command()
+    async def toml(self, ctx, issuer: str, asset_code: str, address:str):
+        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
+            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
+                                                                      asset_code= asset_code.lower(),
+                                                                      to_update={"toml": address}):
+
+                await ctx.channel.send(
+                    content=f'You have successfully updated the TOML link for token {asset_code.upper()} {issuer}')
+            else:
+                await ctx.channel.send(
+                    content="There has been issue in the backend while trying to update token details")
+        else:
+            await ctx.channel.send(content='This token is not registered in DB')
+
+
+    @profile.command()
+    async def withdrawal(self, ctx, issuer: str, asset_code: str, amount: float):
+        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
+            amount_micro = int(amount * (10 ** 7))
+            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
+                                                                      asset_code= asset_code.lower(),
+                                                                      to_update={"minimumWithdrawal": amount_micro}):
+
+                await ctx.channel.send(
+                    content=f'You have successfully updated the minimum withdrawal {amount_micro/(10**7)} for token {asset_code.upper()} {issuer}')
+            else:
+                await ctx.channel.send(
+                    content="There has been issue in the backend while trying to update token details")
+        else:
+            await ctx.channel.send(content='This token is not registered in DB')
+
+    @profile.command()
+    async def expert(self, ctx, issuer: str, asset_code: str, address:str):
+        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
+            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
+                                                                      asset_code= asset_code.lower(),
+                                                                      to_update={"expert": address}):
+
+                await ctx.channel.send(
+                    content=f'You have successfully updated the expert link for token {asset_code.upper()} {issuer}')
+            else:
+                await ctx.channel.send(
+                    content="There has been issue in the backend while trying to update token details")
+        else:
+            await ctx.channel.send(content='This token is not registered in DB')
+
+    @profile.command()
+    async def homepage(self, ctx, issuer: str, asset_code: str, address:str):
+        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
+            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
+                                                                      asset_code= asset_code.lower(),
+                                                                      to_update={"homepage": address}):
+
+                await ctx.channel.send(
+                    content=f'You have successfully updated the hoemapage link for token {asset_code.upper()} {issuer}')
+            else:
+                await ctx.channel.send(
+                    content="There has been issue in the backend while trying to update token details")
+        else:
+            await ctx.channel.send(content='This token is not registered in DB')
+
+
 
     @tokens.command()
     async def new(self, ctx, asset_issuer: str, asset_code: str):
@@ -362,8 +448,7 @@ class BotManagementCommands(commands.Cog):
             if asset_data:
                 data = self.bot.backoffice.stellar_wallet.establish_trust(asset_issuer=asset_data["asset_issuer"],
                                                                           token=asset_data["asset_code"])
-                from pprint import pprint
-                pprint(data)
+
                 if data[0]:
                     token = {
                         "toml": asset_data["_links"]["toml"]["href"],
@@ -373,11 +458,10 @@ class BotManagementCommands(commands.Cog):
                         "pagingToken": asset_data["paging_token"],
                         "coingGeckoListing": False,
                         "minimumWithdrawal": 100000000,
-                        'webPage': None,
                         "ownerId": None,
                         "ownerName": None,
                         "expert": None,
-                        "homepage": None
+                        "homepage": None,
                     }
 
                     # insert new token into database
@@ -482,6 +566,124 @@ class BotManagementCommands(commands.Cog):
         except Exception as e:
             await ctx.send(content=f'It seems like there hass been an issue\n'
                                    f'```{e}```')
+
+    @tokens.command()
+    async def trusted(self, ctx, asset_issuer: str, asset_code: str):
+        data = self.backoffice.stellar_wallet.get_account_assets()
+        assets = data["balances"]
+        for asset in assets:
+            if "asset_code" in asset:
+                if asset_code == asset_code.upper() and asset["asset_issuer"] == asset_issuer.upper():
+                    details = self.bot.backoffice.stellar_wallet.get_asset_details(asset_code=asset_code.upper(),
+                                                                                   asset_issuer=asset_issuer.upper())
+                    asset_data = details["_embedded"]['records'][0]
+                    token = {
+                        "toml": asset_data["_links"]["toml"]["href"],
+                        "assetCode": asset_data["asset_code"].lower(),
+                        "assetIssuer": asset_data["asset_issuer"],
+                        "assetType": asset_data["asset_type"],
+                        "pagingToken": asset_data["paging_token"],
+                        "coingGeckoListing": False,
+                        "minimumWithdrawal": 100000000,
+                        'webPage': None,
+                        "ownerId": None,
+                        "ownerName": None,
+                        "expert": None,
+                        "homepage": None
+                    }
+
+                    # insert new token into database
+                    await ctx.author.send(content="Trying to insert new token data")
+                    if self.bot.backoffice.token_manager.insert_new_token(token):
+                        await ctx.author.send(content="Details of new token to db created")
+                        # Create CL wallet for fee collections
+                        await ctx.author.send(content="Trying to create cl wallets")
+                        if self.bot.backoffice.bot_manager.create_cl_wallet(
+                                {"ticker": asset_data["asset_code"].lower(), "balance": int(0),
+                                 "issuer": asset_data["asset_issuer"]}):
+                            await ctx.author.send(content="Cl wallet for fees created successfully")
+                            # fee category
+                            # Update fee categories
+                            await ctx.author.send(content="Trying to update fee structures")
+                            if self.bot.backoffice.bot_manager.manage_fees_and_limits(key="withdrawals",
+                                                                                      data_to_update={
+                                                                                          f"fee_list.{asset_data['asset_code'].lower()}": 1.0}):
+                                await ctx.author.send(content="New fee category created")
+
+                                all_guild_ids = self.bot.backoffice.guild_profiles.get_all_guild_ids()
+
+                                if all_guild_ids:
+                                    guild_stats_data = {f"{asset_data['asset_code'].lower()}": {"volume": float(0.0),
+                                                                                                "txCount": int(0),
+                                                                                                "privateCount": int(0),
+                                                                                                "publicCount": int(0),
+                                                                                                "roleTxCount": int(0),
+                                                                                                "emojiTxCount": int(0),
+                                                                                                "multiTxCount": int(0)}
+                                                        }
+
+                                    # For every registered guild add new token for stats collections
+                                    await ctx.author.send(content="Trying to update guild stats")
+                                    for g_id in all_guild_ids:
+                                        await self.bot.backoffice.guild_profiles.update_guild_profile(
+                                            guild_id=int(g_id["guildId"]),
+                                            data_to_update=guild_stats_data)
+
+                                    await ctx.author.send(content="All guilds have been updated with stats")
+
+                                # update crypto link stats
+                                stats_off = {
+                                    "ticker": asset_data['asset_code'].lower(),
+                                    "totalTx": int(0),
+                                    "totalMoved": float(0.0),
+                                    "totalPrivateCount": int(0),
+                                    "totalPrivateMoved": float(0.0),
+                                    "totalPublicCount": int(0),
+                                    "totalPublicMoved": float(0.0),
+                                    "totalEmojiTx": int(0),
+                                    "totalEmojiMoved": float(0),
+                                    "multiTxCount": int(0),
+                                    "multiTxMoved": float(0.0),
+                                    "merchantPurchases": int(0),
+                                    "merchantMoved": float(0)
+                                }
+                                await ctx.author.send(content="Updating crypto link stats off chain")
+                                if self.bot.backoffice.stats_manager.register_new_off_chain_bot_stat(stats_off):
+                                    await ctx.author.send(content="Global off chain stats for token created")
+
+                                    stats_on_chain = {
+
+                                        "ticker": asset_data['asset_code'].lower(),
+                                        "depositCount": 0,
+                                        "withdrawalCount": 0,
+                                        "depositAmount": 0.0,
+                                        "withdrawnAmount": 0.0,
+                                        "issuer": asset_data["asset_issuer"]
+                                    }
+                                    if self.bot.backoffice.stats_manager.register_new_on_chain_bot_stats(
+                                            stats_on_chain):
+
+                                        # Send to explorer the support information for new coin
+                                        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                         self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+
+                                        explorer_msg = f':new: :coin: New token integrated with asset code ***{asset_data["asset_code"]}***' \
+                                                       f'from issuer ***{asset_data["asset_issuer"]}*** :rocket:'
+
+                                        await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                                                message=explorer_msg,
+                                                                                on_chain=True, tx_type='deposit')
+                                        await ctx.author.send(content='Integration completed')
+                                    else:
+                                        msg = "On chain stats collector document could not be created"
+                                        await ctx.author.send(content=msg)
+
+                            else:
+                                await ctx.author.send(content="Withdrawals and limits could not be created")
+                        else:
+                            await ctx.author.send(content="Wallet could not be created")
+                    else:
+                        await ctx.author.send(content="Data for new token could not be set in DB ")
 
     # @commands.check(is_one_of_gods)
     # async def cogs(self, ctx):
