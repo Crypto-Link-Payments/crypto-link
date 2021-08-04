@@ -197,7 +197,7 @@ class HelpCommands(commands.Cog):
                                      value=f'[Homepage]({coin["homepage"]}) | [Stellar Expert]({coin["expert"]}) | [TOML]({coin["toml"]}) ')
                 await ctx.author.send(embed=token_info)
 
-    @help.command(aliases=['wallet', 'w'])
+    @help.command(aliases=['w'])
     async def wallets(self, ctx):
         title = ':office_worker: __Multi Level Wallet system__:office_worker: '
         description = "Explanation of wallet system"
