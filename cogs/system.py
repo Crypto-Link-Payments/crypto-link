@@ -363,13 +363,31 @@ class BotManagementCommands(commands.Cog):
                      {'name': '__Set Expert__',
                       'value': f"***{self.command_string}tokens profile expert <issuer> <tick> <expert address>***"},
                      {'name': '__Set Token Withdrawal Limit__',
-                      'value': f"***{self.command_string}tokens profile withdrawal <issuer> <tick> <amount limit float>***"}
+                      'value': f"***{self.command_string}tokens profile withdrawal <issuer> <tick> <amount limit float>***"},
+                     {'name': '__Set Token TOML link__',
+                      'value': f"***{self.command_string}tokens profile toml <issuer> <tick> <toml https>***"}
                      ]
 
             await custom_messages.embed_builder(ctx, title='Available sub commands for system',
                                                 description='Available commands under category ***system***',
                                                 data=value)
         pass
+
+    @profile.command()
+    async def toml(self, ctx, issuer: str, asset_code: str, address:str):
+        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
+            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
+                                                                      asset_code= asset_code.lower(),
+                                                                      to_update={"toml": address}):
+
+                await ctx.channel.send(
+                    content=f'You have successfully updated the TOML link for token {asset_code.upper()} {issuer}')
+            else:
+                await ctx.channel.send(
+                    content="There has been issue in the backend while trying to update token details")
+        else:
+            await ctx.channel.send(content='This token is not registered in DB')
+
 
     @profile.command()
     async def withdrawal(self, ctx, issuer: str, asset_code: str, amount: float):
