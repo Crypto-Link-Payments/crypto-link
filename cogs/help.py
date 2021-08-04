@@ -216,15 +216,15 @@ class HelpCommands(commands.Cog):
                                             destination=1, c=Colour.blue())
 
     @help.command(aliases=['tx', 'pay'])
-    async def transactions(self, ctx):
-        title = ':money_with_wings: __How to make transactions/payments on level 1__ :money_with_wings: '
-        description = f"Forms of transactions available on {self.bot.user.name}"
+    async def payments(self, ctx):
+        title = ':money_with_wings: __How to make P-2-P payments__ :money_with_wings: '
+        description = f"Available payment types on {self.bot.user.name} System"
         list_of_values = [
-            {"name": f":cowboy: Public P-2-P transactions :cowboy:",
-             "value": f"`{self.command_string}send <@Discord User> <amount> <ticker> <message=optional>`\n"
+            {"name": f":cowboy: Public P-2-P payment :cowboy:",
+             "value": f"`{self.command_string}send <@Discord User> <amount> <asset_code> <message=optional>`\n"
                       f"__Example__:`{self.command_string}send 10 xlm @animus Have a nice day`"},
-            {"name": f":detective: Private transactions :detective:  ",
-             "value": f"`{self.command_string}private <@Discord User> <amount> <ticker> <message=optional>`\n"
+            {"name": f":detective: Private payment :detective:  ",
+             "value": f"`{self.command_string}private <@Discord User> <amount> <asset_code> <message=optional>`\n"
                       f"__Example__: `{self.command_string}private 10 xlm @animus Dont tell anyone`"}
         ]
 
