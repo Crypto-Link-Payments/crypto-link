@@ -44,10 +44,10 @@ class HelpCommands(commands.Cog):
                           f"`Aliases: acc, user, profile, wallet`"},
                 {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
                  "value": f"```{self.command_string}help transactions```\n"
-                          f"`Aliases: tx, pay`"},
-                {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
-                 "value": f"```{self.command_string}help horizon```\n"
-                          f"`Aliases: hor, network, explorer`"},
+                          f"`Aliases: tx, pay`"}
+                # {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
+                #  "value": f"```{self.command_string}help horizon```\n"
+                #           f"`Aliases: hor, network, explorer`"},
 
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
