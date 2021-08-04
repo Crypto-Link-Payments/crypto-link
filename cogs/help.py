@@ -33,17 +33,22 @@ class HelpCommands(commands.Cog):
                 {"name": ":coin: Available Currencies :coin:",
                  "value": f"```{self.command_string}help currencies```\n"
                           f"`Aliases: tokens, coins`"},
+                {"name": ":purse: About wallet system :purse: ",
+                 "value": f"```{self.command_string}help wallets```\n"
+                          f"`Aliases: tokens, coins`"},
                 {"name": ":office_worker: Accessing personal account :office_worker:",
+                 "value": f"```{self.command_string}help account```\n"
+                          f"`Aliases: acc, user, profile, wallet`"},
+                {"name": ":crown: Commands for owner system :crown: ",
                  "value": f"```{self.command_string}help account```\n"
                           f"`Aliases: acc, user, profile, wallet`"},
                 {"name": ":money_with_wings: P2P transaction execution :money_with_wings:",
                  "value": f"```{self.command_string}help transactions```\n"
                           f"`Aliases: tx, pay`"},
-                {"name": ":crown: Guild Owner Commands :crown:",
-                 "value": f"```{self.command_string}help owner```"},
                 {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
                  "value": f"```{self.command_string}help horizon```\n"
                           f"`Aliases: hor, network, explorer`"},
+
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.blue())
