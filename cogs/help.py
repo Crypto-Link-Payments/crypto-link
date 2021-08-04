@@ -197,16 +197,16 @@ class HelpCommands(commands.Cog):
                                      value=f'[Homepage]({coin["homepage"]}) | [Stellar Expert]({coin["expert"]}) | [TOML]({coin["toml"]}) ')
                 await ctx.author.send(embed=token_info)
 
-    @help.command()
+    @help.command(aliases=['wallet', 'w'])
     async def wallets(self, ctx):
         title = ':office_worker: __Multi Level Wallet system__:office_worker: '
-        description = "Explanation of the multi-level wallet system"
+        description = "Explanation of wallet system"
         list_of_values = [
             {"name": ":one: Custodial Wallet :one: ",
              "value": f"Registration for `custodial wallet level` is mandatory for all users who would like to "
                       f"use all the functions Crypto Link has to offer. Wallet operates based on MEMO when depositing. "
                       f"This allows anyone to receive transaction from sender "
-                      f"instantly, even doe if recipient has not registered yet into the system. Custodial wallet is  "
+                      f"instantly, even if recipient has not registered yet into the system. Custodial wallet "
                       f"is automatically created and all actions connected with it do not require private key "
                       f"to be used for signing. In order to fully protect your wallet, please activate 2FA for Discord "
                       f"account. "}
