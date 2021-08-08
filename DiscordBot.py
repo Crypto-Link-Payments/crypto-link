@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import Intents
 from colorama import Fore, init
+from discord_components import DiscordComponents
 import json
 from utils.tools import Helpers
 
@@ -11,7 +12,7 @@ init(autoreset=True)
 
 cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
            'cogs.system', 'cogs.withdrawals',
-           'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners']
+           'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners','cogs.specialPayments']
 
 horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.accounts',
@@ -96,28 +97,28 @@ class DiscordBot(commands.Bot):
         notification_str += CONST_SEPARATOR
         print(notification_str)
 
-    async def on_ready(self):
-        """
-            Print out to console once bot logs in
-            :return:
-            """
-
-        for g in self.guilds:
-            check_guild_prefix = self.backoffice.guild_profiles.check_guild_prefix(guild_id=int(g.id))
-            if not check_guild_prefix:
-                if self.backoffice.guild_profiles.set_guild_prefix(guild_id=int(g.id), prefix="!"):
-                    print(Fore.YELLOW + f"Default prefix registered for {g}")
-                else:
-                    print(Fore.RED + f"Could not register prefix for {g}")
-            else:
-                print(Fore.GREEN + f"{g} Prefix ....OK")
-
-        await self.change_presence(status=discord.Status.online, activity=discord.Game('Monitoring Stellar'))
-        print(Fore.GREEN + 'DISCORD BOT : Logged in as')
-        print(self.user.name)
-        print(self.user.id)
-        print('------')
-        print('================================')
+    # async def on_ready(self):
+    #     """
+    #         Print out to console once bot logs in
+    #         :return:
+    #         """
+    #
+    #     for g in self.guilds:
+    #         check_guild_prefix = self.backoffice.guild_profiles.check_guild_prefix(guild_id=int(g.id))
+    #         if not check_guild_prefix:
+    #             if self.backoffice.guild_profiles.set_guild_prefix(guild_id=int(g.id), prefix="!"):
+    #                 print(Fore.YELLOW + f"Default prefix registered for {g}")
+    #             else:
+    #                 print(Fore.RED + f"Could not register prefix for {g}")
+    #         else:
+    #             print(Fore.GREEN + f"{g} Prefix ....OK")
+    #
+    #     await self.change_presence(status=discord.Status.online, activity=discord.Game('Monitoring'))
+    #     print(Fore.GREEN + 'DISCORD BOT : Logged in as')
+    #     print(self.user.name)
+    #     print(self.user.id)
+    #     print('------')
+    #     print('================================')
 
     async def on_reconnect(self):
         guild = await self.fetch_guild(guild_id=756132394289070102)
