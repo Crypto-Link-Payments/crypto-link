@@ -301,6 +301,9 @@ class SpecialPaymentCommands(commands.Cog):
                                                                  destination=1,
                                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
 
+                        await ctx.message.channel.delete_messages([verification, msg_usr])
+
+
                     else:
                         msg = f'You have insufficient balance to give away {total_micro / (10 ** 7)} {asset_code.upper()}' \
                               f' to {len(recipients_list)} members.'
@@ -329,7 +332,10 @@ class SpecialPaymentCommands(commands.Cog):
     async def give_error(self, ctx, error):
         if isinstance(error, TimeoutError):
             msg = 'Time outed'
-            print(msg)
+            msg = "Amount you are willing to send to each user needs to be greater than 0"
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                 destination=1,
+                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
 
 
 def setup(bot):
