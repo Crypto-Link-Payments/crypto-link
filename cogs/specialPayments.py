@@ -290,6 +290,10 @@ class SpecialPaymentCommands(commands.Cog):
                                                 f" total of ***{total_normal:,.7f} {asset_code.upper()}*** to"
                                                 f" {len(recipients_list)} users.")
 
+                                recipients = ' '.join(rec.mention for rec in recipients_list)
+                                tx_report_msg = f":gift: {recipients} member ***{ctx.message.author}*** " \
+                                                f"just gave you ***{amount_micro / (10 ** 7)} {asset_code.upper()}***"
+                                await ctx.channel.send(content=tx_report_msg)
                             else:
                                 msg = 'Payment could not be processed at this moment please try again later'
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
