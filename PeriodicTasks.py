@@ -86,7 +86,8 @@ class PeriodicTasks:
                     # Update balance based on incoming asset
                     if not helper.check_for_special_char(tx["memo"]):
                         if self.bot.backoffice.wallet_manager.update_coin_balance_by_memo(memo=tx['memo'],
-                                                                                          coin=tx['asset_type']["code"].lower(),
+                                                                                          coin=tx['asset_type'][
+                                                                                              "code"].lower(),
                                                                                           amount=int(tx['asset_type'][
                                                                                                          "amount"])):
                             # If balance updated successfully send the message to user of processed deposit
@@ -247,6 +248,14 @@ class PeriodicTasks:
                         inline=False)
         await stats_chn.send(embed=stats)
 
+    async def twitter_message(self):
+        print(Fore.GREEN + f"{get_time()} --> Sending report to Twitter ")
+        stats = self.backoffice.stats_manager.get_all_stats()
+        off_chain_xlm = stats["xlm"]["offChain"]
+        total_tx = off_chain_xlm["totalTx"]
+        total_moved = round(off_chain_xlm["totalMoved"], 7)
+
+        total_wallets = await self.backoffice.stats_manager.count_total_registered_wallets()
         print(Fore.GREEN + f"{get_time()} --> Sending Twitter")
         # Twitter message
         rocket = '\U0001F680'
@@ -275,12 +284,13 @@ class PeriodicTasks:
         for user in stats:
             try:
                 username = user['userName']
-                brdiges = user["bridges"]
-                line = f'{rank}.' + ' ' + f'***{username}***' + ' ' + f'\n{brdiges}' + ' \n'
+                bridge_counts = user["bridges"]
+                line = f'{rank}.' + ' ' + f'{username}' + ' ' + f'\n{bridge_counts}' + ' \n'
                 string += line
                 rank += 1
             except KeyError:
                 pass
+
         self.twitter_messages.update_status(f"{bridges} Bridge Builders Hall of Fame {bridges}\n" + f'{string}')
 
         stats_chn = self.bot.get_channel(id=self.backoffice.auto_messaging_channels["stats"])
@@ -303,8 +313,13 @@ def start_scheduler(timed_updater):
         hour='17'), misfire_grace_time=10, max_instances=20)
 
     scheduler.add_job(timed_updater.send_builder_ranks,
-                      CronTrigger(day_of_week='mon', hour='01', minute='00', second='00'),
+                      CronTrigger(day_of_week='sun', hour='17', minute='58', second='15'),
                       misfire_grace_time=7, max_instances=20)
+
+    scheduler.add_job(timed_updater.twitter_message,
+                      CronTrigger(day_of_week='sun', hour='17', minute='58', second='00'),
+                      misfire_grace_time=7, max_instances=20)
+
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
     return scheduler
