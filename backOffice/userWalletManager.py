@@ -47,6 +47,16 @@ class UserWalletManager:
                                               {"$inc": {f"{coin}": amount}})
         return result.modified_count > 0
 
+    async def as_update_coin_balance(self, coin, user_id: int, amount: int, direction: int):
+        if direction == 1:  # Append
+            pass
+        else:
+            amount *= (-1)  # Deduct
+
+        result = await self.as_user_wallets.update_one({"userId": user_id},
+                                              {"$inc": {f"{coin}": amount}})
+        return result.modified_count > 0
+
     def get_ticker_balance(self, asset_code, user_id: int):
         result = self.user_wallets.find_one({"userId": user_id},
                                             {"_id": 0,

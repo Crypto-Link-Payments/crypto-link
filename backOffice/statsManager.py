@@ -44,6 +44,13 @@ class StatsManager(object):
         await self.as_user_profiles.update_one({"userId": user_id},
                                                {f"{CONST_INC}": {"bridges": 1}})
 
+    async def create_bridges(self, user_id: int, count:int):
+        """
+        Increase user stats on bridges
+        """
+        await self.as_user_profiles.update_one({"userId": user_id},
+                                               {f"{CONST_INC}": {"bridges": int(count)}})
+
     async def count_total_registered_wallets(self):
         """
         Return count of registered wallets
@@ -118,6 +125,10 @@ class StatsManager(object):
     async def update_registered_users(self, guild_id: int):
         await self.as_cl_guild_profiles.update_one({"guildId": guild_id},
                                                    {f"{CONST_INC}": {"registeredUsers": 1}})
+
+    async def update_batch_registered_users(self, guild_id: int,count:int):
+        await self.as_cl_guild_profiles.update_one({"guildId": guild_id},
+                                                   {f"{CONST_INC}": {"registeredUsers": count}})
 
     def get_all_stats(self):
         """

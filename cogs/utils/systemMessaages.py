@@ -29,7 +29,6 @@ class CustomMessages:
 
         elif tx_type == 'role_purchase':
             msg_streamed = f":man_juggling: {message}"
-        print(msg_streamed)
         return msg_streamed
 
     @staticmethod
@@ -471,7 +470,8 @@ class CustomMessages:
         Discord Transaction report to the channel
         """
         msg_streamed = self.filter_message(message=message, tx_type=tx_type)
-        await ctx.channel.send(content=msg_streamed, delete_after=360)
+        await ctx.channel.send(content=msg_streamed)
+        # await ctx.channel.send(content=msg_streamed, delete_after=360)
 
     @staticmethod
     async def send_special_char_notification(channel, tx: dict):
