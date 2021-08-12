@@ -1,23 +1,16 @@
+import discord.ext.commands
 from discord.ext import commands
-from discord import User
-from discord import Embed
-from discord.ext.commands import command, Cog
-from discord_components import DiscordComponents, Button, ButtonStyle
-
 from asyncio import TimeoutError, sleep
-from random import choice
 
-from random import choice
 from discord import Member as DiscordMember
 from discord import Embed, Colour
 from discord.ext.commands import Greedy
-from discord_components import DiscordComponents, Button, ButtonStyle, SelectOption, Select, InteractionType
 from re import search
-from cogs.utils import monetaryConversions
 from datetime import datetime
 from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-import asyncio
+from asyncio.exceptions import TimeoutError
+from asyncio import gather
 
 custom_messages = CustomMessages()
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
@@ -135,7 +128,7 @@ class SpecialPaymentCommands(commands.Cog):
                               description=f'You have executed special payment on {ctx.message.guild} '
                                           f'channel {ctx.message.channel}.',
                               colour=Colour.red())
-        special_embed.add_field(name=':calendar: payment type',
+        special_embed.add_field(name=':pager: payment type',
                                 value=f'{tx_emoji}{tx_type}',
                                 inline=True)
         special_embed.add_field(name=':calendar: Date and time of payment',
@@ -214,107 +207,114 @@ class SpecialPaymentCommands(commands.Cog):
                                           f"***10*** seconds if no response received."
 
                         verification = await ctx.channel.send(content=message_content)
-                        msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=10)
+                        try:
+                            msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=10)
 
-                        if str(msg_usr.content.lower()) == 'yes':
-                            # Checking recipients wallet status
-                            count_new, new_recipients = self.check_recipients_wallets(recipients=recipients_list)
-                            #
-                            # Load registered channel for crypto link
-                            up_link_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                            # Updating statistics
-                            if count_new > 0:
-                                # Updating registered user stats for guild
-                                await self.bot.backoffice.stats_manager.update_batch_registered_users(
-                                    guild_id=ctx.message.guild.id, count=count_new)
+                            if str(msg_usr.content.lower()) == 'yes':
+                                # Checking recipients wallet status
+                                count_new, new_recipients = self.check_recipients_wallets(recipients=recipients_list)
+                                #
+                                # Load registered channel for crypto link
+                                up_link_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                    self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                                # Updating statistics
+                                if count_new > 0:
+                                    # Updating registered user stats for guild
+                                    await self.bot.backoffice.stats_manager.update_batch_registered_users(
+                                        guild_id=ctx.message.guild.id, count=count_new)
 
-                                # Updating users stats for created bridges
-                                await self.bot.backoffice.stats_manager.create_bridges(user_id=ctx.message.author.id,
-                                                                                       count=count_new)
+                                    # Updating users stats for created bridges
+                                    await self.bot.backoffice.stats_manager.create_bridges(
+                                        user_id=ctx.message.author.id,
+                                        count=count_new)
 
-                                # Notify sender on new bridges
-                                await self.bridges_notification(ctx, count_new)
+                                    # Notify sender on new bridges
+                                    await self.bridges_notification(ctx, count_new)
 
-                                # Send messages on new account to uplink
-                                current_total = self.bot.backoffice.account_mng.count_registrations()
-                                explorer_msg = f':new: {count_new} user/s registered into ***{self.bot.user} System*** ' \
-                                               f' through special payments on {ctx.message.guild} (Σ {current_total})'
+                                    # Send messages on new account to uplink
+                                    current_total = self.bot.backoffice.account_mng.count_registrations()
+                                    explorer_msg = f':new: {count_new} user/s registered into ***{self.bot.user} System*** ' \
+                                                   f' through special payments on {ctx.message.guild} (Σ {current_total})'
 
-                                for chn in up_link_channels:
-                                    await chn.send(content=explorer_msg)
+                                    for chn in up_link_channels:
+                                        await chn.send(content=explorer_msg)
 
-                            # deducting total amount from sender
-                            if self.bot.backoffice.wallet_manager.update_coin_balance(coin=asset_code,
-                                                                                      user_id=ctx.message.author.id,
-                                                                                      amount=int(total_micro),
-                                                                                      direction=2):
-                                batch_payments_lists = [
-                                    self.bot.backoffice.wallet_manager.as_update_coin_balance(coin=asset_code.lower(),
-                                                                                              user_id=recipient.id,
-                                                                                              amount=int(amount_micro),
-                                                                                              direction=1) for recipient
-                                    in recipients_list]
-                                await asyncio.gather(*batch_payments_lists)
+                                # deducting total amount from sender
+                                if self.bot.backoffice.wallet_manager.update_coin_balance(coin=asset_code,
+                                                                                          user_id=ctx.message.author.id,
+                                                                                          amount=int(total_micro),
+                                                                                          direction=2):
+                                    batch_payments_lists = [
+                                        self.bot.backoffice.wallet_manager.as_update_coin_balance(
+                                            coin=asset_code.lower(),
+                                            user_id=recipient.id,
+                                            amount=int(amount_micro),
+                                            direction=1) for recipient
+                                        in recipients_list]
+                                    await gather(*batch_payments_lists)
 
-                                # Convert total
-                                total_normal = total_micro / (10 ** 7)
-                                # Send report to recipients
-                                subject = process_message(subject)
+                                    # Convert total
+                                    total_normal = total_micro / (10 ** 7)
+                                    # Send report to recipients
+                                    subject = process_message(subject)
 
-                                # Report to sender
-                                await self.sender_report(ctx=ctx, tx_type='Give', tx_time=tx_time,
-                                                         total_value=total_normal,
-                                                         asset_code=asset_code.upper(),
-                                                         recipients_list=recipients_list,
-                                                         subject=subject, tx_emoji=':gift:')
+                                    # Report to sender
+                                    await self.sender_report(ctx=ctx, tx_type='Give', tx_time=tx_time,
+                                                             total_value=total_normal,
+                                                             asset_code=asset_code.upper(),
+                                                             recipients_list=recipients_list,
+                                                             subject=subject, tx_emoji=':gift:')
 
-                                # report to recipients
-                                batch_reports = [self.recipient_report(ctx=ctx, recipient=recipient, tx_time=tx_time,
-                                                                       total_amount=amount_micro / (10 ** 7),
-                                                                       asset_code=asset_code.upper(), subject=subject,
-                                                                       tx_type='Give', tx_emoji=":gift:")
-                                                 for recipient in recipients_list]
+                                    # report to recipients
+                                    batch_reports = [
+                                        self.recipient_report(ctx=ctx, recipient=recipient, tx_time=tx_time,
+                                                              total_amount=amount_micro / (10 ** 7),
+                                                              asset_code=asset_code.upper(), subject=subject,
+                                                              tx_type='Give', tx_emoji=":gift:")
+                                        for recipient in recipients_list]
 
-                                await asyncio.gather(*batch_reports)
+                                    await gather(*batch_reports)
 
-                                await self.stats_updating(ctx=ctx, asset_code=asset_code, total_amount=total_normal,
-                                                          single_payment=amount_micro / (10 ** 7),
-                                                          payments_count=len(recipients_list), tx_type='multi',
-                                                          recipient_list=recipients_list)
+                                    await self.stats_updating(ctx=ctx, asset_code=asset_code, total_amount=total_normal,
+                                                              single_payment=amount_micro / (10 ** 7),
+                                                              payments_count=len(recipients_list), tx_type='multi',
+                                                              recipient_list=recipients_list)
 
-                                for chn in up_link_channels:
-                                    await chn.send(
-                                        content=f":gift: Member on ***{ctx.guild}*** channel ***{ctx.message.channel}***"
-                                                f" has given in"
-                                                f" total of ***{total_normal:,.7f} {asset_code.upper()}*** to"
-                                                f" {len(recipients_list)} users.")
+                                    for chn in up_link_channels:
+                                        await chn.send(
+                                            content=f":gift: Member on ***{ctx.guild}*** channel ***{ctx.message.channel}***"
+                                                    f" has given in"
+                                                    f" total of ***{total_normal:,.7f} {asset_code.upper()}*** to"
+                                                    f" {len(recipients_list)} users.")
 
-                                recipients = ' '.join(rec.mention for rec in recipients_list)
-                                tx_report_msg = f":gift: {recipients} member ***{ctx.message.author}*** " \
-                                                f"just gave you ***{amount_micro / (10 ** 7)} {asset_code.upper()}***"
-                                await ctx.channel.send(content=tx_report_msg)
+                                    recipients = ' '.join(rec.mention for rec in recipients_list)
+                                    tx_report_msg = f":gift: {recipients} member ***{ctx.message.author}*** " \
+                                                    f"just gave you ***{amount_micro / (10 ** 7)} {asset_code.upper()}***"
+                                    await ctx.channel.send(content=tx_report_msg)
+                                else:
+                                    msg = 'Payment could not be processed at this moment please try again later'
+                                    await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                                         destination=1,
+                                                                         sys_msg_title=CONST_TX_ERROR_TITLE)
                             else:
-                                msg = 'Payment could not be processed at this moment please try again later'
+                                msg = f'You have successfully cancelled payment request.'
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                                      destination=1,
                                                                      sys_msg_title=CONST_TX_ERROR_TITLE)
-                        else:
-                            msg = f'You have successfully cancelled payment request.'
+
+                            await ctx.message.channel.delete_messages([verification, msg_usr])
+                        except TimeoutError:
+                            msg = "Time has run out. Please be faster next time when providing answer to the system"
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                                  destination=1,
                                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
-
-                        await ctx.message.channel.delete_messages([verification, msg_usr])
-
-
+                            await ctx.message.channel.delete_messages([verification])
                     else:
                         msg = f'You have insufficient balance to give away {total_micro / (10 ** 7)} {asset_code.upper()}' \
                               f' to {len(recipients_list)} members.'
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                              destination=1,
                                                              sys_msg_title=CONST_TX_ERROR_TITLE)
-
                 else:
                     msg = 'Recipients list needs to be greater than 0 and less than 10'
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
