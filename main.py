@@ -25,12 +25,12 @@ backend_check = Fore.GREEN + '+++++++++++++++++++++++++++++++++++++++\n' \
 backoffice.check_backend()
 bot = DiscordBot(backoffice=backoffice, bot_settings=bot_settings)
 
-# periodic_tasks = PeriodicTasks(backoffice, bot, main_net=bot_settings["mainNet"])
-# scheduler = start_scheduler(periodic_tasks)
-# #
-# # Activate merchant tasks
-# merchant_tasks = MerchantTasks(backoffice, bot)
-# merchant_scheduler = start_merchant_scheduler(merchant_tasks)
+periodic_tasks = PeriodicTasks(backoffice, bot, main_net=bot_settings["mainNet"])
+scheduler = start_scheduler(periodic_tasks)
+#
+# Activate merchant tasks
+merchant_tasks = MerchantTasks(backoffice, bot)
+merchant_scheduler = start_merchant_scheduler(merchant_tasks)
 
 
 @bot.event
