@@ -56,17 +56,66 @@ class SpecialPaymentCommands(commands.Cog):
         self.bot = bot
         self.session_message = {}
 
-    async def recipient_report(self, ctx, recipient, tx_time: str, total_amount: float, asset_code: str, subject: str):
-        special_embed = Embed(title=f':inbox_tray:  Incoming Payment',
-                              description=f'You have received payment on {ctx.message.guild} '
-                                          f'channel {ctx.message.channel}. Check details below.',
+    async def stats_updating(self, ctx, asset_code, total_amount, single_payment, payments_count, tx_type,
+                             recipient_list):
+        """
+        Type of special transactions
+        Airdrop = Airdrop, MultiTx = Multi
+        """
+
+        if tx_type == "multi":
+            processed = {"globalBot": {"totalTx": int(payments_count),
+                                       'totalMoved': total_amount,
+                                       f"total{tx_type.capitalize()}Count": 1,
+                                       f"total{tx_type.capitalize()}Moved": total_amount},
+                         "senderStats": {f"{asset_code}.{tx_type}TxCount": 1,
+                                         f"{asset_code}.publicSent": total_amount,
+                                         f"{asset_code}.publicTxSendCount": payments_count,
+                                         f"{asset_code}.{tx_type}Sent": total_amount,
+                                         },
+                         "recipientStats": {f"{asset_code.lower()}.publicTxReceivedCount": 1,
+                                            f"{asset_code.lower()}.publicReceived": single_payment,
+                                            },
+                         "guildStats": {
+                             f'{asset_code}.{tx_type.lower()}TxCount': 1,
+                             f'{asset_code}.publicCount': payments_count,
+                             f"{asset_code}.txCount": 1,
+                             f"{asset_code}.volume": total_amount
+                         }
+                         }
+
+        #
+        await self.bot.backoffice.stats_manager.update_cl_off_chain_stats(ticker=asset_code.lower(),
+                                                                          ticker_stats=processed["globalBot"])
+        #
+        await self.bot.backoffice.stats_manager.update_usr_tx_stats(user_id=ctx.message.author.id,
+                                                                    tx_stats_data=processed['senderStats'])
+
+        for recipient in recipient_list:
+            await self.bot.backoffice.stats_manager.update_usr_tx_stats(user_id=recipient.id,
+                                                                        tx_stats_data=processed["recipientStats"])
+
+        await self.bot.backoffice.stats_manager.update_guild_stats(guild_id=ctx.message.guild.id,
+                                                                   guild_stats_data=processed['guildStats'])
+
+    async def recipient_report(self, ctx, recipient, tx_time: str, total_amount: float, asset_code: str, subject: str,
+                               tx_type, tx_emoji):
+        special_embed = Embed(title=f':inbox_tray: Incoming Payment',
+                              description=f'You have received payment, check for details below!',
                               colour=Colour.green())
+        special_embed.add_field(name=':map: Special payment type',
+                                value=f'{tx_emoji} ***{tx_type}***',
+                                inline=False)
+        special_embed.add_field(name=':map: Location details',
+                                value=f'Server: {ctx.message.guild}\n'
+                                      f'Channel: {ctx.message.channel.mention}\n'
+                                      f'[Link to channel](http://discord.com/channels/{ctx.guild.id}/{ctx.channel.id})')
         special_embed.add_field(name=':calendar: Date and time of payment',
                                 value=tx_time,
-                                inline=True)
+                                inline=False)
         special_embed.add_field(name=':cowboy: Sender',
                                 value=f'{ctx.author} (ID: {ctx.author.id})',
-                                inline=True)
+                                inline=False)
         special_embed.add_field(name=':mega: Subject of payment',
                                 value=f"```{subject}```",
                                 inline=False)
@@ -80,14 +129,14 @@ class SpecialPaymentCommands(commands.Cog):
             pass
 
     async def sender_report(self, ctx, tx_type: str, tx_time: str, total_value: float, asset_code: str,
-                            recipients_list: list, subject: str):
+                            recipients_list: list, subject: str, tx_emoji):
         recipients = '\n'.join(f'{recipient}' for recipient in recipients_list)
         special_embed = Embed(title=f':outbox_tray: Special outgoing Payment',
                               description=f'You have executed special payment on {ctx.message.guild} '
                                           f'channel {ctx.message.channel}.',
                               colour=Colour.red())
         special_embed.add_field(name=':calendar: payment type',
-                                value=f'{tx_type}',
+                                value=f'{tx_emoji}{tx_type}',
                                 inline=True)
         special_embed.add_field(name=':calendar: Date and time of payment',
                                 value=tx_time,
@@ -172,8 +221,8 @@ class SpecialPaymentCommands(commands.Cog):
                             count_new, new_recipients = self.check_recipients_wallets(recipients=recipients_list)
                             #
                             # Load registered channel for crypto link
-                            load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                             self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                            up_link_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                             # Updating statistics
                             if count_new > 0:
                                 # Updating registered user stats for guild
@@ -192,7 +241,7 @@ class SpecialPaymentCommands(commands.Cog):
                                 explorer_msg = f':new: {count_new} user/s registered into ***{self.bot.user} System*** ' \
                                                f' through special payments on {ctx.message.guild} (Σ {current_total})'
 
-                                for chn in load_channels:
+                                for chn in up_link_channels:
                                     await chn.send(content=explorer_msg)
 
                             # deducting total amount from sender
@@ -212,20 +261,34 @@ class SpecialPaymentCommands(commands.Cog):
                                 total_normal = total_micro / (10 ** 7)
                                 # Send report to recipients
                                 subject = process_message(subject)
+
+                                # Report to sender
                                 await self.sender_report(ctx=ctx, tx_type='Give', tx_time=tx_time,
                                                          total_value=total_normal,
                                                          asset_code=asset_code.upper(),
                                                          recipients_list=recipients_list,
-                                                         subject=subject)
+                                                         subject=subject, tx_emoji=':gift:')
 
-                                # send report for sender
+                                # report to recipients
                                 batch_reports = [self.recipient_report(ctx=ctx, recipient=recipient, tx_time=tx_time,
                                                                        total_amount=amount_micro / (10 ** 7),
-                                                                       asset_code=asset_code.upper(), subject=subject)
+                                                                       asset_code=asset_code.upper(), subject=subject,
+                                                                       tx_type='Give', tx_emoji=":gift:")
                                                  for recipient in recipients_list]
 
                                 await asyncio.gather(*batch_reports)
 
+                                await self.stats_updating(ctx=ctx, asset_code=asset_code, total_amount=total_normal,
+                                                          single_payment=amount_micro / (10 ** 7),
+                                                          payments_count=len(recipients_list), tx_type='multi',
+                                                          recipient_list=recipients_list)
+
+                                for chn in up_link_channels:
+                                    await chn.send(
+                                        content=f":gift: Member on ***{ctx.guild}*** channel ***{ctx.message.channel}***"
+                                                f" has given in"
+                                                f" total of ***{total_normal:,.7f} {asset_code.upper()}*** to"
+                                                f" {len(recipients_list)} users.")
 
                             else:
                                 msg = 'Payment could not be processed at this moment please try again later'
