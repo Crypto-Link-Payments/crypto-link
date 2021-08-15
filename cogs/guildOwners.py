@@ -128,7 +128,7 @@ class GuildOwnerCommands(commands.Cog):
             stats_info.add_field(name=":incoming_envelope: XLM Payments executed ",
                                  value=f'`{xlm_stats["txCount"]}`')
             stats_info.add_field(name=":money_with_wings: Total Volume ",
-                                 value=f'`{xlm_stats["volume"]:,.7f} XLM`')
+                                 value=f'`{xlm_stats["volume"]} XLM`')
             stats_info.add_field(name=":cowboy: XLM Public Transactions  ",
                                  value=f'`{xlm_stats["publicCount"]}`')
             stats_info.add_field(name=":detective: XLM Private Transactions ",
