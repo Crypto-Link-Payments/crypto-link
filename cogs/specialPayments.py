@@ -254,7 +254,7 @@ class SpecialPaymentCommands(commands.Cog):
 
     @commands.command()
     @commands.check(is_public)
-    async def active(self, ctx, user_count: int, amount: float, asset_code, *, subject: str = None):
+    async def loyalty(self, ctx, user_count: int, amount: float, asset_code, *, subject: str = None):
         asset_code = asset_code.lower()
         if amount > 0:
             if 0 < user_count < 10:
