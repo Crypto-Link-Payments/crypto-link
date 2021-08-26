@@ -334,6 +334,179 @@ class SpecialPaymentCommands(commands.Cog):
                                                  destination=1,
                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
 
+    @commands.command()
+    @commands.check(is_public)
+    async def active(self, ctx, user_count: int, amount: float, asset_code, *, subject: str = None):
+        asset_code = asset_code.lower()
+        if amount > 0:
+            if 0 < user_count < 10:
+                # Check asset
+                if not search("[~!#$%^&*()_+{}:;\']", asset_code) and asset_code in [x["assetCode"] for x in
+                                                                                     self.bot.backoffice.token_manager.get_all_tokens()]:
+                    # Produce the list of last n historically active
+                    msgs = await ctx.channel.history(limit=100).flatten()  # Getting all the messages
+                    list_of_recipients = []
+                    for msg in msgs:
+                        if len(list_of_recipients) < int(user_count):
+                            if msg.author.id != int(ctx.author.id) and not msg.author.bot:
+                                if msg.author not in list_of_recipients:
+                                    list_of_recipients.append(msg.author)
+                        else:
+                            break
+
+                    if len(list_of_recipients) > 0:  # Check if recipients exist
+                        amount_micro = amount * (10 ** 7)  # Converting total amount to micro
+                        total_micro = amount_micro * len(list_of_recipients)  # Multiplying amount by total recipients
+
+                        # CHeckin senders availabale balance
+                        if total_micro <= self.bot.backoffice.wallet_manager.get_ticker_balance(asset_code=asset_code,
+                                                                                                user_id=ctx.message.author.id):
+                            message_content = f"{ctx.message.author.mention} are you sure you would like to give " \
+                                              f"latest ***{len(list_of_recipients)}*** active users {amount_micro / (10 ** 7):,.7f} {asset_code.upper()} each?" \
+                                              f"Answer with either ***yes*** or ***no*** ... Request will be cancelled in " \
+                                              f"***10*** seconds if no response received."
+
+                            verification = await ctx.channel.send(content=message_content)
+                            try:
+                                msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                  timeout=10)
+
+                                if str(msg_usr.content.lower()) == 'yes':
+                                    await self.special_payment(ctx=ctx, recipients_list=list_of_recipients,
+                                                               amount_micro_recipient=amount_micro,
+                                                               asset_code=asset_code,
+                                                               total_amount_micro=total_micro, tx_type='active',
+                                                               emoji=":arrow_backward:",
+                                                               subject=subject)
+
+                                else:
+                                    msg = f'You have successfully cancelled payment request.'
+                                    await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                                         destination=1,
+                                                                         sys_msg_title=CONST_TX_ERROR_TITLE)
+                                await ctx.message.channel.delete_messages([verification, msg_usr])
+                            except TimeoutError:
+                                await ctx.message.channel.delete_messages([verification])
+                                msg = "Time has run out. Please be faster next time when providing answer to the system"
+                                await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                                     destination=1,
+                                                                     sys_msg_title=CONST_TX_ERROR_TITLE)
+                        else:
+                            msg = 'Insufficient wallet balance'
+                            await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                                 destination=1,
+                                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
+                    else:
+                        msg = 'After processing, Crypto Link could not find suitable ' \
+                              ' recipients. Please try again later. '
+                        await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                             destination=1,
+                                                             sys_msg_title=CONST_TX_ERROR_TITLE)
+                else:
+                    msg = 'Asset code either includes special characters or has not been integrated'
+                    await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                         destination=1,
+                                                         sys_msg_title=CONST_TX_ERROR_TITLE)
+            else:
+                msg = 'The amount of recipients needs to be in the range 1-10.'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                     destination=1,
+                                                     sys_msg_title=CONST_TX_ERROR_TITLE)
+
+
+        else:
+            msg = "Amount you are willing to send to each user needs to be greater than 0"
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                 destination=1,
+                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
+
+    async def special_payment(self, ctx, recipients_list: list, amount_micro_recipient: int, asset_code: str,
+                              total_amount_micro: int, tx_type: str, emoji: str, subject: str = None):
+        """
+        FUnction to handle special payments
+        """
+        tx_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # Check wallets of recipients
+        count_new, new_recipients = self.check_recipients_wallets(recipients=recipients_list)
+
+        # Load registered channel for crypto link
+        up_link_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                            self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+
+        if count_new > 0:
+            # Updating registered user stats for guild
+            await self.bot.backoffice.stats_manager.update_batch_registered_users(
+                guild_id=ctx.message.guild.id, count=count_new)
+
+            # Updating users stats for created bridges
+            await self.bot.backoffice.stats_manager.create_bridges(
+                user_id=ctx.message.author.id,
+                count=count_new)
+
+            # Notify sender on new bridges
+            await self.bridges_notification(ctx, count_new)
+
+            # Send messages on new account to uplink
+            current_total = self.bot.backoffice.account_mng.count_registrations()
+            explorer_msg = f':new: {count_new} user/s registered into ***{self.bot.user} System*** ' \
+                           f' through special payments on {ctx.message.guild} (Σ {current_total})'
+
+            for chn in up_link_channels:
+                await chn.send(content=explorer_msg)
+
+        # deducting total amount from sender
+        if self.bot.backoffice.wallet_manager.update_coin_balance(coin=asset_code,
+                                                                  user_id=ctx.message.author.id,
+                                                                  amount=int(total_amount_micro),
+                                                                  direction=2):
+            batch_payments_lists = [
+                self.bot.backoffice.wallet_manager.as_update_coin_balance(
+                    coin=asset_code.lower(),
+                    user_id=recipient.id,
+                    amount=int(amount_micro_recipient),
+                    direction=1) for recipient
+                in recipients_list]
+            await gather(*batch_payments_lists)
+
+            # Send report to recipients
+            subject = process_message(subject)
+
+            recipients = ' '.join(rec.mention for rec in recipients_list)
+            tx_report_msg = f"{emoji} {recipients} member ***{ctx.message.author}*** " \
+                            f"just gave you ***{amount_micro_recipient / (10 ** 7)} {asset_code.upper()}***"
+            await ctx.channel.send(content=tx_report_msg)
+
+            # Report to sender
+            await self.sender_report(ctx=ctx, tx_type=tx_type, tx_time=tx_time,
+                                     total_value=total_amount_micro / (10 ** 7),
+                                     asset_code=asset_code.upper(),
+                                     recipients_list=recipients_list,
+                                     subject=subject, tx_emoji=emoji)
+
+            # report to recipients
+            batch_reports = [
+                self.recipient_report(ctx=ctx, recipient=recipient, tx_time=tx_time,
+                                      total_amount=amount_micro_recipient / (10 ** 7),
+                                      asset_code=asset_code.upper(), subject=subject,
+                                      tx_type=tx_type, tx_emoji=emoji)
+                for recipient in recipients_list]
+            await gather(*batch_reports)
+
+            # Update stats
+            await self.stats_updating(ctx=ctx, asset_code=asset_code, total_amount=total_amount_micro / (10 ** 7),
+                                      single_payment=amount_micro_recipient / (10 ** 7),
+                                      payments_count=len(recipients_list), tx_type=tx_type,
+                                      recipient_list=recipients_list)
+
+            for chn in up_link_channels:
+                await chn.send(
+                    content=f"{emoji} Member on ***{ctx.guild}*** channel ***{ctx.message.channel}***"
+                            f" has given in"
+                            f" total of ***{total_amount_micro / (10 ** 7):,.7f} {asset_code.upper()}*** to"
+                            f" {len(recipients_list)} users.")
+        else:
+            await ctx.author.send(content='System could not deduct from sender')
+
     @give.error
     async def give_error(self, ctx, error):
         if isinstance(error, TimeoutError):
