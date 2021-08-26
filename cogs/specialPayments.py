@@ -56,7 +56,7 @@ class SpecialPaymentCommands(commands.Cog):
         Airdrop = Airdrop, MultiTx = Multi
         """
 
-        if tx_type == "multi":
+        if tx_type in ["multi", "active"]:
             processed = {"globalBot": {"totalTx": int(payments_count),
                                        'totalMoved': total_amount,
                                        f"total{tx_type.capitalize()}Count": 1,
