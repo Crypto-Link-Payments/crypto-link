@@ -258,7 +258,7 @@ class TransactionCommands(commands.Cog):
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def send(self, ctx, recipient: User, amount: float, asset_code: str, *, message: str = None):
         if not re.search("[~!#$%^&*()_+{}:;\']", asset_code.lower()):
             if amount > 0:
@@ -275,7 +275,7 @@ class TransactionCommands(commands.Cog):
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def private(self, ctx, recipient: User, amount: float, asset_code: str, *, message: str = None):
         if not re.search("[~!#$%^&*()_+{}:;\']", asset_code.lower()):
             if amount > 0:

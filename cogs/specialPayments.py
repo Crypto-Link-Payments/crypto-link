@@ -184,6 +184,7 @@ class SpecialPaymentCommands(commands.Cog):
     @commands.command()
     @commands.check(is_public)
     @commands.check(has_wallet)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def give(self, ctx, recipients: Greedy[DiscordMember], amount: float, asset_code, *, subject: str = None):
         asset_code = asset_code.lower()
         if amount > 0:
@@ -271,6 +272,7 @@ class SpecialPaymentCommands(commands.Cog):
 
     @commands.command()
     @commands.check(is_public)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def loyalty(self, ctx, user_count: int, amount: float, asset_code, *, subject: str = None):
         asset_code = asset_code.lower()
         if amount > 0:
