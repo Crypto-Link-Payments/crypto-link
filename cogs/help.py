@@ -225,10 +225,18 @@ class HelpCommands(commands.Cog):
         list_of_values = [
             {"name": f":cowboy: Public P-2-P payment :cowboy:",
              "value": f"`{self.command_string}send <@Discord User> <amount> <asset_code> <message=optional>`\n"
-                      f"__Example__:`{self.command_string}send 10 xlm @animus Have a nice day`"},
+                      f"__Example__:`{self.command_string}send @animus 10 xlm Have a nice day`"},
             {"name": f":detective: Private payment :detective:  ",
              "value": f"`{self.command_string}private <@Discord User> <amount> <asset_code> <message=optional>`\n"
-                      f"__Example__: `{self.command_string}private 10 xlm @animus Dont tell anyone`"}
+                      f"__Example__: `{self.command_string}private  @animus 10 xlm Dont tell anyone`"},
+            {"name": f":gift: Gift to other members :gift:  ",
+             "value": f"`{self.command_string}give <Up to 5 taged users> <amount> <asset_code> <message=optional>`\n"
+                      f"__Example__: `{self.command_string}give @Animus @Plippy @ManuManu 1 xlm`"},
+            {"name": f":military_medal: Loyalty :military_medal:",
+             "value": f"`{self.command_string}loyalty <Last N active users on channe> <amount> <asset_code>`\n"
+                      f"__Example__: `{self.command_string}loyalty 2 1 xlm`\n"
+                      f"__Description__: Sends 1 xlm to two users who have last posted to the channel where payment "
+                      f"was executed  in history of 100 messages. "}
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
