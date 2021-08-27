@@ -219,7 +219,7 @@ class SpecialPaymentCommands(commands.Cog):
                                 "Member on Crypto Link channel testing-grounds has given in total of 2.0000000 XLM to 2 users"
 
                                 # Uplink messages for payment
-                                uplink_message = f":gift: Gift has been given on  " \
+                                uplink_message = f":gift: Gift has been given on " \
                                                  f"***{ctx.guild}***'s channel ***#{ctx.message.channel}***" \
                                                  f" in value of ***{amount_micro / (10 ** 7):,.7f} " \
                                                  f"{asset_code.upper()}*** to" \
@@ -310,7 +310,7 @@ class SpecialPaymentCommands(commands.Cog):
 
                                     # Channel Message for payment
                                     recipients = ' '.join(rec.mention for rec in list_of_recipients)
-                                    channel_message = f":military_medal: {recipients}, user ***{ctx.message.author}*** " \
+                                    channel_message = f":military_medal: {recipients}, user ***{ctx.message.author}***" \
                                                       f" thanked you with ***{amount_micro / (10 ** 7)} " \
                                                       f"{asset_code.upper()}*** for being a loyal and active member."
 
@@ -318,7 +318,7 @@ class SpecialPaymentCommands(commands.Cog):
                                     uplink_message = f":military_medal: Loyalty distributed on " \
                                                      f"***{ctx.guild}*** channel ***{ctx.message.channel}***" \
                                                      f" in value of ***{total_micro / (10 ** 7):,.7f} " \
-                                                     f"{asset_code.upper()}*** amongst " \
+                                                     f"{asset_code.upper()}*** amongst" \
                                                      f" {len(list_of_recipients)} users."
 
                                     await self.special_payment(ctx=ctx, recipients_list=list_of_recipients,
