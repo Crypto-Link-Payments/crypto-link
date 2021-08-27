@@ -374,10 +374,10 @@ class BotManagementCommands(commands.Cog):
         pass
 
     @profile.command()
-    async def toml(self, ctx, issuer: str, asset_code: str, address:str):
+    async def toml(self, ctx, issuer: str, asset_code: str, address: str):
         if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
             if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
-                                                                      asset_code= asset_code.lower(),
+                                                                      asset_code=asset_code.lower(),
                                                                       to_update={"toml": address}):
 
                 await ctx.channel.send(
@@ -388,17 +388,16 @@ class BotManagementCommands(commands.Cog):
         else:
             await ctx.channel.send(content='This token is not registered in DB')
 
-
     @profile.command()
     async def withdrawal(self, ctx, issuer: str, asset_code: str, amount: float):
         if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
             amount_micro = int(amount * (10 ** 7))
             if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
-                                                                      asset_code= asset_code.lower(),
+                                                                      asset_code=asset_code.lower(),
                                                                       to_update={"minimumWithdrawal": amount_micro}):
 
                 await ctx.channel.send(
-                    content=f'You have successfully updated the minimum withdrawal {amount_micro/(10**7)} for token {asset_code.upper()} {issuer}')
+                    content=f'You have successfully updated the minimum withdrawal {amount_micro / (10 ** 7)} for token {asset_code.upper()} {issuer}')
             else:
                 await ctx.channel.send(
                     content="There has been issue in the backend while trying to update token details")
@@ -406,10 +405,10 @@ class BotManagementCommands(commands.Cog):
             await ctx.channel.send(content='This token is not registered in DB')
 
     @profile.command()
-    async def expert(self, ctx, issuer: str, asset_code: str, address:str):
+    async def expert(self, ctx, issuer: str, asset_code: str, address: str):
         if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
             if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
-                                                                      asset_code= asset_code.lower(),
+                                                                      asset_code=asset_code.lower(),
                                                                       to_update={"expert": address}):
 
                 await ctx.channel.send(
@@ -421,10 +420,10 @@ class BotManagementCommands(commands.Cog):
             await ctx.channel.send(content='This token is not registered in DB')
 
     @profile.command()
-    async def homepage(self, ctx, issuer: str, asset_code: str, address:str):
+    async def homepage(self, ctx, issuer: str, asset_code: str, address: str):
         if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
             if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
-                                                                      asset_code= asset_code.lower(),
+                                                                      asset_code=asset_code.lower(),
                                                                       to_update={"homepage": address}):
 
                 await ctx.channel.send(
@@ -434,8 +433,6 @@ class BotManagementCommands(commands.Cog):
                     content="There has been issue in the backend while trying to update token details")
         else:
             await ctx.channel.send(content='This token is not registered in DB')
-
-
 
     @tokens.command()
     async def new(self, ctx, asset_issuer: str, asset_code: str):
