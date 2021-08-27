@@ -56,7 +56,7 @@ class SpecialPaymentCommands(commands.Cog):
         Airdrop = Airdrop, MultiTx = Multi
         """
 
-        if tx_type in ["multi", "active"]:
+        if tx_type in ["multi", "loyalty"]:
             processed = {"globalBot": {"totalTx": int(payments_count),
                                        'totalMoved': total_amount,
                                        f"total{tx_type.capitalize()}Count": 1,
@@ -210,11 +210,28 @@ class SpecialPaymentCommands(commands.Cog):
                             msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=10)
 
                             if str(msg_usr.content.lower()) == 'yes':
+                                # Channel Message for payment
+                                recipients = ' '.join(rec.mention for rec in recipients_list)
+                                channel_message = f":gift: {recipients}, user ***{ctx.message.author}*** " \
+                                                  f" gave you a gift worth ***{amount_micro / (10 ** 7)} " \
+                                                  f"{asset_code.upper()}***."
+
+                                "Member on Crypto Link channel testing-grounds has given in total of 2.0000000 XLM to 2 users"
+
+                                # Uplink messages for payment
+                                uplink_message = f":gift: Gift has been given on  " \
+                                                 f"***{ctx.guild}***'s channel ***#{ctx.message.channel}***" \
+                                                 f" in value of ***{amount_micro / (10 ** 7):,.7f} " \
+                                                 f"{asset_code.upper()}*** to" \
+                                                 f" {len(recipients_list)} users."
+
                                 await self.special_payment(ctx=ctx, recipients_list=recipients_list,
                                                            amount_micro_recipient=amount_micro,
                                                            asset_code=asset_code,
                                                            total_amount_micro=total_micro, tx_type='multi',
                                                            emoji=":gift:",
+                                                           channel_msg=channel_message,
+                                                           uplink_message=uplink_message,
                                                            subject=subject)
                             else:
                                 msg = f'You have successfully cancelled payment request.'
@@ -290,12 +307,29 @@ class SpecialPaymentCommands(commands.Cog):
                                                                   timeout=10)
 
                                 if str(msg_usr.content.lower()) == 'yes':
+
+                                    # Channel Message for payment
+                                    recipients = ' '.join(rec.mention for rec in list_of_recipients)
+                                    channel_message = f":military_medal: {recipients}, user ***{ctx.message.author}*** " \
+                                                      f" thanked you with ***{amount_micro / (10 ** 7)} " \
+                                                      f"{asset_code.upper()}*** for being a loyal and active member."
+
+                                    # Uplink messages for payment
+                                    uplink_message = f":military_medal: Loyalty distributed on " \
+                                                     f"***{ctx.guild}*** channel ***{ctx.message.channel}***" \
+                                                     f" in value of ***{total_micro / (10 ** 7):,.7f} " \
+                                                     f"{asset_code.upper()}*** amongst " \
+                                                     f" {len(list_of_recipients)} users."
+
                                     await self.special_payment(ctx=ctx, recipients_list=list_of_recipients,
                                                                amount_micro_recipient=amount_micro,
                                                                asset_code=asset_code,
-                                                               total_amount_micro=total_micro, tx_type='active',
-                                                               emoji=":arrow_backward:",
-                                                               subject=subject)
+                                                               total_amount_micro=total_micro, tx_type='loyalty',
+                                                               emoji=":military_medal:",
+                                                               channel_msg=channel_message,
+                                                               uplink_message=uplink_message,
+                                                               subject=subject,
+                                                               )
 
                                 else:
                                     msg = f'You have successfully cancelled payment request.'
@@ -339,7 +373,9 @@ class SpecialPaymentCommands(commands.Cog):
                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
 
     async def special_payment(self, ctx, recipients_list: list, amount_micro_recipient: int, asset_code: str,
-                              total_amount_micro: int, tx_type: str, emoji: str, subject: str = None):
+                              total_amount_micro: int, tx_type: str, emoji: str,
+                              channel_msg: str, uplink_message: str,
+                              subject: str = None):
         """
         FUnction to handle special payments
         """
@@ -389,10 +425,7 @@ class SpecialPaymentCommands(commands.Cog):
             # Send report to recipients
             subject = process_message(subject)
 
-            recipients = ' '.join(rec.mention for rec in recipients_list)
-            tx_report_msg = f"{emoji} {recipients} member ***{ctx.message.author}*** " \
-                            f"just gave you ***{amount_micro_recipient / (10 ** 7)} {asset_code.upper()}***"
-            await ctx.channel.send(content=tx_report_msg)
+            await ctx.channel.send(content=channel_msg)
 
             # Report to sender
             await self.sender_report(ctx=ctx, tx_type=tx_type, tx_time=tx_time,
@@ -417,11 +450,7 @@ class SpecialPaymentCommands(commands.Cog):
                                       recipient_list=recipients_list)
 
             for chn in up_link_channels:
-                await chn.send(
-                    content=f"{emoji} Member on ***{ctx.guild}*** channel ***{ctx.message.channel}***"
-                            f" has given in"
-                            f" total of ***{total_amount_micro / (10 ** 7):,.7f} {asset_code.upper()}*** to"
-                            f" {len(recipients_list)} users.")
+                await chn.send(content=uplink_message)
         else:
             await ctx.author.send(content='System could not deduct from sender')
 
