@@ -201,7 +201,7 @@ class SpecialPaymentCommands(commands.Cog):
                                                                                             user_id=ctx.message.author.id):
 
                         message_content = f"{ctx.message.author.mention} are you sure that you would like to give " \
-                                          f"{total_micro / (10 ** 7)} {asset_code.upper()} distributed equally amongst " \
+                                          f"{total_micro / (10 ** 7):,.7f} {asset_code.upper()} distributed equally amongst " \
                                           f"{len(recipients_list)} users?\n" \
                                           f"Answer with either ***yes*** or ***no*** ... Request will be cancelled in " \
                                           f"***10*** seconds if no response received."
@@ -214,7 +214,7 @@ class SpecialPaymentCommands(commands.Cog):
                                 # Channel Message for payment
                                 recipients = ' '.join(rec.mention for rec in recipients_list)
                                 channel_message = f":gift: {recipients}, user ***{ctx.message.author}*** " \
-                                                  f" gave you a gift worth ***{amount_micro / (10 ** 7)} " \
+                                                  f" gave you a gift worth ***{amount_micro / (10 ** 7):,.7f} " \
                                                   f"{asset_code.upper()}***."
 
                                 "Member on Crypto Link channel testing-grounds has given in total of 2.0000000 XLM to 2 users"
