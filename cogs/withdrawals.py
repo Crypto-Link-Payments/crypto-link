@@ -1,6 +1,4 @@
-import time
 from discord.ext import commands
-from discord import TextChannel
 import time
 from utils.customCogChecks import has_wallet, check
 from cogs.utils.monetaryConversions import convert_to_usd
@@ -83,7 +81,8 @@ class WithdrawalCommands(commands.Cog):
                                                                                                  token=token,
                                                                                                  amount=str(
                                                                                                      for_owner_macro),
-                                                                                                 asset_issuer=asset_issuer)
+                                                                                                 asset_issuer=asset_issuer,
+                                                                                                 memo=memo)
 
                                         if result.get("hash"):
                                             to_deduct = {f'{token}': int(micro_units) * (-1)}
@@ -94,6 +93,7 @@ class WithdrawalCommands(commands.Cog):
                                                 # Store withdrawal details to database
                                                 result['userId'] = int(ctx.message.author.id)
                                                 result["time"] = int(time.time())
+                                                result["memo"] = memo
                                                 result['offChainData'] = {f"{token}Fee": withdrawal_fee}
 
                                                 # Insert in the history of withdrawals
@@ -135,7 +135,7 @@ class WithdrawalCommands(commands.Cog):
 
                                                 # Send message to user on withdrawal
                                                 await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
-                                                                                        fee=f'{withdrawal_fee:,.7f} {token.upper()}')
+                                                                                        fee=f'{withdrawal_fee:,.7f} {token.upper()}',memo = memo)
 
                                                 # # System channel notification on withdrawal processed
                                                 channel_sys = self.bot.get_channel(id=int(self.with_channel))
