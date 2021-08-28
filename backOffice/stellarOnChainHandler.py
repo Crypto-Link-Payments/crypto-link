@@ -199,19 +199,8 @@ class StellarWallet:
                 to_process.append(tx)
         return to_process
 
-    @staticmethod
-    def check_if_memo(memo):
-        """
-        Check if memo has been provided
-        :param memo:
-        :return:
-        """
-        if memo != 'none':
-            return True
-        else:
-            return False
 
-    def token_withdrawal(self, address, token, amount: str, asset_issuer: str = None):
+    def token_withdrawal(self, address, token, amount: str, asset_issuer: str = None, memo=None):
         """
         Amount as full
         """
