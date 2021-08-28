@@ -243,7 +243,7 @@ class CustomMessages:
         await recipient.send(embed=sys_embed)
 
     @staticmethod
-    async def withdrawal_notify(ctx, withdrawal_data: dict, fee):
+    async def withdrawal_notify(ctx, withdrawal_data: dict, fee, memo=None):
         notify = Embed(title=":outbox_tray: Withdrawal Notification :outbox_tray:",
                        description=f'Withdrawal Successfully processed',
                        timestamp=datetime.utcnow(),
@@ -254,6 +254,9 @@ class CustomMessages:
                          inline=False)
         notify.add_field(name=':map: Destination :map: ',
                          value=f'```{withdrawal_data["destination"]}```',
+                         inline=False)
+        notify.add_field(name=':pencil: MEMO :pencil:',
+                         value=f'```{memo}```',
                          inline=False)
         notify.add_field(name=CONST_HASH_STR,
                          value=f'`{withdrawal_data["hash"]}`',
