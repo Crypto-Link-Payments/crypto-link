@@ -138,12 +138,20 @@ class HelpCommands(commands.Cog):
         start_embed.add_field(name=':two: Get Deposit Details :two:',
                               value=f'Get deposit details of your Discord wallet with `{self.command_string}wallet'
                                     f' deposit` and deposit XLM or any other supported Stellar native token. '
-                                    f'Please use `{self.command_string}help currencies` to check all available '
+                                    f'Please use `{self.command_string}help tokens` to check all available '
                                     f'tokens on the system besides XLM',
                               inline=False)
         start_embed.add_field(name=':three: Make P-2-P Transaction :three:',
                               value=f'`{self.command_string}send <@discord.Member> <amount> <ticker>`\n'
                                     f'Example: `{self.command_string}send @animus 10 xlm`',
+                              inline=False)
+        start_embed.add_field(name=':four: Check your balances :four:',
+                              value=f'`{self.command_string}wallet balance`\n'
+                                    f'`{self.command_string}me`',
+                              inline=False)
+        start_embed.add_field(name=':five: Withdraw from Discord :five:',
+                              value=f'`{self.command_string}withdraw <amount> <asset_code> <address> <memo=optional>`\n'
+                                    f'Example: `{self.command_string}withdraw 10 xlm GBALRXCJ6NNRE4USDCUFLAOZCDSKDSEJZHTLGEDQXI7BM2T6M77CMMWG`',
                               inline=False)
         start_embed.add_field(name=':sos: Explore Crypto Link :sos: ',
                               value=f'```{self.command_string}help```',
