@@ -137,7 +137,7 @@ class UserAccountCommands(commands.Cog):
                               {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
                                "value": f"```{self.command_string}wallet deposit```"},
                               {"name": ":outbox_tray: Withdraw from Crypto Link :outbox_tray: ",
-                               "value": f"```{self.command_string}withdraw <amount> <asset code> <address>```"}]
+                               "value": f"```{self.command_string}withdraw <amount> <asset code> <address> <memo=Optional>```"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
