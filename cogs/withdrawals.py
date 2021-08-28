@@ -25,7 +25,7 @@ class WithdrawalCommands(commands.Cog):
     @commands.command()
     @commands.check(has_wallet)
     @commands.cooldown(1, 45, commands.BucketType.user)
-    async def withdraw(self, ctx, amount: float, asset_code: str, address: str):
+    async def withdraw(self, ctx, amount: float, asset_code: str, address: str, memo=None):
         """
         Command to initiate withdrawals
         """
@@ -69,8 +69,6 @@ class WithdrawalCommands(commands.Cog):
                                     verification = await ctx.channel.send(content=message_content)
                                     msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
 
-                                    print(msg_usr)
-                                    print()
                                     if str(msg_usr.content.lower()) == 'yes':
                                         processing_msg = ':robot: Processing withdrawal request, please wait few moments....'
                                         processing_msg = await ctx.channel.send(content=processing_msg)
