@@ -136,8 +136,8 @@ class UserAccountCommands(commands.Cog):
                                "value": f"```{self.command_string}wallet stats <asset_code=optional for non XLM>```"},
                               {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
                                "value": f"```{self.command_string}wallet deposit```"},
-                              {"name": ":outbox_tray: Get Withdrawal Instructions :outbox_tray: ",
-                               "value": f"```{self.command_string}withdraw```"}]
+                              {"name": ":outbox_tray: Withdraw from Crypto Link :outbox_tray: ",
+                               "value": f"```{self.command_string}withdraw <amount> <asset code> <address> <memo=Optional>```"}]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
 
@@ -295,7 +295,6 @@ class UserAccountCommands(commands.Cog):
     @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
-
         if user_balances:
             all_wallets = list(user_balances.keys())
             # initiate Discord embed
@@ -304,12 +303,14 @@ class UserAccountCommands(commands.Cog):
                                   colour=Colour.dark_orange())
             balance_embed.set_thumbnail(url=ctx.message.author.avatar_url)
 
-            for wallet in all_wallets:
-                token_balance = int(user_balances[wallet] / (10 ** 7))
-                balance_embed.add_field(
-                    name=f"{wallet.upper()}",
-                    value=f'```{token_balance:,.7f} {wallet.upper()}```',
-                    inline=False)
+            for k, v in user_balances.items():
+                if v > 0:
+                    balance_embed.add_field(
+                        name=f"{k.upper()}",
+                        value=f'```{v / (10 ** 7):,.7f} {k.upper()}```',
+                        inline=False)
+                else:
+                    pass
             await ctx.author.send(embed=balance_embed)
         else:
             title = '__Stellar Wallet Error__'
