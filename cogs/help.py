@@ -345,7 +345,7 @@ class HelpCommands(commands.Cog):
                                    'service.  ',
                              inline=False)
         uplink_nfo.add_field(name=':rocket: Get Started with Up-Link :rocket: ',
-                             value=f':one: `{self.command_string}uplink apply <#discord.TextChannel>`\n'
+                             value=f':one: `{self.command_string}owner uplink apply <#discord.TextChannel>`\n'
                                    f':two: Watch the magic happen on next activity\n'
                                    f':three: For further references use `{self.command_string}owner uplink`',
                              inline=False)
