@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from discord import Intents
 from colorama import Fore, init
-from discord_components import DiscordComponents
 import json
 from utils.tools import Helpers
 
