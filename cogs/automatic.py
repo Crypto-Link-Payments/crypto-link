@@ -6,7 +6,7 @@ import os
 import sys
 
 from colorama import Fore
-from discord import Embed, Colour
+from discord import Embed, Colour, Game, Status
 from discord.ext import commands
 from discord.errors import HTTPException
 from datetime import datetime
@@ -93,6 +93,25 @@ class AutoFunctions(commands.Cog):
             await ctx.message.delete()
         except Exception:
             pass
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        for g in self.bot.guilds:
+            check_guild_prefix = self.bot.backoffice.guild_profiles.check_guild_prefix(guild_id=int(g.id))
+            if not check_guild_prefix:
+                if self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=int(g.id), prefix="!"):
+                    print(Fore.YELLOW + f"Default prefix registered for {g}")
+                else:
+                    print(Fore.RED + f"Could not register prefix for {g}")
+            else:
+                print(Fore.GREEN + f"{g} Prefix ....OK")
+
+        await self.bot.change_presence(status=Status.online, activity=Game('Monitoring'))
+        print(Fore.GREEN + 'DISCORD BOT : Logged in as')
+        print(self.bot.user.name)
+        print(self.bot.user.id)
+        print('------')
+        print('================================')
 
     # @commands.Cog.listener()
     # async def on_member_join(self, member):
