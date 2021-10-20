@@ -128,7 +128,7 @@ class GuildOwnerCommands(commands.Cog):
             stats_info.add_field(name=":incoming_envelope: XLM Payments executed ",
                                  value=f'`{xlm_stats["txCount"]}`')
             stats_info.add_field(name=":money_with_wings: Total Volume ",
-                                 value=f'`{round(float(xlm_stats["volume"]),7)} XLM`')
+                                 value=f'`{round(float(xlm_stats["volume"]), 7)} XLM`')
             stats_info.add_field(name=":cowboy: XLM Public Transactions  ",
                                  value=f'`{xlm_stats["publicCount"]}`')
             stats_info.add_field(name=":detective: XLM Private Transactions ",
@@ -205,15 +205,23 @@ class GuildOwnerCommands(commands.Cog):
             "explorerSettings.channelId": int(chn.id)
         }
 
-        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id,
-                                                                     data_to_update=data_to_update):
-            await customMessages.system_message(ctx=ctx, color_code=0,
-                                                message=f'You have successfully set channel {chn} to receive Crypto'
-                                                        f' Link Network Activity feed',
-                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+        # Check if owner registered
+        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
+            if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id,
+                                                                         data_to_update=data_to_update):
+                await customMessages.system_message(ctx=ctx, color_code=0,
+                                                    message=f'You have successfully set channel {chn} to receive Crypto'
+                                                            f' Link Network Activity feed',
+                                                    destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+            else:
+                await customMessages.system_message(ctx=ctx, color_code=1,
+                                                    message='There has been an issue while trying'
+                                                            'to update data.',
+                                                    destination=ctx.message.channel, sys_msg_title=CONST_SYS_MSG)
         else:
-            await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue while trying'
-                                                                               'to update data.',
+            await customMessages.system_message(ctx=ctx, color_code=1, message=f'Please register the {ctx.guild}'
+                                                                               f' to the system with '
+                                                                               f'`{self.guild_string}owner register',
                                                 destination=ctx.message.channel, sys_msg_title=CONST_SYS_MSG)
 
     @uplink.command()
