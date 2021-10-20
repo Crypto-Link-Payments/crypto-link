@@ -147,7 +147,9 @@ lastTweet.json
 masterKey.json
 utils/securityManager.py
 hotWalletsTest.json
-walletSecretsTest.json\
+walletSecretsTest.json
+stellarPag.json
+stellarPagTest.json
 test.py
 
 
