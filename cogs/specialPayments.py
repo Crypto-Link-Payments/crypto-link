@@ -9,7 +9,6 @@ from re import search
 from datetime import datetime
 from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-from asyncio.exceptions import TimeoutError
 from asyncio import gather
 
 custom_messages = CustomMessages()
@@ -276,7 +275,7 @@ class SpecialPaymentCommands(commands.Cog):
     async def loyalty(self, ctx, user_count: int, amount: float, asset_code, *, subject: str = None):
         asset_code = asset_code.lower()
         if amount > 0:
-            if 0 < user_count < 10:
+            if 0 < user_count <= 10:
                 # Check asset
                 if not search("[~!#$%^&*()_+{}:;\']", asset_code) and asset_code in [x["assetCode"] for x in
                                                                                      self.bot.backoffice.token_manager.get_all_tokens()]:
