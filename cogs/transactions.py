@@ -144,11 +144,11 @@ class TransactionCommands(commands.Cog):
                                                          message=msg)
 
         # Send out explorer
+
         load_channels = [self.bot.get_channel(id=int(chn)) for chn in
                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
-        await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                message=explorer_msg, tx_type=tx_type)
+        await custom_messages.explorer_messages(applied_channels=load_channels, message=explorer_msg)
 
     async def send_impl(self, ctx, amount: float, ticker: str, recipient: User, *, tx_type: str, message: str = None):
         coin = ticker.lower()
@@ -183,9 +183,11 @@ class TransactionCommands(commands.Cog):
                                                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                                 current_total = self.backoffice.account_mng.count_registrations()
 
-                                explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
+                                explorer_msg = f':new: user registered into ***{self.bot.user} System*** ' \
+                                               f'(Σ {current_total})'
                                 for chn in load_channels:
-                                    await chn.send(content=explorer_msg)
+                                    if chn is not None:
+                                        await chn.send(content=explorer_msg)
 
                                 await custom_messages.bridge_notification(ctx, recipient=recipient)
 

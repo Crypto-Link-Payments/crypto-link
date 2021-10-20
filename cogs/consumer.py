@@ -281,8 +281,7 @@ class ConsumerCommands(commands.Cog):
                                                f'(${convert_to_dollar}) on ' \
                                                f'{ctx.message.guild}'
                                 await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                        message=explorer_msg, on_chain=False,
-                                                                        tx_type='role_purchase')
+                                                                        message=explorer_msg)
                         else:
                             message = f'Error while trying to deduct funds from user'
                             await custom_messages.system_message(ctx=ctx, message=message,

@@ -540,8 +540,7 @@ class BotManagementCommands(commands.Cog):
                                                        f'from issuer ***{asset_data["asset_issuer"]}*** :rocket:'
 
                                         await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                                message=explorer_msg,
-                                                                                on_chain=True, tx_type='deposit')
+                                                                                message=explorer_msg)
                                         await ctx.author.send(content='Integration completed')
                                     else:
                                         msg = "On chain stats collector document could not be created"
@@ -668,8 +667,7 @@ class BotManagementCommands(commands.Cog):
                                                        f'from issuer ***{asset_data["asset_issuer"]}*** :rocket:'
 
                                         await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                                message=explorer_msg,
-                                                                                on_chain=True, tx_type='deposit')
+                                                                                message=explorer_msg)
                                         await ctx.author.send(content='Integration completed')
                                     else:
                                         msg = "On chain stats collector document could not be created"

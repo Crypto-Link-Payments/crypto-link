@@ -120,8 +120,7 @@ class PeriodicTasks:
                                            f'{tx["asset_type"]["code"].upper()} to {self.bot.user}'
 
                             await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                    message=explorer_msg,
-                                                                    on_chain=True, tx_type='deposit')
+                                                                    message=explorer_msg)
 
                         else:
                             print(Fore.RED + f'TX Processing error: \n'

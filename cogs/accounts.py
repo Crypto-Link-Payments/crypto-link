@@ -106,7 +106,8 @@ class UserAccountCommands(commands.Cog):
                 current_total = self.backoffice.account_mng.count_registrations()
                 explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
                 for chn in load_channels:
-                    await chn.send(content=explorer_msg)
+                    if chn is not None:
+                        await chn.send(content=explorer_msg)
 
                 # Update guild stats on registered users
                 await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)

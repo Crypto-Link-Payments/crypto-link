@@ -462,12 +462,14 @@ class CustomMessages:
                                      inline=False)
                 await ctx.author.send(embed=coin_stats)
 
-    async def explorer_messages(self, applied_channels: list, message: str, tx_type: str, on_chain: bool = None):
+    async def explorer_messages(self, applied_channels: list, message: str):
         """
         Transactin reports to all explorer applied channels
         """
+
         for explorer_channel in applied_channels:
-            await explorer_channel.send(message)
+            if explorer_channel is not None:
+                await explorer_channel.send(message)
 
     async def transaction_report_to_channel(self, ctx, message: str, tx_type: str):
         """

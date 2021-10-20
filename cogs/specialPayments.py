@@ -407,7 +407,8 @@ class SpecialPaymentCommands(commands.Cog):
                            f' through special payments on {ctx.message.guild} (Σ {current_total})'
 
             for chn in up_link_channels:
-                await chn.send(content=explorer_msg)
+                if chn is not None:
+                    await chn.send(content=explorer_msg)
 
         # deducting total amount from sender
         if self.bot.backoffice.wallet_manager.update_coin_balance(coin=asset_code,
@@ -451,7 +452,8 @@ class SpecialPaymentCommands(commands.Cog):
                                       recipient_list=recipients_list)
 
             for chn in up_link_channels:
-                await chn.send(content=uplink_message)
+                if chn is not None:
+                    await chn.send(content=uplink_message)
         else:
             await ctx.author.send(content='System could not deduct from sender')
 

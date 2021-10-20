@@ -164,9 +164,7 @@ class WithdrawalCommands(commands.Cog):
                                                 explorer_msg = f':outbox_tray: {for_owner_macro} {token.upper()} ' \
                                                                f'(${in_dollar["total"]}) on {ctx.message.guild}'
                                                 await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                                        message=explorer_msg,
-                                                                                        tx_type='withdrawal',
-                                                                                        on_chain=True)
+                                                                                        message=explorer_msg)
 
                                         else:
                                             msg = f"It seems that there has been error while trying to withdraw. " \
