@@ -261,27 +261,34 @@ class GuildOwnerCommands(commands.Cog):
 
     @merch.command()
     async def open(self, ctx):
-        if not self.merchant.check_if_community_exist(community_id=ctx.message.guild.id):  # Check if not registered
-            if self.merchant.register_community_wallet(community_id=ctx.message.guild.id,
-                                                       community_owner_id=ctx.message.author.id,
-                                                       community_name=f'{ctx.message.guild}'):  # register community wallet
-                msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
-                message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed ' \
-                          f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
-                          f' commands or have a look at ***merchant system manual*** accessible through command ' \
-                          f' `{self.command_string}merchant manual` '
+        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
+            if not self.merchant.check_if_community_exist(community_id=ctx.message.guild.id):  # Check if not registered
+                if self.merchant.register_community_wallet(community_id=ctx.message.guild.id,
+                                                           community_owner_id=ctx.message.author.id,
+                                                           community_name=f'{ctx.message.guild}'):  # register community wallet
+                    msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
+                    message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed ' \
+                              f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
+                              f' commands or have a look at ***merchant system manual*** accessible through command ' \
+                              f' `{self.command_string}merchant manual` '
+                    await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
+                                                        destination=1)
+                else:
+                    msg_title = ':warning:  __Merchant Registration Status___ :warning: '
+                    message = f'There has been an issue while registering wallet into the system. Please try again later.' \
+                              f' or contact one of the support staff. '
+                    await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
+                                                        destination=1)
+            else:
+                msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
+                message = f'You have already registered Merchant system on {ctx.guild} server. Proceed' \
+                          f'with command {self.command_string}merchant'
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                     destination=1)
-            else:
-                msg_title = ':warning:  __Merchant Registration Status___ :warning: '
-                message = f'There has been an issue while registering wallet into the system. Please try again later.' \
-                          f' or contact one of the support staff. '
-                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
-                                                    destination=1)
         else:
-            msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
-            message = f'You have already registered Merchant system on {ctx.guild} server. Proceed' \
-                      f'with command {self.command_string}merchant'
+            msg_title = ':warning:  __Community Registration Status___ :warning: '
+            message = f'You have not yet registered {ctx.guild} server into Crypto Link system. Please ' \
+                      f'do that first through `{self.guild_string}owner register`.'
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                 destination=1)
 
