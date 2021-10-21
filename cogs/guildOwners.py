@@ -1,5 +1,7 @@
 from datetime import datetime
 import json
+import decimal
+from bson.decimal128 import Decimal128
 from re import sub
 from discord.ext import commands
 from discord import TextChannel, Embed, Colour
@@ -117,21 +119,25 @@ class GuildOwnerCommands(commands.Cog):
         available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
 
         if not token or token == 'xlm':
+
             stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
                                timestamp=datetime.utcnow(),
                                colour=Colour.dark_gold())
             stats_info.add_field(name='Wallets registered',
                                  value=f'`{stats["registeredUsers"]}`',
                                  inline=False)
+
+            volume = stats["xlm"]["volume"]
+            if isinstance(volume, Decimal128):
+                volume = volume.to_decimal()
+
             xlm_stats = stats["xlm"]
-            volume_micro = float(xlm_stats["volume"])/(10**7)
-            xlm_volume = volume_micro*(10**7)
 
             stats_info.set_thumbnail(url=ctx.guild.icon_url)
             stats_info.add_field(name=":incoming_envelope: XLM Payments executed ",
                                  value=f'`{xlm_stats["txCount"]}`')
             stats_info.add_field(name=":money_with_wings: Total Volume ",
-                                 value=f'`{xlm_volume} XLM`')
+                                 value=f'`{round(volume, 7)} XLM`')
             stats_info.add_field(name=":cowboy: XLM Public Transactions  ",
                                  value=f'`{xlm_stats["publicCount"]}`')
             stats_info.add_field(name=":detective: XLM Private Transactions ",
