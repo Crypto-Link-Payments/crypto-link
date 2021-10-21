@@ -124,11 +124,14 @@ class GuildOwnerCommands(commands.Cog):
                                  value=f'`{stats["registeredUsers"]}`',
                                  inline=False)
             xlm_stats = stats["xlm"]
+            volume_micro = float(xlm_stats["volume"])/(10**7)
+            xlm_volume = volume_micro*(10**7)
+
             stats_info.set_thumbnail(url=ctx.guild.icon_url)
             stats_info.add_field(name=":incoming_envelope: XLM Payments executed ",
                                  value=f'`{xlm_stats["txCount"]}`')
             stats_info.add_field(name=":money_with_wings: Total Volume ",
-                                 value=f'`{round(float(xlm_stats["volume"]), 7)} XLM`')
+                                 value=f'`{xlm_volume} XLM`')
             stats_info.add_field(name=":cowboy: XLM Public Transactions  ",
                                  value=f'`{xlm_stats["publicCount"]}`')
             stats_info.add_field(name=":detective: XLM Private Transactions ",
@@ -148,20 +151,23 @@ class GuildOwnerCommands(commands.Cog):
             tokens = [x["assetCode"] for x in self.backoffice.token_manager.get_registered_tokens() if
                       x["assetCode"] != 'xlm']
 
-            token_stats_info = Embed(title=f'Token statistics for server')
+            if tokens:
+                token_stats_info = Embed(title=f'Token statistics for server')
 
-            for token in tokens:
-                token_stats = stats[f'{token.lower()}']
-                for k, v in token_stats.items():
-                    itm = sub(r"([A-Z])", r" \1", k).split()
-                    item = ' '.join([str(elem) for elem in itm]).capitalize()
-                    if k != 'volume':
-                        token_stats_info.add_field(name=f'{item}',
-                                                   value=f'```{v}```')
-                    else:
-                        token_stats_info.add_field(name=f'{item}',
-                                                   value=f'```{v:,.7f} {token.upper()}```')
-                await ctx.channel.send(embed=token_stats_info)
+                for token in tokens:
+                    token_stats = stats[f'{token.lower()}']
+                    for k, v in token_stats.items():
+                        itm = sub(r"([A-Z])", r" \1", k).split()
+                        item = ' '.join([str(elem) for elem in itm]).capitalize()
+                        if k != 'volume':
+                            token_stats_info.add_field(name=f'{item}',
+                                                       value=f'```{v}```')
+                        else:
+                            token_stats_info.add_field(name=f'{item}',
+                                                       value=f'```{v:,.7f} {token.upper()}```')
+                    await ctx.channel.send(embed=token_stats_info)
+            else:
+                await ctx.channel.send(content="No tokens registered")
 
     @owner.command()
     @commands.check(guild_has_stats)
