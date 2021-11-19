@@ -38,9 +38,9 @@ class VotingPoolManager:
         else:
             return False
 
-    def check_ballot_id(self, ballot_id:int):
-        result = self.voting_pools.find_one({"ballotId":ballot_id},
-                                            {"_id":0})
+    def check_ballot_id(self, ballot_id: int):
+        result = self.voting_pools.find_one({"ballotId": ballot_id},
+                                            {"_id": 0})
         if result:
             return True
         else:
@@ -60,6 +60,18 @@ class VotingPoolManager:
         # TODO make ballot counter
         pass
 
+    def get_ballot_data(self, ballot_id: int, server_id: int):
+        result = self.voting_pools.find_one({"guildId": server_id, "ballotId": ballot_id},
+                                            {"_id": 0,
+                                             "assetCode": 1,
+                                             "votesFor": 1,
+                                             "votesAgainst": 1,
+                                             "voterFor": 1,
+                                             "voterAgainst": 1,
+                                             "endBallot":1,
+                                             "guildId": 1})
+        return result
+
     def get_ballot_rights_role(self, guild_id: int):
         """
         Get the role id used for ballot creation rights
@@ -68,3 +80,10 @@ class VotingPoolManager:
                                                      {"_id": 0,
                                                       "mngRoleId": 1})
         return int(result["mngRoleId"])
+
+    def update_ballot_box(self, ballot_id: int, guild_id: int, new_ballot_data):
+        result = self.voting_pools.update_one({"ballotId": ballot_id, "guildId": guild_id},
+                                              {"$inc": {new_ballot_data["toIncrement"]},
+                                               "$set": {new_ballot_data["toUpdate"]}})
+        return result.modified_count > 0
+
