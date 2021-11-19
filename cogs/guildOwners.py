@@ -262,7 +262,7 @@ class GuildOwnerCommands(commands.Cog):
             title = ':convenience_store: __Crypto Link Uplink manual__ :convenience_store: '
             description = "All available commands to activate and operate with merchant service."
             list_of_values = [
-                {"name": ":pencil:  Open/Reigster for Merchant system :pencil:  ",
+                {"name": ":pencil:  Open/Register for Merchant system :pencil:  ",
                  "value": f"```{self.command_string}owner merchant open ```"},
                 {"name": ":joystick: Access commands for merchant :joystick: ",
                  "value": f"```{self.command_string}merchant```"}
