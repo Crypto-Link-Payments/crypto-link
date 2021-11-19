@@ -362,13 +362,17 @@ class GuildOwnerCommands(commands.Cog):
             if self.backoffice.bot_manager.register_server_for_voting_service(data=data):
                 await customMessages.system_message(ctx=ctx, color_code=0,
                                                     message=f'You have successfully activated ballot voting '
-                                                            f'pools for your'
+                                                            f'pools functionality for your'
                                                             f' server. Proceed with `{self.command_string}ballot` over '
                                                             f'public channel where {self.bot} has access to.',
                                                     destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
-
+            else:
+                msg_title = ':ballot_box: __Ballot Voting System Error__ :ballot_box: '
+                message = f'System could not activate Ballot Voting pools due to backend issue. Please contact' \
+                          f' crypto link team.'
+                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
+                                                    destination=1)
         else:
-
             msg_title = ':ballot_box: __Ballot Voting System Already Active__ :ballot_box: '
             message = f'You have already activated {ctx.guild} server for voting functionality.'
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
