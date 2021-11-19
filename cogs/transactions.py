@@ -108,17 +108,17 @@ class TransactionCommands(commands.Cog):
 
         if native_token:
             in_dollar = monetaryConversions.convert_to_usd(amount=tx_details["amount"], coin_name='stellar')
-            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']:.7f}" \
+            tx_report_msg = f"{ctx.message.author} just sent {recipient.mention} {tx_details['amount']:.7f}" \
                             f" {tx_details['emoji']} (${in_dollar['total']:.4f})"
             explorer_msg = f'💵  {tx_details["amount"]:.7f} {CONST_STELLAR_EMOJI} (${in_dollar["total"]:.4f}) on ' \
                            f'{ctx.message.guild} channel {ctx.message.channel}'
             total_dollar_value = in_dollar['total']
             conversion_rate = in_dollar["usd"]
         else:
-
-            tx_report_msg = f"{recipient.mention} member {ctx.message.author} just sent you {tx_details['amount']} {tx_details['assetCode'].upper()}"
             explorer_msg = f'💵  {tx_details["amount"]} {tx_details["assetCode"].upper()} on ' \
                            f'{ctx.message.guild} channel {ctx.message.channel}'
+            tx_report_msg = f"{ctx.message.author} just sent {recipient.mention} {tx_details['amount']:.7f} " \
+                            f"{tx_details['assetCode'].upper()}"
             total_dollar_value = 0
             conversion_rate = 0
 

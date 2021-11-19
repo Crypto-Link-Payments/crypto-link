@@ -44,7 +44,7 @@ class StatsManager(object):
         await self.as_user_profiles.update_one({"userId": user_id},
                                                {f"{CONST_INC}": {"bridges": 1}})
 
-    async def create_bridges(self, user_id: int, count:int):
+    async def create_bridges(self, user_id: int, count: int):
         """
         Increase user stats on bridges
         """
@@ -126,7 +126,7 @@ class StatsManager(object):
         await self.as_cl_guild_profiles.update_one({"guildId": guild_id},
                                                    {f"{CONST_INC}": {"registeredUsers": 1}})
 
-    async def update_batch_registered_users(self, guild_id: int,count:int):
+    async def update_batch_registered_users(self, guild_id: int, count: int):
         await self.as_cl_guild_profiles.update_one({"guildId": guild_id},
                                                    {f"{CONST_INC}": {"registeredUsers": count}})
 
@@ -143,6 +143,14 @@ class StatsManager(object):
                         "onChain": on_chain_xlm}}
 
         return data
+
+    def get_token_stats_global(self, token: str):
+        off_chain = self.off_chain_activities.find({"ticker": token.lower()},
+                                                   {"_id": 0})
+        on_chain = self.as_on_chain_activities.find({"ticker": token.lower()},
+                                                    {"_id": 0})
+
+        return off_chain,on_chain
 
     def get_top_builders(self, limit: int):
         top_list = self.user_profiles.find({}).sort(
