@@ -378,6 +378,14 @@ class GuildOwnerCommands(commands.Cog):
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                 destination=1)
 
+    @activate.error
+    async def activate_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            message = f"You are required to specify active role on the server which will have access to the " \
+                      f"Ballot voting system management. `{self.command_string}owner ballot activate @discord.Role'"
+            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                sys_msg_title="Ballot voting access error!")
+
 
 def setup(bot):
     bot.add_cog(GuildOwnerCommands(bot))
