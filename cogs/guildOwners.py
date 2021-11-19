@@ -4,7 +4,7 @@ import decimal
 from bson.decimal128 import Decimal128
 from re import sub
 from discord.ext import commands
-from discord import TextChannel, Embed, Colour
+from discord import TextChannel, Embed, Colour, Role
 from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 
@@ -41,6 +41,8 @@ class GuildOwnerCommands(commands.Cog):
                  "value": f"`{self.guild_string}owner uplink`"},
                 {"name": ":convenience_store:  Operate with merchant :convenience_store:  ",
                  "value": f"`{self.guild_string}owner merchant`"},
+                {"name": ":ballot_box: Operate with voting pools :ballot_box:",
+                 "value": f"`{self.guild_string}owner vote_pools"},
                 {"name": f":tools: Change {self.bot.user} prefix ",
                  "value": f"`{self.guild_string}owner changeprefix <char>`"}
             ]
@@ -319,6 +321,58 @@ class GuildOwnerCommands(commands.Cog):
                       f' have personal wallet registered in the system. You can do so through' \
                       f' `{self.command_string}register`'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+
+    # ----------------Voting pools registration-------------#
+    @owner.group()
+    @commands.check(is_owner)
+    @commands.check(has_wallet)
+    @commands.check(is_public)
+    async def ballot(self, ctx):
+        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
+            if ctx.invoked_subcommand is None:
+                title = ':ballot_box: __Crypto Link Ballot System__ :ballot_box: '
+                description = "Commands to activate voting feature over Crypto Link and Discord"
+                list_of_values = [
+                    {"name": ":pencil: Activate ballot vote pools functionality :pencil:  ",
+                     "value": f"```{self.command_string}owner vote_pools activate```"},
+                    {"name": ":joystick: Access commands to operate with ballot vote pools :joystick: ",
+                     "value": f"```{self.command_string}pool```"}
+                ]
+                await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                                                   c=Colour.dark_gold())
+        else:
+            msg_title = ':warning:  __Community Registration Status___ :warning: '
+            message = f'You have not yet registered {ctx.guild} server into Crypto Link system. Please ' \
+                      f'do that first through `{self.guild_string}owner register`.'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
+                                                destination=1)
+
+    @ballot.command()
+    async def activate(self, ctx, mng_role: Role):
+        """
+        Activation of voting pools
+        """
+        if not self.backoffice.voting_manager.check_server_voting_reg_status(guild_id=ctx.guild.id):
+            data = {
+                "guildId": ctx.guild.id,
+                "ownerId": ctx.author.id,
+                "mngRoleId": int(mng_role.id),
+                "mngRoleName": f'{mng_role}'
+            }
+            if self.backoffice.bot_manager.register_server_for_voting_service(data=data):
+                await customMessages.system_message(ctx=ctx, color_code=0,
+                                                    message=f'You have successfully activated ballot voting '
+                                                            f'pools for your'
+                                                            f' server. Proceed with `{self.command_string}ballot` over '
+                                                            f'public channel where {self.bot} has access to.',
+                                                    destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+
+        else:
+
+            msg_title = ':ballot_box: __Ballot Voting System Already Active__ :ballot_box: '
+            message = f'You have already activated {ctx.guild} server for voting functionality.'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
+                                                destination=1)
 
 
 def setup(bot):
