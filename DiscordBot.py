@@ -11,7 +11,8 @@ init(autoreset=True)
 
 cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
            'cogs.system', 'cogs.withdrawals',
-           'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners','cogs.specialPayments']
+           'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners','cogs.specialPayments',
+           'cogs.ballotOwner']
 
 horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.accounts',
