@@ -16,7 +16,7 @@ from backOffice.corpHistory import CorporateHistoryManager
 from backOffice.secondLevelWalletManager import SecondLevelWalletManager
 from backOffice.thirdLevelWalletManager import ThirdLevelWalletManager
 from backOffice.tokenManager import TokenManager
-from backOffice.votingPoolManager import VotingPoolManager
+from backOffice.ballotPoolManager import VotingPoolManager
 
 
 class BackOffice:
