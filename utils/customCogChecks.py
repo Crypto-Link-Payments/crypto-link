@@ -122,3 +122,9 @@ def check(author):
             return False
 
     return inner_check
+
+
+def has_ballot_access(ctx):
+    voting_role_id = ctx.bot.backoffice.voting_manager.get_ballot_rights_role(guild_id=ctx.guild.id)
+    return voting_role_id in [role.id for role in ctx.author.roles]
+
