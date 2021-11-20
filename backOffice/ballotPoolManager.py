@@ -87,3 +87,20 @@ class VotingPoolManager:
                                                "$set": {new_ballot_data["toUpdate"]}})
         return result.modified_count > 0
 
+    def get_overdue_ballots(self, timestamp: int):
+        """
+        Returns all users who's role is overdue based on the timestamp
+        :param timestamp: unix time stamp
+        :return:
+        """
+        all_ballots = list(self.voting_pools.find({"end": {"$lt": timestamp}}))
+        return all_ballots
+
+    def get_live_ballots(self, timestamp: int):
+        """
+        Returns all users who's role is overdue based on the timestamp
+        :param timestamp: unix time stamp
+        :return:
+        """
+        all_ballots = list(self.voting_pools.find({"end": {"$gt": timestamp}}))
+        return all_ballots
