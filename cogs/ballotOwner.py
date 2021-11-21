@@ -47,11 +47,9 @@ class BallotOwnerCommands(commands.Cog):
                                                 c=Colour.dark_gold())
 
     @ballot.command()
-    async def new(self, ctx, ballot_name: str, voting_asset_code: str, days: int, ballot_channel: TextChannel=None):
-        if ballot_channel:
-            notify_channel = ballot_channel.id
-        else:
-            notify_channel = None
+    async def new(self, ctx, ballot_name: str, voting_asset_code: str, days: int, ballot_channel: TextChannel, role_right: Role = None):
+        if not role_right:
+            role_right = 0
         if days >= 1:
             supported = [sup["assetCode"] for sup in self.bot.backoffice.token_manager.get_registered_tokens() if
                          sup["assetCode"] == voting_asset_code.upper()]
@@ -69,8 +67,9 @@ class BallotOwnerCommands(commands.Cog):
                     ballot_id = self.get_ballot_id()
                     ballot_data = {
                         "ballotId": int(ballot_id),
-                        "notificationChnId":notify_channel,
-                        "notificationChannel": ballot_channel.id,
+                        "notificationChannelId":int(ballot_channel.id),
+                        "notificationChannel": f'{ballot_channel}',
+                        "roleRightId": role_right,
                         "guildId": ctx.guild.id,
                         "creatorId": ctx.author.id,
                         "assetCode": voting_asset_code.upper(),
