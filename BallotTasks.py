@@ -26,8 +26,10 @@ class MerchantTasks:
 
     async def send_ballot_snapshot(self, ballot: dict):
         """
-        Notifcation on ballot
+        Creating ballot snapshot
         """
+        author = await self.bot.fetch_user(user_id=int(ballot["creatorId"]))
+
         ending_time = datetime.fromtimestamp(int(ballot['expirationTs']))
         count_left = ending_time - datetime.utcnow()
 
@@ -47,6 +49,7 @@ class MerchantTasks:
                                     f'====================\n'
                                     f'Votes For: {ballot["votesFor"]}\n'
                                     f'Votes Against: {ballot["votesAgainst"]}')
+        ballot_data.set_footer(text=f"Ballot box creator: {author}")
         channel = self.bot.get_channel(id=int(ballot["notificationChannelId"]))
         try:
             await channel.send(embed=ballot_data)
@@ -55,6 +58,9 @@ class MerchantTasks:
             pass
 
     async def check_expired_boxes(self):
+        """
+        Check the expiration times of live ballots
+        """
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
         print(Fore.CYAN + f"{current_time} --> CHECKING BALLOT BOXES ")
@@ -69,6 +75,9 @@ class MerchantTasks:
                 dest = await self.bot.fetch_user(user_id=int(ballot["ballotId"]))
 
     async def ballot_state_notifications(self):
+        """
+        Ballot box state snapshot trigger
+        """
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
         print(Fore.CYAN + f"{current_time} --> SENDING BALLOT SNAPSHOTS")
