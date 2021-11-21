@@ -69,6 +69,8 @@ class VotingPoolManager:
                                              "voterFor": 1,
                                              "voterAgainst": 1,
                                              "endBallot":1,
+                                             "notificationChannelId":1,
+                                             "notificationChannel":1,
                                              "guildId": 1})
         return result
 
