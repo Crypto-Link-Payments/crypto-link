@@ -46,16 +46,6 @@ class VotingPoolManager:
         else:
             return False
 
-    def ballot_to_history(self, ballot_data: dict):
-        result = self.voting_pools_history.insert_one(ballot_data)
-        if result.inserted_id:
-            return True
-        else:
-            return False
-
-    def remove_ballot(self, ballot_data):
-        pass
-
     def update_ballot_voters(self):
         # TODO make ballot counter
         pass
