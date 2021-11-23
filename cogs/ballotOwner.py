@@ -17,6 +17,7 @@ custom_messages = CustomMessages()
 class BallotOwnerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.command_string = bot.get_command_str()
 
     def get_ballot_id(self):
         """
@@ -47,29 +48,31 @@ class BallotOwnerCommands(commands.Cog):
                                                 c=Colour.dark_gold())
 
     @ballot.command()
-    async def new(self, ctx, ballot_name: str, voting_asset_code: str, days: int, ballot_channel: TextChannel, role_right: Role = None):
-        if not role_right:
-            role_right = 0
+    async def new(self, ctx, ballot_name: str, voting_asset_code: str, days: int, ballot_channel: TextChannel = None):
         if days >= 1:
             supported = [sup["assetCode"] for sup in self.bot.backoffice.token_manager.get_registered_tokens() if
-                         sup["assetCode"] == voting_asset_code.upper()]
+                         sup["assetCode"] == voting_asset_code.lower()]
+            print(supported)
             if supported:
                 ballot_name = ballot_name.lower()
                 if not self.bot.backoffice.helper.check_for_special_char(string=ballot_name):
+                    if ballot_channel:
+                        ballot_channel = int(ballot_channel.id)
+                        ballot_destination = f'{ballot_channel}'
+                    else:
+                        ballot_destination = 'No channel for notifications provided'
+
                     voting_asset_code = voting_asset_code.strip().upper()
                     start = datetime.utcnow()
                     # TODO change this to days on release
                     td = timedelta(minutes=days)
                     end = start + td
-                    gap = end - start
                     unix_today = int(time.mktime(start.timetuple()))
                     unix_future = int(time.mktime(end.timetuple()))
                     ballot_id = self.get_ballot_id()
                     ballot_data = {
                         "ballotId": int(ballot_id),
-                        "notificationChannelId":int(ballot_channel.id),
-                        "notificationChannel": f'{ballot_channel}',
-                        "roleRightId": role_right,
+                        "notificationChannelId": ballot_channel,
                         "guildId": ctx.guild.id,
                         "creatorId": ctx.author.id,
                         "assetCode": voting_asset_code.upper(),
@@ -80,23 +83,24 @@ class BallotOwnerCommands(commands.Cog):
                         "createdTs": int(unix_today),
                         "expirationTs": int(unix_future),
                         "startBallot": f'{start} UTC',
-                        "endBallot": f'{end} UTC',
-                        "ballotLength": gap
+                        "endBallot": f'{end} UTC'
                     }
-
                     if self.bot.backoffice.voting_manager.new_ballot(ballot_data):
-                        ballot_embed = Embed(title=f':ballot_box: __Ballot box successfully created__ :ballot_box:',
-                                             description=f'You have successfully initiate ballot vote box. Now'
-                                                         f' you can start to collect member votes. Once time '
-                                                         f'expires system will automatically produce report for you'
-                                                         f' and distribute back votes to the voters. ',
-                                             colour=Colour.green())
+                        ballot_embed = Embed(
+                            title=f':new::ballot_box: __Ballot box successfully created__ :ballot_box:',
+                            description=f'Ballot box has been successfully create and can start to '
+                                        f'collect votes. Once time '
+                                        f'expires system will automatically produce report for you'
+                                        f' and distribute back votes to the voters.',
+                            colour=Colour.green())
                         ballot_embed.add_field(name=f':bank: Ballot server',
                                                value=f'{ctx.guild}')
                         ballot_embed.add_field(name=f':disguised_face: Ballot manager',
                                                value=f'{ctx.author} ({ctx.author.id})')
                         ballot_embed.add_field(name=f':coin: Ballot voting cryptocurrency',
                                                value=f'{voting_asset_code.upper()}')
+                        ballot_embed.add_field(name='Ballot snapshot reports channel',
+                                               value=ballot_destination)
                         ballot_embed.add_field(name=f':id: Ballot Box Identifier',
                                                value=f'{ballot_id}',
                                                inline=False)
@@ -108,7 +112,8 @@ class BallotOwnerCommands(commands.Cog):
                         ballot_embed.add_field(name=f':information_source: Additional information',
                                                value=f'Members can now cast votes either FOR or AGAINST with'
                                                      f' cryptocurrency {voting_asset_code.upper()} through the command'
-                                                     f' `{self.guild_string}vote FOR/AGAINST {ballot_id} <amount>`')
+                                                     f' `{self.command_string}vote FOR/AGAINST {ballot_id} <amount=INT>`')
+
                         await ctx.channel.send(embed=ballot_embed)
 
                     else:
@@ -134,10 +139,16 @@ class BallotOwnerCommands(commands.Cog):
     @ballot.error
     async def ballot_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            message = f'You do not have access to Ballot Voting System on {ctx.guild}, or command has been executed' \
-                      f' over DM. '
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title="Ballot voting access error!")
+            if not ctx.guild:
+                message = f'This command can be accessed only through the public channels of Discord server, where' \
+                          f' Crypto Link has access to and not over DM'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="Ballot voting access error!")
+            else:
+                message = f'You do not have appropriate management permissions to operate with Ballot system. ' \
+                          f'Please contact server owner or administrators'
+                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                                                     sys_msg_title="Ballot voting access error!")
 
 
 def setup(bot):
