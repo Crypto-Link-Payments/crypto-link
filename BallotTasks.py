@@ -18,11 +18,47 @@ class MerchantTasks:
         self.twitter_cred = self.backoffice.twitter_details
         self.bot = bot
 
-    async def distribute_votes_to_users(self, voter_details: dict):
-        # Get use from system
-        # Get vote amount
-        # distribute to wallet
-        pass
+    async def send_ballot_report(self, desc, ballot: dict):
+        """
+        Ballot notification report once closed
+        """
+        ballot_report = Embed(title=f':tada: Ballot finished',
+                              description=desc,
+                              colour=Color.green())
+        ballot_report.add_field(name=":id: Ballot ID",
+                                value=f'{ballot["ballotId"]}')
+        ballot_report.add_field(name=":id: Ballot ID",
+                                value=f'{ballot["ballotId"]}')
+        ballot_report.add_field(name=":coin: Ballot Asset ",
+                                value=f'{ballot["ballotId"]}')
+        ballot_report.add_field(name=f'Vote result',
+                                value=f'```For: {int(ballot["voterFor"] / (10 ** 7))}\n'
+                                      f'Against: {int(ballot["voterFor"] / (10 ** 7))}\n'
+                                      f'Total voted: {len(ballot["voterFor"]) + len(ballot["voterAgainst"])}```',
+                                inline=False)
+
+        dest = await self.bot.fetch_user(user_id=int(ballot["creatorId"]))  # Owner
+        await dest.send(embed=ballot_report)
+
+        channel = self.bot.get_channel(id=int(ballot["notificationChannelId"]))
+        if channel:
+            await channel.send(embed=ballot_report)
+        else:
+            pass
+        return
+
+    async def distribute_votes_to_users(self, ballot: dict):
+        for user in ballot["voterFor"]:
+            self.bot.backoffice.wallet_manager.update_coin_balance(coin=ballot["assetCode"].lower(),
+                                                                   user_id=user["voterId"],
+                                                                   amount=int(user["votePwr"]),
+                                                                   direction=1)
+        for user in ballot["voterAgainst"]:
+            self.bot.backoffice.wallet_manager.update_coin_balance(coin=ballot["assetCode"].lower(),
+                                                                   user_id=user["voterId"],
+                                                                   amount=int(user["votePwr"]),
+                                                                   direction=1)
+        return
 
     async def send_ballot_snapshot(self, ballot: dict):
         """
@@ -67,12 +103,23 @@ class MerchantTasks:
 
         now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
         overdue_ballots = self.backoffice.voting_manager.get_overdue_ballots(timestamp=int(now))
-
+        owner_text = f'Ballot you have initiated has expired. Below are presented results and details.'
+        channel_text = f'Ballot has finished and all votes have been distributed back to users'
         if overdue_ballots:
-            bot_guilds = [guild for guild in self.bot.guilds]
             for ballot in overdue_ballots:
-                ballot_guild = self.bot.get_guild(id=ballot["guildId"])  # Ballot guild
-                dest = await self.bot.fetch_user(user_id=int(ballot["ballotId"]))
+                await self.send_ballot_report(desc=owner_text, ballot=ballot)  # Send ballot report to owner
+                await self.send_ballot_report(desc=channel_text, ballot=ballot)  # Report to channel origin
+
+                if self.bot.backoffice.voting_manager.remove_overdue_ballot(ballot_id=ballot["ballotId"],
+                                                                            guild_id=ballot["guildId"]):
+                    print(Fore.GREEN + f'{ballot["ballotId"]} Remove from live collection')
+
+                    if self.bot.backoffice.voting_manager.store_ballot_to_history(ballot=ballot):
+                        print(Fore.GREEN + f'{ballot["ballotId"]} Moved to history')
+                    else:
+                        print(Fore.RED + f'{ballot["ballotId"]} Could not be stored in history')
+                else:
+                    print(Fore.RED + f'{ballot["ballotId"]} Could not be removed')
 
     async def ballot_state_notifications(self):
         """
