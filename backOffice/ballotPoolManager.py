@@ -69,8 +69,8 @@ class VotingPoolManager:
 
     def update_ballot_box(self, ballot_id: int, guild_id: int, new_ballot_data):
         result = self.voting_pools.update_one({"ballotId": ballot_id, "guildId": guild_id},
-                                              {"$inc": {new_ballot_data["toIncrement"]},
-                                               "$set": {new_ballot_data["toUpdate"]}})
+                                              {"$inc": new_ballot_data["toIncrement"],
+                                               "$set": new_ballot_data["toUpdate"]})
         return result.modified_count > 0
 
     def get_overdue_ballots(self, timestamp: int):
