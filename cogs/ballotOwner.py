@@ -52,7 +52,6 @@ class BallotOwnerCommands(commands.Cog):
         if days >= 1:
             supported = [sup["assetCode"] for sup in self.bot.backoffice.token_manager.get_registered_tokens() if
                          sup["assetCode"] == voting_asset_code.lower()]
-            print(supported)
             if supported:
                 ballot_name = ballot_name.lower()
                 if not self.bot.backoffice.helper.check_for_special_char(string=ballot_name):
