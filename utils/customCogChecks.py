@@ -22,6 +22,7 @@ def is_public(ctx):
     :param ctx: Discord Context
     :return: Boolean
     """
+    print(ctx.channel.type)
     return ctx.message.channel.type != ChannelType.private
 
 
