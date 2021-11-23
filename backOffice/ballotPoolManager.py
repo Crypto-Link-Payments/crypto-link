@@ -64,13 +64,14 @@ class VotingPoolManager:
         result = self.voting_pools.find_one({"guildId": server_id, "ballotId": ballot_id},
                                             {"_id": 0,
                                              "assetCode": 1,
+                                             "ballotId": 1,
                                              "votesFor": 1,
                                              "votesAgainst": 1,
                                              "voterFor": 1,
                                              "voterAgainst": 1,
-                                             "endBallot":1,
-                                             "notificationChannelId":1,
-                                             "notificationChannel":1,
+                                             "endBallot": 1,
+                                             "notificationChannelId": 1,
+                                             "notificationChannel": 1,
                                              "guildId": 1})
         return result
 
@@ -106,3 +107,25 @@ class VotingPoolManager:
         """
         all_ballots = list(self.voting_pools.find({"end": {"$gt": timestamp}}))
         return all_ballots
+
+    def remove_overdue_ballot(self, ballot_id, guild_id):
+        """
+        Remove ballot from the database once done
+        """
+
+        result = self.voting_pools.delete_one({"guildId": guild_id, "ballotId": ballot_id})
+
+        if result.deleted_count == 1:
+            return True
+        else:
+            return False
+
+    def store_ballot_to_history(self, ballot):
+        """
+        Store ballot data to history
+        """
+        result = self.voting_pools_history.insert_one(ballot)
+        if result.inserted_id:
+            return True
+        else:
+            return False
