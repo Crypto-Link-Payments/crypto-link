@@ -48,16 +48,27 @@ class MerchantTasks:
         return
 
     async def distribute_votes_to_users(self, ballot: dict):
+        """
+        Distribute money back to voters
+        """
         for user in ballot["voterFor"]:
-            self.bot.backoffice.wallet_manager.update_coin_balance(coin=ballot["assetCode"].lower(),
-                                                                   user_id=user["voterId"],
-                                                                   amount=int(user["votePwr"]),
-                                                                   direction=1)
+            if self.bot.backoffice.wallet_manager.update_coin_balance(coin=ballot["assetCode"].lower(),
+                                                                      user_id=user["voterId"],
+                                                                      amount=int(user["votePwr"]),
+                                                                      direction=1):
+                print(Fore.RED + f'Voter {user["voterName"]} ({user["voterId"]}) votes returned ')
+
+            else:
+                print(Fore.RED + f'Voter {user["voterName"]} ({user["voterId"]}) votes could not be returned ')
         for user in ballot["voterAgainst"]:
-            self.bot.backoffice.wallet_manager.update_coin_balance(coin=ballot["assetCode"].lower(),
-                                                                   user_id=user["voterId"],
-                                                                   amount=int(user["votePwr"]),
-                                                                   direction=1)
+            if self.bot.backoffice.wallet_manager.update_coin_balance(coin=ballot["assetCode"].lower(),
+                                                                      user_id=user["voterId"],
+                                                                      amount=int(user["votePwr"]),
+                                                                      direction=1):
+                print(Fore.RED + f'Voter {user["voterName"]} ({user["voterId"]}) votes returned ')
+            else:
+                print(Fore.RED + f'Voter {user["voterName"]} ({user["voterId"]}) votes could not be returned ')
+
         return
 
     async def send_ballot_snapshot(self, ballot: dict):
