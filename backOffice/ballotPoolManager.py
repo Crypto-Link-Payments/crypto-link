@@ -61,18 +61,11 @@ class VotingPoolManager:
         pass
 
     def get_ballot_data(self, ballot_id: int, server_id: int):
+        """
+        Geting full ballot data
+        """
         result = self.voting_pools.find_one({"guildId": server_id, "ballotId": ballot_id},
-                                            {"_id": 0,
-                                             "assetCode": 1,
-                                             "ballotId": 1,
-                                             "votesFor": 1,
-                                             "votesAgainst": 1,
-                                             "voterFor": 1,
-                                             "voterAgainst": 1,
-                                             "endBallot": 1,
-                                             "notificationChannelId": 1,
-                                             "notificationChannel": 1,
-                                             "guildId": 1})
+                                            {"_id": 0})
         return result
 
     def get_ballot_rights_role(self, guild_id: int):
