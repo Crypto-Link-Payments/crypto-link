@@ -12,7 +12,7 @@ init(autoreset=True)
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
 
-class MerchantTasks:
+class BallotTasks:
     def __init__(self, backoffice, bot):
         self.backoffice = backoffice
         self.twitter_cred = self.backoffice.twitter_details
@@ -153,11 +153,13 @@ class MerchantTasks:
             print(Fore.BLUE + f'There is no live ongoing ballots currently')
 
 
-def start_merchant_scheduler(timed_updater):
+def start_ballot_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
-    print(Fore.LIGHTBLUE_EX + 'Started merchant monitor')
+    print(Fore.LIGHTBLUE_EX + 'Started ballot monitor')
     scheduler.add_job(timed_updater.ballot_state_notifications,
                       CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
+    scheduler.add_job(timed_updater.check_expired_boxes,
+                      CronTrigger(second='10'), misfire_grace_time=10, max_instances=20)
     scheduler.start()
-    print(Fore.LIGHTBLUE_EX + 'Starte merchant corn Monitors : DONE')
+    print(Fore.LIGHTBLUE_EX + 'Start ballot corn Monitors : DONE')
     return scheduler
