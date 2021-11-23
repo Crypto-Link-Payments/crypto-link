@@ -74,6 +74,7 @@ class BallotOwnerCommands(commands.Cog):
                         "notificationChannelId": ballot_channel,
                         "guildId": ctx.guild.id,
                         "creatorId": ctx.author.id,
+                        "votersList":list(),
                         "assetCode": voting_asset_code.upper(),
                         "votesFor": int(0),
                         "votesAgainst": int(0),
