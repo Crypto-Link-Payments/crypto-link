@@ -26,7 +26,7 @@ class BallotTasks:
         if int(ballot["votesFor"]) > ballot["votesAgainst"]:
             c = Color.green()
             result = 'FOR'
-        elif int(ballot["votesFor"]) > ballot["votesAgainst"]:
+        elif int(ballot["votesFor"]) < ballot["votesAgainst"]:
             c = Color.red()
             result = 'AGAINST'
         elif int(ballot["votesFor"]) == ballot["votesAgainst"]:
