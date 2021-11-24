@@ -61,7 +61,7 @@ class VoterCommands(commands.Cog):
                         user_id=ctx.message.author.id)
                     # Converting amount to atomic
                     amount_atomic = amount * (10 ** 7)
-                    if amount_atomic < user_balance:
+                    if amount_atomic <= user_balance:
                         # deduct the balance due to the vote
                         if self.bot.backoffice.wallet_manager.update_coin_balance(coin=ballot_data["assetCode"].lower(),
                                                                                   user_id=ctx.message.author.id,

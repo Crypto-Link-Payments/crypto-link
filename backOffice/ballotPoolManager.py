@@ -79,7 +79,7 @@ class VotingPoolManager:
         :param timestamp: unix time stamp
         :return:
         """
-        all_ballots = list(self.voting_pools.find({"end": {"$lt": timestamp}}))
+        all_ballots = list(self.voting_pools.find({"expirationTs": {"$lt": timestamp}}))
         return all_ballots
 
     def get_live_ballots(self, timestamp: int):
@@ -88,7 +88,7 @@ class VotingPoolManager:
         :param timestamp: unix time stamp
         :return:
         """
-        all_ballots = list(self.voting_pools.find({"end": {"$gt": timestamp}}))
+        all_ballots = list(self.voting_pools.find({"expirationTs": {"$gt": timestamp}}))
         return all_ballots
 
     def remove_overdue_ballot(self, ballot_id, guild_id):

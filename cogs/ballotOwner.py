@@ -42,7 +42,7 @@ class BallotOwnerCommands(commands.Cog):
             description = "All available commands to operate with guild system."
             list_of_values = [
                 {"name": ":bellhop: Create new ballot :bellhop: ",
-                 "value": f"`{self.guild_string}ballot new <ballot_name> <voting_asset_code> <days = INT>`"},
+                 "value": f"`{self.command_string}ballot new <ballot_name> <voting_asset_code> <days = INT> <#discord.Channel notifications = Optional>`"},
             ]
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 c=Colour.dark_gold())

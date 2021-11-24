@@ -34,7 +34,7 @@ if __name__ == '__main__':
     merchant_tasks = MerchantTasks(backoffice, bot)
     merchant_scheduler = start_merchant_scheduler(merchant_tasks)
 
-    # Ballot tasks
+    # # Ballot tasks
     ballot_tasks = BallotTasks(backoffice,bot)
     ballot_scheduler = start_ballot_scheduler(ballot_tasks)
 
