@@ -193,9 +193,9 @@ def start_ballot_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started ballot monitor')
     scheduler.add_job(timed_updater.ballot_state_notifications,
-                      CronTrigger(second='00'), misfire_grace_time=10, max_instances=20)
+                      CronTrigger(minute='00'), misfire_grace_time=10, max_instances=20)
     scheduler.add_job(timed_updater.check_expired_boxes,
-                      CronTrigger(second='10'), misfire_grace_time=10, max_instances=20)
+                      CronTrigger(minute='00'), misfire_grace_time=10, max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Start ballot corn Monitors : DONE')
     return scheduler

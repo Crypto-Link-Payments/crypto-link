@@ -64,7 +64,7 @@ class BallotOwnerCommands(commands.Cog):
                     voting_asset_code = voting_asset_code.strip().upper()
                     start = datetime.utcnow()
                     # TODO change this to days on release
-                    td = timedelta(minutes=days)
+                    td = timedelta(hours=days)
                     end = start + td
                     unix_today = int(time.mktime(start.timetuple()))
                     unix_future = int(time.mktime(end.timetuple()))
