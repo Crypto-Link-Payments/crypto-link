@@ -467,161 +467,171 @@ class SpecialPaymentCommands(commands.Cog):
         """
         amount_atomic = amount * (10 ** 7)
         asset_code = asset_code.lower()
-        if ctx.guild.owner_id == ctx.author.id or ctx.author.id == 360367188432912385:
-            if amount_atomic > 0:
-                if not search("[~!#$%^&*()_+{}:;\']", asset_code) and asset_code in [x["assetCode"] for x in
-                                                                                     self.bot.backoffice.token_manager.get_all_tokens()]:
-                    filtered_members = [m for m in role.members if not m.bot]
-                    if filtered_members:
-                        total_atomic = amount_atomic * len(filtered_members)  # Total to send
-                        if total_atomic <= self.bot.backoffice.wallet_manager.get_ticker_balance(asset_code=asset_code,
-                                                                                                 user_id=ctx.message.author.id):
-                            message_content = f"{ctx.message.author.mention} are you sure you would like to " \
-                                              f"send in total of {total_atomic / (10 ** 7)} {asset_code.upper()} " \
-                                              f"({amount_atomic / (10 ** 7)}/member) amongst {len(filtered_members)}" \
-                                              f"members part of role {role.mention}?"
-                            verification = await ctx.channel.send(content=message_content)
-                            try:
-                                msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author),
-                                                                  timeout=10)
+        if not role.name in ["@everyone", "everyone"]:
+            if ctx.guild.owner_id == ctx.author.id or ctx.author.id == 360367188432912385:
+                if amount_atomic > 0:
+                    if not search("[~!#$%^&*()_+{}:;\']", asset_code) and asset_code in [x["assetCode"] for x in
+                                                                                         self.bot.backoffice.token_manager.get_all_tokens()]:
+                        filtered_members = [m for m in role.members if not m.bot]
+                        if filtered_members:
+                            total_atomic = amount_atomic * len(filtered_members)  # Total to send
+                            if total_atomic <= self.bot.backoffice.wallet_manager.get_ticker_balance(
+                                    asset_code=asset_code,
+                                    user_id=ctx.message.author.id):
+                                message_content = f"{ctx.message.author.mention} are you sure you would like to " \
+                                                  f"send in total of {total_atomic / (10 ** 7)} {asset_code.upper()} " \
+                                                  f"({amount_atomic / (10 ** 7)}/member) amongst {len(filtered_members)}" \
+                                                  f"members part of role {role.mention}?"
+                                verification = await ctx.channel.send(content=message_content)
+                                try:
+                                    msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author),
+                                                                      timeout=10)
 
-                                if str(msg_usr.content.lower()) == "yes":
-                                    if self.bot.backoffice.wallet_manager.update_coin_balance(coin=asset_code.lower(),
-                                                                                              user_id=ctx.author.id,
-                                                                                              amount=int(total_atomic),
-                                                                                              direction=2):
-                                        # Check balance of the author
-                                        count_new, new_recipients = self.check_recipients_wallets(
-                                            recipients=filtered_members)
-
-                                        if count_new > 0:
-                                            # Updating registered user stats for guild
-                                            await self.bot.backoffice.stats_manager.update_batch_registered_users(
-                                                guild_id=ctx.message.guild.id, count=count_new)
-
-                                            # Updating users stats for created bridges
-                                            await self.bot.backoffice.stats_manager.create_bridges(
-                                                user_id=ctx.message.author.id,
-                                                count=count_new)
-
-                                            # Notify sender on new bridges
-                                            await self.bridges_notification(ctx, count_new)
-
-                                        # Send batch payments
-                                        batch_payments_lists = [
-                                            self.bot.backoffice.wallet_manager.as_update_coin_balance(
+                                    if str(msg_usr.content.lower()) == "yes":
+                                        if self.bot.backoffice.wallet_manager.update_coin_balance(
                                                 coin=asset_code.lower(),
-                                                user_id=recipient.id,
-                                                amount=int(amount_atomic),
-                                                direction=1) for recipient in filtered_members]
+                                                user_id=ctx.author.id,
+                                                amount=int(total_atomic),
+                                                direction=2):
+                                            # Check balance of the author
+                                            count_new, new_recipients = self.check_recipients_wallets(
+                                                recipients=filtered_members)
 
-                                        await gather(*batch_payments_lists)
+                                            if count_new > 0:
+                                                # Updating registered user stats for guild
+                                                await self.bot.backoffice.stats_manager.update_batch_registered_users(
+                                                    guild_id=ctx.message.guild.id, count=count_new)
 
-                                        channel_message = f":mortar_board: {ctx.message.author.mention} sent " \
-                                                          f"members with role {role.mention} " \
-                                                          f"{total_atomic / (10 ** 7)} {asset_code.upper()} " \
-                                                          f"({amount_atomic / (10 ** 7)} {asset_code.upper()} /member)"
-                                        try:
-                                            await ctx.message.channel.send(content=channel_message)
-                                        except Exception as e:
-                                            pass
+                                                # Updating users stats for created bridges
+                                                await self.bot.backoffice.stats_manager.create_bridges(
+                                                    user_id=ctx.message.author.id,
+                                                    count=count_new)
 
-                                        # Report to sender
-                                        special_embed = Embed(title=f':outbox_tray: Special outgoing Payment',
-                                                              description=f'You have executed special '
-                                                                          f'payment on {ctx.message.guild} '
-                                                                          f'channel {ctx.message.channel}.',
-                                                              colour=Colour.red())
-                                        special_embed.add_field(name=':pager: payment type',
-                                                                value=f':mortar_board: Payment to Role ***{role}***',
-                                                                inline=True)
-                                        special_embed.add_field(name=':calendar: Date and time of payment',
-                                                                value=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                                                inline=True)
-                                        special_embed.add_field(name=':mega: Subject of payment',
-                                                                value=f"```{subject}```",
-                                                                inline=False)
-                                        special_embed.add_field(name=':envelope:  __**Payment Slip**__',
-                                                                value=f'```Per user:{amount_atomic / (10 ** 7):,.7f}'
-                                                                      f' {asset_code}\n'
-                                                                      f'Total Recipients: {len(filtered_members)}\n'
-                                                                      f'-----------------------------------------\n'
-                                                                      f'Total sent: '
-                                                                      f'{total_atomic / (10 ** 7):,.7f} {asset_code}\n```',
-                                                                inline=False)
-                                        special_embed.set_footer(text='Thank you for using Crypto Link.')
-                                        try:
-                                            await ctx.author.send(embed=special_embed)
-                                        except Exception:
-                                            await ctx.channel.send(content=f'{ctx.author.mention} Crypto Link could '
-                                                                           f'not deliver the payment report as DMs are blocked',
-                                                                   delete_after=10)
+                                                # Notify sender on new bridges
+                                                await self.bridges_notification(ctx, count_new)
 
-                                        # Distribute uplink messages
-                                        explorer_msg = f":mortar_board: members with role **{role}** on " \
-                                                       f"***{ctx.guild}*** channel ***{ctx.message.channel}***" \
-                                                       f" received ***{total_atomic / (10 ** 7)} {asset_code.upper()}*** "
-                                        up_link_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                            self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                                            # Send batch payments
+                                            batch_payments_lists = [
+                                                self.bot.backoffice.wallet_manager.as_update_coin_balance(
+                                                    coin=asset_code.lower(),
+                                                    user_id=recipient.id,
+                                                    amount=int(amount_atomic),
+                                                    direction=1) for recipient in filtered_members]
 
-                                        for chn in up_link_channels:
-                                            if chn is not None:
-                                                await chn.send(content=explorer_msg)
+                                            await gather(*batch_payments_lists)
 
-                                        # Updating stats in database
-                                        await self.stats_updating(ctx=ctx, asset_code=asset_code.lower(),
-                                                                  single_payment=amount_atomic / (10 ** 7),
-                                                                  payments_count=len(filtered_members),
-                                                                  tx_type="role",
-                                                                  recipient_list=filtered_members,
-                                                                  total_amount=total_atomic / (10 ** 7))
+                                            channel_message = f":mortar_board: {ctx.message.author.mention} sent " \
+                                                              f"members with role {role.mention} " \
+                                                              f"{total_atomic / (10 ** 7)} {asset_code.upper()} " \
+                                                              f"({amount_atomic / (10 ** 7)} {asset_code.upper()} /member)"
+                                            try:
+                                                await ctx.message.channel.send(content=channel_message)
+                                            except Exception as e:
+                                                pass
 
+                                            # Report to sender
+                                            special_embed = Embed(title=f':outbox_tray: Special outgoing Payment',
+                                                                  description=f'You have executed special '
+                                                                              f'payment on {ctx.message.guild} '
+                                                                              f'channel {ctx.message.channel}.',
+                                                                  colour=Colour.red())
+                                            special_embed.add_field(name=':pager: payment type',
+                                                                    value=f':mortar_board: Payment to Role ***{role}***',
+                                                                    inline=True)
+                                            special_embed.add_field(name=':calendar: Date and time of payment',
+                                                                    value=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                                                    inline=True)
+                                            special_embed.add_field(name=':mega: Subject of payment',
+                                                                    value=f"```{subject}```",
+                                                                    inline=False)
+                                            special_embed.add_field(name=':envelope:  __**Payment Slip**__',
+                                                                    value=f'```Per user:{amount_atomic / (10 ** 7):,.7f}'
+                                                                          f' {asset_code}\n'
+                                                                          f'Total Recipients: {len(filtered_members)}\n'
+                                                                          f'-----------------------------------------\n'
+                                                                          f'Total sent: '
+                                                                          f'{total_atomic / (10 ** 7):,.7f} {asset_code}\n```',
+                                                                    inline=False)
+                                            special_embed.set_footer(text='Thank you for using Crypto Link.')
+                                            try:
+                                                await ctx.author.send(embed=special_embed)
+                                            except Exception:
+                                                await ctx.channel.send(
+                                                    content=f'{ctx.author.mention} Crypto Link could '
+                                                            f'not deliver the payment report as DMs are blocked',
+                                                    delete_after=10)
+
+                                            # Distribute uplink messages
+                                            explorer_msg = f":mortar_board: members with role **{role}** on " \
+                                                           f"***{ctx.guild}*** channel ***{ctx.message.channel}***" \
+                                                           f" received ***{total_atomic / (10 ** 7)} {asset_code.upper()}*** "
+                                            up_link_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                                self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+
+                                            for chn in up_link_channels:
+                                                if chn is not None:
+                                                    await chn.send(content=explorer_msg)
+
+                                            # Updating stats in database
+                                            await self.stats_updating(ctx=ctx, asset_code=asset_code.lower(),
+                                                                      single_payment=amount_atomic / (10 ** 7),
+                                                                      payments_count=len(filtered_members),
+                                                                      tx_type="role",
+                                                                      recipient_list=filtered_members,
+                                                                      total_amount=total_atomic / (10 ** 7))
+
+                                        else:
+                                            msg = f'Payments could not be delivered due to backend error. Please contact' \
+                                                  f' Crypto Link staff '
+                                            await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                                                 destination=1,
+                                                                                 sys_msg_title=CONST_TX_ERROR_TITLE)
                                     else:
-                                        msg = f'Payments could not be delivered due to backend error. Please contact' \
-                                              f' Crypto Link staff '
+                                        msg = f'You have successfully cancelled payment request.'
                                         await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                                              destination=1,
                                                                              sys_msg_title=CONST_TX_ERROR_TITLE)
-                                else:
-                                    msg = f'You have successfully cancelled payment request.'
+
+                                    await ctx.message.channel.delete_messages([verification, msg_usr])
+                                except TimeoutError:
+                                    await ctx.message.channel.delete_messages([verification])
+                                    msg = "Time has run out. Please be faster next time when providing answer to the system."
                                     await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                                          destination=1,
                                                                          sys_msg_title=CONST_TX_ERROR_TITLE)
-
-                                await ctx.message.channel.delete_messages([verification, msg_usr])
-                            except TimeoutError:
-                                await ctx.message.channel.delete_messages([verification])
-                                msg = "Time has run out. Please be faster next time when providing answer to the system."
+                            else:
+                                msg = f'{ctx.author.mention} You have insufficient balance to make the payment. Please ' \
+                                      f'recheck your balance. '
                                 await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                                      destination=1,
                                                                      sys_msg_title=CONST_TX_ERROR_TITLE)
                         else:
-                            msg = f'{ctx.author.mention} You have insufficient balance to make the payment. Please ' \
-                                  f'recheck your balance. '
+                            msg = f'Role {role.mention} has no members after processing. This might result if role members ' \
+                                  f'are only Bots, or the role itself is empty'
                             await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                                  destination=1,
                                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
                     else:
-                        msg = f'Role {role.mention} has no members after processing. This might result if role members ' \
-                              f'are only Bots, or the role itself is empty'
+                        msg = f'Asset with code {asset_code.upper()} does not exist or has not been integrated into the ' \
+                              f'system yet. '
                         await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                              destination=1,
                                                              sys_msg_title=CONST_TX_ERROR_TITLE)
+
                 else:
-                    msg = f'Asset with code {asset_code.upper()} does not exist or has not been integrated into the ' \
-                          f'system yet. '
+                    msg = f"Amount you are willing to send to each user needs to be greater than 0 {asset_code}"
                     await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                          destination=1,
                                                          sys_msg_title=CONST_TX_ERROR_TITLE)
 
             else:
-                msg = f"Amount you are willing to send to each user needs to be greater than 0 {asset_code}"
+                msg = f"This payment type is currently available oonly to owner of the {ctx.guild} {ctx.guild.owner}"
                 await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                      destination=1,
                                                      sys_msg_title=CONST_TX_ERROR_TITLE)
-
         else:
-            msg = f"This payment type is currently available oonly to owner of the {ctx.guild} {ctx.guild.owner}"
+            msg = f"You are not allowed to send members with ***everyone*** role as it might result in " \
+                  f"system error."
             await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                  destination=1,
                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
