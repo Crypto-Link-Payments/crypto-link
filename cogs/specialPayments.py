@@ -486,14 +486,28 @@ class SpecialPaymentCommands(commands.Cog):
                                                                   timeout=10)
 
                                 if str(msg_usr.content.lower()) == "yes":
-                                    # Check balance of the author
-                                    count_new, new_recipients = self.check_recipients_wallets(
-                                        recipients=filtered_members)
 
                                     if self.bot.backoffice.wallet_manager.update_coin_balance(coin=asset_code.lower(),
                                                                                               user_id=ctx.author.id,
                                                                                               amount=int(total_atomic),
                                                                                               direction=2):
+                                        # Check balance of the author
+                                        count_new, new_recipients = self.check_recipients_wallets(
+                                            recipients=filtered_members)
+
+                                        if count_new > 0:
+                                            # Updating registered user stats for guild
+                                            await self.bot.backoffice.stats_manager.update_batch_registered_users(
+                                                guild_id=ctx.message.guild.id, count=count_new)
+
+                                            # Updating users stats for created bridges
+                                            await self.bot.backoffice.stats_manager.create_bridges(
+                                                user_id=ctx.message.author.id,
+                                                count=count_new)
+
+                                            # Notify sender on new bridges
+                                            await self.bridges_notification(ctx, count_new)
+
                                         # Send batch payments
                                         batch_payments_lists = [
                                             self.bot.backoffice.wallet_manager.as_update_coin_balance(
