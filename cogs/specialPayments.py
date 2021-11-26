@@ -54,7 +54,6 @@ class SpecialPaymentCommands(commands.Cog):
         Type of special transactions
         Airdrop = Airdrop, MultiTx = Multi
         """
-
         if tx_type in ["multi", "loyalty", "role"]:
             processed = {"globalBot": {"totalTx": int(payments_count),
                                        'totalMoved': total_amount,
@@ -174,9 +173,9 @@ class SpecialPaymentCommands(commands.Cog):
                     new_recipients.append(rec)
                     count_new += 1
                 else:
-                    print("There has been an issue")
+                    pass
             else:
-                print(f'{rec} already has a wallet')
+                pass
         return count_new, new_recipients
 
     async def special_payment(self, ctx, recipients_list: list, amount_micro_recipient: int, asset_code: str,
@@ -293,6 +292,7 @@ class SpecialPaymentCommands(commands.Cog):
                             msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author), timeout=10)
 
                             if str(msg_usr.content.lower()) == 'yes':
+
                                 # Channel Message for payment
                                 recipients = ' '.join(rec.mention for rec in recipients_list)
                                 channel_message = f":gift: {recipients}, user ***{ctx.message.author}*** " \
@@ -486,7 +486,6 @@ class SpecialPaymentCommands(commands.Cog):
                                                                   timeout=10)
 
                                 if str(msg_usr.content.lower()) == "yes":
-
                                     if self.bot.backoffice.wallet_manager.update_coin_balance(coin=asset_code.lower(),
                                                                                               user_id=ctx.author.id,
                                                                                               amount=int(total_atomic),
@@ -521,8 +520,11 @@ class SpecialPaymentCommands(commands.Cog):
                                         channel_message = f":mortar_board: {ctx.message.author.mention} sent " \
                                                           f"members with role {role.mention} " \
                                                           f"{total_atomic / (10 ** 7)} {asset_code.upper()} " \
-                                                          f"({amount_atomic / (10 ** 7)}/member)"
-                                        await ctx.channel.send(embed=channel_message)
+                                                          f"({amount_atomic / (10 ** 7)} {asset_code.upper()} /member)"
+                                        try:
+                                            await ctx.message.channel.send(content=channel_message)
+                                        except Exception as e:
+                                            pass
 
                                         # Report to sender
                                         special_embed = Embed(title=f':outbox_tray: Special outgoing Payment',
@@ -531,7 +533,7 @@ class SpecialPaymentCommands(commands.Cog):
                                                                           f'channel {ctx.message.channel}.',
                                                               colour=Colour.red())
                                         special_embed.add_field(name=':pager: payment type',
-                                                                value=f':mortar_board: Payment to Role',
+                                                                value=f':mortar_board: Payment to Role ***{role}***',
                                                                 inline=True)
                                         special_embed.add_field(name=':calendar: Date and time of payment',
                                                                 value=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -556,11 +558,12 @@ class SpecialPaymentCommands(commands.Cog):
                                                                    delete_after=10)
 
                                         # Distribute uplink messages
-                                        explorer_msg = f":mortar_board: members with role {role} on " \
+                                        explorer_msg = f":mortar_board: members with role **{role}** on " \
                                                        f"***{ctx.guild}*** channel ***{ctx.message.channel}***" \
-                                                       f" received {total_atomic / (10 ** 7)} {asset_code.upper()}*** "
+                                                       f" received ***{total_atomic / (10 ** 7)} {asset_code.upper()}*** "
                                         up_link_channels = [self.bot.get_channel(id=int(chn)) for chn in
                                                             self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+
                                         for chn in up_link_channels:
                                             if chn is not None:
                                                 await chn.send(content=explorer_msg)
@@ -574,11 +577,18 @@ class SpecialPaymentCommands(commands.Cog):
                                                                   total_amount=total_atomic / (10 ** 7))
 
                                     else:
-                                        msg = f'Payments could not be delivered due to backend error. Please contanct' \
+                                        msg = f'Payments could not be delivered due to backend error. Please contact' \
                                               f' Crypto Link staff '
                                         await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
                                                                              destination=1,
                                                                              sys_msg_title=CONST_TX_ERROR_TITLE)
+                                else:
+                                    msg = f'You have successfully cancelled payment request.'
+                                    await custom_messages.system_message(ctx=ctx, color_code=1, message=msg,
+                                                                         destination=1,
+                                                                         sys_msg_title=CONST_TX_ERROR_TITLE)
+
+                                await ctx.message.channel.delete_messages([verification, msg_usr])
                             except TimeoutError:
                                 await ctx.message.channel.delete_messages([verification])
                                 msg = "Time has run out. Please be faster next time when providing answer to the system."
