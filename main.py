@@ -8,6 +8,7 @@ from DiscordBot import DiscordBot
 from backOffice.backOffice import BackOffice
 from PeriodicTasks import PeriodicTasks, start_scheduler
 from MerchantTasks import MerchantTasks, start_merchant_scheduler
+from BallotTasks import BallotTasks, start_ballot_scheduler
 from utils.tools import Helpers
 
 init(autoreset=True)
@@ -32,6 +33,10 @@ if __name__ == '__main__':
     # Activate merchant tasks
     merchant_tasks = MerchantTasks(backoffice, bot)
     merchant_scheduler = start_merchant_scheduler(merchant_tasks)
+
+    # # Ballot tasks
+    ballot_tasks = BallotTasks(backoffice,bot)
+    ballot_scheduler = start_ballot_scheduler(ballot_tasks)
 
     # Discord Token
     bot.run()

@@ -22,6 +22,7 @@ def is_public(ctx):
     :param ctx: Discord Context
     :return: Boolean
     """
+    print(ctx.channel.type)
     return ctx.message.channel.type != ChannelType.private
 
 
@@ -122,3 +123,9 @@ def check(author):
             return False
 
     return inner_check
+
+
+def has_ballot_access(ctx):
+    voting_role_id = ctx.bot.backoffice.voting_manager.get_ballot_rights_role(guild_id=ctx.guild.id)
+    return voting_role_id in [role.id for role in ctx.author.roles]
+

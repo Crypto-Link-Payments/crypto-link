@@ -156,7 +156,6 @@ class CustomMessages:
         sys_embed.add_field(name=':information_source:',
                             value=f'```{message}```')
         sys_embed.set_footer(text='Message will self-destruct in 15 seconds! ')
-
         if destination == 0:
             await ctx.author.send(embed=sys_embed)
         else:
