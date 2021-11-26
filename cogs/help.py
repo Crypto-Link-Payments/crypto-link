@@ -244,7 +244,11 @@ class HelpCommands(commands.Cog):
              "value": f"`{self.command_string}loyalty <Last N active users on channe> <amount> <asset_code>`\n"
                       f"__Example__: `{self.command_string}loyalty 2 1 xlm`\n"
                       f"__Description__: Sends 1 xlm to two users who have last posted to the channel where payment "
-                      f"was executed  in history of 100 messages. "}
+                      f"was executed  in history of 100 messages. "},
+            {"name": f":mortar_board: Role Payment :mortar_board:",
+             "value": f"`{self.command_string}to_role <@discord.Role> <amount> <asset_code>`\n"
+                      f"__Example__: `{self.command_string}to_role @vip 1 xlm`\n"
+                      f"__Description__: Send 1 xlm to each members who has been assigned role ***vip***"}
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
