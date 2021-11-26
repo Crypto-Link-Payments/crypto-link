@@ -467,7 +467,7 @@ class SpecialPaymentCommands(commands.Cog):
         """
         amount_atomic = amount * (10 ** 7)
         asset_code = asset_code.lower()
-        if not role.name in ["@everyone", "everyone"]:
+        if role.name not in ["@everyone", "everyone"]:
             if ctx.guild.owner_id == ctx.author.id or ctx.author.id == 360367188432912385:
                 if amount_atomic > 0:
                     if not search("[~!#$%^&*()_+{}:;\']", asset_code) and asset_code in [x["assetCode"] for x in
