@@ -189,10 +189,38 @@ class AutoFunctions(commands.Cog):
         """
         Triggering message to system channel when bot joins new guild
         """
-        print(Fore.LIGHTMAGENTA_EX + f'{self.bot.user} joined {guild} ')
+        print(Fore.LIGHTMAGENTA_EX + f'Crypto Link joined {guild} ')
+
+        # Message to owner
+
+        owner_msg = Embed(title=f'Greetings from Crypto Link',
+                          colour=Colour.green())
+        owner_msg.add_field(name=f'Message from developers',
+                            value=f'```Welcome to Crypto Link.\n'
+                                  f'Crypto Link is a multi-functional & multi-guild Discord bot serving as '
+                                  f'a bridge between the Stellar Ecosystem and Discord users. '
+                                  f'Being built ontop of the Stellar Blockchain, it utilizes the native token, '
+                                  f'Stellar Lumen (a.k.a XLM) and tokens issued on Stellar chain, '
+                                  f'allowing for execution of Peer to Peer transactions, deploy merchant Discord '
+                                  f'solutions, etc.```')
+        owner_msg.add_field(name=f'Access owner area',
+                            value=f'```System has specially designed functions for server owner. Area can be access'
+                                  f' with command !owner ```',
+                            inline=False)
+        owner_msg.add_field(name=f'How to get help',
+                            value=f'```!help```',
+                            inline=False)
+        owner_msg.add_field(name=f'Links',
+                            value=f'[Homepage](https://cryptolink.carrd.co/)\n'
+                                  f'[Github](https://github.com/Crypto-Link-Payments/crypto-link)\n'
+                                  f'[Twitter](https://twitter.com/CryptoLink8)',
+                            inline=False)
+        try:
+            await guild.owner.send(embed=owner_msg)
+        except Exception:
+            pass
 
         new_guild = Embed(title='__NEW GUILD!!!!__',
-                          description=f'{self.bot.user} has joined new guild',
                           colour=Colour.green())
         new_guild.add_field(name='Guild name and id:',
                             value=f'```{guild} {guild.id}```',
@@ -203,13 +231,9 @@ class AutoFunctions(commands.Cog):
         new_guild.add_field(name='Guild Owner:',
                             value=f'```{guild.owner} {guild.owner_id}```',
                             inline=False)
-        new_guild.add_field(name='Guild Region:',
-                            value=f'```{guild.region}```',
-                            inline=False)
         new_guild.add_field(name='Member Count',
                             value=f'```{guild.member_count}```',
                             inline=False)
-
         animus = await self.bot.fetch_user(user_id=int(self.animus_id))
 
         channel_id = self.bot_channels["sys"]
@@ -222,6 +246,7 @@ class AutoFunctions(commands.Cog):
         print(
             Fore.LIGHTYELLOW_EX + '===================================\nGlobal Stats Updated after join...\n========'
                                   '===========================')
+
         guilds = await self.bot.fetch_guilds(limit=150).flatten()
         reach = len(self.bot.users)
         print(Fore.LIGHTGREEN_EX + f'Integrated into: {len(guilds)} guilds')
