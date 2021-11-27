@@ -11,7 +11,6 @@ from discord.ext import commands
 from discord.errors import HTTPException
 from datetime import datetime
 import traceback
-import json
 from cogs.utils.systemMessaages import CustomMessages
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
