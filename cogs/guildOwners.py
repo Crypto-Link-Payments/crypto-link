@@ -54,19 +54,34 @@ class GuildOwnerCommands(commands.Cog):
     async def changeprefix(self, ctx, prefix):
         prefix = prefix.strip()
         if not len(prefix) > 1 and self.bot.backoffice.helper.check_for_special_char(string=prefix):
-            if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
+            if not self.bot.backoffice.check_guild_prefix(guild_id=ctx.message.guild.id):
+                self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=int(ctx.guild.id), prefix=prefix)
                 await customMessages.system_message(ctx=ctx, color_code=0,
                                                     message=f'You have successfully set prefix for server {ctx.guild} '
-                                                            f'to {prefix}. In case if you forget the prefix, tag the bot '
-                                                            f'and it will respond as well. Be aware that the prefix does '
+                                                            f'to {prefix}. In case if you forget the prefix, '
+                                                            f'tag the bot '
+                                                            f'and it will respond as well. Be aware that '
+                                                            f'the prefix does '
                                                             f'not work over DM therefore a default or bot tag needs'
                                                             f' to be used.',
                                                     destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
             else:
+                if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
+                    await customMessages.system_message(ctx=ctx, color_code=0,
+                                                        message=f'You have successfully set prefix '
+                                                                f'for server {ctx.guild} '
+                                                                f'to {prefix}. In case if you forget the prefix, '
+                                                                f'tag the bot '
+                                                                f'and it will respond as well. Be aware that the '
+                                                                f'prefix does '
+                                                                f'not work over DM therefore a default or bot tag needs'
+                                                                f' to be used.',
+                                                        destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+                else:
 
-                await customMessages.system_message(ctx=ctx, color_code=1,
-                                                    message=f'There has been an issue. please try again later.',
-                                                    destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+                    await customMessages.system_message(ctx=ctx, color_code=1,
+                                                        message=f'There has been an issue. please try again later.',
+                                                        destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(ctx=ctx, color_code=1,
                                                 message=f'Prefix can be only 1 character in length and a special'
@@ -103,9 +118,12 @@ class GuildOwnerCommands(commands.Cog):
                                                       "emojiTxCount": int(0),
                                                       "multiTxCount": int(0)}
 
+            self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=int(ctx.guild.id), prefix="!")
+
             await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
             await customMessages.system_message(ctx=ctx, color_code=0,
-                                                message='You have successfully registered guild into the system',
+                                                message='You have successfully registered guild into the system. '
+                                                        'Default bot prefix is `!`',
                                                 destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(ctx=ctx, color_code=1, message='Guild already registered',
