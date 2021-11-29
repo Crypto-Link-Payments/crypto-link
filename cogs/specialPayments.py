@@ -397,7 +397,7 @@ class SpecialPaymentCommands(commands.Cog):
 
                                     # Channel Message for payment
                                     recipients = ' '.join(rec.mention for rec in list_of_recipients)
-                                    channel_message = f":military_medal: {recipients}, user ***{ctx.message.author}***" \
+                                    channel_message = f":military_medal: {recipients}, user ***{ctx.message.author.mention}***" \
                                                       f" thanked you with ***{amount_micro / (10 ** 7):,.7f} " \
                                                       f"{asset_code.upper()}*** for being a loyal and active member."
 
