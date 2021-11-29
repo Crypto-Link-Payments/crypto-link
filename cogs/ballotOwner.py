@@ -32,6 +32,7 @@ class BallotOwnerCommands(commands.Cog):
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_ballot_access)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def ballot(self, ctx):
         """
         Ballot entry point

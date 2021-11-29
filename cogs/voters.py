@@ -21,6 +21,8 @@ class VoterCommands(commands.Cog):
     @commands.group()
     @commands.check(is_public)
     @commands.check(has_wallet)
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def voter(self, ctx):
         """
         Ballot entry point
@@ -43,6 +45,8 @@ class VoterCommands(commands.Cog):
                                                 c=Colour.dark_gold())
 
     @voter.command()
+    @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def vote(self, ctx, direction: str, ballot_id: int, amount: int):
         """
         Casting a vote

@@ -34,6 +34,8 @@ class UserAccountCommands(commands.Cog):
 
     @commands.command()
     @commands.check(has_wallet)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     async def me(self, ctx):
         utc_now = datetime.utcnow()
         wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
@@ -90,7 +92,8 @@ class UserAccountCommands(commands.Cog):
 
     @commands.command(aliases=['reg', 'apply'])
     @commands.check(is_public)
-    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     async def register(self, ctx):
         if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
             if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
@@ -124,7 +127,8 @@ class UserAccountCommands(commands.Cog):
 
     @commands.group(alliases=["one", "st", "first", "1", "account", ])
     @commands.check(has_wallet)
-    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':joystick: __Available Wallet Commands__ :joystick: '

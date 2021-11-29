@@ -20,6 +20,8 @@ class HelpCommands(commands.Cog):
         self.command_string = bot.get_command_str()
 
     @commands.group()
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     async def help(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':sos: __Available Help Commands__ :sos: '
@@ -118,6 +120,8 @@ class HelpCommands(commands.Cog):
                                             destination=1, c=Colour.blue())
 
     @commands.command(aliases=["start"])
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     async def get_started(self, ctx):
         """
         How to get started with the payment system
@@ -278,6 +282,8 @@ class HelpCommands(commands.Cog):
     @help.group()
     @commands.check(is_public)
     @commands.check(is_owner)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     async def owner(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':crown: __Available Commands for guild owners__ :crown: '
