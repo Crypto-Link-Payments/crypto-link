@@ -161,27 +161,27 @@ class AutoFunctions(commands.Cog):
     #         except commands.NoPrivateMessage:
     #             pass
 
-    @commands.Cog.listener()
-    async def on_member_remove(self, member):
-        """
-        Clean up process once member leaves the guild
-        """
-
-        if not member.bot:
-            if self.bot.backoffice.account_mng.check_user_existence(user_id=member.id):
-                print(Fore.LIGHTYELLOW_EX + f'{member} left {member.guild}... Notifying him on funds')
-
-                warning_embed = Embed(title=f':warning:  __{self.bot.user}__ :warning: ',
-                                      description='This is automatic notification from Crypto Link Payment system bot',
-                                      colour=Colour.dark_orange())
-                warning_embed.add_field(name='Notification',
-                                        value=f'You have left the {member.guild} where {self.bot.user} payment system '
-                                              f'is present. Hope you did not have any funds in your wallet.'
-                                              ' Funds can be accessed from any community where the system is present.',
-                                        inline=False)
-                await member.send(embed=warning_embed)
-            else:
-                print(Fore.LIGHTYELLOW_EX + f'{member} left {member.guild}... Not Registered')
+    # @commands.Cog.listener()
+    # async def on_member_remove(self, member):
+    #     """
+    #     Clean up process once member leaves the guild
+    #     """
+    #
+    #     if not member.bot:
+    #         if self.bot.backoffice.account_mng.check_user_existence(user_id=member.id):
+    #             print(Fore.LIGHTYELLOW_EX + f'{member} left {member.guild}... Notifying him on funds')
+    #
+    #             warning_embed = Embed(title=f':warning:  __{self.bot.user}__ :warning: ',
+    #                                   description='This is automatic notification from Crypto Link Payment system bot',
+    #                                   colour=Colour.dark_orange())
+    #             warning_embed.add_field(name='Notification',
+    #                                     value=f'You have left the {member.guild} where {self.bot.user} payment system '
+    #                                           f'is present. Hope you did not have any funds in your wallet.'
+    #                                           ' Funds can be accessed from any community where the system is present.',
+    #                                     inline=False)
+    #             await member.send(embed=warning_embed)
+    #         else:
+    #             print(Fore.LIGHTYELLOW_EX + f'{member} left {member.guild}... Not Registered')
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
