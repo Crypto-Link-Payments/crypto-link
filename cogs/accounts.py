@@ -1,6 +1,6 @@
 from datetime import datetime
-from discord import Embed, Colour, File
-from discord.ext import commands
+from nextcord import Embed, Colour, File
+from nextcord.ext import commands
 from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
 from cogs.utils.monetaryConversions import get_normal

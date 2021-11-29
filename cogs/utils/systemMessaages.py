@@ -1,10 +1,10 @@
 from datetime import datetime
 
-import discord
+import nextcord
 from colorama import Fore
 
-from discord import errors
-from discord import Role, Embed, Colour, TextChannel, User
+from nextcord import errors
+from nextcord import Role, Embed, Colour, TextChannel, User
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_HASH_STR = ':hash: Transaction Hash :hash: '

@@ -5,8 +5,8 @@ import decimal
 from bson.decimal128 import Decimal128
 from re import sub
 from datetime import timedelta
-from discord.ext import commands
-from discord import TextChannel, Embed, Colour, Role
+from nextcord.ext import commands
+from nextcord import TextChannel, Embed, Colour, Role
 from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet, has_ballot_access
 from cogs.utils.systemMessaages import CustomMessages
 from random import randint

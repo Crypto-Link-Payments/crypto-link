@@ -50,7 +50,7 @@ class StellarWallet:
             self.private_key = secret_details['stellar']
 
         self.root_keypair = Keypair.from_secret(self.private_key)
-        self.root_account = Account(account_id=self.root_keypair.public_key, sequence=1)
+        self.root_account = Account(account=self.root_keypair.public_key, sequence=1)
 
         print(Fore.YELLOW + f' Connected to {self.network_type}')
 

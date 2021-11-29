@@ -6,8 +6,8 @@ import tweepy
 from re import search
 from stellar_sdk import Server
 
-import discord
-from discord import Embed, Color
+import nextcord
+from nextcord import Embed, Color
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init

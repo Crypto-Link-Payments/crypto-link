@@ -1,6 +1,5 @@
-from discord.ext import commands
-from discord import Intents
-import discord
+from nextcord.ext import commands
+from nextcord import Intents
 
 from colorama import Fore, init
 import json

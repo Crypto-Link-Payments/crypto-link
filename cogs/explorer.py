@@ -1,4 +1,4 @@
-from discord.ext import commands
+from nextcord.ext import commands
 from utils.customCogChecks import has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 

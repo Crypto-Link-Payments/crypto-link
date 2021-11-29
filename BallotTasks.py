@@ -2,7 +2,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init
 from datetime import datetime
-from discord import Color, Embed
+from nextcord import Color, Embed
 from utils.tools import Helpers
 from pprint import pprint
 

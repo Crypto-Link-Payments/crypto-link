@@ -4,7 +4,7 @@ COGS which handle explanation  on commands available to communicate with the Ass
 from discord.ext import commands
 from discord import Colour
 from cogs.utils.systemMessaages import CustomMessages
-from discord.ext.commands.errors import CommandInvokeError
+from nextcord.ext.commands.errors import CommandInvokeError
 from horizonCommands.utils.customMessages import send_asset_details, send_multi_asset_case, horizon_error_msg
 from stellar_sdk.exceptions import BadRequestError
 

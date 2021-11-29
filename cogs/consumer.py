@@ -3,9 +3,8 @@ import time
 from datetime import datetime
 from datetime import timedelta
 
-import discord
-from discord import Colour
-from discord.ext import commands
+from nextcord import Colour, Role
+from nextcord.ext import commands
 from pycoingecko import CoinGeckoAPI
 
 from utils.customCogChecks import is_public, guild_has_merchant, has_wallet
@@ -130,7 +129,7 @@ class ConsumerCommands(commands.Cog):
 
     @membership.command(aliases=['purchase', 'buy', 'get'])
     @commands.bot_has_permissions(manage_roles=True)
-    async def subscribe(self, ctx, role: discord.Role, ticker: str = None):
+    async def subscribe(self, ctx, role: Role, ticker: str = None):
         """
         Subscribe to service
         """
