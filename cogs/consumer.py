@@ -3,9 +3,9 @@ import time
 from datetime import datetime
 from datetime import timedelta
 
-import discord
-from discord import Colour
-from discord.ext import commands
+import nextcord
+from nextcord import Colour
+from nextcord.ext import commands
 from pycoingecko import CoinGeckoAPI
 
 from utils.customCogChecks import is_public, guild_has_merchant, has_wallet

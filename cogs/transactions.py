@@ -1,5 +1,5 @@
-from discord.ext import commands
-from discord import User
+from nextcord.ext import commands
+from nextcord import User
 import re
 from cogs.utils import monetaryConversions
 from utils.customCogChecks import is_public, has_wallet

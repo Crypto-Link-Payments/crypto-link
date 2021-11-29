@@ -6,9 +6,8 @@ import sys
 import time
 from datetime import datetime
 
-from discord import Embed, Colour
-from discord.ext import commands
-from git import Repo, InvalidGitRepositoryError
+from nextcord import Embed, Colour
+from nextcord.ext import commands
 from cogs.utils.monetaryConversions import get_normal, get_rates
 from utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages

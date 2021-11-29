@@ -1,8 +1,8 @@
 import re
 from datetime import datetime
 
-from discord import Role, Embed, Color, utils
-from discord.ext import commands
+from nextcord import Role, Embed, Color, utils
+from nextcord.ext import commands
 from utils.customCogChecks import is_owner, has_wallet, is_public, merchant_com_reg_stats
 from cogs.utils.monetaryConversions import convert_to_currency
 from cogs.utils.monetaryConversions import get_normal

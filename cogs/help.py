@@ -1,9 +1,9 @@
 """
 COGS: Help commands for the payment services
 """
-import discord
-from discord.ext import commands
-from discord import Colour, Embed
+import nextcord
+from nextcord.ext import commands
+from nextcord import Colour, Embed
 from utils.tools import Helpers
 from utils.customCogChecks import is_owner, is_public
 from cogs.utils.systemMessaages import CustomMessages

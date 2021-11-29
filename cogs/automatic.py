@@ -6,9 +6,9 @@ import os
 import sys
 
 from colorama import Fore
-from discord import Embed, Colour, Game, Status
-from discord.ext import commands
-from discord.errors import HTTPException
+from nextcord import Embed, Colour, Game, Status
+from nextcord.ext import commands
+from nextcord.errors import HTTPException
 from datetime import datetime
 import traceback
 from cogs.utils.systemMessaages import CustomMessages

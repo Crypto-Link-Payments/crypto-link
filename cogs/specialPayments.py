@@ -1,10 +1,10 @@
-import discord.ext.commands
-from discord.ext import commands
+import nextcord.ext.commands
+from nextcord.ext import commands
 from asyncio import TimeoutError, sleep
 
-from discord import Member as DiscordMember
-from discord import Embed, Colour, Role, Status
-from discord.ext.commands import Greedy
+from nextcord import Member as DiscordMember
+from nextcord import Embed, Colour, Role, Status
+from nextcord.ext.commands import Greedy
 from re import search
 from datetime import datetime
 from utils.customCogChecks import is_public, has_wallet
