@@ -181,7 +181,7 @@ class ConsumerCommands(commands.Cog):
 
                             # Assign the role to the user
                             await ctx.message.author.add_roles(role,
-                                                               reason='Merchnat purchased role given')
+                                                               reason='Merchant purchased role given')
                             start = datetime.utcnow()
                             # get the timedelta from the role description
                             td = timedelta(weeks=role_details['weeks'],
@@ -228,9 +228,9 @@ class ConsumerCommands(commands.Cog):
                                 await custom_messages.user_role_purchase_msg(ctx=ctx, role=role,
                                                                              role_details=purchase_role_data)
 
-                                # Send report to guild oowner that he recieved funds
-                                await custom_messages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
-                                                                                    role_details=purchase_role_data)
+                                # # Send report to guild oowner that he recieved funds
+                                # await custom_messages.guild_owner_role_purchase_msg(ctx=ctx, role=role,
+                                #                                                     role_details=purchase_role_data)
 
                                 user_stats_update = {
                                     f'{ticker}.spentOnRoles': float(role_value_rounded),
