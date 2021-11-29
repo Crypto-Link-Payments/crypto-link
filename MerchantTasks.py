@@ -109,7 +109,7 @@ def start_merchant_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started merchant monitor')
     scheduler.add_job(timed_updater.check_expired_membership,
-                      CronTrigger(second='10'), misfire_grace_time=10, max_instances=20)
+                      CronTrigger(minute='5,10,15,20,25,30,35,40,45,50,55'), misfire_grace_time=10, max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Starte merchant corn Monitors : DONE')
     return scheduler

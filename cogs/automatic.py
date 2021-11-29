@@ -86,6 +86,7 @@ class AutoFunctions(commands.Cog):
                     traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
                 await bug_channel.send(content=stack_trace)
 
+
     @commands.Cog.listener()
     async def on_command(self, ctx):
         try:
@@ -112,53 +113,53 @@ class AutoFunctions(commands.Cog):
         print('------')
         print('================================')
 
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-        """
-        When member joins a message will be sent to newly joined user
-        :param member:
-        :return:
-        """
-        if not member.bot:
-            join_info = Embed(title='__Crypto Link System Message__',
-                              colour=Colour.green())
-            join_info.add_field(name="Welcome!",
-                                value=f"Welcome to the {member.guild}, This discord is powered by "
-                                      f" {self.bot.user.name}, where you can make payments,"
-                                      f" donations, or tips over Discord on Stellar Crypto Currency Chain. "
-                                      f"System Allows as well to purchase guild"
-                                      f" roles so contact owner to find more info."
-                                      f"and other discord users. To get started use command ***{self.command_string}"
-                                      f"help*** or ***{self.command_string}help get_started***.",
-                                inline=False)
-            join_info.add_field(name="Terms Of Service",
-                                value="By accessing or using any part of this bot, "
-                                      "you agree to be bound by these Terms of Service. "
-                                      "If you do not agree to all the terms and conditions "
-                                      "of this agreement, then you may not use any services "
-                                      "of this bot. These Terms of Service apply to all users of the bot,"
-                                      " including without limitation users who are visitors, browsers, "
-                                      "vendors, customers, merchants, and/ or contributors of content. "
-                                      "We do not keep your information or sell it all information gathered "
-                                      "is used for the creation of the wallet to help facilitate your own "
-                                      "ability to trade, swap, or pay users or organisations for their"
-                                      " goods and or services.",
-                                inline=False)
-            join_info.add_field(name="Disclaimer",
-                                value="We reserve the right to update, change or replace any part of these "
-                                      "Terms of Service by posting updates and/or changes to"
-                                      " this message. It is your responsibility to check this bot"
-                                      " periodically for changes. Your continued use of or access "
-                                      "to the bot following the posting of any changes constitutes"
-                                      " acceptance of those changes. You agree that the use of this bot "
-                                      "is at your own risk. In no event should Crypto Link "
-                                      "discord server or any of its members including the bot creator "
-                                      "be liable for any direct or indirect trading losses caused by this "
-                                      "bot and its services and features.")
-            try:
-                await member.send(embed=join_info)
-            except commands.NoPrivateMessage:
-                pass
+    # @commands.Cog.listener()
+    # async def on_member_join(self, member):
+    #     """
+    #     When member joins a message will be sent to newly joined user
+    #     :param member:
+    #     :return:
+    #     """
+    #     if not member.bot:
+    #         join_info = Embed(title='__Crypto Link System Message__',
+    #                           colour=Colour.green())
+    #         join_info.add_field(name="Welcome!",
+    #                             value=f"Welcome to the {member.guild}, This discord is powered by "
+    #                                   f" {self.bot.user.name}, where you can make payments,"
+    #                                   f" donations, or tips over Discord on Stellar Crypto Currency Chain. "
+    #                                   f"System Allows as well to purchase guild"
+    #                                   f" roles so contact owner to find more info."
+    #                                   f"and other discord users. To get started use command ***{self.command_string}"
+    #                                   f"help*** or ***{self.command_string}help get_started***.",
+    #                             inline=False)
+    #         join_info.add_field(name="Terms Of Service",
+    #                             value="By accessing or using any part of this bot, "
+    #                                   "you agree to be bound by these Terms of Service. "
+    #                                   "If you do not agree to all the terms and conditions "
+    #                                   "of this agreement, then you may not use any services "
+    #                                   "of this bot. These Terms of Service apply to all users of the bot,"
+    #                                   " including without limitation users who are visitors, browsers, "
+    #                                   "vendors, customers, merchants, and/ or contributors of content. "
+    #                                   "We do not keep your information or sell it all information gathered "
+    #                                   "is used for the creation of the wallet to help facilitate your own "
+    #                                   "ability to trade, swap, or pay users or organisations for their"
+    #                                   " goods and or services.",
+    #                             inline=False)
+    #         join_info.add_field(name="Disclaimer",
+    #                             value="We reserve the right to update, change or replace any part of these "
+    #                                   "Terms of Service by posting updates and/or changes to"
+    #                                   " this message. It is your responsibility to check this bot"
+    #                                   " periodically for changes. Your continued use of or access "
+    #                                   "to the bot following the posting of any changes constitutes"
+    #                                   " acceptance of those changes. You agree that the use of this bot "
+    #                                   "is at your own risk. In no event should Crypto Link "
+    #                                   "discord server or any of its members including the bot creator "
+    #                                   "be liable for any direct or indirect trading losses caused by this "
+    #                                   "bot and its services and features.")
+    #         try:
+    #             await member.send(embed=join_info)
+    #         except commands.NoPrivateMessage:
+    #             pass
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
