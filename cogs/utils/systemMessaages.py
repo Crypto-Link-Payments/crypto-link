@@ -1,4 +1,5 @@
 from datetime import datetime
+from colorama import Fore
 
 from discord import errors
 from discord import Role, Embed, Colour, TextChannel, User
@@ -59,7 +60,10 @@ class CustomMessages:
         notify.add_field(name='Deposit Value',
                          value=f"Amount: {int(tx_details['asset_type']['amount']) / 10000000:9.7f} {tx_details['asset_type']['code']}",
                          inline=False)
-        await channel.send(embed=notify)
+        try:
+            await channel.send(embed=notify)
+        except errors.Forbidden as e:
+            print(Fore.RED + f"{e}")
 
     @staticmethod
     async def send_unidentified_deposit_msg(channel, tx_details: dict):
