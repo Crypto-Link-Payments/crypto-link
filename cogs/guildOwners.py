@@ -26,6 +26,7 @@ class GuildOwnerCommands(commands.Cog):
     @commands.group()
     @commands.check(is_owner)
     @commands.check(is_public)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def owner(self, ctx):
         if ctx.invoked_subcommand is None:
             self.guild_string = self.bot.get_prefix_help(ctx.guild.id)
@@ -277,6 +278,7 @@ class GuildOwnerCommands(commands.Cog):
     @commands.check(is_owner)
     @commands.check(has_wallet)
     @commands.check(is_public)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merch(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ':convenience_store: __Crypto Link Uplink manual__ :convenience_store: '
