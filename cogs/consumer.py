@@ -28,6 +28,8 @@ class ConsumerCommands(commands.Cog):
     @commands.check(guild_has_merchant)
     @commands.check(has_wallet)
     @commands.check(is_public)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     async def membership(self, ctx):
         """
         Entry point for membership connected with wmerchant system
