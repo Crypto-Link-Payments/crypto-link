@@ -48,24 +48,27 @@ class MerchantTasks:
                         role = guild.get_role(role_id=mem_role_id)  # Get the role
                         if role:
                             if role in member.roles:
+                                print(Fore.YELLOW + f"EXPIRED FOUND:\n"
+                                                    f"1. Removing role form user {member}")
                                 await member.remove_roles(role, reason='Merchant notification -> Role expired')
                                 if merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
                                                                              role_id=mem_role_id, user_id=mem_id):
-                                    expired = Embed(title=':timer::octagonal_sign:  __Role Expiration Notification__ :octagonal_sign: :timer:',
-                                                    description='Your active membership has expired.',
-                                                    color=Color.dark_red())
-
-                                    expired.set_thumbnail(url=bot.user.avatar_url)
-                                    expired.add_field(name=':bank: Origin of role expiration:bank: ',
-                                                      value=f'```{guild.name}```',
-                                                      inline=False)
-                                    expired.add_field(name=":man_juggling: Expired Role :man_juggling: ",
-                                                      value=f'```{role.name}```')
-                                    expired.add_field(name=":information_source: Information :information_source: ",
-                                                      value=" In order to obtain back all privileges please re-purchase"
-                                                            " the role directly from the community.",
-                                                      inline=False)
-                                    await member.send(embed=expired)
+                                    print(Fore.YELLOW + "active membership removed")
+                                    # expired = Embed(title=':timer::octagonal_sign:  __Role Expiration Notification__ :octagonal_sign: :timer:',
+                                    #                 description='Your active membership has expired.',
+                                    #                 color=Color.dark_red())
+                                    #
+                                    # expired.set_thumbnail(url=bot.user.avatar_url)
+                                    # expired.add_field(name=':bank: Origin of role expiration:bank: ',
+                                    #                   value=f'```{guild.name}```',
+                                    #                   inline=False)
+                                    # expired.add_field(name=":man_juggling: Expired Role :man_juggling: ",
+                                    #                   value=f'```{role.name}```')
+                                    # expired.add_field(name=":information_source: Information :information_source: ",
+                                    #                   value=" In order to obtain back all privileges please re-purchase"
+                                    #                         " the role directly from the community.",
+                                    #                   inline=False)
+                                    # await member.send(embed=expired)
                                 else:
                                     channel_sys = channels["merchant"]
                                     # send notification to merchant for system if user could not be removed from database
