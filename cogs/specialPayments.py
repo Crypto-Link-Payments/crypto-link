@@ -232,14 +232,14 @@ class SpecialPaymentCommands(commands.Cog):
                                      recipients_list=recipients_list,
                                      subject=subject, tx_emoji=emoji)
 
-            # report to recipients
-            batch_reports = [
-                self.recipient_report(ctx=ctx, recipient=recipient, tx_time=tx_time,
-                                      total_amount=amount_micro_recipient / (10 ** 7),
-                                      asset_code=asset_code.upper(), subject=subject,
-                                      tx_type=tx_type, tx_emoji=emoji)
-                for recipient in recipients_list]
-            await gather(*batch_reports)
+            # # report to recipients
+            # batch_reports = [
+            #     self.recipient_report(ctx=ctx, recipient=recipient, tx_time=tx_time,
+            #                           total_amount=amount_micro_recipient / (10 ** 7),
+            #                           asset_code=asset_code.upper(), subject=subject,
+            #                           tx_type=tx_type, tx_emoji=emoji)
+            #     for recipient in recipients_list]
+            # await gather(*batch_reports)
 
             # Update stats
             await self.stats_updating(ctx=ctx, asset_code=asset_code, total_amount=total_amount_micro / (10 ** 7),
@@ -265,6 +265,7 @@ class SpecialPaymentCommands(commands.Cog):
     @commands.command()
     @commands.check(is_public)
     @commands.check(has_wallet)
+    @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def give(self, ctx, recipients: Greedy[DiscordMember], amount: float, asset_code, *, subject: str = None):
         asset_code = asset_code.lower()
@@ -355,6 +356,7 @@ class SpecialPaymentCommands(commands.Cog):
     @commands.command()
     @commands.check(is_public)
     @commands.check(has_wallet)
+    @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def loyalty(self, ctx, user_count: int, amount: float, asset_code, *, subject: str = None):
         asset_code = asset_code.lower()
@@ -459,6 +461,7 @@ class SpecialPaymentCommands(commands.Cog):
     @commands.check(is_public)
     @commands.check(has_wallet)
     @commands.cooldown(1, 10, commands.BucketType.guild)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def to_role(self, ctx, role: Role, amount: int, asset_code: str, *, subject=None):
         """
         Role payments
