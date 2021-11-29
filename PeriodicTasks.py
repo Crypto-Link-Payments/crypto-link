@@ -106,21 +106,21 @@ class PeriodicTasks:
 
                             await self.global_bot_stats_update(tx=tx)
 
-                            await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
+                            # await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
 
                             # Channel system message on deposit
                             await custom_messages.sys_deposit_notifications(channel=channel,
                                                                             user=dest, tx_details=tx)
 
-                            # Explorer messages
-                            load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                             self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-
-                            explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"] / (10 ** 7), 7)} ' \
-                                           f'{tx["asset_type"]["code"].upper()} to {self.bot.user}'
-
-                            await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                    message=explorer_msg)
+                            # # Explorer messages
+                            # load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                            #                  self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                            #
+                            # explorer_msg = f':inbox_tray: Someone deposited {round(tx["asset_type"]["amount"] / (10 ** 7), 7)} ' \
+                            #                f'{tx["asset_type"]["code"].upper()} to {self.bot.user}'
+                            #
+                            # await custom_messages.explorer_messages(applied_channels=load_channels,
+                            #                                         message=explorer_msg)
 
                         else:
                             print(Fore.RED + f'TX Processing error: \n'
