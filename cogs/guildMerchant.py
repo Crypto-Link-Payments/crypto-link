@@ -34,6 +34,7 @@ class MerchantCommunityOwner(commands.Cog):
     @commands.check(is_owner)
     @commands.check(has_wallet)
     @commands.check(is_public)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merchant_initiate(self, ctx):
 
         """
@@ -82,6 +83,7 @@ class MerchantCommunityOwner(commands.Cog):
     @commands.check(merchant_com_reg_stats)  # Check if community has been registered in the system
     @commands.check(has_wallet)  # Check if owner has community wallet
     @commands.bot_has_permissions(manage_roles=True)
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merchant(self, ctx):
         if ctx.invoked_subcommand is None:
             title = "💱 __Merchant System Message Setup__💱 "
@@ -101,6 +103,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                c=Color.purple())
 
     @merchant.command()
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def manual(self, ctx):
         manual = Embed(title=':convenience_store: __Merchant system manual__ :convenience_store: ',
                        colour=Color.purple())
@@ -124,6 +127,7 @@ class MerchantCommunityOwner(commands.Cog):
         await ctx.channel.send(embed=manual, delete_after=600)
 
     @merchant.group(aliases=['role', 'r'])
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def roles(self, ctx):
         if ctx.invoked_subcommand is None:
             title = ":man_juggling: __Merchant Role Management__ :man_juggling: "
@@ -398,6 +402,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 destination=1)
 
     @merchant.group(aliases=['w', 'acc', 'account'])
+    @commands.cooldown(1, 20, commands.BucketType.guild)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
             title = "💱 __Merchant Wallet Commands__💱 "
