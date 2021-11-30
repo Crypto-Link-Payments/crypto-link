@@ -69,6 +69,11 @@ class AutoFunctions(commands.Cog):
                       f' where Crypto Link is present.'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
+        elif isinstance(exception, commands.PrivateMessageOnly):
+            title = 'Limit access'
+            message = f'This command `{ctx.message.content}` can be used only through DM with the Crypto Link'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
 
         else:
             if isinstance(exception, commands.CheckFailure):
@@ -97,7 +102,6 @@ class AutoFunctions(commands.Cog):
                 # stack_trace = ''.join(
                 #     traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
                 # await bug_channel.send(content=stack_trace)
-
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
