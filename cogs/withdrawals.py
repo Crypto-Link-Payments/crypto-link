@@ -22,6 +22,7 @@ class WithdrawalCommands(commands.Cog):
 
     @commands.command()
     @commands.check(has_wallet)
+    @commands.dm_only()
     @commands.cooldown(1, 45, commands.BucketType.user)
     async def withdraw(self, ctx, amount: float, asset_code: str, address: str, memo=None):
         """
