@@ -265,6 +265,7 @@ class SpecialPaymentCommands(commands.Cog):
     @commands.command()
     @commands.check(is_public)
     @commands.check(has_wallet)
+    @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def give(self, ctx, recipients: Greedy[DiscordMember], amount: float, asset_code, *, subject: str = None):
@@ -356,6 +357,7 @@ class SpecialPaymentCommands(commands.Cog):
     @commands.command()
     @commands.check(is_public)
     @commands.check(has_wallet)
+    @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def loyalty(self, ctx, user_count: int, amount: float, asset_code, *, subject: str = None):
@@ -460,6 +462,7 @@ class SpecialPaymentCommands(commands.Cog):
     @commands.command()
     @commands.check(is_public)
     @commands.check(has_wallet)
+    @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def to_role(self, ctx, role: Role, amount: int, asset_code: str, *, subject=None):
