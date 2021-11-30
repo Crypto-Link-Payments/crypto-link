@@ -94,9 +94,9 @@ class AutoFunctions(commands.Cog):
 
                 await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
 
-                stack_trace = ''.join(
-                    traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
-                await bug_channel.send(content=stack_trace)
+                # stack_trace = ''.join(
+                #     traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
+                # await bug_channel.send(content=stack_trace)
 
 
     @commands.Cog.listener()
