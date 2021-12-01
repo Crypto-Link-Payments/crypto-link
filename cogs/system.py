@@ -501,7 +501,7 @@ class BotManagementCommands(commands.Cog):
                                                          self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
                                         explorer_msg = f':new: :coin: New token integrated with asset code ***{asset_data["asset_code"]}***' \
-                                                       f'from issuer ***{asset_data["asset_issuer"]}*** :rocket:'
+                                                       f' from issuer ***{asset_data["asset_issuer"]}*** :rocket:'
 
                                         await custom_messages.explorer_messages(applied_channels=load_channels,
                                                                                 message=explorer_msg)
