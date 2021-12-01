@@ -263,7 +263,7 @@ class StellarWallet:
         user_key_pair = Keypair.from_secret(private_key)
         public_key = user_key_pair.public_key
 
-        asset = Asset(token.upper(), asset_issuer=asset_issuer)
+        asset = Asset(code = token.upper(), issuer=asset_issuer)
 
         try:
             source_account = self.server.load_account(public_key)
