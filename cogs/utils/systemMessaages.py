@@ -283,18 +283,8 @@ class CustomMessages:
         try:
             await ctx.author.send(embed=notify)
 
-        except errors.DiscordException:
-            error_msg = Embed(title=f':warning: Withdrawal Notification :warning:',
-                              description=f'You have received this message because'
-                                          f' withdrawal notification could not be'
-                                          f' send to DM. Please allow bot to send'
-                                          f' you messages',
-                              colour=Colour.green())
-            error_msg.add_field(name=':compass: Explorer Link :compass:',
-                                value=withdrawal_data['explorer'])
-            error_msg.set_footer(text='This message will self-destruct in 360 seconds')
-            await ctx.channel.send(embed=error_msg, content=f'{ctx.message.author.mention}',
-                                   delete_after=360)
+        except Exception:
+            print(Fore.RED + f'Can not send deposit notidfication to user')
 
     @staticmethod
     async def withdrawal_notification_channel(ctx, channel, withdrawal_data):
