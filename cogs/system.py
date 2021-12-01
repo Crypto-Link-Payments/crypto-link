@@ -294,58 +294,13 @@ class BotManagementCommands(commands.Cog):
 
     @system.command(aliases=["stop"])
     async def off(self, ctx):
-        guild = await self.bot.fetch_guild(guild_id=756132394289070102)
-        role = guild.get_role(role_id=773212890269745222)
-        channel = self.bot.get_channel(id=int(773157463628709898))
+        guild = await self.bot.fetch_guild(756132394289070102)
+        role = guild.get_role(773212890269745222)
+        channel = self.bot.get_channel(int(773157463628709898))
         message = f':robot: {role.mention} I am going Offline for Maintenance'
         await channel.send(content=message)
         await self.bot.close()
         sys.exit(0)
-
-    @system.command()
-    async def update(self, ctx):
-        notification_str = ''
-        current_time = datetime.utcnow()
-        try:
-            repo = Repo()  # Initiate repo
-            git = repo.git
-            git.pull()
-            notification_str += 'GIT UPDATE STATUS\n' \
-                                ' Latest commits pulled :green_circle: \n' \
-                                '=============================================\n'
-        except InvalidGitRepositoryError:
-            notification_str += 'GIT UPDATE: There has been an error while pulling latest commits :red_circle:  \n' \
-                                'Error: Git Repository could not be found\n' \
-                                '=============================================\n'
-            await ctx.author.send(content=notification_str)
-
-        notification_str += 'STATUS OF COGS AFTER RELOAD\n'
-        for extension in extensions:
-            print(f'Trying to load extension {extension}')
-            try:
-                self.bot.unload_extension(f'{extension}')
-                self.bot.load_extension(f'{extension}')
-                notification_str += f'{extension} :green_circle:  \n'
-                print('success')
-                print('=========')
-            except Exception as e:
-                notification_str += f'{extension} :red_circle:' \
-                                    f'Error: {e} \n'
-                print('failed')
-                print('=========')
-        notification_str += 'GIT UPDATE STATUS\n' \
-                            ' Latest commits pulled :green_circle: \n' \
-                            '=============================================\n'
-        load_status = Embed(title='System update message',
-                            description='Status after git update',
-                            colour=Colour.green())
-        load_status.add_field(name='Time of execution',
-                              value=f'{current_time}',
-                              inline=False)
-        load_status.add_field(name='Status Message',
-                              value=notification_str,
-                              inline=False)
-        await ctx.author.send(embed=load_status)
 
     #############################  Token management #############################
     @commands.group()
