@@ -313,7 +313,7 @@ def start_scheduler(timed_updater):
     #                   misfire_grace_time=10,
     #                   max_instances=20)
     scheduler.add_job(timed_updater.check_stellar_hot_wallet,
-                      CronTrigger(minute='01,03,06,09,12,15,18,21,24,27,30,33,36,39,42,45, 48, 51, 54, 57'),
+                      CronTrigger(minute='02,07, 12, 17,22,27,32,37,42,47,52,57'),
                       misfire_grace_time=10,
                       max_instances=20)
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
