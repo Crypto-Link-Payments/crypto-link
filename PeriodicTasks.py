@@ -106,7 +106,7 @@ class PeriodicTasks:
 
                             await self.global_bot_stats_update(tx=tx)
 
-                            # await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
+                            await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
 
                             # Channel system message on deposit
                             await custom_messages.sys_deposit_notifications(channel=channel,
@@ -215,7 +215,7 @@ class PeriodicTasks:
         deposit_amount = on_chain_xlm["depositAmount"]
         withdrawal_amount = on_chain_xlm["withdrawnAmount"]
 
-        stats_chn = self.bot.get_channel(id=self.backoffice.auto_messaging_channels["stats"])
+        stats_chn = self.bot.get_channel(self.backoffice.auto_messaging_channels["stats"])
         total_wallets = await self.backoffice.stats_manager.count_total_registered_wallets()
 
         stats = Embed(title="Crypto Link Stats",
@@ -292,7 +292,7 @@ class PeriodicTasks:
 
         self.twitter_messages.update_status(f"{bridges} Bridge Builders Hall of Fame {bridges}\n" + f'{string}')
 
-        stats_chn = self.bot.get_channel(id=self.backoffice.auto_messaging_channels["stats"])
+        stats_chn = self.bot.get_channel(self.backoffice.auto_messaging_channels["stats"])
         stats = Embed(title="Builders Hall of Fame",
                       description='Top 5 bridge builders of all time',
                       color=Color.green())
