@@ -1,9 +1,8 @@
 from datetime import datetime
 from nextcord import Embed, Colour, File
 from nextcord.ext import commands
-from utils.customCogChecks import is_public, has_wallet
-from cogs.utils.monetaryConversions import convert_to_usd, get_rates, rate_converter
-from cogs.utils.monetaryConversions import get_normal
+from utils.customCogChecks import has_wallet
+from cogs.utils.monetaryConversions import get_rates, rate_converter
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
 import os
@@ -91,7 +90,7 @@ class UserAccountCommands(commands.Cog):
         await ctx.author.send(embed=acc_details)
 
     @commands.command(aliases=['reg', 'apply'])
-    @commands.check(is_public)
+    @commands.guild_only()
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def register(self, ctx):
