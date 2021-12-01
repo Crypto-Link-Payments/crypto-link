@@ -23,7 +23,7 @@ class WithdrawalCommands(commands.Cog):
     @commands.command()
     @commands.check(has_wallet)
     @commands.dm_only()
-    @commands.cooldown(1, 45, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def withdraw(self, ctx, amount: float, asset_code: str, address: str, memo=None):
         """
         Command to initiate withdrawals
@@ -56,6 +56,7 @@ class WithdrawalCommands(commands.Cog):
 
                             wallet_details = self.backoffice.wallet_manager.get_ticker_balance(asset_code=token,
                                                                                                user_id=ctx.message.author.id)
+                            print("wallet details check")
                             if wallet_details:
                                 if wallet_details >= micro_units:
                                     message_content = f"{ctx.message.author.mention} You have requested to withdraw " \
