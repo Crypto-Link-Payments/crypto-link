@@ -2,8 +2,8 @@
 COGS which handle explanation  on commands available to communicate with the Effects Horizon Endpoints from Discord
 """
 
-from discord.ext import commands
-from discord import Colour
+from nextcord.ext import commands
+from nextcord import Colour
 
 from cogs.utils.systemMessaages import CustomMessages
 from stellar_sdk.exceptions import BadRequestError

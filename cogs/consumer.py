@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 from datetime import timedelta
 
-from nextcord import Colour, Role
+from nextcord import Colour, Role, Embed
 from nextcord.ext import commands
 from pycoingecko import CoinGeckoAPI
 
@@ -70,7 +70,7 @@ class ConsumerCommands(commands.Cog):
                 role_name = role['roleName']
                 role_id = int(role['roleId'])
 
-                role_embed = discord.Embed(title=f':person_juggling: Active role information :person_juggling:',
+                role_embed = Embed(title=f':person_juggling: Active role information :person_juggling:',
                                            colour=Colour.magenta())
                 role_embed.add_field(name=":circus_tent: Active Role :circus_tent:",
                                      value=f'***{role_name}*** (id:{role_id})',

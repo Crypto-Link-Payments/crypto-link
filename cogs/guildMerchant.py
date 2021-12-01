@@ -394,7 +394,7 @@ class MerchantCommunityOwner(commands.Cog):
                            "value": f"```{role['weeks']} week/s \n{role['days']} day/s \n{role['hours']} "
                                     f"hour/s \n{role['minutes']} minute/s```"}]
                 await customMessages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
-                                                   data=values, thumbnail=self.bot.user.avatar_url, c=Color.blue())
+                                                   data=values, thumbnail=self.bot.user.avatar.url, c=Color.blue())
         else:
             title1 = "__Merchant System notification__"
             message = "Currently you have no monetized roles. "

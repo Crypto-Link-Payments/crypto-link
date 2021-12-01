@@ -2,8 +2,8 @@
 COGS which handle explanation  on commands available to communicate with the Operations Horizon Endpoints from Discord
 """
 
-from discord.ext import commands
-from discord import Embed, Colour
+from nextcord.ext import commands
+from nextcord import Embed, Colour
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
 from stellar_sdk.exceptions import BadRequestError
