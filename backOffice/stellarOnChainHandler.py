@@ -263,13 +263,14 @@ class StellarWallet:
         user_key_pair = Keypair.from_secret(private_key)
         public_key = user_key_pair.public_key
 
+        asset = Asset(token.upper(), asset_issuer=asset_issuer)
+
         try:
             source_account = self.server.load_account(public_key)
             tx = TransactionBuilder(
                 source_account=source_account,
                 network_passphrase=self.network_phrase,
-                base_fee=self.server.fetch_base_fee()).append_change_trust_op(asset_code=f'{token.upper()}',
-                                                                              asset_issuer=asset_issuer).set_timeout(
+                base_fee=self.server.fetch_base_fee()).append_change_trust_op(asset=asset).set_timeout(
                 30).build()
             tx.sign(private_key)
 
