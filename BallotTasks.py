@@ -53,7 +53,7 @@ class BallotTasks:
                                 inline=False)
 
         try:
-            dest = await self.bot.fetch_user(user_id=int(ballot["creatorId"]))  # Owner
+            dest = await self.bot.fetch_user(int(ballot["creatorId"]))  # Owner
             await dest.send(embed=ballot_report)
         except Exception as e:
             print(e)
