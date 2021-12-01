@@ -249,7 +249,7 @@ class BotManagementCommands(commands.Cog):
 
                     # notification to corp account discord channel
                     stellar_channel_id = auto_channels['stellar']
-                    stellar_notify_channel = self.bot.get_channel(id=int(stellar_channel_id))
+                    stellar_notify_channel = self.bot.get_channel(int(stellar_channel_id))
 
                     await custom_messages.send_transfer_notification(ctx=ctx, member=ctx.message.author,
                                                                      sys_channel=stellar_notify_channel,
@@ -497,7 +497,7 @@ class BotManagementCommands(commands.Cog):
                                             stats_on_chain):
 
                                         # Send to explorer the support information for new coin
-                                        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                        load_channels = [self.bot.get_channel(int(chn)) for chn in
                                                          self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
                                         explorer_msg = f':new: :coin: New token integrated with asset code ***{asset_data["asset_code"]}***' \
@@ -624,7 +624,7 @@ class BotManagementCommands(commands.Cog):
                                             stats_on_chain):
 
                                         # Send to explorer the support information for new coin
-                                        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                        load_channels = [self.bot.get_channel(int(chn)) for chn in
                                                          self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
                                         explorer_msg = f':new: :coin: New token integrated with asset code ***{asset_data["asset_code"]}***' \
