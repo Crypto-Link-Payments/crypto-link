@@ -205,13 +205,19 @@ class StellarWallet:
         """
         source_account = self.server.load_account(self.public_key)
         base_fee = self.server.fetch_base_fee()
+
+        if asset_issuer:
+            asset = Asset(code=token.upper(), issuer=asset_issuer)
+
+        else:
+            asset = Asset.native()
+
         if memo:
             tx = TransactionBuilder(
                 source_account=source_account,
                 network_passphrase=self.network_phrase,
-                base_fee=base_fee).add_text_memo(memo_text=memo).append_payment_op(asset_issuer=asset_issuer,
-                                                                                   destination=address,
-                                                                                   asset_code=token.upper(),
+                base_fee=base_fee).add_text_memo(memo_text=memo).append_payment_op(destination=address,
+                                                                                   asset=asset,
                                                                                    amount=amount) \
                 .set_timeout(30) \
                 .build()
@@ -219,9 +225,8 @@ class StellarWallet:
             tx = TransactionBuilder(
                 source_account=source_account,
                 network_passphrase=self.network_phrase,
-                base_fee=base_fee).append_payment_op(asset_issuer=asset_issuer,
-                                                     destination=address,
-                                                     asset_code=token.upper(),
+                base_fee=base_fee).append_payment_op(destination=address,
+                                                     asset=asset,
                                                      amount=amount) \
                 .set_timeout(30) \
                 .build()
