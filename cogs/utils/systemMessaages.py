@@ -245,7 +245,10 @@ class CustomMessages:
         sys_embed.add_field(name=":moneybag: Amount :moneybag: ",
                             value=f"{int(tx_details['asset_type']['amount']) / 10000000:9.7f}",
                             inline=False)
-        await recipient.send(embed=sys_embed)
+        try:
+            await recipient.send(embed=sys_embed)
+        except Exception as e:
+            print(e)
 
     @staticmethod
     async def withdrawal_notify(ctx, withdrawal_data: dict, fee, memo=None):
@@ -357,7 +360,7 @@ class CustomMessages:
             await ctx.channe.send(content=f'{ctx.message.guild.owner.mention} {ctx.author.mention}'
                                           f' you have successfully purchased membership {role}. '
                                           f'It will expire on {role_details["roleEnd"]} (in: {role_details["roleLeft"]})')
-        except discord.Forbidden as e:
+        except nextcord.Forbidden as e:
             print(Fore.RED + f'{e}')
         # try:
         #     await ctx.author.send(embed=role_embed)
