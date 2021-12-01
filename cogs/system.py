@@ -118,7 +118,7 @@ class BotManagementCommands(commands.Cog):
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                            destination=ctx.message.author, thumbnail=self.bot.user.avatar_url)
+                                            destination=ctx.message.author, thumbnail=self.bot.user.avatar.url)
 
     @commands.group()
     @commands.check(is_one_of_gods)
@@ -144,7 +144,7 @@ class BotManagementCommands(commands.Cog):
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                destination=ctx.message.author, thumbnail=self.bot.user.avatar_url)
+                                                destination=ctx.message.author, thumbnail=self.bot.user.avatar.url)
 
     @cl.command(aliases=['balance'])
     async def bal(self, ctx):
@@ -812,7 +812,7 @@ class BotManagementCommands(commands.Cog):
                            value=f'{rates["stellar"]["usd"]} :dollar: / {CONST_STELLAR_EMOJI}\n'
                                  f'{rates["stellar"]["eur"]} :euro: / {CONST_STELLAR_EMOJI}')
 
-        fee_info.set_thumbnail(url=self.bot.user.avatar_url)
+        fee_info.set_thumbnail(url=self.bot.user.avatar.url)
         fee_info.set_footer(text='Conversion rates provided by CoinGecko',
                             icon_url='https://static.coingecko.com/s/thumbnail-'
                                      '007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
@@ -835,7 +835,7 @@ class BotManagementCommands(commands.Cog):
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                thumbnail=self.bot.user.avatar_url, destination=ctx.message.author)
+                                                thumbnail=self.bot.user.avatar.url, destination=ctx.message.author)
 
     @fee.group()
     async def change(self, ctx):
@@ -860,7 +860,7 @@ class BotManagementCommands(commands.Cog):
             ]
 
             await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                thumbnail=self.bot.user.avatar_url, destination=ctx.message.author)
+                                                thumbnail=self.bot.user.avatar.url, destination=ctx.message.author)
 
     @change.command()
     async def coin_fee(self, ctx, value: float, ticker: str):

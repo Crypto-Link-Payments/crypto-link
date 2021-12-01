@@ -336,7 +336,7 @@ class HelpCommands(commands.Cog):
                                      f":three: Initiate the merchant with `{self.command_string}merchant_initiate`\n"
                                      f":four: Familiarize yourself with merchant system through command `{self.command_string}merchant`",
                                inline=False)
-        merchant_nfo.set_thumbnail(url=self.bot.user.avatar_url)
+        merchant_nfo.set_thumbnail(url=self.bot.user.avatar.url)
         await ctx.author.send(embed=merchant_nfo, delete_after=500)
 
     @owner.command(aliases=['link', 'up_link'])
@@ -344,9 +344,9 @@ class HelpCommands(commands.Cog):
         """
         Entry point for merchant system
         """
-        uplink_nfo = discord.Embed(title=':convenience_store: Uplink System Commands__ :convenience_store: ',
+        uplink_nfo = nextcord.Embed(title=':convenience_store: Uplink System Commands__ :convenience_store: ',
                                    description='Basic explanation on what is merchant system',
-                                   colour=discord.Color.blue())
+                                   colour=nextcord.Color.blue())
         uplink_nfo.add_field(name=':mega: About Up-Link :mega:',
                              value=' Crypto Link Up-Link is a service, allowing Discord Guild Owner to opt-in one '
                                    'of the text channels available for updates on Crypto Link activity. It serves'
@@ -360,7 +360,7 @@ class HelpCommands(commands.Cog):
                                    f':three: For further references use `{self.command_string}owner uplink`',
                              inline=False)
 
-        uplink_nfo.set_thumbnail(url=self.bot.user.avatar_url)
+        uplink_nfo.set_thumbnail(url=self.bot.user.avatar.url)
         await ctx.author.send(embed=uplink_nfo, delete_after=500)
 
     @help.command(aliases=['hor', 'network', 'explorer'])
@@ -368,7 +368,7 @@ class HelpCommands(commands.Cog):
         """
         Entry point for merchant system
         """
-        horizon_info = discord.Embed(title=':sunrise: __ Stellar Horizon Access__ :sunrise:  ',
+        horizon_info = nextcord.Embed(title=':sunrise: __ Stellar Horizon Access__ :sunrise:  ',
                                      description='What is Horizon',
                                      colour=Colour.lighter_gray())
         horizon_info.add_field(name=':information_source:  About Horizon :information_source: ',

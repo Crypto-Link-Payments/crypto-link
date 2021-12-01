@@ -440,7 +440,7 @@ class LevelThreeAccountCommands(commands.Cog):
             data = self.server.accounts().account_id(account_id=user_public).call()
             if data and 'status' not in data:
                 # Send user account info
-                await user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar_url)
+                await user_account_info(ctx=ctx, data=data, bot_avatar_url=self.bot.user.avatar.url)
 
             else:
                 sys_msg_title = 'Stellar Wallet Query Server error'
