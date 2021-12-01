@@ -317,7 +317,7 @@ def start_scheduler(timed_updater):
                       misfire_grace_time=7, max_instances=20)
 
     scheduler.add_job(timed_updater.twitter_message,
-                      CronTrigger(day_of_week='sun', hour='17', minute='58', second='00'),
+                      CronTrigger(day='30'),
                       misfire_grace_time=7, max_instances=20)
 
     scheduler.start()
