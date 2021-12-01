@@ -140,14 +140,14 @@ class WithdrawalCommands(commands.Cog):
                                                                                     fee=f'{withdrawal_fee:,.7f} {token.upper()}',memo = memo)
 
                                             # # System channel notification on withdrawal processed
-                                            channel_sys = self.bot.get_channel(id=int(self.with_channel))
+                                            channel_sys = self.bot.get_channel(int(self.with_channel))
                                             await custom_messages.withdrawal_notification_channel(ctx=ctx,
                                                                                                   channel=channel_sys,
                                                                                                   withdrawal_data=result)
 
                                             # Notify staff on incoming funds
                                             incoming_funds = self.bot.get_channel(
-                                                id=int(self.earnings))
+                                                int(self.earnings))
                                             await custom_messages.cl_staff_incoming_funds_notification(
                                                 sys_channel=incoming_funds,
                                                 incoming_fees=f'{withdrawal_fee:,.7f} {token.upper()}')
