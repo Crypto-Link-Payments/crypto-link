@@ -8,8 +8,9 @@ import sys
 from colorama import Fore
 from nextcord import Embed, Colour, Game, Status
 from nextcord.ext import commands
-from nextcord.errors import HTTPException
-from datetime import datetime
+import datetime
+import time
+from discord import HTTPException
 import traceback
 from cogs.utils.systemMessaages import CustomMessages
 
@@ -17,10 +18,13 @@ project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
 custom_messages = CustomMessages()
+spam_window = 5000
+max_cms_per_user = 5
 
 
 class AutoFunctions(commands.Cog):
     def __init__(self, bot):
+        self.author_msg = {}
         self.bot_channels = bot.backoffice.auto_messaging_channels
         self.bot = bot
         self.animus_id = bot.backoffice.creator_id
@@ -31,78 +35,76 @@ class AutoFunctions(commands.Cog):
         """
         Global error for on command error
         """
-        from pprint import pprint
-        pprint(exception)
+
         print(f'Command executed {ctx.message.content}')
         print(f'Command executed {ctx.message.author}')
         print(f'Command executed {ctx.message.guild}')
-        # try:
-        #     await ctx.message.delete()
-        # except Exception:
-        #     pass
-        #
-        # if isinstance(exception, commands.CommandNotFound):
-        #     title = '__Command Error__'
-        #     message = f'Command `{ctx.message.content}` is not implemented/active yet or it does not exist! Please' \
-        #               f'type `{self.command_string}help` to check available commands.'
-        #     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-        #                                          sys_msg_title=title)
-        # elif isinstance(exception, commands.CommandOnCooldown):
-        #     message = f'{exception}. In order to prevent abuse and unwanted delays, we have implemented cool down' \
-        #               f' into various commands. Thank you for your understanding.'
-        #     await custom_messages.system_message(ctx=ctx, color_code=Colour.blue(), message=message, destination=0,
-        #                                          sys_msg_title=':sweat_drops: Cool-Down :sweat_drops: ')
-        #
-        # elif isinstance(exception, commands.MissingRequiredArgument):
-        #     await custom_messages.system_message(ctx=ctx, color_code=Colour.orange(), message=f'{exception}',
-        #                                          destination=0,
-        #                                          sys_msg_title=':sweat_drops: Missing Required Argument :sweat_drops: ')
-        # elif isinstance(exception, HTTPException):
-        #     title = 'Discord API Error'
-        #     message = f'We could not process your command due to the connection error with Discord API server. ' \
-        #               f'Please try again later'
-        #     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-        #                                          sys_msg_title=title)
-        # elif isinstance(exception, commands.NoPrivateMessage):
-        #     title = 'Limit access'
-        #     message = f'This command `{ctx.message.content}` can be used only through public channel of the server' \
-        #               f' where Crypto Link is present.'
-        #     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-        #                                          sys_msg_title=title)
-        # elif isinstance(exception, commands.PrivateMessageOnly):
-        #     title = 'Limit access'
-        #     message = f'This command `{ctx.message.content}` can be used only through DM with the Crypto Link'
-        #     await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-        #                                          sys_msg_title=title)
-        #
-        # else:
-        #     if isinstance(exception, commands.CheckFailure):
-        #         print("Check has failed")
-        #     else:
-        #         bug_channel = self.bot.get_channel(int(self.bot_channels["bug"]))
-        #
-        #         animus = await self.bot.fetch_user(int(self.animus_id))
-        #
-        #         bug_info = Embed(title=f':new: :bug: :warning: ',
-        #                          description='New command error found',
-        #                          colour=Colour.red(),
-        #                          timestamp=datetime.utcnow())
-        #         bug_info.add_field(name=f'Command Author',
-        #                            value=f'{ctx.author}')
-        #         bug_info.add_field(name=f'Channel',
-        #                            value=ctx.message.channel)
-        #         bug_info.add_field(name=f':joystick: Command Executed :joystick:',
-        #                            value=f'```{ctx.message.content}```',
-        #                            inline=False)
-        #         bug_info.add_field(name=f':interrobang: Error Details :interrobang: ',
-        #                            value=f'```{exception}```',
-        #                            inline=False)
-        #
-        #         await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
+        try:
+            await ctx.message.delete()
+        except Exception:
+            pass
 
-        stack_trace = ''.join(
-            traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
-        pprint(stack_trace)
+        if isinstance(exception, commands.CommandNotFound):
+            title = '__Command Error__'
+            message = f'Command `{ctx.message.content}` is not implemented/active yet or it does not exist! Please' \
+                      f'type `{self.command_string}help` to check available commands.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+        elif isinstance(exception, commands.CommandOnCooldown):
+            message = f'{exception}. In order to prevent abuse and unwanted delays, we have implemented cool down' \
+                      f' into various commands. Thank you for your understanding.'
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.blue(), message=message, destination=0,
+                                                 sys_msg_title=':sweat_drops: Cool-Down :sweat_drops: ')
+
+        elif isinstance(exception, commands.MissingRequiredArgument):
+            await custom_messages.system_message(ctx=ctx, color_code=Colour.orange(), message=f'{exception}',
+                                                 destination=0,
+                                                 sys_msg_title=':sweat_drops: Missing Required Argument :sweat_drops: ')
+        elif isinstance(exception, HTTPException):
+            title = 'Discord API Error'
+            message = f'We could not process your command due to the connection error with Discord API server. ' \
+                      f'Please try again later'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+        elif isinstance(exception, commands.NoPrivateMessage):
+            title = 'Limit access'
+            message = f'This command `{ctx.message.content}` can be used only through public channel of the server' \
+                      f' where Crypto Link is present.'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+        elif isinstance(exception, commands.PrivateMessageOnly):
+            title = 'Limit access'
+            message = f'This command `{ctx.message.content}` can be used only through DM with the Crypto Link'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+
+        else:
+            if isinstance(exception, commands.CheckFailure):
+                print("Check has failed")
+            else:
+                bug_channel = self.bot.get_channel(int(self.bot_channels["bug"]))
+
+                animus = await self.bot.fetch_user(int(self.animus_id))
+
+                bug_info = Embed(title=f':new: :bug: :warning: ',
+                                 description='New command error found',
+                                 colour=Colour.red())
+                bug_info.add_field(name=f'Command Author',
+                                   value=f'{ctx.author}')
+                bug_info.add_field(name=f'Channel',
+                                   value=ctx.message.channel)
+                bug_info.add_field(name=f':joystick: Command Executed :joystick:',
+                                   value=f'```{ctx.message.content}```',
+                                   inline=False)
+                bug_info.add_field(name=f':interrobang: Error Details :interrobang: ',
+                                   value=f'```{exception}```',
+                                   inline=False)
+
+                await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
+
+        # stack_trace = ''.join(
+        #     traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
+        # pprint(stack_trace)
         # await bug_channel.send(content=stack_trace)
 
     @commands.Cog.listener()
@@ -111,6 +113,31 @@ class AutoFunctions(commands.Cog):
             await ctx.message.delete()
         except Exception:
             pass
+
+        author_id = ctx.author.id
+        now = datetime.datetime.now().timestamp() * 1000
+
+        if not author_id in self.author_msg:
+            self.author_msg[author_id] = []
+
+        self.author_msg[author_id].append(now)
+        #
+        expired_time = now - spam_window
+        expired_msg = [msg for msg in self.author_msg[author_id] if msg < expired_time]
+        for msg in expired_msg:
+            self.author_msg[author_id].remove(msg)
+
+        if len(self.author_msg[author_id]) > max_cms_per_user:
+            await ctx.send("stop spamming")
+            animus = await self.bot.fetch_user(int(self.animus_id))
+
+            bug_info = Embed(title=f':new: :bug: :warning: ',
+                             description='Author spamming the bot',
+                             colour=Colour.red())
+            bug_info.add_field(name='Author spamming',
+                               value=f'{ctx.message.author}')
+            await animus.send(embed=bug_info, content=f"{animus.mention}")
+            return
 
     @commands.Cog.listener()
     async def on_ready(self):
