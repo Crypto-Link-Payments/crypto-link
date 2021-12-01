@@ -1,6 +1,7 @@
 import nextcord.ext.commands
 from nextcord.ext import commands
 from asyncio import TimeoutError, sleep
+from random import sample
 
 from nextcord import Member as DiscordMember
 from nextcord import Embed, Colour, Role, Status
@@ -478,6 +479,10 @@ class SpecialPaymentCommands(commands.Cog):
 
                     # Make a list of members who are not bots and are online
                     filtered_members = [m for m in role.members if not m.bot and m.status == Status.online]
+
+                    if len(filtered_members) > 15:
+                        filtered_members = sample(filtered_members, 15)
+
                     if filtered_members:
                         total_atomic = amount_atomic * len(filtered_members)  # Total to send
                         if total_atomic <= self.bot.backoffice.wallet_manager.get_ticker_balance(
