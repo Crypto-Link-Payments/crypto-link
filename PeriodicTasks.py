@@ -93,7 +93,7 @@ class PeriodicTasks:
                             # If balance updated successfully send the message to user of processed deposit
                             user_id = self.bot.backoffice.wallet_manager.get_discord_id_from_memo(
                                 memo=tx['memo'])  # Return usr int number
-                            dest = await self.bot.fetch_user(user_id=int(user_id))
+                            dest = await self.bot.fetch_user(int(user_id))
 
                             on_chain_stats = {
                                 f"{tx['asset_type']['code'].lower()}.depositsCount": 1,
