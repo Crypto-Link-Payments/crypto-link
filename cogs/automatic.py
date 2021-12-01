@@ -79,7 +79,7 @@ class AutoFunctions(commands.Cog):
             if isinstance(exception, commands.CheckFailure):
                 print("Check has failed")
             else:
-                bug_channel = self.bot.get_channel(id=int(self.bot_channels["bug"]))
+                bug_channel = self.bot.get_channel(int(self.bot_channels["bug"]))
 
                 animus = await self.bot.fetch_user(user_id=int(self.animus_id))
                 bug_info = Embed(title=f':new: :bug: :warning: ',
