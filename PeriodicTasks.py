@@ -175,18 +175,18 @@ class PeriodicTasks:
             tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
                 new_transactions)
             if tx_with_registered_memo:
-                channel = self.bot.get_channel(id=int(self.notification_channels['memoRegistered']))
+                channel = self.bot.get_channel(int(self.notification_channels['memoRegistered']))
                 await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
             if tx_with_not_registered_memo:
-                channel = self.bot.get_channel(id=int(self.notification_channels['memoNotRegistered']))
+                channel = self.bot.get_channel(int(self.notification_channels['memoNotRegistered']))
                 await self.process_tx_with_not_registered_memo(channel=channel,
                                                                no_registered_memo=tx_with_not_registered_memo)
             if tx_with_no_memo:
-                channel = self.bot.get_channel(id=int(self.notification_channels['memoNone']))
+                channel = self.bot.get_channel(int(self.notification_channels['memoNone']))
                 await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
 
             if tx_with_memo_special:
-                channel = self.bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
+                channel = self.bot.get_channel(int(self.notification_channels['memoSpecialChar']))
                 await self.process_tx_with_special_chart(channel=channel)
 
             last_checked_pag = new_transactions[-1]["paging_token"]
