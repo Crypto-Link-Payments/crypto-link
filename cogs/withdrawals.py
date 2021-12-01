@@ -153,20 +153,20 @@ class WithdrawalCommands(commands.Cog):
                                                 incoming_fees=f'{withdrawal_fee:,.7f} {token.upper()}')
 
                                             # Message to explorer
-                                            if token == 'xlm':
-                                                in_dollar = convert_to_usd(amount=for_owner_macro,
-                                                                           coin_name='stellar')
-                                            else:
-                                                in_dollar = {"total": "$ 0.0"}
+                                            # if token == 'xlm':
+                                            #     in_dollar = convert_to_usd(amount=for_owner_macro,
+                                            #                                coin_name='stellar')
+                                            # else:
+                                            #     in_dollar = {"total": "$ 0.0"}
 
                                             # Load channels
-                                            load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                             self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-
-                                            explorer_msg = f':outbox_tray: {for_owner_macro} {token.upper()} ' \
-                                                           f'(${in_dollar["total"]}) on {ctx.message.guild}'
-                                            await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                                    message=explorer_msg)
+                                            # load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                            #                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                                            #
+                                            # explorer_msg = f':outbox_tray: {for_owner_macro} {token.upper()} ' \
+                                            #                f'(${in_dollar["total"]}) on {ctx.message.guild}'
+                                            # await custom_messages.explorer_messages(applied_channels=load_channels,
+                                            #                                         message=explorer_msg)
 
                                     else:
                                         msg = f"It seems that there has been error while trying to withdraw. " \
