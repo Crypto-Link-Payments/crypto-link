@@ -2,8 +2,8 @@
 COGS which handle explanation on access to Horizon
 """
 
-from discord.ext import commands
-from discord import Colour
+from nextcord.ext import commands
+from nextcord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 
 custom_messages = CustomMessages()

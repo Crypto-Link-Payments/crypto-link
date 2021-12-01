@@ -93,7 +93,7 @@ class PeriodicTasks:
                             # If balance updated successfully send the message to user of processed deposit
                             user_id = self.bot.backoffice.wallet_manager.get_discord_id_from_memo(
                                 memo=tx['memo'])  # Return usr int number
-                            dest = await self.bot.fetch_user(user_id=int(user_id))
+                            dest = await self.bot.fetch_user(int(user_id))
 
                             on_chain_stats = {
                                 f"{tx['asset_type']['code'].lower()}.depositsCount": 1,
@@ -106,7 +106,7 @@ class PeriodicTasks:
 
                             await self.global_bot_stats_update(tx=tx)
 
-                            # await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
+                            await custom_messages.deposit_notification_message(recipient=dest, tx_details=tx)
 
                             # Channel system message on deposit
                             await custom_messages.sys_deposit_notifications(channel=channel,
@@ -175,18 +175,18 @@ class PeriodicTasks:
             tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
                 new_transactions)
             if tx_with_registered_memo:
-                channel = self.bot.get_channel(id=int(self.notification_channels['memoRegistered']))
+                channel = self.bot.get_channel(int(self.notification_channels['memoRegistered']))
                 await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
             if tx_with_not_registered_memo:
-                channel = self.bot.get_channel(id=int(self.notification_channels['memoNotRegistered']))
+                channel = self.bot.get_channel(int(self.notification_channels['memoNotRegistered']))
                 await self.process_tx_with_not_registered_memo(channel=channel,
                                                                no_registered_memo=tx_with_not_registered_memo)
             if tx_with_no_memo:
-                channel = self.bot.get_channel(id=int(self.notification_channels['memoNone']))
+                channel = self.bot.get_channel(int(self.notification_channels['memoNone']))
                 await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
 
             if tx_with_memo_special:
-                channel = self.bot.get_channel(id=int(self.notification_channels['memoSpecialChar']))
+                channel = self.bot.get_channel(int(self.notification_channels['memoSpecialChar']))
                 await self.process_tx_with_special_chart(channel=channel)
 
             last_checked_pag = new_transactions[-1]["paging_token"]
@@ -215,7 +215,7 @@ class PeriodicTasks:
         deposit_amount = on_chain_xlm["depositAmount"]
         withdrawal_amount = on_chain_xlm["withdrawnAmount"]
 
-        stats_chn = self.bot.get_channel(id=self.backoffice.auto_messaging_channels["stats"])
+        stats_chn = self.bot.get_channel(self.backoffice.auto_messaging_channels["stats"])
         total_wallets = await self.backoffice.stats_manager.count_total_registered_wallets()
 
         stats = Embed(title="Crypto Link Stats",
@@ -246,6 +246,7 @@ class PeriodicTasks:
                         value=f'{withdrawal_amount} XLM',
                         inline=False)
         await stats_chn.send(embed=stats)
+        return
 
     async def twitter_message(self):
         print(Fore.GREEN + f"{get_time()} --> Sending report to Twitter ")
@@ -274,6 +275,7 @@ class PeriodicTasks:
                 f" {total_moved} $XLM in total! #Stellar #StellarGlobal #XLM")
         except Exception as e:
             print(Fore.RED + f"{e} ")
+        return
 
     async def send_builder_ranks(self):
         stats = self.backoffice.stats_manager.get_top_builders(limit=5)
@@ -292,7 +294,7 @@ class PeriodicTasks:
 
         self.twitter_messages.update_status(f"{bridges} Bridge Builders Hall of Fame {bridges}\n" + f'{string}')
 
-        stats_chn = self.bot.get_channel(id=self.backoffice.auto_messaging_channels["stats"])
+        stats_chn = self.bot.get_channel(self.backoffice.auto_messaging_channels["stats"])
         stats = Embed(title="Builders Hall of Fame",
                       description='Top 5 bridge builders of all time',
                       color=Color.green())
@@ -300,11 +302,16 @@ class PeriodicTasks:
                         value=f'{string}',
                         inline=False)
         await stats_chn.send(embed=stats)
+        return
 
 
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
+    # scheduler.add_job(timed_updater.check_stellar_hot_wallet,
+    #                   CronTrigger(second='00'),
+    #                   misfire_grace_time=10,
+    #                   max_instances=20)
     scheduler.add_job(timed_updater.check_stellar_hot_wallet,
                       CronTrigger(minute='01,03,06,09,12,15,18,21,24,27,30,33,36,39,42,45, 48, 51, 54, 57'),
                       misfire_grace_time=10,
@@ -317,7 +324,7 @@ def start_scheduler(timed_updater):
                       misfire_grace_time=7, max_instances=20)
 
     scheduler.add_job(timed_updater.twitter_message,
-                      CronTrigger(day_of_week='sun', hour='17', minute='58', second='00'),
+                      CronTrigger(day='30'),
                       misfire_grace_time=7, max_instances=20)
 
     scheduler.start()

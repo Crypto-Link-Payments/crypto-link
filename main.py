@@ -15,7 +15,7 @@ init(autoreset=True)
 #
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     helper = Helpers()
     bot_settings = helper.read_json_file(file_name='botSetup.json')
     backoffice = BackOffice(bot_settings)

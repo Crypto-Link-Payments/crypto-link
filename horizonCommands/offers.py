@@ -3,8 +3,8 @@ COGS which handle explanation  on commands available to communicate with the Off
 """
 
 
-from discord.ext import commands
-from discord import Embed, Colour
+from nextcord.ext import commands
+from nextcord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.customMessages import offer_details, horizon_error_msg, send_offers
 from stellar_sdk.exceptions import BadRequestError

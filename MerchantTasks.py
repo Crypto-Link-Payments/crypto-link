@@ -75,7 +75,7 @@ class MerchantTasks:
                                     expired_sys = Embed(
                                         title='__Expired user could not be removed from system__',
                                         colour=Color.red())
-                                    expired_sys.set_thumbnail(url=bot.user.avatar_url)
+                                    expired_sys.set_thumbnail(url=bot.user.avatar.url)
                                     expired_sys.add_field(name='Community',
                                                           value=guild.name,
                                                           inline=False)

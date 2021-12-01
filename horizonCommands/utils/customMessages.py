@@ -1,4 +1,4 @@
-from discord import Embed, Colour
+from nextcord import Embed, Colour
 from re import sub
 
 CONST_HASH = ':hash: Transaction Hash :hash:'

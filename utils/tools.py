@@ -61,7 +61,7 @@ class Helpers:
     @staticmethod
     def check_public_key(address: str):
         try:
-            Account(account_id=address, sequence=0)
+            Account(account=address, sequence=0)
             return True
         except Ed25519PublicKeyInvalidError:
             return False

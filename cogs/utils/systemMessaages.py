@@ -51,7 +51,7 @@ class CustomMessages:
         notify = Embed(title='System Deposit Notification',
                        description='Deposit has been processed',
                        timestamp=datetime.utcnow())
-        notify.set_thumbnail(url=user.avatar_url)
+        notify.set_thumbnail(url=user.avatar.url)
         notify.add_field(name='User details',
                          value=f'{user} ID; {user.id}',
                          inline=False)
@@ -189,13 +189,13 @@ class CustomMessages:
             col = Colour.red()
             destination_txt = f'{tx_type_emoji} Recipient {tx_type_emoji} '
             value_emoji = ":money_with_wings: "
-            avatar = user.avatar_url
+            avatar = user.avatar.url
 
         elif direction == 1:
             title = f':inbox_tray: Incoming {tx_type_emoji} {tx_type.title()} transaction :inbox_tray: '
             col = Colour.green()
             destination_txt = ':postbox: Sender :postbox: '
-            avatar = destination.avatar_url
+            avatar = destination.avatar.url
             value_emoji = ":moneybag: "
 
         tx_report = Embed(title=title,
@@ -245,7 +245,10 @@ class CustomMessages:
         sys_embed.add_field(name=":moneybag: Amount :moneybag: ",
                             value=f"{int(tx_details['asset_type']['amount']) / 10000000:9.7f}",
                             inline=False)
-        await recipient.send(embed=sys_embed)
+        try:
+            await recipient.send(embed=sys_embed)
+        except Exception as e:
+            print(e)
 
     @staticmethod
     async def withdrawal_notify(ctx, withdrawal_data: dict, fee, memo=None):
@@ -275,23 +278,13 @@ class CustomMessages:
         notify.add_field(name=':sunrise: Horizon Access Link :sunrise: ',
                          value=f"[Complete Details]({withdrawal_data['explorer']})",
                          inline=False)
-        notify.set_thumbnail(url=ctx.message.author.avatar_url)
+        notify.set_thumbnail(url=ctx.message.author.avatar.url)
 
         try:
             await ctx.author.send(embed=notify)
 
-        except errors.DiscordException:
-            error_msg = Embed(title=f':warning: Withdrawal Notification :warning:',
-                              description=f'You have received this message because'
-                                          f' withdrawal notification could not be'
-                                          f' send to DM. Please allow bot to send'
-                                          f' you messages',
-                              colour=Colour.green())
-            error_msg.add_field(name=':compass: Explorer Link :compass:',
-                                value=withdrawal_data['explorer'])
-            error_msg.set_footer(text='This message will self-destruct in 360 seconds')
-            await ctx.channel.send(embed=error_msg, content=f'{ctx.message.author.mention}',
-                                   delete_after=360)
+        except Exception:
+            print(Fore.RED + f'Can not send deposit notidfication to user')
 
     @staticmethod
     async def withdrawal_notification_channel(ctx, channel, withdrawal_data):
@@ -357,7 +350,7 @@ class CustomMessages:
             await ctx.channe.send(content=f'{ctx.message.guild.owner.mention} {ctx.author.mention}'
                                           f' you have successfully purchased membership {role}. '
                                           f'It will expire on {role_details["roleEnd"]} (in: {role_details["roleLeft"]})')
-        except discord.Forbidden as e:
+        except nextcord.Forbidden as e:
             print(Fore.RED + f'{e}')
         # try:
         #     await ctx.author.send(embed=role_embed)
@@ -377,7 +370,7 @@ class CustomMessages:
                                  value=f"```Name: {role.name}\n"
                                        f"Id: {role.id}```",
                                  inline=False)
-        incoming_funds.set_thumbnail(url=f'{ctx.message.author.avatar_url}')
+        incoming_funds.set_thumbnail(url=f'{ctx.message.author.avatar.url}')
         incoming_funds.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
                                  value=f'```Fiat: ${role_details["dollarValue"]}\n'
                                        f'Crypto: {role_details["roleRounded"]} XLM\n'
@@ -399,7 +392,7 @@ class CustomMessages:
         tx_stats = Embed(title='__Global Account Statistics__',
                          timestamp=utc_now,
                          colour=Colour.blue())
-        tx_stats.set_thumbnail(url=ctx.author.avatar_url)
+        tx_stats.set_thumbnail(url=ctx.author.avatar.url)
         tx_stats.add_field(name=f':abacus: Outgoing ',
                            value=transaction_stats["sentTxCount"] + transaction_stats["rolePurchase"],
                            inline=True)
@@ -509,7 +502,7 @@ class CustomMessages:
         :param normal_amount: converted amount from atomic
         :param emoji: emoji identification for the currency
         :param chain_name: name of the chain used in transactions
-        :return: discord.Embed
+        :return: nextcord.Embed
         """
 
         corp_channel = Embed(
