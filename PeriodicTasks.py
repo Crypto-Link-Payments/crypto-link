@@ -246,6 +246,7 @@ class PeriodicTasks:
                         value=f'{withdrawal_amount} XLM',
                         inline=False)
         await stats_chn.send(embed=stats)
+        return
 
     async def twitter_message(self):
         print(Fore.GREEN + f"{get_time()} --> Sending report to Twitter ")
@@ -274,6 +275,7 @@ class PeriodicTasks:
                 f" {total_moved} $XLM in total! #Stellar #StellarGlobal #XLM")
         except Exception as e:
             print(Fore.RED + f"{e} ")
+        return
 
     async def send_builder_ranks(self):
         stats = self.backoffice.stats_manager.get_top_builders(limit=5)
@@ -300,29 +302,30 @@ class PeriodicTasks:
                         value=f'{string}',
                         inline=False)
         await stats_chn.send(embed=stats)
+        return
 
 
 def start_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors')
-    scheduler.add_job(timed_updater.check_stellar_hot_wallet,
-                      CronTrigger(second='00'),
-                      misfire_grace_time=10,
-                      max_instances=20)
     # scheduler.add_job(timed_updater.check_stellar_hot_wallet,
-    #                   CronTrigger(minute='01,03,06,09,12,15,18,21,24,27,30,33,36,39,42,45, 48, 51, 54, 57'),
+    #                   CronTrigger(second='00'),
     #                   misfire_grace_time=10,
     #                   max_instances=20)
+    scheduler.add_job(timed_updater.check_stellar_hot_wallet,
+                      CronTrigger(minute='01,03,06,09,12,15,18,21,24,27,30,33,36,39,42,45, 48, 51, 54, 57'),
+                      misfire_grace_time=10,
+                      max_instances=20)
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
         hour='17'), misfire_grace_time=10, max_instances=20)
 
-    # scheduler.add_job(timed_updater.send_builder_ranks,
-    #                   CronTrigger(day_of_week='sun', hour='17', minute='58', second='15'),
-    #                   misfire_grace_time=7, max_instances=20)
+    scheduler.add_job(timed_updater.send_builder_ranks,
+                      CronTrigger(day_of_week='sun', hour='17', minute='58', second='15'),
+                      misfire_grace_time=7, max_instances=20)
 
-    # scheduler.add_job(timed_updater.twitter_message,
-    #                   CronTrigger(day='30'),
-    #                   misfire_grace_time=7, max_instances=20)
+    scheduler.add_job(timed_updater.twitter_message,
+                      CronTrigger(day='30'),
+                      misfire_grace_time=7, max_instances=20)
 
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
