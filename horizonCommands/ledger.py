@@ -3,9 +3,9 @@ COGS which handle explanation  on commands available to communicate with the Led
 """
 
 
-from discord.ext import commands
+from nextcord.ext import commands
 import requests
-from discord import Embed, Colour
+from nextcord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.customMessages import horizon_error_msg
 from stellar_sdk.exceptions import BadRequestError

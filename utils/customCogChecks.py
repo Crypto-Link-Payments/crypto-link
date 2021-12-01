@@ -2,7 +2,7 @@
 File includes custom security checks for the Discord GUI part
 """
 
-from discord import ChannelType
+from nextcord import ChannelType
 
 
 def is_animus(ctx):

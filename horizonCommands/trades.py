@@ -2,8 +2,8 @@
 COGS which handle explanation  on commands available to communicate with the Trades Horizon Endpoints from Discord
 """
 
-from discord.ext import commands
-from discord import Colour
+from nextcord.ext import commands
+from nextcord import Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.customMessages import send_trades_details, send_trades_basic_details, horizon_error_msg
 from stellar_sdk.exceptions import BadRequestError

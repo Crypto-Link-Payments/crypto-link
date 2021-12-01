@@ -502,7 +502,7 @@ class CustomMessages:
         :param normal_amount: converted amount from atomic
         :param emoji: emoji identification for the currency
         :param chain_name: name of the chain used in transactions
-        :return: discord.Embed
+        :return: nextcord.Embed
         """
 
         corp_channel = Embed(

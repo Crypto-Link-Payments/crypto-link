@@ -6,8 +6,8 @@ from Merchant wallet to their won upon withdrawal.
 """
 
 import asyncio
-from discord.ext import commands
-from discord import Colour, Member, Embed
+from nextcord.ext import commands
+from nextcord import Colour, Member, Embed
 from cogs.utils.systemMessaages import CustomMessages
 from utils.customCogChecks import user_has_third_level, user_has_no_third_level, user_has_second_level, check
 from utils.customMessages import user_account_info, dev_fee_option_notification, ask_for_dev_fee_amount

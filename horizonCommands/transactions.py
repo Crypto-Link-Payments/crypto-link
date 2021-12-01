@@ -1,8 +1,8 @@
 """
 COGS which handle explanation  on commands available to communicate with the Transactions Horizon Endpoints from Discord
 """
-from discord.ext import commands
-from discord import Embed, Colour
+from nextcord.ext import commands
+from nextcord import Embed, Colour
 from cogs.utils.systemMessaages import CustomMessages
 from horizonCommands.utils.tools import format_date, process_memo
 from horizonCommands.utils.customMessages import tx_info_for_account, horizon_error_msg, tx_info_for_hash, \

@@ -1,4 +1,4 @@
-from discord import Embed, Colour
+from nextcord import Embed, Colour
 from datetime import datetime
 from cogs.utils.monetaryConversions import get_rates, rate_converter
 
