@@ -81,7 +81,8 @@ class AutoFunctions(commands.Cog):
             else:
                 bug_channel = self.bot.get_channel(int(self.bot_channels["bug"]))
 
-                animus = await self.bot.fetch_user(user_id=int(self.animus_id))
+                animus = await self.bot.fetch_user(int(self.animus_id))
+
                 bug_info = Embed(title=f':new: :bug: :warning: ',
                                  description='New command error found',
                                  colour=Colour.red(),
@@ -249,7 +250,7 @@ class AutoFunctions(commands.Cog):
         new_guild.add_field(name='Member Count',
                             value=f'```{guild.member_count}```',
                             inline=False)
-        animus = await self.bot.fetch_user(user_id=int(self.animus_id))
+        animus = await self.bot.fetch_user(int(self.animus_id))
 
         channel_id = self.bot_channels["sys"]
         dest = self.bot.get_channel(id=int(channel_id))
@@ -303,7 +304,7 @@ class AutoFunctions(commands.Cog):
         removed_guild.add_field(name='Member Count',
                                 value=f'```{guild.member_count}```',
                                 inline=False)
-        animus = await self.bot.fetch_user(user_id=int(self.animus_id))
+        animus = await self.bot.fetch_user(int(self.animus_id))
 
         dest = self.bot.get_channel(id=int(self.bot_channels["sys"]))
 
