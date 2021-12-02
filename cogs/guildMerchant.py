@@ -31,10 +31,11 @@ class MerchantCommunityOwner(commands.Cog):
         self.merchant = self.backoffice.merchant_manager
 
     @commands.command()
+    @commands.guild_only()
     @commands.check(is_owner)
     @commands.check(has_wallet)
-    @commands.check(is_public)
-    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def merchant_initiate(self, ctx):
 
         """
@@ -55,7 +56,7 @@ class MerchantCommunityOwner(commands.Cog):
                 await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                     destination=1)
 
-                merchant_notification = self.bot.get_channel(id=int(self.merchant_channel_info))
+                merchant_notification = self.bot.get_channel(int(self.merchant_channel_info))
                 new_merch = Embed(title=f'New Community Has registered for merchant',
                                   description=f'New community has registered for merchant service',
                                   colour=Color.purple())
@@ -78,11 +79,10 @@ class MerchantCommunityOwner(commands.Cog):
                                                 destination=1)
 
     @commands.group()
-    @commands.check(is_public)
     @commands.check(is_owner)  # Check if author is community owner
     @commands.check(merchant_com_reg_stats)  # Check if community has been registered in the system
     @commands.check(has_wallet)  # Check if owner has community wallet
-    @commands.bot_has_permissions(manage_roles=True)
+    @commands.guild_only()
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merchant(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -151,6 +151,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                c=Color.purple())
 
     @roles.command(aliases=["new"])
+    @commands.bot_has_permissions(manage_roles=True)
     @commands.check(is_public)
     async def create(self, ctx, role_name: str, dollar_value: float, weeks_count: int, days_count: int,
                      hours_count: int, minutes_count: int):
@@ -269,6 +270,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 destination=1)
 
     @roles.command()
+    @commands.bot_has_permissions(manage_roles=True)
     @commands.check(is_public)
     async def delete(self, ctx, discord_role: Role):
         """
@@ -298,6 +300,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 destination=1)
 
     @roles.command()
+    @commands.bot_has_permissions(manage_roles=True)
     async def stop(self, ctx, role: Role):
         """
         Command used to change activity status of the role
@@ -334,6 +337,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 destination=1)
 
     @roles.command()
+    @commands.bot_has_permissions(manage_roles=True)
     async def start(self, ctx, role: Role):
         """
         Change status of the role
@@ -454,6 +458,7 @@ class MerchantCommunityOwner(commands.Cog):
 
     @wallet.command(aliases=["withdraw"])
     @commands.check(is_owner)
+    @commands.guild_only()
     async def sweep(self, ctx):
         """
         Transfers Stellar from Merchant corp wallet to community owner's own wallet
@@ -503,7 +508,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                                            amount=com_balance_stroops):
 
                     # Notification channel
-                    notification_channel = self.bot.get_channel(id=int(self.merchant_channel_info))
+                    notification_channel = self.bot.get_channel(int(self.merchant_channel_info))
                     # credit fee to launch pad investment wallet
 
                     if self.backoffice.bot_manager.update_cl_wallet_balance(to_update={"balance": cl_earnings},
