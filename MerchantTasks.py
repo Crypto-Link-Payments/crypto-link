@@ -45,7 +45,7 @@ class MerchantTasks:
                     member = guild.get_member(mem_id)
                     # Check if member still exists
                     if member in guild.members:
-                        role = guild.get_role(role_id=mem_role_id)  # Get the role
+                        role = guild.get_role(mem_role_id)  # Get the role
                         if role:
                             if role in member.roles:
                                 print(Fore.YELLOW + f"EXPIRED FOUND:\n"
