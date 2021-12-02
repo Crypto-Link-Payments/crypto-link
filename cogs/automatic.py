@@ -35,10 +35,7 @@ class AutoFunctions(commands.Cog):
         """
         Global error for on command error
         """
-
-        print(f'Command executed {ctx.message.content}')
-        print(f'Command executed {ctx.message.author}')
-        print(f'Command executed {ctx.message.guild}')
+        print(Fore.RED + f"{ctx.message.author} @ {ctx.message.guild}: {ctx.message.content}")
         try:
             await ctx.message.delete()
         except Exception:
