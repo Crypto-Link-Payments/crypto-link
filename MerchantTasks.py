@@ -41,7 +41,7 @@ class MerchantTasks:
                 # Check if community where role was created still has bot
                 if [guild.id for guild in bot_guilds if mem_role_community_id == guild.id]:
                     # get guild and member
-                    guild = bot.get_guild(id=mem_role_community_id)
+                    guild = bot.get_guild(mem_role_community_id)
                     member = guild.get_member(mem_id)
                     # Check if member still exists
                     if member in guild.members:
@@ -97,9 +97,7 @@ class MerchantTasks:
                     else:
                         merchant_manager.delete_user_from_applied(community_id=mem_role_community_id, user_id=mem_id)
                 else:
-                    merchant_manager.bulk_user_clear(community_id=mem_role_community_id, role_id=mem_role_id)
-                    merchant_manager.remove_all_monetized_roles(guild_id=mem_role_community_id)
-
+                    pass
         else:
             print(Fore.GREEN + 'There are no overdue members in the system going to sleep!')
             print('===========================================================')
@@ -109,7 +107,7 @@ def start_merchant_scheduler(timed_updater):
     scheduler = AsyncIOScheduler()
     print(Fore.LIGHTBLUE_EX + 'Started merchant monitor')
     scheduler.add_job(timed_updater.check_expired_membership,
-                      CronTrigger(minute='5,10,15,20,25,30,35,40,45,50,55'), misfire_grace_time=10, max_instances=20)
+                      CronTrigger(minute='5,10,15,20,25,30,35,40,45,50,55,00'), misfire_grace_time=10, max_instances=20)
     scheduler.start()
     print(Fore.LIGHTBLUE_EX + 'Starte merchant corn Monitors : DONE')
     return scheduler
