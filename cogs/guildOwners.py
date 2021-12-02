@@ -337,9 +337,9 @@ class GuildOwnerCommands(commands.Cog):
     @register.error
     async def register_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            message = f'In order to be able to register community into Crypto Link system you re required to be ' \
-                      f' have personal wallet registered in the system. You can do so through' \
-                      f' `{self.command_string}register`'
+            message = f'In order to be able to register community into Crypto Link system you re required to ' \
+                      f' have personal wallet registered in the system. You can do so through:\n' \
+                      f' {self.command_string}register'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
 
     # ----------------Voting pools registration-------------#
