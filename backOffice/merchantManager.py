@@ -52,6 +52,20 @@ class MerchantManager:
         except errors.PyMongoError:
             return False
 
+    def check_if_role_registered(self, community_id:int, role_id:int):
+        """
+        Check if role exists already in the cl system
+        :param community_id:
+        :param role_id:
+        :return:
+        """
+        result = self.monetized_roles.find_one({"communityId":community_id,"roleId":role_id},
+                                               {"_id":0})
+        if result:
+            return True
+        else:
+            return False
+
     def get_all_roles_community(self, community_id: int):
         """
         Returns all the roles in the system which were monetized by owner of the community
