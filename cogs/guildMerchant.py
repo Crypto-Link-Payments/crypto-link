@@ -269,6 +269,99 @@ class MerchantCommunityOwner(commands.Cog):
                                                 color_code=1,
                                                 destination=1)
 
+    @roles.commands()
+    @commands.bot_has_permissions(manage_roles=True)
+    @commands.guild_only()
+    async def reactivate(self, ctx, role: Role, dollar_value: float, weeks_count: int, days_count: int,
+                         hours_count: int, minutes_count: int):
+
+        if ctx.author.id == ctx.guild.owner.id:
+            # Check if role already not  monetized
+            in_penny = (int(dollar_value * (10 ** 2)))  # Convert to pennies
+            total = weeks_count + days_count + hours_count + minutes_count
+            if not (weeks_count < 0) and not (days_count < 0) and not (hours_count < 0) and not (
+                    minutes_count < 0) and (
+                    total > 0):
+                if in_penny > 0:
+                    # TO Store in database
+
+                    if not self.bot.backoffice.merchant_manager.find_role_details(role_id=role.id):
+
+                        new_role = {
+                            "roleId": int(role.id),
+                            "roleName": f'{role}',
+                            "communityId": int(ctx.guild.id),
+                            "pennyValues": int(in_penny),
+                            "weeks": int(weeks_count),
+                            "days": int(days_count),
+                            "hours": int(hours_count),
+                            "minutes": int(minutes_count),
+                            "status": "active"
+                        }
+
+                        if self.merchant.register_role(new_role):
+
+                            # Send the message to the owner
+                            msg_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
+                            sys_title = f":man_juggling: ***Role successfully created*** :man_juggling: "
+                            message = f'Details:\n' \
+                                      f'```Role Name : {role}\n' \
+                                      f'Role ID: {role.id}\n' \
+                                      f'Value: {dollar_value} $\n' \
+                                      f'Duration of role: \n' \
+                                      f'{weeks_count} week/s, \n{days_count} day/s \n{hours_count} hour/s\n' \
+                                      f'{minutes_count} minute/s```'
+
+                            await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
+                                                                color_code=0,
+                                                                destination=1, embed_title=msg_title)
+
+                            message_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
+                            sys_title = ":mega: Time to inform your members on available role to be " \
+                                        "purchased. :mega:"
+                            message = f'Users can now apply for the role by executing the' \
+                                      f'```command bellow: \n {self.command_string}membership subscribe ' \
+                                      f'<@Discord Role>```' \
+                                      f'Thank You for using Merchant System!'
+                            await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
+                                                                color_code=0,
+                                                                destination=1, embed_title=message_title)
+                        else:
+                            message = f'Role could not be stores into the system at this point. Please try again' \
+                                      f' later. We apologize for inconvenience.'
+                            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                                                                message=message,
+                                                                color_code=1,
+                                                                destination=1)
+
+                    else:
+                        message = f'This role has been already monetized.'
+                        await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                                                            message=message,
+                                                            color_code=1,
+                                                            destination=1)
+                else:
+                    message = 'The amount user will have to pay for role needs to be greater than 0.00$'
+                    await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                                                        message=message,
+                                                        color_code=1,
+                                                        destination=1)
+
+            else:
+                message = 'Role could not be create since the length of the role is either' \
+                          ' limitless or expiration time is' \
+                          ' not in future. In order to create a role data for week, days hours and minutes needs ' \
+                          'to be provide as followed:\n' \
+                          'week: whole number greater than 0\n' \
+                          'day: whole number greater than 0\n' \
+                          'hour: whole number greater than 0\n' \
+                          'minute: whole number greater than 0\n' \
+                          'Note: 0 is also acceptable however the sum of all variables needs to be greater than 0 at ' \
+                          'the end. '
+                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
+                                                    color_code=1,
+                                                    destination=1)
+
     @roles.command()
     @commands.bot_has_permissions(manage_roles=True)
     @commands.check(is_public)
