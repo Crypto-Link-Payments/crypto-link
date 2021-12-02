@@ -1,3 +1,4 @@
+import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init
@@ -54,21 +55,22 @@ class MerchantTasks:
                                 if merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
                                                                              role_id=mem_role_id, user_id=mem_id):
                                     print(Fore.YELLOW + "active membership removed")
-                                    # expired = Embed(title=':timer::octagonal_sign:  __Role Expiration Notification__ :octagonal_sign: :timer:',
-                                    #                 description='Your active membership has expired.',
-                                    #                 color=Color.dark_red())
-                                    #
-                                    # expired.set_thumbnail(url=bot.user.avatar_url)
-                                    # expired.add_field(name=':bank: Origin of role expiration:bank: ',
-                                    #                   value=f'```{guild.name}```',
-                                    #                   inline=False)
-                                    # expired.add_field(name=":man_juggling: Expired Role :man_juggling: ",
-                                    #                   value=f'```{role.name}```')
-                                    # expired.add_field(name=":information_source: Information :information_source: ",
-                                    #                   value=" In order to obtain back all privileges please re-purchase"
-                                    #                         " the role directly from the community.",
-                                    #                   inline=False)
-                                    # await member.send(embed=expired)
+                                    expired = Embed(title=':timer::octagonal_sign:  __Role Expiration Notification__ :octagonal_sign: :timer:',
+                                                    description='Your active membership has expired.',
+                                                    color=Color.dark_red())
+                                    expired.add_field(name=':bank: Origin of role expiration:bank: ',
+                                                      value=f'```{guild.name}```',
+                                                      inline=False)
+                                    expired.add_field(name=":man_juggling: Expired Role :man_juggling: ",
+                                                      value=f'```{role.name}```')
+                                    expired.add_field(name=":information_source: Information :information_source: ",
+                                                      value=" In order to obtain back all privileges please re-purchase"
+                                                            " the role directly from the community.",
+                                                      inline=False)
+                                    try:
+                                        await member.send(embed=expired)
+                                    except discord.Forbidden:
+                                        pass
                                 else:
                                     channel_sys = channels["merchant"]
                                     # send notification to merchant for system if user could not be removed from database
