@@ -145,7 +145,6 @@ class ConsumerCommands(commands.Cog):
 
         # Check if community has activated merchant
         if role_details and role_details['status'] == 'active':
-
             # Check if user has already applied for the role
             if role.id not in [author_role.id for author_role in
                                ctx.message.author.roles]:  # Check if user has not purchased role yet
@@ -329,7 +328,7 @@ class ConsumerCommands(commands.Cog):
             message = f'Role can not be given as bot does not have sufficient rights please contact guild ' \
                       f'owner {ctx.guild.owner.mention}.' \
                       f' Current missing permissions are:\n' \
-                      f'{error.missing_perms}'
+                      f'{error}'
             await custom_messages.system_message(ctx=ctx, sys_msg_title=CONST_MERCHANT_ROLE_ERROR, message=message,
                                                  color_code=1,
                                                  destination=1)
