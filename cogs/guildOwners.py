@@ -124,7 +124,8 @@ class GuildOwnerCommands(commands.Cog):
             await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
             await customMessages.system_message(ctx=ctx, color_code=0,
                                                 message='You have successfully registered guild into the system. '
-                                                        'Default bot prefix is `!`',
+                                                        'Default bot prefix is:\n'
+                                                        '!',
                                                 destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(ctx=ctx, color_code=1, message='Guild already registered',
@@ -154,7 +155,7 @@ class GuildOwnerCommands(commands.Cog):
 
             xlm_stats = stats["xlm"]
 
-            stats_info.set_thumbnail(url=ctx.guild.icon_url)
+            stats_info.set_thumbnail(url=ctx.guild.icon.url)
             stats_info.add_field(name=":incoming_envelope: XLM Payments executed ",
                                  value=f'`{xlm_stats["txCount"]}`')
             stats_info.add_field(name=":money_with_wings: Total Volume ",
