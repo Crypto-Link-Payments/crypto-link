@@ -278,7 +278,7 @@ class AutoFunctions(commands.Cog):
         animus = await self.bot.fetch_user(int(self.animus_id))
 
         channel_id = self.bot_channels["sys"]
-        dest = self.bot.get_channel(id=int(channel_id))
+        dest = self.bot.get_channel(int(channel_id))
         await dest.send(embed=new_guild, content=f'{animus.mention}')
 
         # Register default prefix
@@ -331,7 +331,7 @@ class AutoFunctions(commands.Cog):
                                 inline=False)
         animus = await self.bot.fetch_user(int(self.animus_id))
 
-        dest = self.bot.get_channel(id=int(self.bot_channels["sys"]))
+        dest = self.bot.get_channel(int(self.bot_channels["sys"]))
 
         await dest.send(embed=removed_guild, content=f'{animus.mention}')
 

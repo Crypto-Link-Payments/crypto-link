@@ -145,7 +145,7 @@ class TransactionCommands(commands.Cog):
 
         # Send out explorer
 
-        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+        load_channels = [self.bot.get_channel(int(chn)) for chn in
                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
         await custom_messages.explorer_messages(applied_channels=load_channels, message=explorer_msg)
@@ -179,7 +179,7 @@ class TransactionCommands(commands.Cog):
                                 await self.backoffice.stats_manager.create_bridge(user_id=ctx.message.author.id)
 
                                 # Send up link
-                                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                load_channels = [self.bot.get_channel(int(chn)) for chn in
                                                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
                                 current_total = self.backoffice.account_mng.count_registrations()
 

@@ -201,7 +201,7 @@ class GuildOwnerCommands(commands.Cog):
     @commands.check(guild_has_stats)
     async def services(self, ctx):
         service_status = await self.backoffice.guild_profiles.get_service_statuses(guild_id=ctx.guild.id)
-        explorer_channel = self.bot.get_channel(id=int(service_status["explorerSettings"]["channelId"]))
+        explorer_channel = self.bot.get_channel(int(service_status["explorerSettings"]["channelId"]))
 
         service_info = Embed(title=":service_dog: __Guild Service Status__ :service_dog: ",
                              timestamp=datetime.utcnow(),

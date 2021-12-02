@@ -58,7 +58,7 @@ class LevelThreeAccountCommands(commands.Cog):
         Dispatch informational embeds to sender and Crypto Link Upling
         """
         # Send notification on transaciton to Crypto Link Uplink
-        load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+        load_channels = [self.bot.get_channel(int(chn)) for chn in
                          self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
         for dest in load_channels:
             await dest.send(content=message)

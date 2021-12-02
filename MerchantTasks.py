@@ -85,7 +85,7 @@ class MerchantTasks:
                                                           value=f'Role ID: {mem_role_id}\n'
                                                                 f'Community ID: {mem_role_community_id}\n'
                                                                 f'Member ID: {mem_id}')
-                                    merch_channel = bot.get_channel(id=int(channel_sys))
+                                    merch_channel = bot.get_channel(int(channel_sys))
                                     await merch_channel.send(embed=expired_sys)
                             else:
                                 merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,

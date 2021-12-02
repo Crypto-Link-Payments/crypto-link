@@ -275,14 +275,14 @@ class ConsumerCommands(commands.Cog):
                                 await self.backoffice.guild_profiles.update_stellar_community_wallet_stats(
                                     guild_id=ctx.guild.id, data=data)
 
-                                # Send notifcications
-                                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                 self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                                explorer_msg = f':man_juggling: purchased in value {role_value_rounded} {CONST_STELLAR_EMOJI} ' \
-                                               f'(${convert_to_dollar}) on ' \
-                                               f'{ctx.message.guild}'
-                                await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                        message=explorer_msg)
+                                # # Send notifcications
+                                # load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                #                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                                # explorer_msg = f':man_juggling: purchased in value {role_value_rounded} {CONST_STELLAR_EMOJI} ' \
+                                #                f'(${convert_to_dollar}) on ' \
+                                #                f'{ctx.message.guild}'
+                                # await custom_messages.explorer_messages(applied_channels=load_channels,
+                                #                                         message=explorer_msg)
                         else:
                             message = f'Error while trying to deduct funds from user'
                             await custom_messages.system_message(ctx=ctx, message=message,

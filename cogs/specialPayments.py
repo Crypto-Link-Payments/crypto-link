@@ -191,7 +191,7 @@ class SpecialPaymentCommands(commands.Cog):
         count_new, new_recipients = self.check_recipients_wallets(recipients=recipients_list)
 
         # Load registered channel for crypto link
-        up_link_channels = [self.bot.get_channel(id=int(chn)) for chn in
+        up_link_channels = [self.bot.get_channel(int(chn)) for chn in
                             self.bot.backoffice.guild_profiles.get_all_explorer_applied_channels()]
 
         if count_new > 0:

@@ -60,7 +60,7 @@ class BallotTasks:
 
         channel_id = ballot["notificationChannelId"]
         if channel_id:
-            channel = self.bot.get_channel(id=int(ballot["notificationChannelId"]))
+            channel = self.bot.get_channel(int(ballot["notificationChannelId"]))
             try:
                 await channel.send(embed=ballot_report)
             except Exception as e:
@@ -125,7 +125,7 @@ class BallotTasks:
                               inline=False)
         ballot_data.set_footer(text=f"Ballot box creator: {author}")
         if not destination:
-            channel = self.bot.get_channel(id=int(ballot["notificationChannelId"]))
+            channel = self.bot.get_channel(int(ballot["notificationChannelId"]))
             try:
                 await channel.send(embed=ballot_data)
             except Exception as e:
