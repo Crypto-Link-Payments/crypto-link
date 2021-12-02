@@ -98,18 +98,10 @@ class UserAccountCommands(commands.Cog):
             if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
                                                          discord_username=f'{ctx.message.author}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
-                          f' Please use {self.command_string}acc or {self.command_string}wallet.'
+                          f' You can now access your wallet through:\n' \
+                          f' {self.command_string}wallet'
                 await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
-
-                # Send message to explorer
-                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                 self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                current_total = self.backoffice.account_mng.count_registrations()
-                explorer_msg = f':new: user registered into ***{self.bot.user} System*** (Σ {current_total})'
-                for chn in load_channels:
-                    if chn is not None:
-                        await chn.send(content=explorer_msg)
 
                 # Update guild stats on registered users
                 await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
@@ -344,7 +336,7 @@ class UserAccountCommands(commands.Cog):
         if isinstance(error, commands.CheckFailure):
             title = f'__{self.command_string}register error__'
             message = f'You can not register over DM with the bot. Please head to one of the channels on Discord ' \
-                      f' server where Crypto Link is present and execute command  {self.command_string}register'
+                      f' server where Crypto Link is present and execute command: \n{self.command_string}register'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
