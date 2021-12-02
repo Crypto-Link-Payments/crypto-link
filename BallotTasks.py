@@ -179,7 +179,7 @@ class BallotTasks:
                 if ballot_channel:
                     await self.send_ballot_snapshot(ballot=ballot)
                 else:
-                    guild = self.bot.get_guild(id=ballot["guildId"])
+                    guild = self.bot.get_guild(ballot["guildId"])
                     member = guild.get_member(ballot["creatorId"])
                     await self.send_ballot_snapshot(ballot=ballot, destination=member)
 
