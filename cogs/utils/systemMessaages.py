@@ -347,7 +347,7 @@ class CustomMessages:
         #                            f'Rate: {role_details["usdRate"]} / 1 XLM```',
         #                      inline=False)
         try:
-            await ctx.channe.send(content=f'{ctx.message.guild.owner.mention} {ctx.author.mention}'
+            await ctx.channel.send(content=f'{ctx.message.guild.owner.mention} {ctx.author.mention}'
                                           f' you have successfully purchased membership {role}. '
                                           f'It will expire on {role_details["roleEnd"]} (in: {role_details["roleLeft"]})')
         except nextcord.Forbidden as e:
