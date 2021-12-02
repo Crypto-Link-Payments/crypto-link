@@ -322,7 +322,7 @@ class CustomMessages:
 
     @staticmethod
     async def user_role_purchase_msg(ctx, role: Role, role_details: dict):
-        # Send notification to user
+        # # Send notification to user
         # role_embed = Embed(title=':man_juggling: Congratulations on '
         #                          'obtaining the role',
         #                    description='You have received this notification because you have successfully '
@@ -348,7 +348,8 @@ class CustomMessages:
         #                      inline=False)
         try:
             await ctx.channel.send(content=f'{ctx.message.guild.owner.mention} {ctx.author.mention}'
-                                          f' you have successfully purchased membership {role}. '
+                                          f' you have successfully purchased membership {role} in value of '
+                                           f'{role_details["roleRounded"]} XLM (${role_details["dollarValue"]}). '
                                           f'It will expire on {role_details["roleEnd"]} (in: {role_details["roleLeft"]})')
         except nextcord.Forbidden as e:
             print(Fore.RED + f'{e}')
