@@ -169,48 +169,10 @@ class HelpCommands(commands.Cog):
         Returns representation of all available currencies available to be utilized int transactions
         :return: Discord Embed
         """
-
         available = Embed(title=':coin: Integrated coins and tokens :coin: ',
-                          description='Below is a list of all available currencies for making peer 2 peer'
-                                      ' transactions or to be used with merchant system',
+                          description='[Token List](https://cryptolink.carrd.co/)',
                           colour=Colour.blue())
         await ctx.author.send(embed=available)
-
-        coins = self.bot.backoffice.token_manager.get_all_tokens()
-
-        for coin in coins:
-            if coin["assetCode"] == 'xlm':
-                stellar_info = Embed(title='Stellar Network Native Token',
-                                     description="Stellar native token XLM (Lumen)",
-                                     colour=Colour.lighter_gray())
-                stellar_info.add_field(name=f'Minimum Withdrawal',
-                                       value=f'```{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} XLM```',
-                                       inline=False)
-                stellar_info.add_field(name=f'Links and information',
-                                       value=f'[XLM Stellar Expert]({coin["expert"]})\n'
-                                             f'[Homepage]({coin["homepage"]})',
-                                       inline=False)
-                await ctx.author.send(embed=stellar_info)
-
-            else:
-
-                token_info = Embed(title='Stellar token',
-                                   colour=Colour.lighter_gray())
-                token_info.add_field(name=f'Asset Code',
-                                     value=f'```{coin["assetCode"].upper()}```',
-                                     inline=False)
-                token_info.add_field(name=f'Asset Type',
-                                     value=f'```{coin["assetType"].upper()}```',
-                                     inline=False)
-                token_info.add_field(name=f'Asset Issuer',
-                                     value=f'```{coin["assetIssuer"].upper()}```',
-                                     inline=False)
-                token_info.add_field(name=f'Minimum Withdrawal',
-                                     value=f'```{int(coin["minimumWithdrawal"]) / (10 ** 7):,.7f} {coin["assetCode"].upper()}```',
-                                     inline=False)
-                token_info.add_field(name='Web Links',
-                                     value=f'[Homepage]({coin["homepage"]}) | [Stellar Expert]({coin["expert"]}) | [TOML]({coin["toml"]}) ')
-                await ctx.author.send(embed=token_info)
 
     @help.command(aliases=['w'])
     async def wallets(self, ctx):
