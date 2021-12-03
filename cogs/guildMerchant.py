@@ -31,56 +31,56 @@ class MerchantCommunityOwner(commands.Cog):
         self.command_string = bot.get_command_str()
         self.merchant = self.backoffice.merchant_manager
 
-    async def create_monetized_role(self, ctx, role,in_penny:int, weeks_count:int, days_count:int,hours_count:int,minutes_count:int):
+    async def create_monetized_role(self, ctx, role, in_penny: int, weeks_count: int, days_count: int, hours_count: int,
+                                    minutes_count: int):
 
-            # TO Store in database
-            new_role = {
-                "roleId": int(role.id),
-                "roleName": f'{role}',
-                "communityId": int(ctx.guild.id),
-                "pennyValues": int(in_penny),
-                "weeks": int(weeks_count),
-                "days": int(days_count),
-                "hours": int(hours_count),
-                "minutes": int(minutes_count),
-                "status": "active"
-            }
+        # TO Store in database
+        new_role = {
+            "roleId": int(role.id),
+            "roleName": f'{role}',
+            "communityId": int(ctx.guild.id),
+            "pennyValues": int(in_penny),
+            "weeks": int(weeks_count),
+            "days": int(days_count),
+            "hours": int(hours_count),
+            "minutes": int(minutes_count),
+            "status": "active"
+        }
 
-            if self.merchant.register_role(new_role):
+        if self.merchant.register_role(new_role):
 
-                # Send the message to the owner
-                msg_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
-                sys_title = f":man_juggling: ***Role successfully created*** :man_juggling: "
-                message = f'Details:\n' \
-                          f'Role Name : {role}\n' \
-                          f'Role ID: {role.id}\n' \
-                          f'Value: {in_penny/(10**2)} $\n' \
-                          f'Duration of role: \n' \
-                          f'{weeks_count} week/s, \n{days_count} day/s \n{hours_count} hour/s\n' \
-                          f'{minutes_count} minute/s'
+            # Send the message to the owner
+            msg_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
+            sys_title = f":man_juggling: ***Role successfully created*** :man_juggling: "
+            message = f'Details:\n' \
+                      f'Role Name : {role}\n' \
+                      f'Role ID: {role.id}\n' \
+                      f'Value: {in_penny / (10 ** 2)} $\n' \
+                      f'Duration of role: \n' \
+                      f'{weeks_count} week/s, \n{days_count} day/s \n{hours_count} hour/s\n' \
+                      f'{minutes_count} minute/s'
 
-                await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
-                                                    color_code=0,
-                                                    destination=1, embed_title=msg_title)
+            await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
+                                                color_code=0,
+                                                destination=1, embed_title=msg_title)
 
-                message_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
-                sys_title = ":mega: Time to inform your members on available role to be " \
-                            "purchased. :mega:"
-                message = f'Users can now apply for the role by executing the' \
-                          f'```command bellow: \n {self.command_string}membership subscribe ' \
-                          f'<@Discord Role>```' \
-                          f'Thank You for using Merchant System!'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
-                                                    color_code=0,
-                                                    destination=1, embed_title=message_title)
-            else:
-                message = f'Role could not be stores into the system at this point. Please try again' \
-                          f' later. We apologize for inconvenience.'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
-                                                    message=message,
-                                                    color_code=1,
-                                                    destination=1)
-
+            message_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
+            sys_title = ":mega: Time to inform your members on available role to be " \
+                        "purchased. :mega:"
+            message = f'Users can now apply for the role by executing the' \
+                      f'```command bellow: \n {self.command_string}membership subscribe ' \
+                      f'<@Discord Role>```' \
+                      f'Thank You for using Merchant System!'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
+                                                color_code=0,
+                                                destination=1, embed_title=message_title)
+        else:
+            message = f'Role could not be stores into the system at this point. Please try again' \
+                      f' later. We apologize for inconvenience.'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                                                message=message,
+                                                color_code=1,
+                                                destination=1)
 
     @commands.command()
     @commands.guild_only()
@@ -234,7 +234,7 @@ class MerchantCommunityOwner(commands.Cog):
                                     name=role_name)  # Create role and return its details
 
                                 await self.create_monetized_role(ctx=ctx,
-                                                                 role = new_role,
+                                                                 role=new_role,
                                                                  in_penny=in_penny,
                                                                  weeks_count=weeks_count,
                                                                  days_count=days_count,
@@ -301,64 +301,23 @@ class MerchantCommunityOwner(commands.Cog):
             if not (weeks_count < 0) and not (days_count < 0) and not (hours_count < 0) and not (
                     minutes_count < 0) and (
                     total > 0):
-                if in_penny > 0:
-                    if not self.bot.backoffice.merchant_manager.find_role_details(role_id=role.id):
-
-                        new_role = {
-                            "roleId": int(role.id),
-                            "roleName": f'{role}',
-                            "communityId": int(ctx.guild.id),
-                            "pennyValues": int(in_penny),
-                            "weeks": int(weeks_count),
-                            "days": int(days_count),
-                            "hours": int(hours_count),
-                            "minutes": int(minutes_count),
-                            "status": "active"
-                        }
-
-                        if self.merchant.register_role(new_role):
-
-                            # Send the message to the owner
-                            msg_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
-                            sys_title = f":man_juggling: ***Role successfully created*** :man_juggling: "
-                            message = f'Details:\n' \
-                                      f'```Role Name : {role}\n' \
-                                      f'Role ID: {role.id}\n' \
-                                      f'Value: {dollar_value} $\n' \
-                                      f'Duration of role: \n' \
-                                      f'{weeks_count} week/s, \n{days_count} day/s \n{hours_count} hour/s\n' \
-                                      f'{minutes_count} minute/s```'
-
-                            await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
-                                                                color_code=0,
-                                                                destination=1, embed_title=msg_title)
-
-                            message_title = ':convenience_store: __Merchant System Information___ :convenience_store: '
-                            sys_title = ":mega: Time to inform your members on available role to be " \
-                                        "purchased. :mega:"
-                            message = f'Users can now apply for the role by executing the' \
-                                      f'```command bellow: \n {self.command_string}membership subscribe ' \
-                                      f'<@Discord Role>```' \
-                                      f'Thank You for using Merchant System!'
-                            await customMessages.system_message(ctx=ctx, sys_msg_title=sys_title, message=message,
-                                                                color_code=0,
-                                                                destination=1, embed_title=message_title)
-                        else:
-                            message = f'Role could not be stores into the system at this point. Please try again' \
-                                      f' later. We apologize for inconvenience.'
-                            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
-                                                                message=message,
-                                                                color_code=1,
-                                                                destination=1)
-
+                if not self.bot.backoffice.merchant_manager.find_role_details(role_id=role.id):
+                    if in_penny > 0:
+                        await self.create_monetized_role(ctx=ctx,
+                                                         role=role,
+                                                         in_penny=in_penny,
+                                                         weeks_count=weeks_count,
+                                                         days_count=days_count,
+                                                         hours_count=hours_count,
+                                                         minutes_count=minutes_count)
                     else:
-                        message = f'This role has been already monetized.'
+                        message = f'Role value you are planning to monetize needs to be greater than $0.00'
                         await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
                                                             message=message,
                                                             color_code=1,
                                                             destination=1)
                 else:
-                    message = 'The amount user will have to pay for role needs to be greater than 0.00$'
+                    message = 'Role you have selected has been already monetized'
                     await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
                                                         message=message,
                                                         color_code=1,
@@ -378,6 +337,11 @@ class MerchantCommunityOwner(commands.Cog):
                 await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
                                                     color_code=1,
                                                     destination=1)
+        else:
+            message = f'You can not operate with this command as you are not the owner of the {ctx.guild}'
+            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
+                                                color_code=1,
+                                                destination=1)
 
     @roles.command()
     @commands.bot_has_permissions(manage_roles=True)
