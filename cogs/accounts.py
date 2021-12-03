@@ -291,8 +291,8 @@ class UserAccountCommands(commands.Cog):
     @wallet.command(aliases=['bal', 'balances', 'b'])
     async def balance(self, ctx):
         user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
-        if user_balances:
-            all_wallets = list(user_balances.keys())
+        bag = [k for k, v in user_balances.items() if v > 0]
+        if bag:
             # initiate Discord embed
             balance_embed = Embed(title=f":office_worker: Wallet details for {ctx.message.author} :office_worker:",
                                   timestamp=datetime.utcnow(),
@@ -309,8 +309,8 @@ class UserAccountCommands(commands.Cog):
                     pass
             await ctx.author.send(embed=balance_embed)
         else:
-            title = '__Stellar Wallet Error__'
-            message = f'Wallet could not be obtained from the system please try again later'
+            title = 'Crypto Link Wallet is empty__'
+            message = f'Your wallet is empty'
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
