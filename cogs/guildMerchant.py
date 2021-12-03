@@ -188,6 +188,9 @@ class MerchantCommunityOwner(commands.Cog):
                 {"name": f':information_source: Create new monetized role :information_source: ',
                  "value": f'```{self.command_string}merchant role create <role name> <role value in $> '
                           f'<weeks> <days> <hours> <minutes>```'},
+                {"name": f':rocket: Activate already activated role',
+                 "value": f'```{self.command_string}merchant role reactivate <@discord.Role> <role value in $> '
+                          f'<weeks> <days> <hours> <minutes>```'},
 
                 {"name": f':play_pause:  Stop Active Role :play_pause:  ',
                  "value": f'```{self.command_string}merchant role stop <@discord.Role>```'},
