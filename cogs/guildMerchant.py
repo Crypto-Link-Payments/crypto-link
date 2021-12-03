@@ -130,13 +130,13 @@ class MerchantCommunityOwner(commands.Cog):
             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                 destination=1)
 
-    @commands.group()
+    @commands.group(aliases=['merchant'])
     @commands.check(is_owner)  # Check if author is community owner
     @commands.check(merchant_com_reg_stats)  # Check if community has been registered in the system
     @commands.check(has_wallet)  # Check if owner has community wallet
     @commands.guild_only()
     @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def merchant(self, ctx):
+    async def merch(self, ctx):
         if ctx.invoked_subcommand is None:
             title = "💱 __Merchant System Message Setup__💱 "
             description = 'All available commands under ***merchant*** category.'
@@ -154,7 +154,7 @@ class MerchantCommunityOwner(commands.Cog):
             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands,
                                                c=Color.purple())
 
-    @merchant.command()
+    @merch.command()
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def manual(self, ctx):
         manual = Embed(title=':convenience_store: __Merchant system manual__ :convenience_store: ',
@@ -178,7 +178,7 @@ class MerchantCommunityOwner(commands.Cog):
                          inline=False)
         await ctx.channel.send(embed=manual, delete_after=600)
 
-    @merchant.group(aliases=['role', 'r'])
+    @merch.group(aliases=['role', 'r'])
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def roles(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -450,7 +450,7 @@ class MerchantCommunityOwner(commands.Cog):
                                                 color_code=1,
                                                 destination=1)
 
-    @merchant.command()
+    @merch.command()
     @commands.check(is_owner)
     @commands.check(is_public)
     async def active(self, ctx):
@@ -482,7 +482,7 @@ class MerchantCommunityOwner(commands.Cog):
             await customMessages.system_message(ctx=ctx, sys_msg_title=title1, message=message, color_code=1,
                                                 destination=1)
 
-    @merchant.group(aliases=['w', 'acc', 'account'])
+    @merch.group(aliases=['w', 'acc', 'account'])
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def wallet(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -741,7 +741,7 @@ class MerchantCommunityOwner(commands.Cog):
                       f'will be excluded. At least one duration property needs to have integer greater than 0.'
             await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
 
-    @merchant.error
+    @merch.error
     async def merchant_error(self, ctx, error):
 
         """

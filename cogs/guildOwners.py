@@ -1,10 +1,9 @@
 from datetime import datetime
-import json
 import decimal
 from bson.decimal128 import Decimal128
 from re import sub
 from nextcord.ext import commands
-from nextcord import TextChannel, Embed, Colour, Role
+from nextcord import Embed, Colour, Role
 from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 
@@ -172,7 +171,8 @@ class GuildOwnerCommands(commands.Cog):
             #                      value=f'`{xlm_stats["multiTxCount"]}`')
             stats_info.add_field(name=':warning: Other token statistics',
                                  value=f'In order to get statistics of other tokens for you server please use '
-                                       f'same command structure and add one asset code from available: {available_stats.upper()}',
+                                       f'same command structure and add one asset code from available:'
+                                       f' {available_stats.upper()}',
                                  inline=False)
             await ctx.channel.send(embed=stats_info)
         else:
@@ -303,8 +303,9 @@ class GuildOwnerCommands(commands.Cog):
                                                            community_name=f'{ctx.message.guild}'):  # register community wallet
                     msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
                     message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed ' \
-                              f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
-                              f' commands or have a look at ***merchant system manual*** accessible through command ' \
+                              f' with `{self.command_string}merchant` in order to familiarize yourself with ' \
+                              f'all available commands or have a look at ***merchant system' \
+                              f' manual*** accessible through command ' \
                               f' `{self.command_string}merchant manual` '
                     await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
                                                         destination=1)

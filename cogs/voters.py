@@ -1,15 +1,7 @@
-import time
-from datetime import datetime
-import json
-import decimal
-from bson.decimal128 import Decimal128
-from re import sub
-from datetime import timedelta
 from nextcord.ext import commands
-from nextcord import TextChannel, Embed, Colour, Role
-from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet, has_ballot_access
+from nextcord import Colour
+from utils.customCogChecks import is_public, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
-from random import randint
 
 custom_messages = CustomMessages()
 

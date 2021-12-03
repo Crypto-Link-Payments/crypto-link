@@ -36,7 +36,6 @@ horizon_cogs = ['horizonCommands.horizonMain',
 
 class DiscordBot(commands.Bot):
     def __init__(self, backoffice, bot_settings: dict):
-        helper = Helpers()
         self.bot_settings = bot_settings
         self.hot_wallets = backoffice.stellar_wallet.public_key
 

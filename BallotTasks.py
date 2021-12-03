@@ -130,7 +130,6 @@ class BallotTasks:
                 await channel.send(embed=ballot_data)
             except Exception as e:
                 print(Fore.RED + f"BALLOT SNAPSHOT ERROR {e}")
-                pass
         else:
             try:
                 await destination.send(embed=ballot_data)

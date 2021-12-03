@@ -1,13 +1,9 @@
 import time
 from datetime import datetime
-import json
-import decimal
-from bson.decimal128 import Decimal128
-from re import sub
 from datetime import timedelta
 from nextcord.ext import commands
-from nextcord import TextChannel, Embed, Colour, Role
-from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet, has_ballot_access
+from nextcord import TextChannel, Embed, Colour
+from utils.customCogChecks import is_public, has_wallet, has_ballot_access
 from cogs.utils.systemMessaages import CustomMessages
 from random import randint
 
@@ -31,6 +27,7 @@ class BallotOwnerCommands(commands.Cog):
 
     @commands.group()
     @commands.check(is_public)
+    @commands.check(has_wallet)
     @commands.check(has_ballot_access)
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def ballot(self, ctx):
