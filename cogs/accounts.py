@@ -294,10 +294,12 @@ class UserAccountCommands(commands.Cog):
         bag = [k for k, v in user_balances.items() if v > 0]
         if bag:
             # initiate Discord embed
-            balance_embed = Embed(title=f":office_worker: Wallet details for {ctx.message.author} :office_worker:",
+            balance_embed = Embed(title=f":office_worker: Details for {ctx.message.author} :office_worker:",
                                   timestamp=datetime.utcnow(),
                                   colour=Colour.dark_orange())
-            balance_embed.set_thumbnail(url=ctx.message.author.avatar.url)
+
+            if ctx.message.author.avatar:
+                balance_embed.set_thumbnail(url=ctx.message.author.avatar.url)
 
             for k, v in user_balances.items():
                 if v > 0:
