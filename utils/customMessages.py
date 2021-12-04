@@ -17,7 +17,8 @@ async def user_account_info(ctx, data, bot_avatar_url):
     account_info.set_author(name=f'{ctx.message.author} (ID: {ctx.message.author.id})',
                             icon_url=bot_avatar_url,
                             url=data["_links"]["self"]['href'])
-    account_info.set_thumbnail(url=ctx.message.author.avatar.url)
+    if ctx.message.author.avatar:
+        account_info.set_thumbnail(url=ctx.message.author.avatar.url)
     account_info.add_field(name=":map: Account Address :map:",
                            value=f'```{data["account_id"]}```',
                            inline=False)

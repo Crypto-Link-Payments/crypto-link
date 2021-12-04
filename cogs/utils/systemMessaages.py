@@ -278,7 +278,8 @@ class CustomMessages:
         notify.add_field(name=':sunrise: Horizon Access Link :sunrise: ',
                          value=f"[Complete Details]({withdrawal_data['explorer']})",
                          inline=False)
-        notify.set_thumbnail(url=ctx.message.author.avatar.url)
+        if ctx.message.author.avatar.url:
+            notify.set_thumbnail(url=ctx.message.author.avatar.url)
 
         try:
             await ctx.author.send(embed=notify)
@@ -371,7 +372,9 @@ class CustomMessages:
                                  value=f"```Name: {role.name}\n"
                                        f"Id: {role.id}```",
                                  inline=False)
-        incoming_funds.set_thumbnail(url=f'{ctx.message.author.avatar.url}')
+        if ctx.message.author.avatar.url:
+            incoming_funds.set_thumbnail(url=ctx.message.author.avatar.url)
+
         incoming_funds.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
                                  value=f'```Fiat: ${role_details["dollarValue"]}\n'
                                        f'Crypto: {role_details["roleRounded"]} XLM\n'
