@@ -298,7 +298,6 @@ class MerchantCommunityOwner(commands.Cog):
                          hours_count: int, minutes_count: int):
 
         if ctx.author.id == ctx.guild.owner.id:
-            # Check if role already not  monetized
             in_penny = (int(dollar_value * (10 ** 2)))  # Convert to pennies
             total = weeks_count + days_count + hours_count + minutes_count
             if not (weeks_count < 0) and not (days_count < 0) and not (hours_count < 0) and not (
