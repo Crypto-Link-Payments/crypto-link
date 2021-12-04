@@ -509,14 +509,11 @@ class MerchantCommunityOwner(commands.Cog):
         data = self.merchant.get_wallet_balance(community_id=ctx.message.guild.id)
 
         if data:
-            stellar_balance = data['xlm']
-            stellar_real = get_normal(value=str(stellar_balance), decimal_point=7)
-
             wallet_details = Embed(title=' :bank: __Merchant Wallet Balance__ :bank:',
                                    description=f"Current balance of the ***{ctx.guild}*** wallet",
                                    colour=Color.gold())
             wallet_details.add_field(name=f':moneybag:  Stellar Lumen :moneybag: ',
-                                     value=f"```{stellar_real} XLM```",
+                                     value=f"```{(data['xlm'])/(10**7)} XLM```",
                                      inline=False)
             wallet_details.add_field(name=f':warning: Withdrawal from merchant wallet :warning: ',
                                      value=f"Please use command ```{self.command_string}merchant wallet sweep``` to withdraw all"
