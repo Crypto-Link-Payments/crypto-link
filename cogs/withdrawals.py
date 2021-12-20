@@ -1,7 +1,6 @@
 from nextcord.ext import commands
 import time
 from utils.customCogChecks import has_wallet, check
-from cogs.utils.monetaryConversions import convert_to_usd
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
 
