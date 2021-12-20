@@ -56,7 +56,6 @@ class WithdrawalCommands(commands.Cog):
 
                         wallet_details = self.backoffice.wallet_manager.get_ticker_balance(asset_code=token,
                                                                                            user_id=ctx.message.author.id)
-                        print("wallet details check")
                         if wallet_details:
                             if wallet_details >= micro_units:
                                 message_content = f"{ctx.message.author.mention} You have requested to withdraw " \
@@ -85,16 +84,12 @@ class WithdrawalCommands(commands.Cog):
                                                                                                  for_owner_macro),
                                                                                              asset_issuer=asset_issuer,
                                                                                              memo=memo)
-                                    from pprint import pprint
-                                    pprint(result)
-                                    print("Getting hash details")
+
                                     if result.get("hash"):
-                                        print("Hash found")
                                         to_deduct = {f'{token}': int(micro_units) * (-1)}
                                         if self.backoffice.wallet_manager.update_user_balance_off_chain(
                                                 user_id=int(ctx.author.id),
                                                 coin_details=to_deduct):
-
                                             # Store withdrawal details to database
                                             result['userId'] = int(ctx.message.author.id)
                                             result["time"] = int(time.time())
@@ -140,7 +135,8 @@ class WithdrawalCommands(commands.Cog):
 
                                             # Send message to user on withdrawal
                                             await custom_messages.withdrawal_notify(ctx, withdrawal_data=result,
-                                                                                    fee=f'{withdrawal_fee:,.7f} {token.upper()}',memo = memo)
+                                                                                    fee=f'{withdrawal_fee:,.7f} {token.upper()}',
+                                                                                    memo=memo)
 
                                             # # System channel notification on withdrawal processed
                                             channel_sys = self.bot.get_channel(int(self.with_channel))
@@ -154,22 +150,6 @@ class WithdrawalCommands(commands.Cog):
                                             await custom_messages.cl_staff_incoming_funds_notification(
                                                 sys_channel=incoming_funds,
                                                 incoming_fees=f'{withdrawal_fee:,.7f} {token.upper()}')
-
-                                            # Message to explorer
-                                            # if token == 'xlm':
-                                            #     in_dollar = convert_to_usd(amount=for_owner_macro,
-                                            #                                coin_name='stellar')
-                                            # else:
-                                            #     in_dollar = {"total": "$ 0.0"}
-
-                                            # Load channels
-                                            # load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                            #                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                                            #
-                                            # explorer_msg = f':outbox_tray: {for_owner_macro} {token.upper()} ' \
-                                            #                f'(${in_dollar["total"]}) on {ctx.message.guild}'
-                                            # await custom_messages.explorer_messages(applied_channels=load_channels,
-                                            #                                         message=explorer_msg)
 
                                     else:
                                         msg = f"It seems that there has been error while trying to withdraw. " \
