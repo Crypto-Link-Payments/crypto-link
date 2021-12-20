@@ -189,19 +189,16 @@ class CustomMessages:
             col = Colour.red()
             destination_txt = f'{tx_type_emoji} Recipient {tx_type_emoji} '
             value_emoji = ":money_with_wings: "
-            avatar = user.avatar.url
 
         elif direction == 1:
             title = f':inbox_tray: Incoming {tx_type_emoji} {tx_type.title()} transaction :inbox_tray: '
             col = Colour.green()
             destination_txt = ':postbox: Sender :postbox: '
-            avatar = destination.avatar.url
             value_emoji = ":moneybag: "
 
         tx_report = Embed(title=title,
                           colour=col,
                           timestamp=datetime.utcnow())
-        tx_report.set_thumbnail(url=avatar)
         tx_report.add_field(name=f'{destination_txt}',
                             value=f'```{user}```',
                             inline=False)
