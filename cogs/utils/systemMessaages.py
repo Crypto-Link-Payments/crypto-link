@@ -51,7 +51,6 @@ class CustomMessages:
         notify = Embed(title='System Deposit Notification',
                        description='Deposit has been processed',
                        timestamp=datetime.utcnow())
-        notify.set_thumbnail(url=user.avatar.url)
         notify.add_field(name='User details',
                          value=f'{user} ID; {user.id}',
                          inline=False)
