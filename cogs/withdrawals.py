@@ -85,6 +85,8 @@ class WithdrawalCommands(commands.Cog):
                                                                                                  for_owner_macro),
                                                                                              asset_issuer=asset_issuer,
                                                                                              memo=memo)
+                                    from pprint import pprint
+                                    pprint(result)
                                     print("Getting hash details")
                                     if result.get("hash"):
                                         print("Hash found")

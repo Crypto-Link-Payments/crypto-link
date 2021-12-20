@@ -234,7 +234,11 @@ class StellarWallet:
 
         tx.sign(self.private_key)
         try:
+            print("Submitting transaction")
             resp = self.server.submit_transaction(tx)
+            from pprint import pprint
+            pprint("Result from response")
+            pprint(resp)
             details = self.decode_transaction_envelope(envelope_xdr=resp['envelope_xdr'])
             end_details = {
                 "asset": details['code'],
@@ -247,10 +251,15 @@ class StellarWallet:
             return end_details
         except exceptions.BadRequestError as e:
             # get operation from result_codes to be processed
+            print(f'Bad request: {e}')
             error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
             return {
 
                 "error": f'{error} with {token.upper()} issuer'
+            }
+        except Exception as e:
+            return {
+                "error": f'{e}'
             }
 
     def establish_trust(self, token, asset_issuer: str, private_key=None):
@@ -264,7 +273,7 @@ class StellarWallet:
         user_key_pair = Keypair.from_secret(private_key)
         public_key = user_key_pair.public_key
 
-        asset = Asset(code = token.upper(), issuer=asset_issuer)
+        asset = Asset(code=token.upper(), issuer=asset_issuer)
 
         try:
             source_account = self.server.load_account(public_key)
