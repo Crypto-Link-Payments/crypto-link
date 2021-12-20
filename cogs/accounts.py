@@ -49,7 +49,6 @@ class UserAccountCommands(commands.Cog):
                             description=f' ***__Basic details on your Discord account__*** ',
                             colour=Colour.dark_orange(),
                             timestamp=utc_now)
-        acc_details.set_author(name=f'Discord Account details', icon_url=ctx.author.avatar.url)
         acc_details.add_field(name=":map: Wallet address :map: ",
                               value=f"```{self.backoffice.stellar_wallet.public_key}```")
         acc_details.add_field(name=":compass: MEMO :compass: ",
@@ -79,7 +78,6 @@ class UserAccountCommands(commands.Cog):
             acc_details.add_field(name=f'LTC',
                                   value=f'`Ł {in_ltc:.8f}`')
 
-        acc_details.set_thumbnail(url=ctx.author.avatar.url)
         acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
                               value=f'[Stellar](https://www.stellar.org/)\n'
                                     f'[Stellar Foundation](https://www.stellar.org/foundation)\n'
@@ -297,9 +295,6 @@ class UserAccountCommands(commands.Cog):
             balance_embed = Embed(title=f":office_worker: Details for {ctx.message.author} :office_worker:",
                                   timestamp=datetime.utcnow(),
                                   colour=Colour.dark_orange())
-
-            if ctx.message.author.avatar:
-                balance_embed.set_thumbnail(url=ctx.message.author.avatar.url)
 
             for k, v in user_balances.items():
                 if v > 0:
