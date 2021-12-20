@@ -85,8 +85,9 @@ class WithdrawalCommands(commands.Cog):
                                                                                                  for_owner_macro),
                                                                                              asset_issuer=asset_issuer,
                                                                                              memo=memo)
-
+                                    print("Getting hash details")
                                     if result.get("hash"):
+                                        print("Hash found")
                                         to_deduct = {f'{token}': int(micro_units) * (-1)}
                                         if self.backoffice.wallet_manager.update_user_balance_off_chain(
                                                 user_id=int(ctx.author.id),

@@ -127,17 +127,18 @@ class StellarWallet:
         :param envelope_xdr: Xdr envelope from stellar network
         :return: Decoded transaction details
         """
+        from pprint import pprint
+        pprint(envelope_xdr)
         te = TransactionEnvelope.from_xdr(envelope_xdr, self.network_phrase)
+        pprint(te)
         operations = te.transaction.operations
-
-        # TODO make multiple payments inside one transaction
+        pprint(dir(te.transaction))
         for op in operations:
             if isinstance(op, Payment):
                 asset = op.asset.to_dict()
                 if asset.get('type') == 'native':
                     asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
                 asset["amount"] = op.to_xdr_amount(op.amount)
-                # TODO count all deposits
                 return asset
 
     def get_incoming_transactions(self, pag):
