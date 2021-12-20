@@ -127,12 +127,8 @@ class StellarWallet:
         :param envelope_xdr: Xdr envelope from stellar network
         :return: Decoded transaction details
         """
-        from pprint import pprint
-        pprint(envelope_xdr)
         te = TransactionEnvelope.from_xdr(envelope_xdr, self.network_phrase)
-        pprint(te)
         operations = te.transaction.operations
-        pprint(dir(te.transaction))
         for op in operations:
             if isinstance(op, Payment):
                 asset = op.asset.to_dict()
@@ -234,11 +230,7 @@ class StellarWallet:
 
         tx.sign(self.private_key)
         try:
-            print("Submitting transaction")
             resp = self.server.submit_transaction(tx)
-            from pprint import pprint
-            pprint("Result from response")
-            pprint(resp)
             details = self.decode_transaction_envelope(envelope_xdr=resp['envelope_xdr'])
             end_details = {
                 "asset": details['code'],
@@ -251,7 +243,6 @@ class StellarWallet:
             return end_details
         except exceptions.BadRequestError as e:
             # get operation from result_codes to be processed
-            print(f'Bad request: {e}')
             error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
             return {
 
@@ -259,7 +250,7 @@ class StellarWallet:
             }
         except Exception as e:
             return {
-                "error": f'{e}'
+                "error": f'Internal network error: {e}'
             }
 
     def establish_trust(self, token, asset_issuer: str, private_key=None):
