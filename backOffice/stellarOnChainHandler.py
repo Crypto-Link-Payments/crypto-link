@@ -128,14 +128,17 @@ class StellarWallet:
         :return: Decoded transaction details
         """
         te = TransactionEnvelope.from_xdr(envelope_xdr, self.network_phrase)
-        operations = te.transaction.operations
-        for op in operations:
-            if isinstance(op, Payment):
-                asset = op.asset.to_dict()
-                if asset.get('type') == 'native':
-                    asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
-                asset["amount"] = op.to_xdr_amount(op.amount)
-                return asset
+        try:
+            operations = te.transaction.operations
+            for op in operations:
+                if isinstance(op, Payment):
+                    asset = op.asset.to_dict()
+                    if asset.get('type') == 'native':
+                        asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
+                    asset["amount"] = op.to_xdr_amount(op.amount)
+                    return asset
+        except Exception:
+            return None
 
     def get_incoming_transactions(self, pag):
         """
@@ -232,15 +235,19 @@ class StellarWallet:
         try:
             resp = self.server.submit_transaction(tx)
             details = self.decode_transaction_envelope(envelope_xdr=resp['envelope_xdr'])
-            end_details = {
-                "asset": details['code'],
-                "explorer": resp['_links']['transaction']['href'],
-                "hash": resp['hash'],
-                "ledger": resp['ledger'],
-                "destination": address,
-                "amount": details['amount']
-            }
-            return end_details
+            if details:
+                end_details = {
+                    "asset": details['code'],
+                    "explorer": resp['_links']['transaction']['href'],
+                    "hash": resp['hash'],
+                    "ledger": resp['ledger'],
+                    "destination": address,
+                    "amount": details['amount']
+                }
+                return end_details
+            else:
+                return {"error": "Stellar horizon network is busy. Please try again later"}
+
         except exceptions.BadRequestError as e:
             # get operation from result_codes to be processed
             error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
