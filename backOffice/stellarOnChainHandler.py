@@ -214,6 +214,7 @@ class StellarWallet:
             asset = Asset.native()
 
         if memo:
+            print("Memo attached")
             tx = TransactionBuilder(
                 source_account=source_account,
                 network_passphrase=self.network_phrase,
@@ -223,6 +224,7 @@ class StellarWallet:
                 .set_timeout(30) \
                 .build()
         else:
+            print("no Memo")
             tx = TransactionBuilder(
                 source_account=source_account,
                 network_passphrase=self.network_phrase,
@@ -234,9 +236,11 @@ class StellarWallet:
 
         tx.sign(self.private_key)
         try:
+            print("Submitting transaction")
             resp = self.server.submit_transaction(tx)
             details = self.decode_transaction_envelope(envelope_xdr=resp['envelope_xdr'])
             if details:
+                print("Details obtained")
                 end_details = {
                     "asset": details['code'],
                     "explorer": resp['_links']['transaction']['href'],
@@ -247,18 +251,19 @@ class StellarWallet:
                 }
                 return end_details
             else:
+                print("There was error")
                 return {"error": "Stellar horizon network is busy. Please try again later"}
 
+        except Exception as e:
+            return {
+                "error": f'Internal network error: {e}'
+            }
         except exceptions.BadRequestError as e:
             # get operation from result_codes to be processed
             error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
             return {
 
                 "error": f'{error} with {token.upper()} issuer'
-            }
-        except Exception as e:
-            return {
-                "error": f'Internal network error: {e}'
             }
 
     def establish_trust(self, token, asset_issuer: str, private_key=None):

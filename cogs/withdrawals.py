@@ -66,7 +66,7 @@ class WithdrawalCommands(commands.Cog):
 
                                 verification = await ctx.channel.send(content=message_content)
                                 msg_usr = await self.bot.wait_for('message', check=check(ctx.message.author))
-
+                                print("Waiting for users answer")
                                 if str(msg_usr.content.lower()) == 'yes':
                                     processing_msg = ':robot: Processing withdrawal request, please wait few moments....'
                                     processing_msg = await ctx.channel.send(content=processing_msg)
@@ -76,6 +76,7 @@ class WithdrawalCommands(commands.Cog):
                                     # Get issuer if not xlm
                                     if token != 'xlm':
                                         asset_issuer = asset_details["assetIssuer"]
+                                        print(f'Issuer for asset {asset_code}? {asset_issuer}')
 
                                     result = self.backoffice.stellar_wallet.token_withdrawal(address=address,
                                                                                              token=token,
@@ -83,7 +84,7 @@ class WithdrawalCommands(commands.Cog):
                                                                                                  for_owner_macro),
                                                                                              asset_issuer=asset_issuer,
                                                                                              memo=memo)
-
+                                    print(result)
                                     if result.get("hash"):
                                         to_deduct = {f'{token}': int(micro_units) * (-1)}
                                         if self.backoffice.wallet_manager.update_user_balance_off_chain(
