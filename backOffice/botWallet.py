@@ -55,6 +55,11 @@ class BotManager:
 
         return result.matched_count > 0
 
+    def reset_bot_wallet_balance(self, ticker: str):
+        result = self.bot_wallet.update_one({"ticker": ticker},
+                                            {"$set": {ticker: 0}})
+        return result.matched_count > 0
+
     def get_fees_by_category(self, key: str):
         """
         Return details on the fees from database
