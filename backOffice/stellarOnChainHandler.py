@@ -44,7 +44,8 @@ class StellarWallet:
             public_details = helpers.read_json_file(file_name="hotWallets.json")  # Load hot wallet details
             self.network_phrase = Network.PUBLIC_NETWORK_PASSPHRASE
             self.network_type = 'pub-net'
-            self.server = Server(horizon_url="https://horizon.publicnode.org/")
+            self.server = Server(horizon_url="https://horizon.stellar.lobstr.co /")
+            # self.server = Server(horizon_url="https://horizon.publicnode.org/")
             self.public_key = public_details["xlm"]
             self.dev_key = public_details["xlmDev"]
             self.private_key = secret_details['stellar']
