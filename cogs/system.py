@@ -227,20 +227,23 @@ class BotManagementCommands(commands.Cog):
         """
 
         balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
-        # tODO check if this is correct
+
         if balance > 0:  # Check if balance greater than -
             if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
                     discord_id=ctx.message.author.id,
                     stroops=int(balance), direction=1):
                 # Deduct from bot wallet balance
                 if self.backoffice.bot_manager.reset_bot_wallet_balance(ticker=ticker):
-                    print("Bot wallet balance has been reset")
+                    await ctx.author.send(content=f'You have transferred {balance} {ticker} from bot wallet to yourself')
                 else:
-                    print(f"Could not reset bot wallet balance for {ticker}")
+                    await ctx.author.send(
+                        content=f'Bot wallet balance could not be rese')
             else:
-                print("Balance could not be appended to you")
+                await ctx.author.send(
+                    content=f'Could not give you money')
         else:
             print(f"Bot wallet balance is 0 for ticker {ticker}")
+        pass
 
     """
     CRYPTO LINK SYSTEM COMMANDS
