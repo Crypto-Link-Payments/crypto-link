@@ -100,7 +100,9 @@ class BotManagementCommands(commands.Cog):
 
         return fee_type
 
-    #############################  Crypto Link Commands #############################
+    """
+    CRYPTO LINK COMMANDS
+    """
 
     @commands.command()
     @commands.check(is_one_of_gods)
