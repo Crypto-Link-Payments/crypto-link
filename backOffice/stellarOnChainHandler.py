@@ -138,7 +138,8 @@ class StellarWallet:
                         asset['code'] = 'XLM'  # Appending XLM code to asset incase if native
                     asset["amount"] = op.to_xdr_amount(op.amount)
                     return asset
-        except Exception:
+        except Exception as e:
+            print("Decoding error")
             return None
 
     def get_incoming_transactions(self, pag):
