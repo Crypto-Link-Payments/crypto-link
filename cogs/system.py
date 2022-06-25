@@ -204,8 +204,8 @@ class BotManagementCommands(commands.Cog):
         for u in stats:
             try:
                 username = u['userName']
-                brdiges = u["bridges"]
-                line = f'{rank}.' + ' ' + f'***{username}***' + ' ' + f'\n{brdiges}' + ' \n'
+                bridges_count = u["bridges"]
+                line = f'{rank}.' + ' ' + f'***{username}***' + ' ' + f'\n{int(bridges_count)}' + ' \n'
                 string += line
                 rank += 1
             except KeyError:
