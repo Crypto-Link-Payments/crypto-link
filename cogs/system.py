@@ -254,6 +254,7 @@ class BotManagementCommands(commands.Cog):
                                                 data=value)
 
     @system.command(aliases=["stop"])
+    @commands.check(is_one_of_gods)
     async def off(self, ctx):
         guild = await self.bot.fetch_guild(756132394289070102)
         role = guild.get_role(773212890269745222)
