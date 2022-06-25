@@ -136,7 +136,7 @@ class BotManagementCommands(commands.Cog):
             list_of_values = [
                 {"name": "Check Corporate Balance", "value": f"{self.command_string}cl balance"},
                 {"name": "Withdrawing XLM from Corp to personal",
-                 "value": f"{self.command_string}cl sweep"},
+                 "value": f"{self.command_string}cl sweep <token>"},
                 {"name": "Statistics of crypto link system",
                  "value": f"{self.command_string}cl stats"},
                 {"name": "Other categories",
@@ -224,6 +224,7 @@ class BotManagementCommands(commands.Cog):
         """
 
         balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
+        #tODO check if this is correct
         if balance > 0:  # Check if balance greater than -
             if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
                     discord_id=ctx.message.author.id,
@@ -245,9 +246,7 @@ class BotManagementCommands(commands.Cog):
     async def system(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__Turning bot off__',
-                      'value': f"***{self.command_string}system off*** "},
-                     {'name': '__Pulling update from Github__',
-                      'value': f"***{self.command_string}system update*** "},
+                      'value': f"***{self.command_string}system off*** "}
                      ]
 
             await custom_messages.embed_builder(ctx, title='Available sub commands for system',
