@@ -224,7 +224,7 @@ class BotManagementCommands(commands.Cog):
         """
 
         balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
-        #tODO check if this is correct
+        # tODO check if this is correct
         if balance > 0:  # Check if balance greater than -
             if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
                     discord_id=ctx.message.author.id,
@@ -239,7 +239,9 @@ class BotManagementCommands(commands.Cog):
         else:
             print(f"Bot wallet balance is 0 for ticker {ticker}")
 
-    #############################  Crypto Link System #############################
+    """
+    CRYPTO LINK SYSTEM COMMANDS
+    """
 
     @commands.group(aliases=["sys"])
     @commands.check(is_one_of_gods)
@@ -256,6 +258,7 @@ class BotManagementCommands(commands.Cog):
     @system.command(aliases=["stop"])
     @commands.check(is_one_of_gods)
     async def off(self, ctx):
+        # TODO try this command
         guild = await self.bot.fetch_guild(756132394289070102)
         role = guild.get_role(773212890269745222)
         channel = self.bot.get_channel(int(773157463628709898))
@@ -264,7 +267,10 @@ class BotManagementCommands(commands.Cog):
         await self.bot.close()
         sys.exit(0)
 
-    #############################  Token management #############################
+    """
+    CRYPTO LINK TOKEN MANAGEMENT COMMANDS
+    """
+
     @commands.group()
     @commands.check(is_one_of_gods)
     async def tokens(self, ctx):
@@ -371,7 +377,6 @@ class BotManagementCommands(commands.Cog):
             if asset_data:
                 data = self.bot.backoffice.stellar_wallet.establish_trust(asset_issuer=asset_data["asset_issuer"],
                                                                           token=asset_data["asset_code"])
-
 
                 if data[0]:
                     token = {
@@ -606,100 +611,6 @@ class BotManagementCommands(commands.Cog):
                             await ctx.author.send(content="Wallet could not be created")
                     else:
                         await ctx.author.send(content="Data for new token could not be set in DB ")
-
-    # @commands.check(is_one_of_gods)
-    # async def cogs(self, ctx):
-    #     if ctx.invoked_subcommand is None:
-    #         value = [{'name': '__List all cogs__',
-    #                   'value': f"***{self.command_string}cogs list*** "},
-    #                  {'name': '__Loading specific cog__',
-    #                   'value': f"***{self.command_string}cogs load <cog name>*** "},
-    #                  {'name': '__Unloading specific cog__',
-    #                   'value': f"***{self.command_string}cogs unload <cog name>*** "},
-    #                  {'name': '__Reload all cogs__',
-    #                   'value': f"***{self.command_string}cogs reload*** "}
-    #                  ]
-    #
-    #         await custom_messages.embed_builder(ctx, title='Available sub commands for system',
-    #                                             description='Available commands under category ***system***',
-    #                                             data=value)
-
-    # @cogs.command()
-    # async def load(self, ctx, extension: str):
-    #     """
-    #     Load specific COG == Turn ON
-    #     :param ctx: Context
-    #     :param extension: Extension Name as str
-    #     :return:
-    #     """
-    #     try:
-    #         self.bot.load_extension(f'cogs.{extension}')
-    #         embed_unload = Embed(name='Boom',
-    #                              title='Cogs management',
-    #                              colour=Colour.green())
-    #         embed_unload.add_field(name='Extension',
-    #                                value=f'You have loaded ***{extension}*** COGS')
-    #
-    #         await ctx.channel.send(embed=embed_unload)
-    #     except Exception as error:
-    #         await ctx.channel.send(content=error)
-
-    # @cogs.command()
-    # async def unload(self, ctx, extension: str):
-    #     """
-    #     Unloads COG == Turns OFF commands under certain COG
-    #     :param ctx: Context
-    #     :param extension: COG Name
-    #     :return:
-    #     """
-    #     try:
-    #         self.bot.unload_extension(f'cogs.{extension}')
-    #         embed_unload = Embed(name='Boom',
-    #                              title='Cogs management',
-    #                              colour=Colour.red())
-    #         embed_unload.add_field(name='Extension',
-    #                                value=f'You have unloaded ***{extension}*** COGS')
-    #
-    #         await ctx.channel.send(embed=embed_unload)
-    #     except Exception as error:
-    #         await ctx.channel.send(content=error)
-    #
-    # @cogs.command()
-    # async def list(self, ctx):
-    #     """
-    #     List all cogs implemented in the system
-    #     """
-    #     cog_list_embed = Embed(title='All available COGS',
-    #                            description='All available cogs and their description',
-    #                            colour=Colour.green())
-    #     for cg in extensions:
-    #         cog_list_embed.add_field(name=cg,
-    #                                  value='==============',
-    #                                  inline=False)
-    #     await ctx.channel.send(embed=cog_list_embed)
-    #
-    # @cogs.command()
-    # async def reload(self, ctx):
-    #     """
-    #      Reload all cogs
-    #     """
-    #     notification_str = ''
-    #     ext_load_embed = Embed(title='System message',
-    #                            description='Status of the cogs after reload',
-    #                            colour=Colour.blue())
-    #     for extension in extensions:
-    #         try:
-    #             self.bot.unload_extension(f'{extension}')
-    #             self.bot.load_extension(f'{extension}')
-    #             notification_str += f'{extension} :smile: \n'
-    #         except Exception as e:
-    #             notification_str += f'{extension} :angry: {e}\n'
-    #
-    #     ext_load_embed.add_field(name='Status',
-    #                              value=notification_str)
-    #     await ctx.channel.send(embed=ext_load_embed)
-
-    #############################  Crypto Link Hot Wallet #############################
 
     @commands.group()
     @commands.check(is_animus)
