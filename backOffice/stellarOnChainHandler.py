@@ -215,33 +215,26 @@ class StellarWallet:
             asset = Asset.native()
 
         if memo:
-            print("Memo attached")
             tx = TransactionBuilder(
                 source_account=source_account,
                 network_passphrase=self.network_phrase,
                 base_fee=base_fee).add_text_memo(memo_text=memo).append_payment_op(destination=address,
                                                                                    asset=asset,
-                                                                                   amount=amount) \
-                .set_timeout(30) \
-                .build()
+                                                                                   amount=amount).set_timeout(
+                30).build()
         else:
-            print("no Memo")
             tx = TransactionBuilder(
                 source_account=source_account,
                 network_passphrase=self.network_phrase,
                 base_fee=base_fee).append_payment_op(destination=address,
                                                      asset=asset,
-                                                     amount=amount) \
-                .set_timeout(30) \
-                .build()
+                                                     amount=amount).set_timeout(30).build()
 
         tx.sign(self.private_key)
         try:
-            print("Submitting transaction")
             resp = self.server.submit_transaction(tx)
             details = self.decode_transaction_envelope(envelope_xdr=resp['envelope_xdr'])
             if details:
-                print("Details obtained")
                 end_details = {
                     "asset": details['code'],
                     "explorer": resp['_links']['transaction']['href'],
@@ -252,7 +245,6 @@ class StellarWallet:
                 }
                 return end_details
             else:
-                print("There was error")
                 return {"error": "Stellar horizon network is busy. Please try again later"}
 
         except Exception as e:
@@ -263,7 +255,6 @@ class StellarWallet:
             # get operation from result_codes to be processed
             error = self.__filter_error(result_code=e.extras["result_codes"]['operations'])
             return {
-
                 "error": f'{error} with {token.upper()} issuer'
             }
 
