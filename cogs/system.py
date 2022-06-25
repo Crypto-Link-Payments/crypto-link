@@ -3,7 +3,6 @@ COGS: Management of the whole payment system
 """
 import os
 import sys
-import time
 from datetime import datetime
 
 from nextcord import Embed, Colour
@@ -186,11 +185,11 @@ class BotManagementCommands(commands.Cog):
                             value=f'{reach}',
                             inline=False)
             await ctx.author.send(embed=world)
+            await self.send_token_stats(ctx=ctx, cl_on_chain=cl_on_chain, cl_off_chain=cl_off_chain, token="XLM")
 
-            await self.send_token_stats(ctx=ctx, cl_on_chain=cl_on_chain, cl_off_chain=cl_off_chain)
         else:
             off_chain_stats, on_chain_stats = self.bot.stats_manager.get_token_stats_global(token=token)
-            await self.send_token_stats(ctx=ctx, cl_on_chain=on_chain_stats, cl_off_chain=off_chain_stats)
+            await self.send_token_stats(ctx=ctx, cl_on_chain=on_chain_stats, cl_off_chain=off_chain_stats, token=token)
 
     @cl.command()
     async def bridges(self, ctx):
