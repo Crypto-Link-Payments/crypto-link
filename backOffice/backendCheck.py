@@ -37,10 +37,7 @@ class BotStructureCheck(object):
                                      "StellarUnprocessedWithdrawals",
                                      "guildProfiles",
                                      "userHotWallets",
-                                     "thirdLevelWallets",
-                                     "votingGuildProfiles",
-                                     "votingPools",
-                                     "votingPoolsHistory"]
+                                     "thirdLevelWallets"]
 
     def check_collections(self):
         """
