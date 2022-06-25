@@ -279,7 +279,6 @@ class StellarWallet:
                 base_fee=self.server.fetch_base_fee()).append_change_trust_op(asset=asset).set_timeout(
                 30).build()
             tx.sign(private_key)
-
             data = self.server.submit_transaction(tx)
             return True, data
         except exceptions.NotFoundError as e:
