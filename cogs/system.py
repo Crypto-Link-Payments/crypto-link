@@ -833,12 +833,6 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
 
-    # @cogs.error
-    # async def mng_error(self, ctx, error):
-    #     if isinstance(error, commands.CheckFailure):
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
-    #                                              sys_msg_title=CONST_WARNING_MESSAGE)
-
     @hot.error
     async def h_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
