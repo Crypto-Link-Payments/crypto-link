@@ -657,7 +657,11 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=sys_msg_title)
 
-    #############################  Crypto Link Fee management #############################
+    """
+    Crypto Link fee management commands 
+    """
+
+    # TODO check this section
 
     @commands.command()
     async def fees(self, ctx):
