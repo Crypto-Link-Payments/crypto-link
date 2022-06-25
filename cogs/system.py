@@ -41,7 +41,8 @@ class BotManagementCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
-    async def send_token_stats(self, ctx, cl_on_chain: dict, cl_off_chain: dict, token: str):
+    @staticmethod
+    async def send_token_stats(ctx, cl_on_chain: dict, cl_off_chain: dict, token: str):
         """
         Send stats on tokens
         """
