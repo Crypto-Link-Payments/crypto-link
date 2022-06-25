@@ -627,6 +627,7 @@ class BotManagementCommands(commands.Cog):
                                                 data=value, destination=1)
 
     @hot.command()
+    @commands.check(is_animus)
     async def balance(self, ctx):
         """
         Check Stellar hot wallet details
