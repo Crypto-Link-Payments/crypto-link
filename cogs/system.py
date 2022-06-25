@@ -222,59 +222,19 @@ class BotManagementCommands(commands.Cog):
         """
 
         balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
-        print(balance)
         if balance > 0:  # Check if balance greater than -
-            # Checks if recipient exists
-            if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
-                self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
-                                                          discord_username=f'{ctx.message.author}')
-
             if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
                     discord_id=ctx.message.author.id,
                     stroops=int(balance), direction=1):
-                # Deduct the balance from the community balance
-                if self.backoffice.bot_manager.update_lpi_wallet_balance(amount=balance, wallet="xlm", direction=2):
-                    # Store in history and send notifications to owner and to channel
-                    dec_point = 7
-                    normal_amount = get_normal(str(balance), decimal_point=dec_point)
-
-                    # Store into the history of corporate transfers
-                    self.backoffice.corporate_hist_mng.store_transfer_from_corp_wallet(time_utc=int(time.time()),
-                                                                                       author=f'{ctx.message.author}',
-                                                                                       destination=int(
-                                                                                           ctx.message.author.id),
-                                                                                       amount_atomic=balance,
-                                                                                       amount=normal_amount,
-                                                                                       currency='xlm')
-
-                    # notification to corp account discord channel
-                    stellar_channel_id = auto_channels['stellar']
-                    stellar_notify_channel = self.bot.get_channel(int(stellar_channel_id))
-
-                    await custom_messages.send_transfer_notification(ctx=ctx, member=ctx.message.author,
-                                                                     sys_channel=stellar_notify_channel,
-                                                                     normal_amount=normal_amount,
-                                                                     emoji=CONST_STELLAR_EMOJI,
-                                                                     chain_name='Stellar Chain')
-
+                # Deduct from bot wallet balance
+                if self.backoffice.bot_manager.reset_bot_wallet_balance(ticker=ticker):
+                    print("Bot wallet balance has been reset")
                 else:
-                    # Revert the user balance if community balance can not be updated
-                    self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
-                        discord_id=ctx.message.author.id,
-                        stroops=int(balance), direction=2)
-
-                    message = f"Stellar funds could not be deducted from corporate account. Please try again later"
-                    await custom_messages.system_message(ctx, color_code=1, message=message, destination=0,
-                                                         sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+                    print(f"Could not reset bot wallet balance for {ticker}")
             else:
-                message = f"Stellar funds could not be moved from corporate account to {ctx.message.author}." \
-                          f"Please try again later "
-                await custom_messages.system_message(ctx, color_code=1, message=message, destination=0,
-                                                     sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+                print("Balance could not be appended to you")
         else:
-            message = f"You can not sweep the account as its balance is 0.0000000 {CONST_STELLAR_EMOJI}"
-            await custom_messages.system_message(ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_CORP_TRANSFER_ERROR_TITLE)
+            print(f"Bot wallet balance is 0 for ticker {ticker}")
 
     #############################  Crypto Link System #############################
 
@@ -409,6 +369,7 @@ class BotManagementCommands(commands.Cog):
             if asset_data:
                 data = self.bot.backoffice.stellar_wallet.establish_trust(asset_issuer=asset_data["asset_issuer"],
                                                                           token=asset_data["asset_code"])
+
 
                 if data[0]:
                     token = {
