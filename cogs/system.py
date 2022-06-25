@@ -196,25 +196,28 @@ class BotManagementCommands(commands.Cog):
 
     @cl.command()
     async def bridges(self, ctx):
-        stats = self.backoffice.stats_manager.get_top_builders(limit=10)
+        stats = list(self.backoffice.stats_manager.get_top_builders(limit=10))
 
         bridges = '\U0001F309'
         string = ''
         rank = 1
-        for u in stats:
-            try:
-                username = u['userName']
-                bridges_count = u["bridges"]
-                line = f'{rank}.' + ' ' + f'***{username}***' + ' ' + f'\n{int(bridges_count)}' + ' \n'
-                string += line
-                rank += 1
-            except KeyError:
-                pass
+        if stats:
+            for u in stats:
+                try:
+                    username = u['userName']
+                    bridges_count = u["bridges"]
+                    line = f'{rank}.' + ' ' + f'***{username}***' + ' ' + f'\n{int(bridges_count)}' + ' \n'
+                    string += line
+                    rank += 1
+                except KeyError:
+                    pass
 
-        bridges_embed = Embed(title=f'Stats')
-        bridges_embed.add_field(name="Top 5",
-                                value=f"{bridges} Bridge Builders Hall of Fame {bridges}\n" + f'{string}')
-        await ctx.author.send(embed=bridges_embed)
+            bridges_embed = Embed(title=f'Stats')
+            bridges_embed.add_field(name="Top 5",
+                                    value=f"{bridges} Bridge Builders Hall of Fame {bridges}\n" + f'{string}')
+            await ctx.author.send(embed=bridges_embed)
+        else:
+            await ctx.author.send(content='No Stats Marked Yet')
 
     @cl.command()
     @commands.check(is_one_of_gods)
