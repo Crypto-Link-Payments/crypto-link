@@ -237,7 +237,16 @@ class BotManagementCommands(commands.Cog):
                     token=ticker.lower()):
                 # Deduct from bot wallet balance
                 if self.backoffice.bot_manager.reset_bot_wallet_balance(ticker=ticker):
-                    await ctx.author.send(content=f'You have transferred {ticker_balance} {ticker} from bot wallet to yourself')
+
+                    await ctx.author.send(content=f'You have transferred {ticker_balance} {ticker} from bot'
+                                                  f' wallet to yourself')
+
+                    # TODO load channel from file and send notification as well
+                    guild = await self.bot.fetch_guild(756132394289070102)
+                    channel = self.bot.get_channel(int(773157463628709898))
+                    message = f':robot: Wallet has been Sweeped'
+                    await channel.send(content=message)
+
                 else:
                     await ctx.author.send(
                         content=f'Bot wallet balance could not be rese')
