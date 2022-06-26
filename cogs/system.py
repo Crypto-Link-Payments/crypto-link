@@ -845,6 +845,13 @@ class BotManagementCommands(commands.Cog):
             await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
 
+    @sweep.error
+    async def sweep_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            message= 'You forgot to provide coin ticker you are willing to sweep'
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+                                                 sys_msg_title=CONST_WARNING_MESSAGE)
+
 
 def setup(bot):
     bot.add_cog(BotManagementCommands(bot))
