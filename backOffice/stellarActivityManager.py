@@ -137,11 +137,12 @@ class StellarManager:
             print(f'Could not update balance by memo: {e}')
             return False
 
-    def update_stellar_balance_by_discord_id(self, discord_id: int, stroops: int, direction: int):
+    def update_stellar_balance_by_discord_id(self, discord_id: int, stroops: int, direction: int, token: str):
         """
         Updates the balance based on discord id  with stroops
         :param discord_id: Unique Discord id
         :param stroops: micro unit of stellar chain
+        :param token: token to be transfered
         :param direction: updating stellar balance based on memo. if 1 = append otherwise deduct
         :return:
         """
@@ -152,7 +153,7 @@ class StellarManager:
 
         try:
             result = self.xlm_wallets.update_one({"userId": discord_id},
-                                                 {'$inc': {"balance": int(stroops)}})
+                                                 {'$inc': {f"{token.lower()}": int(stroops)}})
 
             return result.matched_count > 0
         except errors.PyMongoError as e:

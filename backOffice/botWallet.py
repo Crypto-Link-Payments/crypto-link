@@ -43,10 +43,8 @@ class BotManager:
         return query
 
     def get_bot_wallet_balance_by_ticker(self, ticker):
-        query = self.bot_wallet.find_one({"ticker": ticker},
-                                         {"_id": 0,
-                                          "balance": 1})
-        return query['balance']
+        query = self.bot_wallet.find_one({"ticker": ticker})
+        return query
 
     def manage_fees_and_limits(self, key: str, data_to_update: dict):
 

@@ -27,16 +27,16 @@ if __name__ == '__main__':
     bot = DiscordBot(backoffice=backoffice, bot_settings=bot_settings)
     print("DONE")
 
-    periodic_tasks = PeriodicTasks(backoffice, bot, main_net=bot_settings["mainNet"])
-    scheduler = start_scheduler(periodic_tasks)
+    # periodic_tasks = PeriodicTasks(backoffice, bot, main_net=bot_settings["mainNet"])
+    # scheduler = start_scheduler(periodic_tasks)
+    # #
+    # # Activate merchant tasks
+    # merchant_tasks = MerchantTasks(backoffice, bot)
+    # merchant_scheduler = start_merchant_scheduler(merchant_tasks)
     #
-    # Activate merchant tasks
-    merchant_tasks = MerchantTasks(backoffice, bot)
-    merchant_scheduler = start_merchant_scheduler(merchant_tasks)
-
-    # # Ballot tasks
-    ballot_tasks = BallotTasks(backoffice, bot)
-    ballot_scheduler = start_ballot_scheduler(ballot_tasks)
+    # # # Ballot tasks
+    # ballot_tasks = BallotTasks(backoffice, bot)
+    # ballot_scheduler = start_ballot_scheduler(ballot_tasks)
 
     # Discord Token
     bot.run()

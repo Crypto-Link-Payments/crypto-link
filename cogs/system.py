@@ -123,7 +123,7 @@ class BotManagementCommands(commands.Cog):
                                             destination=ctx.message.author, thumbnail=self.bot.user.avatar.url)
 
     @commands.group()
-    @commands.check(is_one_of_gods)
+    @commands.check(is_animus)
     async def cl(self, ctx):
         """
         Entry point for cl sub commands
@@ -220,21 +220,24 @@ class BotManagementCommands(commands.Cog):
             await ctx.author.send(content='No Stats Marked Yet')
 
     @cl.command()
-    @commands.check(is_one_of_gods)
+    @commands.check(is_animus)
     async def sweep(self, ctx, ticker: str):
         """
         Transfer funds from Crypto Link to develop wallet
         """
 
-        balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
+        balance = self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker)
+        ticker_balance = int(balance["balance"])
 
-        if balance > 0:  # Check if balance greater than -
+        if ticker_balance > 0:  # Check if balance greater than -
             if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
                     discord_id=ctx.message.author.id,
-                    stroops=int(balance), direction=1):
+                    stroops=int(ticker_balance),
+                    direction=1,
+                    token=ticker.lower()):
                 # Deduct from bot wallet balance
                 if self.backoffice.bot_manager.reset_bot_wallet_balance(ticker=ticker):
-                    await ctx.author.send(content=f'You have transferred {balance} {ticker} from bot wallet to yourself')
+                    await ctx.author.send(content=f'You have transferred {ticker_balance} {ticker} from bot wallet to yourself')
                 else:
                     await ctx.author.send(
                         content=f'Bot wallet balance could not be rese')
@@ -849,8 +852,10 @@ class BotManagementCommands(commands.Cog):
     async def sweep_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             message= 'You forgot to provide coin ticker you are willing to sweep'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
+        else:
+            print(error)
 
 
 def setup(bot):
