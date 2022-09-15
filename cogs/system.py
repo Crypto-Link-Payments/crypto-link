@@ -40,6 +40,7 @@ class BotManagementCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+        self.channels = self.backoffice.auto_messaging_channels
 
     @staticmethod
     async def send_token_stats(ctx, cl_on_chain: dict, cl_off_chain: dict, token: str):
@@ -225,7 +226,8 @@ class BotManagementCommands(commands.Cog):
         """
         Transfer funds from Crypto Link to develop wallet
         """
-
+        from pprint import pprint
+        pprint(self.channels)
         balance = self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker)
         ticker_balance = int(balance["balance"])
 
@@ -240,10 +242,10 @@ class BotManagementCommands(commands.Cog):
 
                     await ctx.author.send(content=f'You have transferred {ticker_balance} {ticker} from bot'
                                                   f' wallet to yourself')
+                    channel = self.bot.get_channel(int(self.channels["sys"]))
 
-                    # TODO load channel from file and send notification as well
-                    guild = await self.bot.fetch_guild(756132394289070102)
-                    channel = self.bot.get_channel(int(773157463628709898))
+                    transfer_emb = Embed()
+
                     message = f':robot: Wallet has been Sweeped'
                     await channel.send(content=message)
 
