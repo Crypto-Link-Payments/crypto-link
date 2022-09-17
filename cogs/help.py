@@ -66,6 +66,7 @@ class HelpCommands(commands.Cog):
         :param ctx:
         :return:
         """
+        #rewrite about
         title = ':mega: __Welcome to Crypto Link__ :mega: '
         description = "What Crypto Link is and what it offers"
         list_of_values = [
