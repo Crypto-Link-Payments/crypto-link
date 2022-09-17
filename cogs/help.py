@@ -24,6 +24,7 @@ class HelpCommands(commands.Cog):
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def help(self, ctx):
         if ctx.invoked_subcommand is None:
+            # rewrite help
             title = ':sos: __Available Help Commands__ :sos: '
             description = f"Available sub commands for `{self.command_string}help`"
             list_of_values = [
