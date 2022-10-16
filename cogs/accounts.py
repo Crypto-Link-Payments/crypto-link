@@ -1,6 +1,7 @@
 from datetime import datetime
-from nextcord import Embed, Colour, File
-from nextcord.ext import commands
+from nextcord import Embed, Colour, File, Interaction, slash_command
+from nextcord.ext import commands, application_checks
+import cooldowns
 from utils.customCogChecks import has_wallet
 from cogs.utils.monetaryConversions import get_rates, rate_converter
 from re import sub
@@ -31,13 +32,13 @@ class UserAccountCommands(commands.Cog):
         else:
             print("The file does not exist")
 
-    @commands.command()
-    @commands.check(has_wallet)
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def me(self, ctx):
+    @slash_command(description="Basic details on your Discord account", dm_permission=True)
+    @application_checks.check(has_wallet)
+    @cooldowns.cooldown(1, 20, cooldowns.SlashBucket.author)
+    async def me(self,
+                 interaction: Interaction):
         utc_now = datetime.utcnow()
-        wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=ctx.message.author.id)
+        wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=interaction.user.id)
 
         try:
             xlm_balance = float(wallet_data["xlm"]) / (10 ** 7)
@@ -45,7 +46,7 @@ class UserAccountCommands(commands.Cog):
             xlm_balance = 0
 
         rates = get_rates(coin_name='stellar')
-        acc_details = Embed(title=f':office_worker: {ctx.author} :office_worker:',
+        acc_details = Embed(title=f':office_worker: {interaction.user} :office_worker:',
                             description=f' ***__Basic details on your Discord account__*** ',
                             colour=Colour.dark_orange(),
                             timestamp=utc_now)
@@ -85,7 +86,7 @@ class UserAccountCommands(commands.Cog):
                                     f'[CMC](https://coinmarketcap.com/currencies/stellar/)\n'
                                     f'[Stellar Expert](https://stellar.expert/explorer/public)')
         acc_details.set_footer(text='Conversion rates provided by CoinGecko')
-        await ctx.author.send(embed=acc_details)
+        await interaction.user.send(embed=acc_details)
 
     @commands.command(aliases=['reg', 'apply'])
     @commands.guild_only()
