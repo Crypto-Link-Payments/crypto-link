@@ -6,12 +6,13 @@ import os
 import sys
 
 from colorama import Fore
-from nextcord import Embed, Colour, Game, Status
+from nextcord import Embed, Colour, Game, Status, Interaction
 from nextcord.ext import commands
 import datetime
 import time
 from discord import HTTPException
 import traceback
+from cooldowns import CallableOnCooldown
 from cogs.utils.systemMessaages import CustomMessages
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,6 +30,27 @@ class AutoFunctions(commands.Cog):
         self.bot = bot
         self.animus_id = bot.backoffice.creator_id
         self.command_string = bot.get_command_str()
+
+    @commands.Cog.listener()
+    async def on_application_command_error(self, inter: Interaction, error):
+        error = getattr(error, "original", error)
+
+        if isinstance(error, CallableOnCooldown):
+            await inter.send(f"You are being rate-limited! Retry in `{error.retry_after}` seconds.")
+        else:
+            print(error)
+            usr_details = f'User: {inter.user} {inter.user.id}\n' \
+                          f'Server: {inter.guild}\n' \
+                          f'Channel: {inter.channel}\n'
+            try:
+                self.bot.hook_pager.error_discord(title="Unhandled Error",
+                                                  details=usr_details,
+                                                  error_description=error,
+                                                  command_content=inter.message.content,
+                                                  message='Animus')
+            except Exception as e:
+                print(e)
+
 
     # @commands.Cog.listener()
     # async def on_command_error(self, ctx, exception):
@@ -104,37 +126,37 @@ class AutoFunctions(commands.Cog):
     #     # pprint(stack_trace)
     #     # await bug_channel.send(content=stack_trace)
 
-    @commands.Cog.listener()
-    async def on_command(self, ctx):
-        try:
-            await ctx.message.delete()
-        except Exception:
-            pass
-
-        author_id = ctx.author.id
-        now = datetime.datetime.now().timestamp() * 1000
-
-        if not author_id in self.author_msg:
-            self.author_msg[author_id] = []
-
-        self.author_msg[author_id].append(now)
-        #
-        expired_time = now - spam_window
-        expired_msg = [msg for msg in self.author_msg[author_id] if msg < expired_time]
-        for msg in expired_msg:
-            self.author_msg[author_id].remove(msg)
-
-        if len(self.author_msg[author_id]) > max_cms_per_user:
-            await ctx.send("stop spamming")
-            animus = await self.bot.fetch_user(int(self.animus_id))
-
-            bug_info = Embed(title=f':new: :bug: :warning: ',
-                             description='Author spamming the bot',
-                             colour=Colour.red())
-            bug_info.add_field(name='Author spamming',
-                               value=f'{ctx.message.author}')
-            await animus.send(embed=bug_info, content=f"{animus.mention}")
-            return
+    # @commands.Cog.listener()
+    # async def on_command(self, ctx):
+    #     try:
+    #         await ctx.message.delete()
+    #     except Exception:
+    #         pass
+    #
+    #     author_id = ctx.author.id
+    #     now = datetime.datetime.now().timestamp() * 1000
+    #
+    #     if not author_id in self.author_msg:
+    #         self.author_msg[author_id] = []
+    #
+    #     self.author_msg[author_id].append(now)
+    #     #
+    #     expired_time = now - spam_window
+    #     expired_msg = [msg for msg in self.author_msg[author_id] if msg < expired_time]
+    #     for msg in expired_msg:
+    #         self.author_msg[author_id].remove(msg)
+    #
+    #     if len(self.author_msg[author_id]) > max_cms_per_user:
+    #         await ctx.send("stop spamming")
+    #         animus = await self.bot.fetch_user(int(self.animus_id))
+    #
+    #         bug_info = Embed(title=f':new: :bug: :warning: ',
+    #                          description='Author spamming the bot',
+    #                          colour=Colour.red())
+    #         bug_info.add_field(name='Author spamming',
+    #                            value=f'{ctx.message.author}')
+    #         await animus.send(embed=bug_info, content=f"{animus.mention}")
+    #         return
 
     @commands.Cog.listener()
     async def on_ready(self):
