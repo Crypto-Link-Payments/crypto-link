@@ -1,6 +1,6 @@
 from datetime import datetime
-from nextcord import Embed, Colour, File, Interaction, SlashOption, slash_command
-from nextcord.ext import commands
+from nextcord import Embed, Colour, File, Interaction, slash_command
+from nextcord.ext import commands, application_checks
 import cooldowns
 from utils.customCogChecks import has_wallet
 from cogs.utils.monetaryConversions import get_rates, rate_converter
@@ -32,9 +32,8 @@ class UserAccountCommands(commands.Cog):
         else:
             print("The file does not exist")
 
-    @commands.command()
-    @commands.check(has_wallet)
     @slash_command(description="Basic details on your Discord account", dm_permission=True)
+    @application_checks.check(has_wallet)
     @cooldowns.cooldown(1, 20, cooldowns.SlashBucket.author)
     async def me(self,
                  interaction: Interaction):
