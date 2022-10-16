@@ -86,7 +86,7 @@ class UserAccountCommands(commands.Cog):
                                     f'[CMC](https://coinmarketcap.com/currencies/stellar/)\n'
                                     f'[Stellar Expert](https://stellar.expert/explorer/public)')
         acc_details.set_footer(text='Conversion rates provided by CoinGecko')
-        await interaction.user.send(embed=acc_details)
+        await interaction.response.send_message(embed=acc_details, delete_after=15, ephemeral=True)
 
     @commands.command(aliases=['reg', 'apply'])
     @commands.guild_only()
