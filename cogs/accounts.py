@@ -32,9 +32,9 @@ class UserAccountCommands(commands.Cog):
         else:
             print("The file does not exist")
 
-    @slash_command(description="Basic details on your Discord account", dm_permission=True)
-    @application_checks.check(has_wallet)
-    @cooldowns.cooldown(1, 20, cooldowns.SlashBucket.author)
+    @slash_command(description="Basic details on your Discord account", dm_permission=False)
+    @application_checks.check(has_wallet_inter_check())
+    @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.author)
     async def me(self,
                  interaction: Interaction):
         utc_now = datetime.utcnow()
