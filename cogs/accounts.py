@@ -2,7 +2,7 @@ from datetime import datetime
 from nextcord import Embed, Colour, File, Interaction, slash_command
 from nextcord.ext import commands, application_checks
 import cooldowns
-from utils.customCogChecks import has_wallet
+from utils.customCogChecks import has_wallet, has_wallet_inter_check
 from cogs.utils.monetaryConversions import get_rates, rate_converter
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
