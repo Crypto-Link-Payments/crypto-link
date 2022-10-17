@@ -88,31 +88,33 @@ class UserAccountCommands(commands.Cog):
         acc_details.set_footer(text='Conversion rates provided by CoinGecko')
         await interaction.response.send_message(embed=acc_details, delete_after=15, ephemeral=True)
 
-    @commands.command(aliases=['reg', 'apply'])
-    @commands.guild_only()
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def register(self, ctx):
-        if not self.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id):
-            if self.backoffice.account_mng.register_user(discord_id=ctx.message.author.id,
-                                                         discord_username=f'{ctx.message.author}'):
+    @slash_command(description="Register to Crypto Link", dm_permission=False)
+    @application_checks.check(has_wallet_inter_check())
+    @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.author)
+    async def register(self,
+                       interaction: Interaction):
+        if not self.backoffice.account_mng.check_user_existence(user_id=interaction.user.id):
+            if self.backoffice.account_mng.register_user(discord_id=interaction.user.id,
+                                                         discord_username=f'{interaction.user}'):
                 message = f'Account has been successfully registered into the system and wallets created.' \
                           f' You can now access your wallet through:\n' \
-                          f' {self.command_string}wallet'
-                await custom_messages.system_message(ctx=ctx, color_code=0, message=message, destination=0,
+                          f' /wallet'
+                await custom_messages.system_message(interaction=interaction, color_code=0, message=message,
+                                                     destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
 
                 # Update guild stats on registered users
-                await self.backoffice.stats_manager.update_registered_users(guild_id=ctx.message.guild.id)
+                await self.backoffice.stats_manager.update_registered_users(guild_id=interaction.message.guild.id)
 
             else:
                 message = f'Account could not be registered at this moment please try again later.'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+                await custom_messages.system_message(interaction=interaction, color_code=1, message=message,
+                                                     destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
         else:
-            message = f'You have already registered account into the system. Please use ***{self.command_string}acc*** or ' \
-                      f'***{self.command_string}wallet*** to obtain details on balances and your profile'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+            message = f'You have already registered account into the system. Please use ***/acc*** or ' \
+                      f'***/wallet*** to obtain details on balances and your profile'
+            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
     @commands.group(alliases=["one", "st", "first", "1", "account", ])
