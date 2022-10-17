@@ -133,7 +133,7 @@ class CustomMessages:
         await ctx.author.send(embed=bridge_info)
 
     @staticmethod
-    async def system_message(ctx, message: str, color_code, destination: int, sys_msg_title: str = None,
+    async def system_message(interaction, message: str, color_code, destination: int, sys_msg_title: str = None,
                              embed_title: str = None):
         """
         Custom System Messages
@@ -160,9 +160,9 @@ class CustomMessages:
                             value=f'```{message}```')
         sys_embed.set_footer(text='Message will self-destruct in 15 seconds! ')
         if destination == 0:
-            await ctx.author.send(embed=sys_embed)
+            await interaction.response.send_message(embed=sys_embed, ephermeral=True)
         else:
-            await ctx.channel.send(embed=sys_embed, delete_after=15)
+            await interaction.channel.send(embed=sys_embed, delete_after=15, ephermeral=True)
 
     async def transaction_report_to_user(self, ctx, user, destination, transaction_data: dict, direction: int,
                                          tx_type: str,
