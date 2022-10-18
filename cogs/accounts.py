@@ -89,8 +89,7 @@ class UserAccountCommands(commands.Cog):
         await interaction.response.send_message(embed=acc_details, delete_after=15, ephemeral=True)
 
     @slash_command(description="Register to Crypto Link", dm_permission=False)
-    @application_checks.check(has_wallet_inter_check())
-    @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.author)
+    @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
     async def register(self,
                        interaction: Interaction):
         if not self.backoffice.account_mng.check_user_existence(user_id=interaction.user.id):
@@ -104,7 +103,7 @@ class UserAccountCommands(commands.Cog):
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
 
                 # Update guild stats on registered users
-                await self.backoffice.stats_manager.update_registered_users(guild_id=interaction.message.guild.id)
+                await self.backoffice.stats_manager.update_registered_users(guild_id=interaction.guild.id)
 
             else:
                 message = f'Account could not be registered at this moment please try again later.'
