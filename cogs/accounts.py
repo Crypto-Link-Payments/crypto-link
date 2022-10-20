@@ -170,7 +170,8 @@ class UserAccountCommands(commands.Cog):
                                            f'{available_stats}',
                                      inline=False)
                 await interaction.user.send(embed=stats_info)
-                await custom_messages.stellar_wallet_overall(interaction=interaction, coin_stats=account_details, utc_now=utc_now)
+                await custom_messages.stellar_wallet_overall(interaction=interaction, coin_stats=account_details,
+                                                             utc_now=utc_now)
             else:
                 token_stats = self.backoffice.account_mng.get_token_stats(discord_id=interaction.message.author.id,
                                                                           token=token.lower())
