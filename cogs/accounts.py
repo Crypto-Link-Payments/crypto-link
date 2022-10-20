@@ -1,5 +1,5 @@
 from datetime import datetime
-from nextcord import Embed, Colour, Interaction, slash_command, SlashOption
+from nextcord import Embed, Colour, File, Interaction, slash_command, SlashOption
 from nextcord.ext import commands, application_checks
 import cooldowns
 from utils.customCogChecks import has_wallet_inter_check
