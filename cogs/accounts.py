@@ -31,7 +31,7 @@ class UserAccountCommands(commands.Cog):
         else:
             print("The file does not exist")
 
-    @slash_command(description="Basic details on your Discord account", dm_permission=False)
+    @slash_command(description="Basic details about your Crypto Link account", dm_permission=False)
     @application_checks.check(has_wallet_inter_check())
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.author)
     async def me(self,
@@ -46,16 +46,16 @@ class UserAccountCommands(commands.Cog):
 
         rates = get_rates(coin_name='stellar')
         acc_details = Embed(title=f':office_worker: {interaction.user} :office_worker:',
-                            description=f' ***__Basic details on your Discord account__*** ',
+                            description=f' ***__Basic details about your Crypto Link account__*** ',
                             colour=Colour.dark_orange(),
                             timestamp=utc_now)
-        acc_details.add_field(name=":map: Wallet address :map: ",
+        acc_details.add_field(name=":map: Wallet Address :map: ",
                               value=f"```{self.backoffice.stellar_wallet.public_key}```")
         acc_details.add_field(name=":compass: MEMO :compass: ",
                               value=f"```{wallet_data['depositId']}```",
                               inline=False)
         acc_details.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag: ',
-                              value=f'`{xlm_balance:.7f}` {CONST_STELLAR_EMOJI}',
+                              value=f'`{xlm_balance:.7f}`',
                               inline=False)
 
         if rates and float(wallet_data["xlm"]) > 0:
@@ -78,13 +78,13 @@ class UserAccountCommands(commands.Cog):
             acc_details.add_field(name=f'LTC',
                                   value=f'`Ł {in_ltc:.8f}`')
 
-        acc_details.add_field(name=f'{CONST_STELLAR_EMOJI} More On Stellar Lumen (XLM) {CONST_STELLAR_EMOJI}',
+        acc_details.add_field(name=f'More On Stellar Lumen (XLM)',
                               value=f'[Stellar](https://www.stellar.org/)\n'
                                     f'[Stellar Foundation](https://www.stellar.org/foundation)\n'
                                     f'[Stellar Lumens](https://www.stellar.org/lumens)\n'
                                     f'[CMC](https://coinmarketcap.com/currencies/stellar/)\n'
                                     f'[Stellar Expert](https://stellar.expert/explorer/public)')
-        acc_details.set_footer(text='Conversion rates provided by CoinGecko')
+        acc_details.set_footer(text='Conversion rates are provided by CoinGecko')
         await interaction.response.send_message(embed=acc_details, delete_after=15, ephemeral=True)
 
     @slash_command(description="Register to Crypto Link", dm_permission=False)
@@ -94,9 +94,9 @@ class UserAccountCommands(commands.Cog):
         if not self.backoffice.account_mng.check_user_existence(user_id=interaction.user.id):
             if self.backoffice.account_mng.register_user(discord_id=interaction.user.id,
                                                          discord_username=f'{interaction.user}'):
-                message = f'Account has been successfully registered into the system and wallets created.' \
-                          f' You can now access your wallet through:\n' \
-                          f' /wallet'
+                message = f'Congratulations, your account has been successfully created.' \
+                          f' You can access your wallet via the following command:\n' \
+                          f'/wallet'
                 await custom_messages.system_message(interaction=interaction, color_code=0, message=message,
                                                      destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
@@ -105,13 +105,15 @@ class UserAccountCommands(commands.Cog):
                 await self.backoffice.stats_manager.update_registered_users(guild_id=interaction.guild.id)
 
             else:
-                message = f'Account could not be registered at this moment please try again later.'
+                message = f'Oh no! Something went wrong.\n' \
+                          f'Registration failed, please try again later.\n' \
+                          f'If the issue persists please contact one of the developers'
                 await custom_messages.system_message(interaction=interaction, color_code=1, message=message,
                                                      destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
         else:
-            message = f'You have already registered account into the system. Please use ***/acc*** or ' \
-                      f'***/wallet*** to obtain details on balances and your profile'
+            message = f'You already have an account! Please use ' \
+                      f'***/wallet*** to access your wallet details.'
             await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
