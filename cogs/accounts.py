@@ -128,6 +128,7 @@ class UserAccountCommands(commands.Cog):
                                               default='xlm')
                      ):
 
+        token = token.lower()
         # Pull all the registered coin codes from database for further check
         supported_tokens = [sup["assetCode"].lower() for sup in
                             self.bot.backoffice.token_manager.get_registered_tokens()]
@@ -173,13 +174,14 @@ class UserAccountCommands(commands.Cog):
                 await custom_messages.stellar_wallet_overall(interaction=interaction, coin_stats=account_details,
                                                              utc_now=utc_now)
             else:
-                token_stats = self.backoffice.account_mng.get_token_stats(discord_id=interaction.message.author.id,
-                                                                          token=token.lower())
-                if token_stats:
-                    token_stats_info = Embed(title=f'Details for token {token.upper()}',
-                                             description=f'Below are statistical details on account activities for the selected token,'
-                                                         f'till {utc_now} (UTC)',
-                                             colour=Colour.gold())
+                if token in supported_tokens:
+                    token_stats = self.backoffice.account_mng.get_token_stats(discord_id=interaction.message.author.id,
+                                                                              token=token.lower())
+                    if token_stats:
+                        token_stats_info = Embed(title=f'Details for token {token.upper()}',
+                                                 description=f'Below are statistical details on account activities for the selected token,'
+                                                             f'till {utc_now} (UTC)',
+                                                 colour=Colour.gold())
 
                     for k, v in token_stats[token.lower()].items():
                         # k = k.capitalize()
