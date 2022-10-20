@@ -1,5 +1,5 @@
 from datetime import datetime
-from nextcord import Embed, Colour, File, Interaction, slash_command
+from nextcord import Embed, Colour, File, Interaction, slash_command, SlashOption
 from nextcord.ext import commands, application_checks
 import cooldowns
 from utils.customCogChecks import has_wallet, has_wallet_inter_check
@@ -120,198 +120,197 @@ class UserAccountCommands(commands.Cog):
     @commands.check(has_wallet)
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def wallet(self, ctx):
-        if ctx.invoked_subcommand is None:
+    async def wallet(self,
+                     interaction: Interaction,
+                     sub_command: str = SlashOption(description="Wallet commands", required=False,
+                                                    choices=['Balance', 'Stats', 'Deposit', 'Withdraw']),
+                     token: str = SlashOption(description="For which token you'd like to query for?", required=False,
+                                              choices=["XLM", "BTC"])
+                     ):
+        if sub_command is None:
             title = ':joystick: __Available Wallet Commands__ :joystick: '
-            description = "All commands available to operate execute wallet related actions.\n" \
-                          "`Aliases: one, st, first, 1`"
+            description = "All commands available to execute wallet related actions.\n"
             list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
-                               "value": f"```{self.command_string}wallet balance```\n"
-                                        f"`Aliases: bal, balances,b`"},
+                               "value": f"```/wallet balance```\n"},
                               {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
-                               "value": f"```{self.command_string}wallet stats <asset_code=optional for non XLM>```"},
+                               "value": f"```/wallet stats <asset_code=optional for non XLM>```"},
                               {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
-                               "value": f"```{self.command_string}wallet deposit```"},
+                               "value": f"```/wallet deposit```"},
                               {"name": ":outbox_tray: Withdraw from Crypto Link :outbox_tray: ",
-                               "value": f"```{self.command_string}withdraw <amount> <asset code> <address> <memo=Optional>```"}]
-            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+                               "value": f"```/withdraw <amount> <asset code> <address> <memo=Optional>```"}]
+            await custom_messages.embed_builder(interaction=interaction, title=title,
+                                                description=description, data=list_of_values,
                                                 destination=1, c=Colour.dark_orange())
-
-    @wallet.command()
-    async def stats(self, ctx, token=None):
-        """
-        Command which returns statistical information for the wallet
-        """
-        utc_now = datetime.utcnow()
-
-        if not token or token.lower() == 'xlm':
-            tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
-                      x['assetCode'] != 'xlm']
-            available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
-            account_details = self.backoffice.account_mng.get_account_stats(discord_id=ctx.message.author.id)
-            stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
-                               description='Below are presented stats which are automatically counted upon successful'
-                                           ' execution of the commands dedicated to wallet level :one: ',
-                               colour=Colour.lighter_grey())
-            stats_info.add_field(name=f":symbols: Symbols :symbols: ",
-                                 value=f':incoming_envelope: -> `SUM of total incoming transactions` \n'
-                                       f':money_with_wings: -> `SUM of total amount sent per currency` \n'
-                                       f':envelope_with_arrow:  -> `SUM of total outgoing transactions`\n'
-                                       f':money_mouth: -> `SUM of total amount received per currency` \n'
-                                       f':man_juggling: -> `SUM of total roles purchase through merchant system`\n'
-                                       f':money_with_wings: -> `SUM of total amount spent on merchant system` \n')
-            stats_info.add_field(name=f':warning: Access token stats:warning: ',
-                                 value=f'Use same command, and add asset code. All currently available are: '
-                                       f'{available_stats}',
-                                 inline=False)
-            await ctx.author.send(embed=stats_info)
-            await custom_messages.stellar_wallet_overall(ctx=ctx, coin_stats=account_details, utc_now=utc_now)
-        else:
-            token_stats = self.backoffice.account_mng.get_token_stats(discord_id=ctx.message.author.id,
-                                                                      token=token.lower())
-            if token_stats:
-                token_stats_info = Embed(title=f'Details for token {token.upper()}',
-                                         description=f'Below are statistical details on account activities for the selected token,'
-                                                     f'till {utc_now} (UTC)',
-                                         colour=Colour.gold())
-
-                for k, v in token_stats[token.lower()].items():
-                    # k = k.capitalize()
-                    itm = sub(r"([A-Z])", r" \1", k).split()
-                    item = ' '.join([str(elem) for elem in itm]).capitalize()
-                    if k in ["depositsCount", "publicTxSendCount", "privateTxSendCount", "withdrawalsCount"]:
-                        token_stats_info.add_field(name=f'{item}',
-                                                   value=f'{v}')
-                    else:
-                        token_stats_info.add_field(name=f'{item}',
-                                                   value=f'{v:,.7f} {token.upper()}')
-
-                await ctx.author.send(embed=token_stats_info)
+        elif sub_command == "Stats":
+            utc_now = datetime.utcnow()
+            if not token or token.lower() == 'xlm':
+                tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
+                          x['assetCode'] != 'xlm']
+                available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
+                account_details = self.backoffice.account_mng.get_account_stats(discord_id=interaction.message.author.id)
+                stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
+                                   description='Below are presented stats which are automatically counted upon successful'
+                                               ' execution of the commands dedicated to wallet level :one: ',
+                                   colour=Colour.lighter_grey())
+                stats_info.add_field(name=f":symbols: Symbols :symbols: ",
+                                     value=f':incoming_envelope: -> `SUM of total incoming transactions` \n'
+                                           f':money_with_wings: -> `SUM of total amount sent per currency` \n'
+                                           f':envelope_with_arrow:  -> `SUM of total outgoing transactions`\n'
+                                           f':money_mouth: -> `SUM of total amount received per currency` \n'
+                                           f':man_juggling: -> `SUM of total roles purchase through merchant system`\n'
+                                           f':money_with_wings: -> `SUM of total amount spent on merchant system` \n')
+                stats_info.add_field(name=f':warning: Access token stats:warning: ',
+                                     value=f'Use same command, and add asset code. All currently available are: '
+                                           f'{available_stats}',
+                                     inline=False)
+                await interaction.user.send(embed=stats_info)
+                await custom_messages.stellar_wallet_overall(interaction=interaction, coin_stats=account_details, utc_now=utc_now)
             else:
-                title = '__Token statistics__'
-                message = f'You have no activity marked in the wallet for token {token.upper()}'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                     sys_msg_title=title)
+                token_stats = self.backoffice.account_mng.get_token_stats(discord_id=interaction.message.author.id,
+                                                                          token=token.lower())
+                if token_stats:
+                    token_stats_info = Embed(title=f'Details for token {token.upper()}',
+                                             description=f'Below are statistical details on account activities for the selected token,'
+                                                         f'till {utc_now} (UTC)',
+                                             colour=Colour.gold())
 
-    @wallet.group()
-    async def deposit(self, ctx):
-        """
-        Returns deposit information to user
-        """
-        if ctx.invoked_subcommand is None:
-            user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
-            if user_profile:
-                coins_string = ', '.join(
-                    [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
+                    for k, v in token_stats[token.lower()].items():
+                        # k = k.capitalize()
+                        itm = sub(r"([A-Z])", r" \1", k).split()
+                        item = ' '.join([str(elem) for elem in itm]).capitalize()
+                        if k in ["depositsCount", "publicTxSendCount", "privateTxSendCount", "withdrawalsCount"]:
+                            token_stats_info.add_field(name=f'{item}',
+                                                       value=f'{v}')
+                        else:
+                            token_stats_info.add_field(name=f'{item}',
+                                                       value=f'{v:,.7f} {token.upper()}')
 
-                description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
-                              ' wallet(GUI, CLI) to the address and deposit ID provided below. Of them will result in ' \
-                              'funds being lost to which staff of Launch Pad Investments is not ' \
-                              'responsible for. :warning:'
-
-                deposit_embed = Embed(title='How to deposit',
-                                      colour=Colour.dark_orange(),
-                                      description=description)
-                deposit_embed.add_field(name=':gem: Supported Cryptocurrencies/Tokens for deposit:gem: ',
-                                        value=f'```{coins_string}```',
-                                        inline=False)
-                deposit_embed.add_field(
-                    name=f' {CONST_STELLAR_EMOJI} Deposit Details {CONST_STELLAR_EMOJI}',
-                    value=f'\n:map: Public Address :map: \n'
-                          f'```{self.backoffice.stellar_wallet.public_key}```\n'
-                          f':compass: MEMO :compass:\n'
-                          f'```{user_profile["stellarDepositId"]}```',
-                    inline=False)
-                deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
-                                        value='Be sure to include and provide appropriate  **__MEMO__** as text and Wallet '
-                                              'address for each currency , otherwise your deposit will be lost!',
-                                        inline=False)
-                deposit_embed.add_field(name=":printer: QR Code :printer: ",
-                                        value=f'Bellow is your personal QR code including your deposit address and '
-                                              f'MEMO. Scan it with mobile application supporting QR. Be sure to '
-                                              f'recheck the data once you scan it.',
-                                        inline=False)
-
-                memo = user_profile["stellarDepositId"]
-                uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
-                                                                  memo=memo)
-                image = pyqrcode.create(content=uri, error='L')
-                image.png(file=f'{ctx.message.author.id}.png', scale=6, module_color=[0, 255, 255, 128],
-                          background=[17, 17, 17],
-                          quiet_zone=4)
-                qr_to_send = File(f'{ctx.message.author.id}.png')
-
-                deposit_embed.set_image(url=f"attachment://{ctx.message.author.id}.png")
-                deposit_embed.set_footer(text=f'{self.command_string}wallet deposit qr -> Only QR')
-                await ctx.author.send(file=qr_to_send, embed=deposit_embed)
-
-                self.clean_qr_image(author_id=ctx.message.author.id)
-            else:
-                title = '__Deposit information error__'
-                message = f'Deposit details for your account could not be obtained at this moment from the system. ' \
-                          f'Please try again later, or contact one of the staff members. '
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                     sys_msg_title=title)
-
-    @deposit.command()
-    async def qr(self, ctx):
-        """
-        Send the QR only to user
-        """
-        user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
-        if user_profile:
-            coins_string = ', '.join(
-                [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
-
-            deposit_embed = Embed(title='Deposit QR code',
-                                  colour=Colour.dark_orange())
-            deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited:gem: ',
-                                    value=f'```{coins_string}```',
-                                    inline=False)
-            memo = user_profile["stellarDepositId"]
-            uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
-                                                              memo=memo)
-            image = pyqrcode.create(content=uri, error='L')
-            image.png(file=f'{ctx.message.author.id}.png', scale=6, module_color=[0, 255, 255, 128],
-                      background=[17, 17, 17],
-                      quiet_zone=4)
-            qr_to_send = File(f'{ctx.message.author.id}.png')
-
-            deposit_embed.set_image(url=f"attachment://{ctx.message.author.id}.png")
-            deposit_embed.set_footer(text=f'{self.command_string}wallet deposit qr -> Only QR')
-            await ctx.author.send(file=qr_to_send, embed=deposit_embed)
-            self.clean_qr_image(author_id=ctx.message.author.id)
-        else:
-            title = '__Deposit information error__'
-            message = f'Deposit details for your account could not be obtained at this moment from the system. ' \
-                      f'Please try again later, or contact one of the staff members. '
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=title)
-
-    @wallet.command(aliases=['bal', 'balances', 'b'])
-    async def balance(self, ctx):
-        user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
-        bag = [k for k, v in user_balances.items() if v > 0]
-        if bag:
-            # initiate Discord embed
-            balance_embed = Embed(title=f":office_worker: Details for {ctx.message.author} :office_worker:",
-                                  timestamp=datetime.utcnow(),
-                                  colour=Colour.dark_orange())
-
-            for k, v in user_balances.items():
-                if v > 0:
-                    balance_embed.add_field(
-                        name=f"{k.upper()}",
-                        value=f'```{v / (10 ** 7):,.7f} {k.upper()}```',
-                        inline=False)
+                    await interaction.user.send(embed=token_stats_info)
                 else:
-                    pass
-            await ctx.author.send(embed=balance_embed)
-        else:
-            title = 'Crypto Link Wallet is empty__'
-            message = f'Your wallet is empty'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=title)
+                    title = '__Token statistics__'
+                    message = f'You have no activity marked in the wallet for token {token.upper()}'
+                    await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
+                                                         sys_msg_title=title)
+
+    # @wallet.group()
+    # async def deposit(self, ctx):
+    #     """
+    #     Returns deposit information to user
+    #     """
+    #     if ctx.invoked_subcommand is None:
+    #         user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
+    #         if user_profile:
+    #             coins_string = ', '.join(
+    #                 [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
+    #
+    #             description = ' :warning: To top up your Discord wallets, you will need to send from your preferred' \
+    #                           ' wallet(GUI, CLI) to the address and deposit ID provided below. Of them will result in ' \
+    #                           'funds being lost to which staff of Launch Pad Investments is not ' \
+    #                           'responsible for. :warning:'
+    #
+    #             deposit_embed = Embed(title='How to deposit',
+    #                                   colour=Colour.dark_orange(),
+    #                                   description=description)
+    #             deposit_embed.add_field(name=':gem: Supported Cryptocurrencies/Tokens for deposit:gem: ',
+    #                                     value=f'```{coins_string}```',
+    #                                     inline=False)
+    #             deposit_embed.add_field(
+    #                 name=f' {CONST_STELLAR_EMOJI} Deposit Details {CONST_STELLAR_EMOJI}',
+    #                 value=f'\n:map: Public Address :map: \n'
+    #                       f'```{self.backoffice.stellar_wallet.public_key}```\n'
+    #                       f':compass: MEMO :compass:\n'
+    #                       f'```{user_profile["stellarDepositId"]}```',
+    #                 inline=False)
+    #             deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
+    #                                     value='Be sure to include and provide appropriate  **__MEMO__** as text and Wallet '
+    #                                           'address for each currency , otherwise your deposit will be lost!',
+    #                                     inline=False)
+    #             deposit_embed.add_field(name=":printer: QR Code :printer: ",
+    #                                     value=f'Bellow is your personal QR code including your deposit address and '
+    #                                           f'MEMO. Scan it with mobile application supporting QR. Be sure to '
+    #                                           f'recheck the data once you scan it.',
+    #                                     inline=False)
+    #
+    #             memo = user_profile["stellarDepositId"]
+    #             uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
+    #                                                               memo=memo)
+    #             image = pyqrcode.create(content=uri, error='L')
+    #             image.png(file=f'{ctx.message.author.id}.png', scale=6, module_color=[0, 255, 255, 128],
+    #                       background=[17, 17, 17],
+    #                       quiet_zone=4)
+    #             qr_to_send = File(f'{ctx.message.author.id}.png')
+    #
+    #             deposit_embed.set_image(url=f"attachment://{ctx.message.author.id}.png")
+    #             deposit_embed.set_footer(text=f'{self.command_string}wallet deposit qr -> Only QR')
+    #             await ctx.author.send(file=qr_to_send, embed=deposit_embed)
+    #
+    #             self.clean_qr_image(author_id=ctx.message.author.id)
+    #         else:
+    #             title = '__Deposit information error__'
+    #             message = f'Deposit details for your account could not be obtained at this moment from the system. ' \
+    #                       f'Please try again later, or contact one of the staff members. '
+    #             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+    #                                                  sys_msg_title=title)
+    #
+    # @deposit.command()
+    # async def qr(self, ctx):
+    #     """
+    #     Send the QR only to user
+    #     """
+    #     user_profile = self.backoffice.account_mng.get_user_memo(user_id=ctx.message.author.id)
+    #     if user_profile:
+    #         coins_string = ', '.join(
+    #             [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
+    #
+    #         deposit_embed = Embed(title='Deposit QR code',
+    #                               colour=Colour.dark_orange())
+    #         deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited:gem: ',
+    #                                 value=f'```{coins_string}```',
+    #                                 inline=False)
+    #         memo = user_profile["stellarDepositId"]
+    #         uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
+    #                                                           memo=memo)
+    #         image = pyqrcode.create(content=uri, error='L')
+    #         image.png(file=f'{ctx.message.author.id}.png', scale=6, module_color=[0, 255, 255, 128],
+    #                   background=[17, 17, 17],
+    #                   quiet_zone=4)
+    #         qr_to_send = File(f'{ctx.message.author.id}.png')
+    #
+    #         deposit_embed.set_image(url=f"attachment://{ctx.message.author.id}.png")
+    #         deposit_embed.set_footer(text=f'{self.command_string}wallet deposit qr -> Only QR')
+    #         await ctx.author.send(file=qr_to_send, embed=deposit_embed)
+    #         self.clean_qr_image(author_id=ctx.message.author.id)
+    #     else:
+    #         title = '__Deposit information error__'
+    #         message = f'Deposit details for your account could not be obtained at this moment from the system. ' \
+    #                   f'Please try again later, or contact one of the staff members. '
+    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+    #                                              sys_msg_title=title)
+    #
+    # @wallet.command(aliases=['bal', 'balances', 'b'])
+    # async def balance(self, ctx):
+    #     user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
+    #     bag = [k for k, v in user_balances.items() if v > 0]
+    #     if bag:
+    #         # initiate Discord embed
+    #         balance_embed = Embed(title=f":office_worker: Details for {ctx.message.author} :office_worker:",
+    #                               timestamp=datetime.utcnow(),
+    #                               colour=Colour.dark_orange())
+    #
+    #         for k, v in user_balances.items():
+    #             if v > 0:
+    #                 balance_embed.add_field(
+    #                     name=f"{k.upper()}",
+    #                     value=f'```{v / (10 ** 7):,.7f} {k.upper()}```',
+    #                     inline=False)
+    #             else:
+    #                 pass
+    #         await ctx.author.send(embed=balance_embed)
+    #     else:
+    #         title = 'Crypto Link Wallet is empty__'
+    #         message = f'Your wallet is empty'
+    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+    #                                              sys_msg_title=title)
 
     @balance.error
     async def balance_error(self, ctx, error):
