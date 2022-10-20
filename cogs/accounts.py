@@ -183,16 +183,15 @@ class UserAccountCommands(commands.Cog):
                                                              f'till {utc_now} (UTC)',
                                                  colour=Colour.gold())
 
-                    for k, v in token_stats[token.lower()].items():
-                        # k = k.capitalize()
-                        itm = sub(r"([A-Z])", r" \1", k).split()
-                        item = ' '.join([str(elem) for elem in itm]).capitalize()
-                        if k in ["depositsCount", "publicTxSendCount", "privateTxSendCount", "withdrawalsCount"]:
-                            token_stats_info.add_field(name=f'{item}',
-                                                       value=f'{v}')
-                        else:
-                            token_stats_info.add_field(name=f'{item}',
-                                                       value=f'{v:,.7f} {token.upper()}')
+                        for k, v in token_stats[token.lower()].items():
+                            itm = sub(r"([A-Z])", r" \1", k).split()
+                            item = ' '.join([str(elem) for elem in itm]).capitalize()
+                            if k in ["depositsCount", "publicTxSendCount", "privateTxSendCount", "withdrawalsCount"]:
+                                token_stats_info.add_field(name=f'{item}',
+                                                           value=f'{v}')
+                            else:
+                                token_stats_info.add_field(name=f'{item}',
+                                                           value=f'{v:,.7f} {token.upper()}')
 
                     await interaction.user.send(embed=token_stats_info)
                 else:
