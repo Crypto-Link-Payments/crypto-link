@@ -117,7 +117,7 @@ class UserAccountCommands(commands.Cog):
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
     @commands.group(alliases=["one", "st", "first", "1", "account", ])
-    @commands.check(has_wallet)
+    @application_checks.check(has_wallet_inter_check())
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def wallet(self,
