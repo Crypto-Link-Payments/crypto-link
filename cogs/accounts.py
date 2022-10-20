@@ -129,7 +129,8 @@ class UserAccountCommands(commands.Cog):
                      ):
 
         # Pull all the registered coin codes from database for further check
-        supported_tokens = [sup["assetCode"].lower() for sup in self.bot.backoffice.token_manager.get_registered_tokens()]
+        supported_tokens = [sup["assetCode"].lower() for sup in
+                            self.bot.backoffice.token_manager.get_registered_tokens()]
 
         if sub_command == "Help":
             title = ':joystick: __Available Wallet Commands__ :joystick: '
