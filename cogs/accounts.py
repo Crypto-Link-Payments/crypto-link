@@ -134,10 +134,10 @@ class UserAccountCommands(commands.Cog):
                    interaction: Interaction
                    ):
         title = ':joystick: __Available Wallet Commands__ :joystick: '
-        description = "All commands available to execute wallet related actions.\n"
-        list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
+        description = "Here is a summary of wallet related commands.\n"
+        list_of_values = [{"name": " :woman_technologist: Get AFull Account Balance Report :woman_technologist:  ",
                            "value": f"```/wallet balance```\n"},
-                          {"name": ":bar_chart: Get Wallet Statistics :bar_chart:",
+                          {"name": ":bar_chart: Get Your Wallet Statistics :bar_chart:",
                            "value": f"```/wallet stats <asset_code=optional for non XLM>```"},
                           {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
                            "value": f"```/wallet deposit```"},
