@@ -329,20 +329,13 @@ class UserAccountCommands(commands.Cog):
     #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
     #                                              sys_msg_title=title)
 
-    @balance.error
-    async def balance_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
-            title = f'__System Error__'
-            message = f'You have not registered yourself into the system yet. Please head to one of the public ' \
-                      f'channels, where Virtual Interactive Pilot is Accessible and  execute {self.command_string}register'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
-
     @me.error
     async def quick_acc_check_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             title = f'__Balance check error__'
             message = f'In order to check balance you need to be registered into the system'
+            # TODO you need to rewrite all functions which have custom_message.system_message as you have changed
+            # the structuro in previou spull request.
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
