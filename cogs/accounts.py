@@ -151,7 +151,8 @@ class UserAccountCommands(commands.Cog):
                 tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
                           x['assetCode'] != 'xlm']
                 available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
-                account_details = self.backoffice.account_mng.get_account_stats(discord_id=interaction.message.author.id)
+                account_details = self.backoffice.account_mng.get_account_stats(
+                    discord_id=interaction.message.author.id)
                 stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
                                    description='Below are presented stats which are automatically counted upon successful'
                                                ' execution of the commands dedicated to wallet level :one: ',
