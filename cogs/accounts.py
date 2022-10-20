@@ -127,7 +127,11 @@ class UserAccountCommands(commands.Cog):
                      token: str = SlashOption(description="Balance for token", required=False,
                                               default='xlm')
                      ):
-        if sub_command is None:
+
+        # Pull all the registered coin codes from database for further check
+        supported_tokens = [sup["assetCode"].lower() for sup in self.bot.backoffice.token_manager.get_registered_tokens()]
+
+        if sub_command == "Help":
             title = ':joystick: __Available Wallet Commands__ :joystick: '
             description = "All commands available to execute wallet related actions.\n"
             list_of_values = [{"name": " :woman_technologist: Get Full Account Balance Report :woman_technologist:  ",
