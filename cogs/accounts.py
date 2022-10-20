@@ -164,7 +164,7 @@ class UserAccountCommands(commands.Cog):
         if token.lower() == 'xlm':
             tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
                       x['assetCode'] != 'xlm']
-            available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
+            available_stats = ' '.join([str("***" + elem + "***" + ", ") for elem in tokens]).capitalize()
             account_details = self.backoffice.account_mng.get_account_stats(
                 discord_id=interaction.message.author.id)
             stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
@@ -176,10 +176,10 @@ class UserAccountCommands(commands.Cog):
                                        f':money_with_wings: -> `SUM of total amount sent per currency` \n'
                                        f':envelope_with_arrow:  -> `SUM of total outgoing transactions`\n'
                                        f':money_mouth: -> `SUM of total amount received per currency` \n'
-                                       f':man_juggling: -> `SUM of total roles purchase through merchant system`\n'
-                                       f':money_with_wings: -> `SUM of total amount spent on merchant system` \n')
-            stats_info.add_field(name=f':warning: Access token stats:warning: ',
-                                 value=f'Use same command, and add asset code. All currently available are: '
+                                       f':man_juggling: -> `SUM of total roles purchased through merchant system`\n'
+                                       f':money_with_wings: -> `SUM of total amount spent on the merchant system` \n')
+            stats_info.add_field(name=f':warning: Access token stats :warning: ',
+                                 value=f'Use the same command and add an asset code. All available currencies are: '
                                        f'{available_stats}',
                                  inline=False)
             await interaction.user.send(embed=stats_info)
