@@ -122,10 +122,10 @@ class UserAccountCommands(commands.Cog):
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def wallet(self,
                      interaction: Interaction,
-                     sub_command: str = SlashOption(description="Wallet commands", required=False,
-                                                    choices=['Balance', 'Stats', 'Deposit', 'Withdraw']),
-                     token: str = SlashOption(description="For which token you'd like to query for?", required=False,
-                                              choices=["XLM", "BTC"])
+                     sub_command: str = SlashOption(description="Wallet commands", required=True,
+                                                    choices=['Balance', 'Stats', 'Deposit', 'Withdraw', 'Help']),
+                     token: str = SlashOption(description="Balance for token", required=False,
+                                              default='xlm')
                      ):
         if sub_command is None:
             title = ':joystick: __Available Wallet Commands__ :joystick: '
