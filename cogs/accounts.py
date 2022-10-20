@@ -116,7 +116,7 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
-    @commands.group(alliases=["one", "st", "first", "1", "account", ])
+    @slash_command(description="Wallet operations",dm_permission=False)
     @application_checks.check(has_wallet_inter_check())
     @commands.cooldown(1, 20, commands.BucketType.guild)
     @commands.cooldown(1, 20, commands.BucketType.user)
