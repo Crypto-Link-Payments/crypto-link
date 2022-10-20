@@ -334,8 +334,7 @@ class UserAccountCommands(commands.Cog):
         if isinstance(error, commands.CheckFailure):
             title = f'__Balance check error__'
             message = f'In order to check balance you need to be registered into the system'
-            # TODO you need to rewrite all functions which have custom_message.system_message as you have changed
-            # the structuro in previou spull request.
+            # TODO you need to rewrite all functions which have custom_message.system_message as you have changed the structuro in previou spull request.
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
@@ -345,16 +344,10 @@ class UserAccountCommands(commands.Cog):
             title = f'__{self.command_string}register error__'
             message = f'You can not register over DM with the bot. Please head to one of the channels on Discord ' \
                       f' server where Crypto Link is present and execute command: \n{self.command_string}register'
+            # TODO you need to rewrite all functions which have custom_message.system_message as you have changed the structuro in previou spull request.
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
-    @deposit.error
-    async def deposit_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
-            title = f'__{self.command_string}wallet deposit error__'
-            message = f'You have not registered yourself yet into the system. Please use first {self.command_string}register'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
 
     @wallet.error
     async def wallet_error(self, ctx, error):
@@ -362,6 +355,7 @@ class UserAccountCommands(commands.Cog):
             title = f'__{self.command_string}wallet Error__'
             message = f'In order to access your wallet you need to be first registered into payment system. You' \
                       f' can do that with {self.command_string}register!'
+            # TODO you need to rewrite all functions which have custom_message.system_message as you have changed the structuro in previou spull request.
             await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
