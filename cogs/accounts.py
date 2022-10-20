@@ -168,7 +168,8 @@ class UserAccountCommands(commands.Cog):
             account_details = self.backoffice.account_mng.get_account_stats(
                 discord_id=interaction.message.author.id)
             stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
-                               description='Below are presented stats which are automatically counted upon successful'
+                               description='Below you will find a summary of stats which are '
+                                           'automatically counted upon successful'
                                            ' execution of the commands dedicated to wallet level :one: ',
                                colour=Colour.lighter_grey())
             stats_info.add_field(name=f":symbols: Symbols :symbols: ",
