@@ -193,11 +193,20 @@ class UserAccountCommands(commands.Cog):
                                 token_stats_info.add_field(name=f'{item}',
                                                            value=f'{v:,.7f} {token.upper()}')
 
-                    await interaction.user.send(embed=token_stats_info)
+                        await interaction.response.send_message(embed=token_stats_info, delete_after=15, ephemeral=True)
+
+                    else:
+                        title = '__Token statistics__'
+                        message = f'You have no activity marked in the wallet for token {token.upper()}'
+                        await custom_messages.system_message(interaction=interaction, color_code=1, message=message,
+                                                             destination=1,
+                                                             sys_msg_title=title)
                 else:
-                    title = '__Token statistics__'
-                    message = f'You have no activity marked in the wallet for token {token.upper()}'
-                    await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
+                    title = '__Token not supported__'
+                    message = f'Token {token.upper()} is not integrated in {self.bot.user.name}. Currently available' \
+                              f' tokens are:\n {", ".join([str(elem) for elem in supported_tokens]).capitalize()}'
+                    await custom_messages.system_message(interaction=interaction, color_code=1, message=message,
+                                                         destination=1,
                                                          sys_msg_title=title)
 
     # @wallet.group()
