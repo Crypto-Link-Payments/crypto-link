@@ -147,7 +147,7 @@ class UserAccountCommands(commands.Cog):
                                                 destination=1, c=Colour.dark_orange())
         elif sub_command == "Stats":
             utc_now = datetime.utcnow()
-            if not token or token.lower() == 'xlm':
+            if token.lower() == 'xlm':
                 tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
                           x['assetCode'] != 'xlm']
                 available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
