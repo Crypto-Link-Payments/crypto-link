@@ -23,6 +23,23 @@ class UserAccountCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
+    def send_qr_code_picture(self, interaction):
+        user_profile = self.backoffice.account_mng.get_user_memo(user_id=interaction.message.author.id)
+        if user_profile:
+            memo = user_profile["stellarDepositId"]
+            uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
+                                                              memo=memo)
+            image = pyqrcode.create(content=uri, error='L')
+            image.png(file=f'{interaction.message.author.id}.png', scale=6, module_color=[0, 255, 255, 128],
+                      background=[17, 17, 17],
+                      quiet_zone=4)
+            qr_to_send = File(f'{interaction.message.author.id}.png')
+            # TODO: I think here... its needed to make whole embed inside this function, but I'm not sure
+            # TODO: Section from line 261 to 295 would need to be merged here
+            deposit_embed.set_image(url=f"attachment://{interaction.message.author.id}.png")
+
+
+
     @staticmethod
     def clean_qr_image(author_id):
         if os.path.exists(f'{author_id}.png'):
