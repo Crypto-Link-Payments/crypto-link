@@ -86,7 +86,7 @@ class CustomMessages:
         await channel.send(embed=notify)
 
     @staticmethod
-    async def embed_builder(ctx, title, description, data: list, destination=None, thumbnail=None, c: Colour = None):
+    async def embed_builder(interaction, title, description, data: list, destination=None, thumbnail=None, c: Colour = None):
         """
         Build embed from data provided
         :param ctx: Discord Context
@@ -110,11 +110,11 @@ class CustomMessages:
                             inline=False)
         try:
             if destination:
-                await ctx.author.send(embed=embed)
+                await interaction.author.send(embed=embed)
             else:
-                await ctx.channel.send(embed=embed, delete_after=40)
+                await interaction.channel.send(embed=embed, delete_after=40)
         except Exception:
-            await ctx.channel.send(embed=embed)
+            await interaction.channel.send(embed=embed)
 
     @staticmethod
     async def bridge_notification(ctx, recipient):
@@ -410,7 +410,7 @@ class CustomMessages:
         await ctx.author.send(embed=tx_stats)
 
     @staticmethod
-    async def stellar_wallet_overall(ctx, coin_stats: dict, utc_now):
+    async def stellar_wallet_overall(interaction, coin_stats: dict, utc_now):
 
         try:
             bridges = coin_stats['bridges']
@@ -424,7 +424,7 @@ class CustomMessages:
                                  timestamp=utc_now)
         building_bridges.add_field(name=f':bridge_at_night: Created Bridges :bridge_at_night: ',
                                    value=f'```{int(bridges)}```')
-        await ctx.author.send(embed=building_bridges)
+        await interaction.user.send(embed=building_bridges)
 
         for k, v in coin_stats.items():
             if k in ["xlm"]:
@@ -456,7 +456,7 @@ class CustomMessages:
                                            f':money_with_wings: `{(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}`\n',
 
                                      inline=False)
-                await ctx.author.send(embed=coin_stats)
+                await interaction.user.send(embed=coin_stats)
 
     async def explorer_messages(self, applied_channels: list, message: str):
         """
