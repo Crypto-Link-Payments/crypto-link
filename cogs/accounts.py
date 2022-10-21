@@ -23,6 +23,7 @@ class UserAccountCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
+    # FIXME: Animus please fix me
     def send_qr_code_picture(self, interaction):
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=interaction.message.author.id)
         if user_profile:
