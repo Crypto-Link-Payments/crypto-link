@@ -245,16 +245,23 @@ class UserAccountCommands(commands.Cog):
         """
         Returns deposit information to user
         """
-        user_profile = self.backoffice.account_mng.get_user_memo(user_id=interaction.message.author.id)
+        user_profile = self.backoffice.account_mng.get_user_memo(user_id=interaction.user.id)
         if user_profile:
+
+            # Make coin strings
             coins_string = ', '.join(
                 [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
+
+            # # Get qr file
+            self.make_qr_image(user_id=interaction.user.id, user_profile=user_profile)
+            qr_file = File(f"{interaction.user.id}.png")
 
             description = ':warning: To deposit funds to your Discord wallet, you will need to withdraw from your ' \
                           'preferred wallet(GUI, CLI) to the address and deposit ID provided below. ' \
                           'If done incorrectly this can result in funds being lost and irrecoverable! ' \
                           'Crypto Link staff are not responsible for any mistakes made. :warning:'
 
+            # Make embed for the user
             deposit_embed = Embed(title='How to deposit',
                                   colour=Colour.dark_orange(),
                                   description=description)
