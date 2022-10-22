@@ -308,6 +308,10 @@ class UserAccountCommands(commands.Cog):
             coins_string = ', '.join(
                 [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
 
+            # Get qr image as a file
+            self.make_qr_image(user_id=interaction.user.id, user_profile=user_profile)
+            qr_file = File(f"{interaction.user.id}.png")
+
             deposit_embed = Embed(title='Deposit QR code',
                                   colour=Colour.dark_orange())
             deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited:gem: ',
