@@ -317,11 +317,15 @@ class UserAccountCommands(commands.Cog):
             deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited:gem: ',
                                     value=f'```{coins_string}```',
                                     inline=False)
-            qr_to_send = self.send_qr_code_picture(interaction, deposit_embed)
             deposit_embed.set_footer(text=f'{self.command_string}wallet deposit qr -> Only QR')
-            await interaction.response.send_message(file=qr_to_send, embed=deposit_embed,
-                                                    delete_after=40, ephermeral=True)
-            self.clean_qr_image(author_id=interaction.message.author.id)
+
+            deposit_embed.set_image(url=f"attachment://{interaction.user.id}.png")
+
+            await interaction.response.send_message(file=qr_file, embed=deposit_embed,
+                                                    delete_after=40, ephemeral=True)
+
+            # # Clean the image after process
+            self.clean_qr_image(author_id=interaction.user.id)
         else:
             title = '__Deposit information error__'
             message = f'Deposit details for your account could not be obtained at this moment from the system. ' \
