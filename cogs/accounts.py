@@ -42,13 +42,10 @@ class UserAccountCommands(commands.Cog):
 
     @staticmethod
     def clean_qr_image(author_id):
-        if os.path.exists(f'{author_id}.png'):
-            try:
-                os.remove(f'{author_id}.png')
-            except Exception as e:
-                print(f'Exception: {e}')
-        else:
-            print("The file does not exist")
+        try:
+            os.remove(f'{author_id}.png')
+        except Exception as e:
+            print(f'Exception: {e}')
 
     @slash_command(description="Basic details about your Crypto Link account", dm_permission=False)
     @application_checks.check(has_wallet_inter_check())
