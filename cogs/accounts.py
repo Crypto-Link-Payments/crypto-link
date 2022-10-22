@@ -9,7 +9,6 @@ from cogs.utils.systemMessaages import CustomMessages
 import os
 import pyqrcode
 
-
 custom_messages = CustomMessages()
 # Move this to class
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
