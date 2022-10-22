@@ -284,12 +284,12 @@ class UserAccountCommands(commands.Cog):
                                           f'MEMO. Scan it with a mobile application supporting QR codes. Be sure to '
                                           f'double check the data once you scan it.',
                                     inline=False)
-
-            qr_to_send = self.send_qr_code_picture(interaction, deposit_embed)
             deposit_embed.set_footer(text=f'/wallet deposit qr -> Only QR')
-            await interaction.response.send_message(file=qr_to_send, embed=deposit_embed, ephermeral=True)
+            deposit_embed.set_image(url=f"attachment://{interaction.user.id}.png")
+            await interaction.response.send_message(file=qr_file, embed=deposit_embed, ephemeral=True)
 
-            self.clean_qr_image(author_id=interaction.message.author.id)
+            # Clean the image after process
+            self.clean_qr_image(author_id=interaction.user.id)
         else:
             title = '__Deposit information error__'
             message = f'Deposit details for your account could not be obtained at this moment from the system. ' \
