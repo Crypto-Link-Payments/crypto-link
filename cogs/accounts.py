@@ -305,6 +305,7 @@ class UserAccountCommands(commands.Cog):
         """
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=interaction.user.id)
         if user_profile:
+            # Get all registered tokens
             coins_string = ', '.join(
                 [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
 
