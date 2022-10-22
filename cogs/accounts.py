@@ -310,16 +310,7 @@ class UserAccountCommands(commands.Cog):
             deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited:gem: ',
                                     value=f'```{coins_string}```',
                                     inline=False)
-            memo = user_profile["stellarDepositId"]
-            uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
-                                                              memo=memo)
-            image = pyqrcode.create(content=uri, error='L')
-            image.png(file=f'{interaction.message.author.id}.png', scale=6, module_color=[0, 255, 255, 128],
-                      background=[17, 17, 17],
-                      quiet_zone=4)
-            qr_to_send = File(f'{interaction.message.author.id}.png')
-
-            deposit_embed.set_image(url=f"attachment://{interaction.message.author.id}.png")
+            qr_to_send = self.send_qr_code_picture(interaction, deposit_embed)
             deposit_embed.set_footer(text=f'{self.command_string}wallet deposit qr -> Only QR')
             await interaction.response.send_message(file=qr_to_send, embed=deposit_embed,
                                                     delete_after=40, ephermeral=True)
