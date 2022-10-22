@@ -23,22 +23,22 @@ class UserAccountCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
 
-    # FIXME: Animus please fix me
-    def send_qr_code_picture(self, interaction, embed):
-        user_profile = self.backoffice.account_mng.get_user_memo(user_id=interaction.message.author.id)
-        if user_profile:
-            memo = user_profile["stellarDepositId"]
-            uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
-                                                              memo=memo)
-            image = pyqrcode.create(content=uri, error='L')
-            image.png(file=f'{interaction.message.author.id}.png', scale=6, module_color=[0, 255, 255, 128],
-                      background=[17, 17, 17],
-                      quiet_zone=4)
-            qr_to_send = File(f'{interaction.message.author.id}.png')
-            # TODO: I think here... its needed to make whole embed inside this function, but I'm not sure
-            # TODO: Section from line 261 to 295 would need to be merged here
-            embed.set_image(url=f"attachment://{interaction.message.author.id}.png")
-            return qr_to_send
+    def make_qr_image(self, user_id, user_profile):
+        """
+        Function to produce the qr image from database data
+        :param user_id: Discord user id
+        :param user_profile: discord user profile to get deposit id
+        :return:
+        """
+        memo = user_profile["stellarDepositId"]
+        uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
+                                                          memo=memo)
+
+        # make the qr with picture
+        image = pyqrcode.create(content=uri, error='L')
+        image.png(file=f'{user_id}.png', scale=6, module_color=[0, 255, 255, 128],
+                  background=[17, 17, 17],
+                  quiet_zone=4)
 
     @staticmethod
     def clean_qr_image(author_id):
