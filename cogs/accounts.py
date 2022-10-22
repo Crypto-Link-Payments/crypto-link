@@ -304,7 +304,7 @@ class UserAccountCommands(commands.Cog):
         """
         Send the QR only to user
         """
-        user_profile = self.backoffice.account_mng.get_user_memo(user_id=interaction.message.author.id)
+        user_profile = self.backoffice.account_mng.get_user_memo(user_id=interaction.user.id)
         if user_profile:
             coins_string = ', '.join(
                 [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
