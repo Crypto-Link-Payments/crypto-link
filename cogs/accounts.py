@@ -239,9 +239,9 @@ class UserAccountCommands(commands.Cog):
                                                      sys_msg_title=title)
 
     @wallet.subcommand(name="deposit", description="Deposit Funds to your Wallet")
-    async def deposit(self,
-                      interaction: Interaction
-                      ):
+    async def deposit_cmd(self,
+                          interaction: Interaction
+                          ):
         """
         Returns deposit information to user
         """
@@ -290,10 +290,10 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @deposit.subcommand(name="QR Code", description="QR Code Generator")
-    async def qr(self,
-                 interaction: Interaction
-                 ):
+    @wallet.subcommand(name="qr_deposit", description="QR Code Generator")
+    async def qr_cmd(self,
+                     interaction: Interaction
+                     ):
         """
         Send the QR only to user
         """
