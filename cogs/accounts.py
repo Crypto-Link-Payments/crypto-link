@@ -199,7 +199,7 @@ class UserAccountCommands(commands.Cog):
                                  value=f'Use the same command and add an asset code. All available currencies are: '
                                        f'{available_stats}',
                                  inline=False)
-            await interaction.response.send_message(embed=stats_info, delete_after=40, ephermeral=True)
+            await interaction.response.send_message(embed=stats_info, delete_after=40, ephemeral=True)
             await custom_messages.stellar_wallet_overall(interaction=interaction, coin_stats=account_details,
                                                          utc_now=utc_now)
         else:
