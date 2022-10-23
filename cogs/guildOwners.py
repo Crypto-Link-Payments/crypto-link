@@ -2,8 +2,9 @@ from datetime import datetime
 import decimal
 from bson.decimal128 import Decimal128
 from re import sub
-from nextcord.ext import commands
-from nextcord import Embed, Colour, Role
+from nextcord.ext import commands, application_checks
+from nextcord import Embed, Colour, Role, slash_command, SlashOption, Interaction
+import cooldowns
 from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet
 from cogs.utils.systemMessaages import CustomMessages
 
@@ -22,71 +23,34 @@ class GuildOwnerCommands(commands.Cog):
         self.merchant = self.backoffice.merchant_manager
         self.guild_string = None
 
-    @commands.group()
-    @commands.check(is_owner)
-    @commands.check(is_public)
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def owner(self, ctx):
-        if ctx.invoked_subcommand is None:
-            self.guild_string = self.bot.get_prefix_help(ctx.guild.id)
-            title = ':joystick: __Guild Owner Manual__ :joystick: '
-            description = "All available commands to operate with guild system."
-            list_of_values = [
-                {"name": ":bellhop: Register Guild :bellhop: ", "value": f"`{self.guild_string}owner register`"},
-                {"name": ":bar_chart: Guild Crypto Link Stats :bar_chart: ",
-                 "value": f"`{self.guild_string}owner stats`"},
-                {"name": ":service_dog: Guild Applied Services :service_dog: ",
-                 "value": f"`{self.guild_string}owner services`"},
-                {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
-                 "value": f"`{self.guild_string}owner uplink`"},
-                {"name": ":convenience_store:  Operate with merchant :convenience_store:  ",
-                 "value": f"`{self.guild_string}owner merchant`"},
-                {"name": ":ballot_box: Operate with voting pools :ballot_box:",
-                 "value": f"`{self.guild_string}owner ballot`"},
-                {"name": f":tools: Change {self.bot.user} prefix ",
-                 "value": f"`{self.guild_string}owner changeprefix <char>`"}
-            ]
+    @slash_command(description="Guild Owner manual", dm_permission=False)
+    # TODO: Animus to change check functions for is_owner and is_public
+    @application_checks.check(is_owner)
+    @application_checks.check(is_public)
+    @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
+    async def owner(self,
+                    interaction: Interaction
+                    ):
+        self.guild_string = self.bot.get_prefix_help(interaction.guild.id)
+        title = ':joystick: __Guild Owner Manual__ :joystick: '
+        description = "Available commands to operate the guild system."
+        list_of_values = [
+            {"name": ":bellhop: Register Guild :bellhop: ",
+             "value": f"`/owner register`"},
+            {"name": ":bar_chart: Guild Crypto Link Stats :bar_chart: ",
+             "value": f"`/owner stats`"},
+            {"name": ":service_dog: Guild Applied Services :service_dog: ",
+             "value": f"`/owner services`"},
+            {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
+             "value": f"`/owner uplink`"},
+            {"name": ":convenience_store: Operate with merchant :convenience_store:  ",
+             "value": f"`/owner merchant`"},
+            {"name": ":ballot_box: Operate with voting pools :ballot_box:",
+             "value": f"`/owner ballot`"}
+        ]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               c=Colour.dark_gold())
-
-    @owner.command()
-    async def changeprefix(self, ctx, prefix):
-        prefix = prefix.strip()
-        if not len(prefix) > 1 and self.bot.backoffice.helper.check_for_special_char(string=prefix):
-            if not self.bot.backoffice.check_guild_prefix(guild_id=ctx.message.guild.id):
-                self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=int(ctx.guild.id), prefix=prefix)
-                await customMessages.system_message(ctx=ctx, color_code=0,
-                                                    message=f'You have successfully set prefix for server {ctx.guild} '
-                                                            f'to {prefix}. In case if you forget the prefix, '
-                                                            f'tag the bot '
-                                                            f'and it will respond as well. Be aware that '
-                                                            f'the prefix does '
-                                                            f'not work over DM therefore a default or bot tag needs'
-                                                            f' to be used.',
-                                                    destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
-            else:
-                if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
-                    await customMessages.system_message(ctx=ctx, color_code=0,
-                                                        message=f'You have successfully set prefix '
-                                                                f'for server {ctx.guild} '
-                                                                f'to {prefix}. In case if you forget the prefix, '
-                                                                f'tag the bot '
-                                                                f'and it will respond as well. Be aware that the '
-                                                                f'prefix does '
-                                                                f'not work over DM therefore a default or bot tag needs'
-                                                                f' to be used.',
-                                                        destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
-                else:
-
-                    await customMessages.system_message(ctx=ctx, color_code=1,
-                                                        message=f'There has been an issue. please try again later.',
-                                                        destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
-        else:
-            await customMessages.system_message(ctx=ctx, color_code=1,
-                                                message=f'Prefix can be only 1 character in length and a special'
-                                                        f' character',
-                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+        await customMessages.embed_builder(interaction=interaction, title=title, description=description, data=list_of_values,
+                                           c=Colour.dark_gold())
 
     @owner.command()
     @commands.check(has_wallet)
