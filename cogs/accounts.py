@@ -238,7 +238,7 @@ class UserAccountCommands(commands.Cog):
                                                      sys_msg_title=title)
 
     @wallet.subcommand(name="deposit", description="Deposit Funds to your Wallet")
-    async def deposit_cmd(self,
+    async def deposit(self,
                           interaction: Interaction
                           ):
         """
@@ -275,8 +275,8 @@ class UserAccountCommands(commands.Cog):
                       f'```{user_profile["stellarDepositId"]}```',
                 inline=False)
             deposit_embed.add_field(name=':warning: **__Warning__** :warning:',
-                                    value='Make sure to include and provide an appropriate  **__MEMO__** as text '
-                                          'and Wallet address for each currency , otherwise your deposit will be lost!',
+                                    value='Please provide an appropriate  **__MEMO__** '
+                                          'and Wallet address for each currency, otherwise your deposit will be lost!',
                                     inline=False)
             deposit_embed.add_field(name=":printer: QR Code :printer: ",
                                     value=f'Below is your personal QR code including your deposit address and '
@@ -296,8 +296,8 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
-    @wallet.subcommand(name="qr_deposit", description="QR Code Generator")
-    async def qr_cmd(self,
+    @wallet.subcommand(name="qr", description="QR Code Generator")
+    async def qr(self,
                      interaction: Interaction
                      ):
         """
@@ -315,10 +315,10 @@ class UserAccountCommands(commands.Cog):
 
             deposit_embed = Embed(title='Deposit QR code',
                                   colour=Colour.dark_orange())
-            deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited:gem: ',
+            deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited :gem: ',
                                     value=f'```{coins_string}```',
                                     inline=False)
-            deposit_embed.set_footer(text=f'{self.command_string}wallet deposit qr -> Only QR')
+            deposit_embed.set_footer(text=f'/wallet deposit qr -> Only QR')
 
             deposit_embed.set_image(url=f"attachment://{interaction.user.id}.png")
 
