@@ -252,57 +252,67 @@ class GuildOwnerCommands(commands.Cog):
     #                                                                            'Please try again later',
     #                                             destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
 
-    @owner.group(aliases=['merchant'])
-    @commands.check(is_owner)
-    @commands.check(has_wallet)
-    @commands.check(is_public)
+    @owner.subcommand(name="merchant", description="Guild Merchant Service")
+    # TODO: Animus to change check is_owner and is_public
+    @application_checks.check(is_owner)
+    @application_checks.check(has_wallet_inter_check())
+    @application_checks.check(is_public)
     @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def merch(self, ctx):
-        if ctx.invoked_subcommand is None:
-            title = ':convenience_store: __Crypto Link Uplink manual__ :convenience_store: '
-            description = "All available commands to activate and operate with merchant service."
-            list_of_values = [
-                {"name": ":pencil:  Open/Register for Merchant system :pencil:  ",
-                 "value": f"```{self.command_string}owner merchant open ```"},
-                {"name": ":joystick: Access commands for merchant :joystick: ",
-                 "value": f"```{self.command_string}merchant```"}
-            ]
+    async def merchant(self,
+                       interaction: Interaction
+                       ):
+        title = ':convenience_store: __Crypto Link Uplink manual__ :convenience_store: '
+        description = "All available commands to activate and operate with merchant service."
+        list_of_values = [
+            {"name": ":pencil: Open/Register for Merchant system :pencil:  ",
+             "value": f"```/owner merchant open ```"},
+            {"name": ":joystick: Access commands for merchant :joystick: ",
+             "value": f"```/merchant```"}
+        ]
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               c=Colour.dark_gold())
+        await customMessages.embed_builder(interaction=interaction, title=title,
+                                           description=description, data=list_of_values,
+                                           c=Colour.dark_gold())
 
-    @merch.command()
-    async def open(self, ctx):
-        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
-            if not self.merchant.check_if_community_exist(community_id=ctx.message.guild.id):  # Check if not registered
-                if self.merchant.register_community_wallet(community_id=ctx.message.guild.id,
-                                                           community_owner_id=ctx.message.author.id,
-                                                           community_name=f'{ctx.message.guild}'):  # register community wallet
+    @merchant.subcommand(name="open", description="Community Wallet Registration")
+    async def open(self,
+                   interaction: Interaction
+                   ):
+        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=interaction.guild.id):
+            if not self.merchant.check_if_community_exist(community_id=interaction.guild.id):  # Check if not registered
+                if self.merchant.register_community_wallet(community_id=interaction.guild.id,
+                                                           community_owner_id=interaction.user.id,
+                                                           community_name=f'{interaction.guild}'):
                     msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
-                    message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed ' \
-                              f' with `{self.command_string}merchant` in order to familiarize yourself with ' \
+                    message = f'You have successfully merchant system on ***{interaction.guild}***. You can proceed ' \
+                              f' with `/merchant` in order to familiarize yourself with ' \
                               f'all available commands or have a look at ***merchant system' \
                               f' manual*** accessible through command ' \
-                              f' `{self.command_string}merchant manual` '
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
+                              f' `/merchant manual` '
+                    await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
+                                                        message=message, color_code=0,
                                                         destination=1)
                 else:
                     msg_title = ':warning:  __Merchant Registration Status___ :warning: '
-                    message = f'There has been an issue while registering wallet into the system. Please try again later.' \
+                    message = f'There has been an issue while registering wallet into the system. ' \
+                              f'Please try again later.' \
                               f' or contact one of the support staff. '
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
+                    await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
+                                                        message=message, color_code=1,
                                                         destination=1)
             else:
                 msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
-                message = f'You have already registered Merchant system on {ctx.guild} server. Proceed' \
+                message = f'You have already registered Merchant system on {interaction.guild} server. Proceed' \
                           f'with command {self.command_string}merchant'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
+                await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
+                                                    message=message, color_code=0,
                                                     destination=1)
         else:
             msg_title = ':warning:  __Community Registration Status___ :warning: '
-            message = f'You have not yet registered {ctx.guild} server into Crypto Link system. Please ' \
+            message = f'You have not yet registered {interaction.guild} server into Crypto Link system. Please ' \
                       f'do that first through `{self.guild_string}owner register`.'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
+            await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
+                                                message=message, color_code=0,
                                                 destination=1)
 
     @owner.error
