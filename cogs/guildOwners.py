@@ -5,7 +5,7 @@ from re import sub
 from nextcord.ext import commands, application_checks
 from nextcord import Embed, Colour, Role, slash_command, SlashOption, Interaction
 import cooldowns
-from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet
+from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet, has_wallet_inter_check
 from cogs.utils.systemMessaages import CustomMessages
 
 customMessages = CustomMessages()
@@ -49,16 +49,21 @@ class GuildOwnerCommands(commands.Cog):
              "value": f"`/owner ballot`"}
         ]
 
-        await customMessages.embed_builder(interaction=interaction, title=title, description=description, data=list_of_values,
+        await customMessages.embed_builder(interaction=interaction, title=title,
+                                           description=description, data=list_of_values,
                                            c=Colour.dark_gold())
 
-    @owner.command()
-    @commands.check(has_wallet)
-    async def register(self, ctx):
-        if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
+    @owner.subcommand(name="register", description="Register Guild into the System")
+    @application_checks.check(has_wallet_inter_check())
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    @commands.cooldown(1, 20, commands.BucketType.user)
+    async def register(self,
+                       interaction: Interaction
+                       ):
+        if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=interaction.guild.id):
             new_guild = {
-                "guildId": ctx.message.guild.id,
-                "guildName": f'{ctx.guild}',
+                "guildId": interaction.guild.id,
+                "guildName": f'{interaction.guild}',
                 "explorerSettings": {"channelId": int(0)},
                 "txFees": {"xlmFeeValue": int(0)},
                 "registeredUsers": 0,
@@ -82,17 +87,17 @@ class GuildOwnerCommands(commands.Cog):
                                                       "emojiTxCount": int(0),
                                                       "multiTxCount": int(0)}
 
-            self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=int(ctx.guild.id), prefix="!")
+            self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=int(interaction.guild.id), prefix="!")
 
             await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
-            await customMessages.system_message(ctx=ctx, color_code=0,
-                                                message='You have successfully registered guild into the system. '
-                                                        'Default bot prefix is:\n'
-                                                        '!',
-                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+            await customMessages.system_message(interaction=interaction, color_code=0,
+                                                message='You have successfully registered guild into the system.',
+                                                destination=interaction.user, sys_msg_title=CONST_SYS_MSG)
         else:
-            await customMessages.system_message(ctx=ctx, color_code=1, message='Guild already registered',
-                                                destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
+            await customMessages.system_message(interaction=interaction, color_code=1,
+                                                message='Guild already registered',
+                                                destination=interaction.channel,
+                                                sys_msg_title=CONST_SYS_ERROR)
 
     @owner.command()
     @commands.check(guild_has_stats)
