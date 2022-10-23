@@ -239,8 +239,8 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.subcommand(name="deposit", description="Deposit Funds to your Wallet")
     async def deposit(self,
-                          interaction: Interaction
-                          ):
+                      interaction: Interaction
+                      ):
         """
         Returns deposit information to user
         """
@@ -298,8 +298,8 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.subcommand(name="qr", description="QR Code Generator")
     async def qr(self,
-                     interaction: Interaction
-                     ):
+                 interaction: Interaction
+                 ):
         """
         Send the QR only to user
         """
@@ -333,31 +333,33 @@ class UserAccountCommands(commands.Cog):
                       f'Please try again later, or contact one of the staff members. '
             await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
-    #
-    # @wallet.command(aliases=['bal', 'balances', 'b'])
-    # async def balance(self, ctx):
-    #     user_balances = self.backoffice.wallet_manager.get_balances(user_id=ctx.message.author.id)
-    #     bag = [k for k, v in user_balances.items() if v > 0]
-    #     if bag:
-    #         # initiate Discord embed
-    #         balance_embed = Embed(title=f":office_worker: Details for {ctx.message.author} :office_worker:",
-    #                               timestamp=datetime.utcnow(),
-    #                               colour=Colour.dark_orange())
-    #
-    #         for k, v in user_balances.items():
-    #             if v > 0:
-    #                 balance_embed.add_field(
-    #                     name=f"{k.upper()}",
-    #                     value=f'```{v / (10 ** 7):,.7f} {k.upper()}```',
-    #                     inline=False)
-    #             else:
-    #                 pass
-    #         await ctx.author.send(embed=balance_embed)
-    #     else:
-    #         title = 'Crypto Link Wallet is empty__'
-    #         message = f'Your wallet is empty'
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-    #                                              sys_msg_title=title)
+
+    @wallet.subcommand(name="balance", description="Fetch wallet Balance")
+    async def balance(self,
+                      interaction: Interaction
+                      ):
+        user_balances = self.backoffice.wallet_manager.get_balances(user_id=interaction.user.id)
+        bag = [k for k, v in user_balances.items() if v > 0]
+        if bag:
+            # initiate Discord embed
+            balance_embed = Embed(title=f":office_worker: Details for {interaction.user} :office_worker:",
+                                  timestamp=datetime.utcnow(),
+                                  colour=Colour.dark_orange())
+
+            for k, v in user_balances.items():
+                if v > 0:
+                    balance_embed.add_field(
+                        name=f"{k.upper()}",
+                        value=f'```{v / (10 ** 7):,.7f} {k.upper()}```',
+                        inline=False)
+                else:
+                    pass
+            await interaction.response.send_message(embed=balance_embed, delete_after=40, ephemeral=True)
+        else:
+            title = 'Crypto Link Wallet is empty__'
+            message = f'Your wallet is empty'
+            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
 
     @me.error
     async def quick_acc_check_error(self, interaction, error):
