@@ -99,16 +99,21 @@ class GuildOwnerCommands(commands.Cog):
                                                 destination=interaction.channel,
                                                 sys_msg_title=CONST_SYS_ERROR)
 
-    @owner.command()
-    @commands.check(guild_has_stats)
-    async def stats(self, ctx, token=None):
-        stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=ctx.guild.id)
+    @owner.subcommand(name="stats", description="Check Guild Stats")
+    # TODO: Animus to change check guild_has_stats
+    @application_checks.check(guild_has_stats)
+    async def stats(self,
+                    interaction: Interaction,
+                    token: str = SlashOption(description="Balance for token", required=False, default='xlm')
+                    ):
+        token = token.lower()
+        stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=interaction.guild.id)
         # available tokens
         tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
                   x['assetCode'] != 'xlm']
         available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
 
-        if not token or token == 'xlm':
+        if token == 'xlm':
 
             stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
                                timestamp=datetime.utcnow(),
@@ -123,7 +128,7 @@ class GuildOwnerCommands(commands.Cog):
 
             xlm_stats = stats["xlm"]
 
-            stats_info.set_thumbnail(url=ctx.guild.icon.url)
+            stats_info.set_thumbnail(url=interaction.guild.icon.url)
             stats_info.add_field(name=":incoming_envelope: XLM Payments executed ",
                                  value=f'`{xlm_stats["txCount"]}`')
             stats_info.add_field(name=":money_with_wings: Total Volume ",
@@ -143,7 +148,7 @@ class GuildOwnerCommands(commands.Cog):
                                        f'same command structure and add one asset code from available:'
                                        f' {available_stats.upper()}',
                                  inline=False)
-            await ctx.channel.send(embed=stats_info)
+            await interaction.response.send_message(embed=stats_info)
         else:
             tokens = [x["assetCode"] for x in self.backoffice.token_manager.get_registered_tokens() if
                       x["assetCode"] != 'xlm']
@@ -162,9 +167,9 @@ class GuildOwnerCommands(commands.Cog):
                         else:
                             token_stats_info.add_field(name=f'{item}',
                                                        value=f'```{v:,.7f} {token.upper()}```')
-                    await ctx.channel.send(embed=token_stats_info)
+                    await interaction.response.send_message(embed=token_stats_info)
             else:
-                await ctx.channel.send(content="No tokens registered")
+                await interaction.response.send_message(content="No tokens registered")
 
     @owner.command()
     @commands.check(guild_has_stats)
