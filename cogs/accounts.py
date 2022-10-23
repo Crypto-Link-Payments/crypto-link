@@ -389,6 +389,15 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
                                                  sys_msg_title=title)
 
+    @withdraw_command.error
+    async def withdrawal_error(self, interaction, error):
+        if isinstance(error, commands.CheckFailure):
+            message = f'First you need to register yourself wallet in Crypto Link system. You can do that ' \
+                      f'though {self.command_string}register'
+            title = f'**__Not registered__** :clipboard:'
+            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
+                                                 sys_msg_title=title)
+
 
 def setup(bot):
     bot.add_cog(UserAccountCommands(bot))
