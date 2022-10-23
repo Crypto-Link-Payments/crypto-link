@@ -171,10 +171,13 @@ class GuildOwnerCommands(commands.Cog):
             else:
                 await interaction.response.send_message(content="No tokens registered")
 
-    @owner.command()
-    @commands.check(guild_has_stats)
-    async def services(self, ctx):
-        service_status = await self.backoffice.guild_profiles.get_service_statuses(guild_id=ctx.guild.id)
+    @owner.subcommand(name="services", description="Guild Service Status")
+    # TODO: Animus to change check guild_has_stats
+    @application_checks.check(guild_has_stats)
+    async def services(self,
+                       interaction: Interaction
+                       ):
+        service_status = await self.backoffice.guild_profiles.get_service_statuses(guild_id=interaction.guild.id)
         explorer_channel = self.bot.get_channel(int(service_status["explorerSettings"]["channelId"]))
 
         service_info = Embed(title=":service_dog: __Guild Service Status__ :service_dog: ",
@@ -190,7 +193,7 @@ class GuildOwnerCommands(commands.Cog):
             service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
                                    value=f':red_circle:')
 
-        await ctx.channel.send(embed=service_info)
+        await interaction.response.sent_message(embed=service_info)
 
     # @owner.group()
     # async def uplink(self, ctx):
