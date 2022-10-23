@@ -316,20 +316,20 @@ class GuildOwnerCommands(commands.Cog):
                                                 destination=1)
 
     @owner.error
-    async def owner_error(self, ctx, error):
+    async def owner_error(self, interaction, error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to be able to access this category of commands you are required to be ' \
-                      f' owner of the community {ctx.guild} and execute command on one of the ' \
+                      f' owner of the community {interaction.guild} and execute command on one of the ' \
                       f' public channels.'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message, destination=0)
 
     @register.error
-    async def register_error(self, ctx, error):
+    async def register_error(self, interaction, error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to be able to register community into Crypto Link system you re required to ' \
                       f' have personal wallet registered in the system. You can do so through:\n' \
-                      f' {self.command_string}register'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+                      f' /register'
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message, destination=0)
 
     # ----------------Voting pools registration-------------#
     @owner.group()
