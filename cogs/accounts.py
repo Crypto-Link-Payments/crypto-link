@@ -2,11 +2,12 @@ from datetime import datetime
 from nextcord import Embed, Colour, File, Interaction, slash_command, SlashOption
 from nextcord.ext import commands, application_checks
 import cooldowns
-from utils.customCogChecks import has_wallet_inter_check
+from utils.customCogChecks import has_wallet_inter_check, check
 from cogs.utils.monetaryConversions import get_rates, rate_converter
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
 import os
+import time
 import pyqrcode
 
 custom_messages = CustomMessages()
