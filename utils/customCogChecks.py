@@ -2,8 +2,8 @@
 File includes custom security checks for the Discord GUI part
 """
 
-from nextcord import ChannelType
-
+from nextcord import ChannelType, Interaction
+from nextcord.ext import application_checks
 
 def is_animus(ctx):
     """
@@ -37,6 +37,15 @@ def has_wallet(ctx):
     :return: Boolean
     """
     return ctx.bot.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id)
+
+
+def has_wallet_inter_check():
+    def predicate(interaction: Interaction):
+        return (
+            interaction.client.backoffice.account_mng.check_user_existence(user_id=interaction.user.id)
+        )
+
+    return application_checks.check(predicate)
 
 
 def is_owner(ctx):
