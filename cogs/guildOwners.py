@@ -248,8 +248,6 @@ class GuildOwnerCommands(commands.Cog):
     #                                             destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
 
     @owner.subcommand(name="merchant", description="Guild Merchant Service")
-    # TODO: Animus to change check is_owner and is_public
-    @application_checks.check(is_owner)
     @application_checks.check(has_wallet_inter_check())
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merchant(self,
