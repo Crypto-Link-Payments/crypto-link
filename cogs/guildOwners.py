@@ -26,7 +26,6 @@ class GuildOwnerCommands(commands.Cog):
     @slash_command(description="Guild Owner manual", dm_permission=False)
     # TODO: Animus to change check functions for is_owner and is_public
     @application_checks.check(is_owner)
-    @application_checks.check(is_public)
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
     async def owner(self,
                     interaction: Interaction
@@ -256,7 +255,6 @@ class GuildOwnerCommands(commands.Cog):
     # TODO: Animus to change check is_owner and is_public
     @application_checks.check(is_owner)
     @application_checks.check(has_wallet_inter_check())
-    @application_checks.check(is_public)
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merchant(self,
                        interaction: Interaction
