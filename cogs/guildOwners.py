@@ -89,11 +89,11 @@ class GuildOwnerCommands(commands.Cog):
             await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
             await customMessages.system_message(interaction=interaction, color_code=0,
                                                 message='You have successfully registered guild into the system.',
-                                                destination=interaction.user, sys_msg_title=CONST_SYS_MSG)
+                                                destination=0, sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(interaction=interaction, color_code=1,
                                                 message='Guild already registered',
-                                                destination=interaction.channel,
+                                                destination=0,
                                                 sys_msg_title=CONST_SYS_ERROR)
 
     @owner.subcommand(name="stats", description="Check Guild Stats")
