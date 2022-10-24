@@ -279,21 +279,21 @@ class CustomMessages:
             print(Fore.RED + f'Can not send deposit notidfication to user')
 
     @staticmethod
-    async def withdrawal_notification_channel(ctx, channel, withdrawal_data):
+    async def withdrawal_notification_channel(interaction, channel, withdrawal_data):
         # create withdrawal notification for channel
         notify = Embed(title='Stellar Withdrawal Notification',
                        description='Withdrawal has been processed',
                        colour=Colour.gold())
-        if isinstance(ctx.channel, TextChannel):
+        if isinstance(interaction.channel, TextChannel):
             notify.add_field(name='Origin',
-                             value=f'{ctx.message.guild} ID; {ctx.message.guild.id}',
+                             value=f'{interaction.guild} ID; {interaction.guild.id}',
                              inline=False)
         else:
             notify.add_field(name='Origin',
                              value=f'DM with bot',
                              inline=False)
         notify.add_field(name='User details',
-                         value=f'{ctx.message.author} \nID; {ctx.message.author.id}',
+                         value=f'{interaction.user} \nID; {interaction.user.id}',
                          inline=False)
         notify.add_field(name='Withdrawal details',
                          value=f'Time: {withdrawal_data["time"]}\n'
