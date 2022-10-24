@@ -245,7 +245,7 @@ class CustomMessages:
             print(e)
 
     @staticmethod
-    async def withdrawal_notify(ctx, withdrawal_data: dict, fee, memo=None):
+    async def withdrawal_notify(interaction, withdrawal_data: dict, fee, memo=None):
         notify = Embed(title=":outbox_tray: Withdrawal Notification :outbox_tray:",
                        description=f'Withdrawal Successfully processed',
                        timestamp=datetime.utcnow(),
@@ -273,7 +273,7 @@ class CustomMessages:
                          value=f"[Complete Details]({withdrawal_data['explorer']})",
                          inline=False)
         try:
-            await ctx.author.send(embed=notify)
+            await interaction.user.send_message(embed=notify)
 
         except Exception:
             print(Fore.RED + f'Can not send deposit notidfication to user')
