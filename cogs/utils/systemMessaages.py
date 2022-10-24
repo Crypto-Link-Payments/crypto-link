@@ -86,7 +86,7 @@ class CustomMessages:
         await channel.send(embed=notify)
 
     @staticmethod
-    async def embed_builder(interaction, title, description, data: list, destination=None, thumbnail=None, c: Colour = None):
+    async def embed_builder(ctx, title, description, data: list, destination=None, thumbnail=None, c: Colour = None):
         """
         Build embed from data provided
         :param ctx: Discord Context
@@ -110,11 +110,11 @@ class CustomMessages:
                             inline=False)
         try:
             if destination:
-                await interaction.author.send(embed=embed)
+                await ctx.author.send(embed=embed)
             else:
-                await interaction.channel.send(embed=embed, delete_after=40)
+                await ctx.channel.send(embed=embed, delete_after=40)
         except Exception:
-            await interaction.channel.send(embed=embed)
+            await ctx.channel.send(embed=embed)
 
     @staticmethod
     async def bridge_notification(ctx, recipient):
@@ -133,7 +133,7 @@ class CustomMessages:
         await ctx.author.send(embed=bridge_info)
 
     @staticmethod
-    async def system_message(interaction, message: str, color_code, destination: int, sys_msg_title: str = None,
+    async def system_message(ctx, message: str, color_code, destination: int, sys_msg_title: str = None,
                              embed_title: str = None):
         """
         Custom System Messages
@@ -160,9 +160,9 @@ class CustomMessages:
                             value=f'```{message}```')
         sys_embed.set_footer(text='Message will self-destruct in 15 seconds! ')
         if destination == 0:
-            await interaction.response.send_message(embed=sys_embed, ephermeral=True)
+            await ctx.author.send(embed=sys_embed)
         else:
-            await interaction.channel.send(embed=sys_embed, delete_after=15, ephermeral=True)
+            await ctx.channel.send(embed=sys_embed, delete_after=15)
 
     async def transaction_report_to_user(self, ctx, user, destination, transaction_data: dict, direction: int,
                                          tx_type: str,
@@ -245,7 +245,7 @@ class CustomMessages:
             print(e)
 
     @staticmethod
-    async def withdrawal_notify(interaction, withdrawal_data: dict, fee, memo=None):
+    async def withdrawal_notify(ctx, withdrawal_data: dict, fee, memo=None):
         notify = Embed(title=":outbox_tray: Withdrawal Notification :outbox_tray:",
                        description=f'Withdrawal Successfully processed',
                        timestamp=datetime.utcnow(),
@@ -273,27 +273,27 @@ class CustomMessages:
                          value=f"[Complete Details]({withdrawal_data['explorer']})",
                          inline=False)
         try:
-            await interaction.user.send_message(embed=notify)
+            await ctx.author.send(embed=notify)
 
         except Exception:
             print(Fore.RED + f'Can not send deposit notidfication to user')
 
     @staticmethod
-    async def withdrawal_notification_channel(interaction, channel, withdrawal_data):
+    async def withdrawal_notification_channel(ctx, channel, withdrawal_data):
         # create withdrawal notification for channel
         notify = Embed(title='Stellar Withdrawal Notification',
                        description='Withdrawal has been processed',
                        colour=Colour.gold())
-        if isinstance(interaction.channel, TextChannel):
+        if isinstance(ctx.channel, TextChannel):
             notify.add_field(name='Origin',
-                             value=f'{interaction.guild} ID; {interaction.guild.id}',
+                             value=f'{ctx.message.guild} ID; {ctx.message.guild.id}',
                              inline=False)
         else:
             notify.add_field(name='Origin',
                              value=f'DM with bot',
                              inline=False)
         notify.add_field(name='User details',
-                         value=f'{interaction.user} \nID; {interaction.user.id}',
+                         value=f'{ctx.message.author} \nID; {ctx.message.author.id}',
                          inline=False)
         notify.add_field(name='Withdrawal details',
                          value=f'Time: {withdrawal_data["time"]}\n'
@@ -410,7 +410,7 @@ class CustomMessages:
         await ctx.author.send(embed=tx_stats)
 
     @staticmethod
-    async def stellar_wallet_overall(interaction, coin_stats: dict, utc_now):
+    async def stellar_wallet_overall(ctx, coin_stats: dict, utc_now):
 
         try:
             bridges = coin_stats['bridges']
@@ -424,7 +424,7 @@ class CustomMessages:
                                  timestamp=utc_now)
         building_bridges.add_field(name=f':bridge_at_night: Created Bridges :bridge_at_night: ',
                                    value=f'```{int(bridges)}```')
-        await interaction.user.send(embed=building_bridges)
+        await ctx.author.send(embed=building_bridges)
 
         for k, v in coin_stats.items():
             if k in ["xlm"]:
@@ -456,7 +456,7 @@ class CustomMessages:
                                            f':money_with_wings: `{(int(v["spentOnRoles"] * (10 ** 7))) / (10 ** 7): .7f}`\n',
 
                                      inline=False)
-                await interaction.user.send(embed=coin_stats)
+                await ctx.author.send(embed=coin_stats)
 
     async def explorer_messages(self, applied_channels: list, message: str):
         """
