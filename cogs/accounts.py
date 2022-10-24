@@ -23,6 +23,7 @@ class UserAccountCommands(commands.Cog):
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
         self.with_channel = bot.backoffice.auto_messaging_channels["withdrawals"]
+        self.earnings = bot.backoffice.auto_messaging_channels["earnings"]
 
     def make_qr_image(self, user_id, user_profile):
         """
