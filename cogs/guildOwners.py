@@ -97,8 +97,7 @@ class GuildOwnerCommands(commands.Cog):
                                                 sys_msg_title=CONST_SYS_ERROR)
 
     @owner.subcommand(name="stats", description="Check Guild Stats")
-    # TODO: Animus to change check guild_has_stats
-    @application_checks.check(guild_has_stats)
+    @application_checks.check(guild_has_stats())
     async def stats(self,
                     interaction: Interaction,
                     token: str = SlashOption(description="Balance for token", required=False, default='xlm')
@@ -169,8 +168,7 @@ class GuildOwnerCommands(commands.Cog):
                 await interaction.response.send_message(content="No tokens registered")
 
     @owner.subcommand(name="services", description="Guild Service Status")
-    # TODO: Animus to change check guild_has_stats
-    @application_checks.check(guild_has_stats)
+    @application_checks.check(guild_has_stats())
     async def services(self,
                        interaction: Interaction
                        ):
