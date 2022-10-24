@@ -1,11 +1,10 @@
 from datetime import datetime
-import decimal
 from bson.decimal128 import Decimal128
 from re import sub
 from nextcord.ext import commands, application_checks
-from nextcord import Embed, Colour, Role, slash_command, SlashOption, Interaction
+from nextcord import Embed, Colour, slash_command, SlashOption, Interaction
 import cooldowns
-from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet, has_wallet_inter_check
+from utils.customCogChecks import guild_has_stats, has_wallet_inter_check, is_guild_owner
 from cogs.utils.systemMessaages import CustomMessages
 
 customMessages = CustomMessages()
