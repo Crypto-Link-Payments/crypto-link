@@ -23,8 +23,7 @@ class GuildOwnerCommands(commands.Cog):
         self.guild_string = None
 
     @slash_command(description="Guild Owner manual", dm_permission=False)
-    # TODO: Animus to change check functions for is_owner and is_public
-    @application_checks.check(is_owner)
+    @is_guild_owner()
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
     async def owner(self,
                     interaction: Interaction
