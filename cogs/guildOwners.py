@@ -2,7 +2,7 @@ from datetime import datetime
 from bson.decimal128 import Decimal128
 from re import sub
 from nextcord.ext import commands, application_checks
-from nextcord import Embed, Colour, slash_command, SlashOption, Interaction
+from nextcord import Embed, Colour, slash_command, SlashOption, Interaction, Role
 import cooldowns
 from utils.customCogChecks import guild_has_stats, has_wallet_inter_check, is_guild_owner
 from cogs.utils.systemMessaages import CustomMessages
@@ -323,74 +323,80 @@ class GuildOwnerCommands(commands.Cog):
                       f' /register'
             await customMessages.system_message(interaction=interaction, color_code=1, message=message, destination=0)
 
-    # # ----------------Voting pools registration-------------#
-    # @owner.group()
-    # @commands.check(is_owner)
-    # @commands.check(has_wallet)
-    # @commands.check(is_public)
-    # async def ballot(self, ctx):
-    #     if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
-    #         if ctx.invoked_subcommand is None:
-    #             title = ':ballot_box: __Crypto Link Ballot System__ :ballot_box: '
-    #             description = "Commands to activate voting feature over Crypto Link and Discord"
-    #             list_of_values = [
-    #                 {"name": ":pencil: Activate ballot vote pools functionality :pencil:  ",
-    #                  "value": f"```{self.command_string}owner ballot activate```"},
-    #                 {"name": ":joystick: Access commands to operate with ballot vote pools :joystick: ",
-    #                  "value": f"```{self.command_string}pool```"}
-    #             ]
-    #             await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-    #                                                c=Colour.dark_gold())
-    #     else:
-    #         msg_title = ':warning:  __Community Registration Status___ :warning: '
-    #         message = f'You have not yet registered {ctx.guild} server into Crypto Link system. Please ' \
-    #                   f'do that first through `{self.guild_string}owner register`.'
-    #         await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-    #                                             destination=1)
-    #
-    # @ballot.command()
-    # async def activate(self, ctx, r: Role):
-    #     """
-    #     Activation of voting pools
-    #     """
-    #     if not self.bot.backoffice.voting_manager.check_server_voting_reg_status(guild_id=ctx.guild.id):
-    #         data = {
-    #             "guildId": ctx.guild.id,
-    #             "ownerId": ctx.author.id,
-    #             "mngRoleId": int(r.id),
-    #             "mngRoleName": f'{r}'
-    #         }
-    #
-    #         if self.backoffice.voting_manager.register_server_for_voting_service(data=data):
-    #             await customMessages.system_message(ctx=ctx, color_code=0,
-    #                                                 message=f'You have successfully activated ballot voting '
-    #                                                         f'pools functionality for your'
-    #                                                         f' server. Proceed with `{self.command_string}ballot` over '
-    #                                                         f'public channel where Crypto Link has access to.',
-    #                                                 destination=1, sys_msg_title=CONST_SYS_MSG)
-    #         else:
-    #             msg_title = ':ballot_box: __Ballot Voting System Error__ :ballot_box: '
-    #             message = f'System could not activate Ballot Voting pools due to backend issue. Please contact' \
-    #                       f' crypto link team.'
-    #             await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-    #                                                 destination=1)
-    #     else:
-    #         msg_title = ':ballot_box: __Ballot Voting System Already Active__ :ballot_box: '
-    #         message = f'You have already activated {ctx.guild} server for voting functionality.'
-    #         await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-    #                                             destination=1)
-    #
-    # @activate.error
-    # async def activate_error(self, ctx, error):
-    #     if isinstance(error, commands.CheckFailure):
-    #         message = f"You are required to specify active role on the server which will have access to the " \
-    #                   f"Ballot voting system management. `{self.command_string}owner ballot activate @discord.Role'"
-    #         await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-    #                                             sys_msg_title="Ballot voting access error!")
-    #     elif isinstance(error, commands.MissingRequiredArgument):
-    #         message = f"You forgot to provide @discord.Role which will have access to ballot functions."
-    #         await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-    #                                             sys_msg_title="Ballot voting access error!")
+    # ----------------Voting pools registration-------------#
+    @owner.subcommand(name="ballot", description="Crypto Link Ballot System")
+    @is_guild_owner()
+    @application_checks.check(has_wallet_inter_check())
+    async def ballot(self,
+                     interaction: Interaction):
+        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=interaction.guild.id):
+            title = ':ballot_box: __Crypto Link Ballot System__ :ballot_box: '
+            description = "Commands to activate voting feature over Crypto Link and Discord"
+            list_of_values = [
+                {"name": ":pencil: Activate ballot vote pools functionality :pencil:  ",
+                 "value": f"```/owner ballot activate```"},
+                {"name": ":joystick: Access commands to operate with ballot vote pools :joystick: ",
+                 "value": f"```/pool```"}
+            ]
+            await customMessages.embed_builder(interaction=interaction, title=title, description=description,
+                                               data=list_of_values,
+                                               c=Colour.dark_gold())
+        else:
+            msg_title = ':warning:  __Community Registration Status___ :warning: '
+            message = f'You have not yet registered {interaction.guild} server into Crypto Link system. Please ' \
+                      f'do that first through `/owner register`.'
+            await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title, message=message,
+                                                color_code=0,
+                                                destination=1)
+
+    @ballot.subcommand(name="activate", description="Activation of voting pools")
+    @is_guild_owner()
+    async def activate(self,
+                       interaction: Interaction,
+                       r: Role):
+        """
+        Activation of voting pools
+        """
+        if not self.bot.backoffice.voting_manager.check_server_voting_reg_status(guild_id=interaction.guild.id):
+            data = {
+                "guildId": interaction.guild.id,
+                "ownerId": interaction.user.id,
+                "mngRoleId": int(r.id),
+                "mngRoleName": f'{r}'
+            }
+
+            if self.backoffice.voting_manager.register_server_for_voting_service(data=data):
+                await customMessages.system_message(interaction=interaction, color_code=0,
+                                                    message=f'You have successfully activated ballot voting '
+                                                            f'pools functionality for your'
+                                                            f' server. Proceed with `{self.command_string}ballot` over '
+                                                            f'public channel where Crypto Link has access to.',
+                                                    destination=1, sys_msg_title=CONST_SYS_MSG)
+            else:
+                msg_title = ':ballot_box: __Ballot Voting System Error__ :ballot_box: '
+                message = f'System could not activate Ballot Voting pools due to backend issue. Please contact' \
+                          f' crypto link team.'
+                await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title, message=message,
+                                                    color_code=0,
+                                                    destination=1)
+        else:
+            msg_title = ':ballot_box: __Ballot Voting System Already Active__ :ballot_box: '
+            message = f'You have already activated {interaction.guild} server for voting functionality.'
+            await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title, message=message,
+                                                color_code=0,
+                                                destination=1)
+
+    @activate.error
+    async def activate_error(self, interaction, error):
+        if isinstance(error, commands.CheckFailure):
+            message = f"You are required to specify active role on the server which will have access to the " \
+                      f"Ballot voting system management. `/owner ballot activate @discord.Role'"
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
+                                                sys_msg_title="Ballot voting access error!")
+        elif isinstance(error, commands.MissingRequiredArgument):
+            message = f"You forgot to provide @discord.Role which will have access to ballot functions."
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
+                                                sys_msg_title="Ballot voting access error!")
 
 
 def setup(bot):
