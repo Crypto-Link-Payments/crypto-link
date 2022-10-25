@@ -204,7 +204,7 @@ class GuildOwnerCommands(commands.Cog):
     #
     #         await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
     #                                            c=Colour.dark_gold())
-
+    #
     # @uplink.command()
     # async def apply(self, ctx, chn: TextChannel):
     #     data_to_update = {
@@ -229,7 +229,7 @@ class GuildOwnerCommands(commands.Cog):
     #                                                                            f' to the system with '
     #                                                                            f'`{self.guild_string}owner register',
     #                                             destination=ctx.message.channel, sys_msg_title=CONST_SYS_MSG)
-
+    #
     # @uplink.command()
     # async def remove(self, ctx):
     #     data_to_update = {
