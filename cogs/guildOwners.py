@@ -89,11 +89,10 @@ class GuildOwnerCommands(commands.Cog):
             await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
             await customMessages.system_message(interaction=interaction, color_code=0,
                                                 message='You have successfully registered guild into the system.',
-                                                destination=0, sys_msg_title=CONST_SYS_MSG)
+                                                sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(interaction=interaction, color_code=1,
                                                 message='Guild already registered',
-                                                destination=0,
                                                 sys_msg_title=CONST_SYS_ERROR)
 
     @owner.subcommand(name="stats", description="Check Guild Stats")
@@ -222,18 +221,15 @@ class GuildOwnerCommands(commands.Cog):
                                                                          data_to_update=data_to_update):
                 await customMessages.system_message(interaction=interaction, color_code=0,
                                                     message=f'You have successfully set channel {chn} to receive Crypto'
-                                                            f' Link Network Activity feed',
-                                                    destination=0, sys_msg_title=CONST_SYS_MSG)
+                                                            f' Link Network Activity feed', sys_msg_title=CONST_SYS_MSG)
             else:
                 await customMessages.system_message(interaction=interaction, color_code=1,
                                                     message='There has been an issue while trying'
-                                                            'to update data.',
-                                                    destination=1, sys_msg_title=CONST_SYS_MSG)
+                                                            'to update data.', sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(interaction=interaction, color_code=1,
                                                 message=f'Please register the {interaction.guild} to the system with '
-                                                        f'/owner register',
-                                                destination=1, sys_msg_title=CONST_SYS_MSG)
+                                                        f'/owner register', sys_msg_title=CONST_SYS_MSG)
 
     @uplink.subcommand(name="remove", description="Switch Off Uplink")
     async def remove(self,
@@ -246,12 +242,12 @@ class GuildOwnerCommands(commands.Cog):
                                                                      data_to_update=data_to_update):
             await customMessages.system_message(interaction=interaction, color_code=0,
                                                 message=f'You have successfully turned OFF Crypto Link Network Feed',
-                                                destination=0, sys_msg_title=CONST_SYS_MSG)
+                                                sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(interaction=interaction, color_code=1,
                                                 message='There has been an issue and Crypto Link Network Feed could '
                                                         'not be turned OFF. Please try again later',
-                                                destination=1, sys_msg_title=CONST_SYS_ERROR)
+                                                sys_msg_title=CONST_SYS_ERROR)
 
     @owner.subcommand(name="merchant", description="Guild Merchant Service")
     @application_checks.check(has_wallet_inter_check())
@@ -288,30 +284,26 @@ class GuildOwnerCommands(commands.Cog):
                               f' manual*** accessible through command ' \
                               f' `/merchant manual` '
                     await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
-                                                        message=message, color_code=0,
-                                                        destination=1)
+                                                        message=message, color_code=0)
                 else:
                     msg_title = ':warning:  __Merchant Registration Status___ :warning: '
                     message = f'There has been an issue while registering wallet into the system. ' \
                               f'Please try again later.' \
                               f' or contact one of the support staff. '
                     await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
-                                                        message=message, color_code=1,
-                                                        destination=1)
+                                                        message=message, color_code=1)
             else:
                 msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
                 message = f'You have already registered Merchant system on {interaction.guild} server. Proceed' \
                           f'with command {self.command_string}merchant'
                 await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
-                                                    message=message, color_code=0,
-                                                    destination=1)
+                                                    message=message, color_code=0)
         else:
             msg_title = ':warning:  __Community Registration Status___ :warning: '
             message = f'You have not yet registered {interaction.guild} server into Crypto Link system. Please ' \
                       f'do that first through `{self.guild_string}owner register`.'
             await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
-                                                message=message, color_code=0,
-                                                destination=1)
+                                                message=message, color_code=0)
 
     @owner.error
     async def owner_error(self, interaction, error):
@@ -319,7 +311,7 @@ class GuildOwnerCommands(commands.Cog):
             message = f'In order to be able to access this category of commands you are required to be ' \
                       f' owner of the community {interaction.guild} and execute command on one of the ' \
                       f' public channels.'
-            await customMessages.system_message(interaction=interaction, color_code=1, message=message, destination=0)
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message)
 
     @register.error
     async def register_error(self, interaction, error):
@@ -327,7 +319,7 @@ class GuildOwnerCommands(commands.Cog):
             message = f'In order to be able to register community into Crypto Link system you re required to ' \
                       f' have personal wallet registered in the system. You can do so through:\n' \
                       f' /register'
-            await customMessages.system_message(interaction=interaction, color_code=1, message=message, destination=0)
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message)
 
     # ----------------Voting pools registration-------------#
     @owner.subcommand(name="ballot", description="Crypto Link Ballot System")
@@ -352,8 +344,7 @@ class GuildOwnerCommands(commands.Cog):
             message = f'You have not yet registered {interaction.guild} server into Crypto Link system. Please ' \
                       f'do that first through `/owner register`.'
             await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title, message=message,
-                                                color_code=0,
-                                                destination=1)
+                                                color_code=0)
 
     @ballot.subcommand(name="activate", description="Activation of voting pools")
     @is_guild_owner()
@@ -377,31 +368,29 @@ class GuildOwnerCommands(commands.Cog):
                                                             f'pools functionality for your'
                                                             f' server. Proceed with `{self.command_string}ballot` over '
                                                             f'public channel where Crypto Link has access to.',
-                                                    destination=1, sys_msg_title=CONST_SYS_MSG)
+                                                    sys_msg_title=CONST_SYS_MSG)
             else:
                 msg_title = ':ballot_box: __Ballot Voting System Error__ :ballot_box: '
                 message = f'System could not activate Ballot Voting pools due to backend issue. Please contact' \
                           f' crypto link team.'
                 await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title, message=message,
-                                                    color_code=0,
-                                                    destination=1)
+                                                    color_code=0)
         else:
             msg_title = ':ballot_box: __Ballot Voting System Already Active__ :ballot_box: '
             message = f'You have already activated {interaction.guild} server for voting functionality.'
             await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title, message=message,
-                                                color_code=0,
-                                                destination=1)
+                                                color_code=0)
 
     @activate.error
     async def activate_error(self, interaction, error):
         if isinstance(error, commands.CheckFailure):
             message = f"You are required to specify active role on the server which will have access to the " \
                       f"Ballot voting system management. `/owner ballot activate @discord.Role'"
-            await customMessages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message,
                                                 sys_msg_title="Ballot voting access error!")
         elif isinstance(error, commands.MissingRequiredArgument):
             message = f"You forgot to provide @discord.Role which will have access to ballot functions."
-            await customMessages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message,
                                                 sys_msg_title="Ballot voting access error!")
 
 
