@@ -5,6 +5,7 @@ File includes custom security checks for the Discord GUI part
 from nextcord import ChannelType, Interaction
 from nextcord.ext import application_checks
 
+
 def is_animus(ctx):
     """
     Check if creator
@@ -55,6 +56,18 @@ def is_owner(ctx):
     return int(ctx.message.author.id) == int(ctx.message.guild.owner_id)
 
 
+def is_guild_owner():
+    """
+    Checks if its guild owner
+    :return:
+    """
+
+    def predicate(interaction: Interaction):
+        return interaction.guild.owner_id == interaction.user.id
+
+    return application_checks.check(predicate)
+
+
 def merchant_com_reg_stats(ctx):
     """
     Checks if community is registered in the merchant system
@@ -86,11 +99,17 @@ def guild_has_merchant(ctx):
     return ctx.bot.backoffice.merchant_manager.check_if_community_exist(int(ctx.message.guild.id))
 
 
-def guild_has_stats(ctx):
+def guild_has_stats():
     """
-    Guild registration status check for stats
+    check if guild has stats
+    :return:
     """
-    return ctx.bot.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id)
+
+    def predicate(interaction: Interaction):
+        return interaction.client.backoffice.guild_profiles.check_guild_registration_stats(
+            guild_id=interaction.guild_id)
+
+    return application_checks.check(predicate)
 
 
 def user_has_second_level(ctx):
@@ -137,4 +156,3 @@ def check(author):
 def has_ballot_access(ctx):
     voting_role_id = ctx.bot.backoffice.voting_manager.get_ballot_rights_role(guild_id=ctx.guild.id)
     return voting_role_id in [role.id for role in ctx.author.roles]
-
