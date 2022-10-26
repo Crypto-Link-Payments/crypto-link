@@ -232,7 +232,7 @@ class GuildOwnerCommands(commands.Cog):
         else:
             await customMessages.system_message(interaction=interaction, color_code=1,
                                                 message=f'Please register the {interaction.guild} to the system with '
-                                                        f'{self.guild_string}owner register',
+                                                        f'/owner register',
                                                 destination=interaction.message.channel, sys_msg_title=CONST_SYS_MSG)
 
     @uplink.subcommand(name="remove", description="Switch Off Uplink")
