@@ -203,9 +203,9 @@ class GuildOwnerCommands(commands.Cog):
              "value": f"`/owner uplink remove`"}
         ]
 
-        await customMessages.embed_builder(interaction=interaction, title=title, description=description, data=list_of_values,
+        await customMessages.embed_builder(interaction=interaction, title=title, description=description,
+                                           data=list_of_values,
                                            c=Colour.dark_gold())
-
 
     @uplink.subcommand(name="apply", description="Crypto Link Activity Feed")
     async def apply(self,
@@ -223,17 +223,17 @@ class GuildOwnerCommands(commands.Cog):
                 await customMessages.system_message(interaction=interaction, color_code=0,
                                                     message=f'You have successfully set channel {chn} to receive Crypto'
                                                             f' Link Network Activity feed',
-                                                    destination=interaction.message.author, sys_msg_title=CONST_SYS_MSG)
+                                                    destination=0, sys_msg_title=CONST_SYS_MSG)
             else:
                 await customMessages.system_message(interaction=interaction, color_code=1,
                                                     message='There has been an issue while trying'
                                                             'to update data.',
-                                                    destination=interaction.message.channel, sys_msg_title=CONST_SYS_MSG)
+                                                    destination=1, sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(interaction=interaction, color_code=1,
                                                 message=f'Please register the {interaction.guild} to the system with '
                                                         f'/owner register',
-                                                destination=interaction.message.channel, sys_msg_title=CONST_SYS_MSG)
+                                                destination=1, sys_msg_title=CONST_SYS_MSG)
 
     @uplink.subcommand(name="remove", description="Switch Off Uplink")
     async def remove(self,
@@ -246,12 +246,12 @@ class GuildOwnerCommands(commands.Cog):
                                                                      data_to_update=data_to_update):
             await customMessages.system_message(interaction=interaction, color_code=0,
                                                 message=f'You have successfully turned OFF Crypto Link Network Feed',
-                                                destination=interaction.message.author, sys_msg_title=CONST_SYS_MSG)
+                                                destination=0, sys_msg_title=CONST_SYS_MSG)
         else:
             await customMessages.system_message(interaction=interaction, color_code=1,
                                                 message='There has been an issue and Crypto Link Network Feed could '
                                                         'not be turned OFF. Please try again later',
-                                                destination=interaction.message.channel, sys_msg_title=CONST_SYS_ERROR)
+                                                destination=1, sys_msg_title=CONST_SYS_ERROR)
 
     @owner.subcommand(name="merchant", description="Guild Merchant Service")
     @application_checks.check(has_wallet_inter_check())
