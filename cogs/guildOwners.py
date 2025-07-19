@@ -114,75 +114,85 @@ class GuildOwnerCommands(commands.Cog):
         )
 
     @owner.subcommand(name="stats", description="Check Guild Stats")
+    @application_checks.check(is_guild_owner())
     @application_checks.check(guild_has_stats())
     async def stats(self,
                     interaction: Interaction,
-                    token: str = SlashOption(description="Balance for token", required=False, default='xlm')
+                    token: str = SlashOption(description="Token to display stats for", required=False, default='xlm')
                     ):
+
         token = token.lower()
-        stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=interaction.guild.id)
-        # available tokens
-        tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
-                  x['assetCode'] != 'xlm']
-        available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
+        guild_id = interaction.guild.id
+
+        stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=guild_id)
+        registered_tokens = [
+            x["assetCode"] for x in self.bot.backoffice.token_manager.get_registered_tokens()
+        ]
+
+        available_stats = ', '.join(t for t in registered_tokens if t.lower() != "xlm").upper()
 
         if token == 'xlm':
-
-            stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
-                               timestamp=datetime.utcnow(),
-                               colour=Colour.dark_gold())
-            stats_info.add_field(name='Wallets registered',
-                                 value=f'`{stats["registeredUsers"]}`',
-                                 inline=False)
-
-            volume = stats["xlm"]["volume"]
+            xlm_stats = stats["xlm"]
+            volume = xlm_stats["volume"]
             if isinstance(volume, Decimal128):
                 volume = volume.to_decimal()
 
-            xlm_stats = stats["xlm"]
+            embed = Embed(
+                title=":bank: __Guild Statistics__ :bank:",
+                timestamp=datetime.utcnow(),
+                colour=Colour.dark_gold()
+            )
+            embed.set_thumbnail(url=interaction.guild.icon.url)
+            embed.add_field(name="Wallets registered", value=f'`{stats["registeredUsers"]}`', inline=False)
+            embed.add_field(name=":incoming_envelope: XLM Payments executed", value=f'`{xlm_stats["txCount"]}`')
+            embed.add_field(name=":money_with_wings: Total Volume", value=f'`{round(volume, 7)} XLM`')
+            embed.add_field(name=":cowboy: Public Transactions", value=f'`{xlm_stats["publicCount"]}`')
+            embed.add_field(name=":detective: Private Transactions", value=f'`{xlm_stats["privateCount"]}`')
+            embed.add_field(name=":person_juggling: Perks Sold", value=f'`{xlm_stats["roleTxCount"]}`')
 
-            stats_info.set_thumbnail(url=interaction.guild.icon.url)
-            stats_info.add_field(name=":incoming_envelope: XLM Payments executed ",
-                                 value=f'`{xlm_stats["txCount"]}`')
-            stats_info.add_field(name=":money_with_wings: Total Volume ",
-                                 value=f'`{round(volume, 7)} XLM`')
-            stats_info.add_field(name=":cowboy: XLM Public Transactions  ",
-                                 value=f'`{xlm_stats["publicCount"]}`')
-            stats_info.add_field(name=":detective: XLM Private Transactions ",
-                                 value=f'`{xlm_stats["privateCount"]}`')
-            stats_info.add_field(name=":person_juggling: Perks Sold  ",
-                                 value=f'`{xlm_stats["roleTxCount"]}`')
-            # stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
-            #                      value=f'`{xlm_stats["emojiTxCount"]}`')
-            # stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
-            #                      value=f'`{xlm_stats["multiTxCount"]}`')
-            stats_info.add_field(name=':warning: Other token statistics',
-                                 value=f'In order to get statistics of other tokens for you server please use '
-                                       f'same command structure and add one asset code from available:'
-                                       f' {available_stats.upper()}',
-                                 inline=False)
-            await interaction.response.send_message(embed=stats_info)
+            embed.add_field(
+                name=':warning: Other token statistics',
+                value=(
+                    f'To view token-specific stats, use this command with one of the following tokens: '
+                    f'`{available_stats}`'
+                ),
+                inline=False
+            )
+
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        elif token in [t.lower() for t in registered_tokens if t.lower() != 'xlm']:
+            token_stats = stats.get(token)
+            if not token_stats:
+                await interaction.response.send_message(
+                    f"No stats available for token `{token.upper()}`.",
+                    ephemeral=True
+                )
+                return
+
+            embed = Embed(
+                title=f":coin: Token Statistics: {token.upper()}",
+                timestamp=datetime.utcnow(),
+                colour=Colour.teal()
+            )
+            embed.set_thumbnail(url=interaction.guild.icon.url)
+
+            for k, v in token_stats.items():
+                display_key = ' '.join(sub(r"([A-Z])", r" \1", k).split()).capitalize()
+                value_str = f'{v:,.7f} {token.upper()}' if k == 'volume' else str(v)
+                embed.add_field(name=display_key, value=f'```{value_str}```')
+
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+
         else:
-            tokens = [x["assetCode"] for x in self.backoffice.token_manager.get_registered_tokens() if
-                      x["assetCode"] != 'xlm']
+            await interaction.response.send_message(
+                content=(
+                    f"❌ Unsupported token `{token.upper()}`.\n"
+                    f"Available tokens: `{available_stats}`"
+                ),
+                ephemeral=True
+            )
 
-            if tokens:
-                token_stats_info = Embed(title=f'Token statistics for server')
-
-                for token in tokens:
-                    token_stats = stats[f'{token.lower()}']
-                    for k, v in token_stats.items():
-                        itm = sub(r"([A-Z])", r" \1", k).split()
-                        item = ' '.join([str(elem) for elem in itm]).capitalize()
-                        if k != 'volume':
-                            token_stats_info.add_field(name=f'{item}',
-                                                       value=f'```{v}```')
-                        else:
-                            token_stats_info.add_field(name=f'{item}',
-                                                       value=f'```{v:,.7f} {token.upper()}```')
-                    await interaction.response.send_message(embed=token_stats_info)
-            else:
-                await interaction.response.send_message(content="No tokens registered")
 
     @owner.subcommand(name="services", description="Guild Service Status")
     @application_checks.check(guild_has_stats())
