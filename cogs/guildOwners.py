@@ -22,8 +22,12 @@ class GuildOwnerCommands(commands.Cog):
         self.merchant = self.backoffice.merchant_manager
         self.guild_string = None
 
-    @slash_command(description="Guild Owner manual", dm_permission=False)
-    @is_guild_owner()
+    @slash_command(name='owner', description="Guild Owner manual group", dm_permission=False)
+    @application_checks.check(is_guild_owner())
+    @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
+    async def owner(self, interaction: Interaction):
+        pass 
+
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
     async def owner(self,
                     interaction: Interaction
