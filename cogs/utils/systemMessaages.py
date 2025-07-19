@@ -133,7 +133,7 @@ class CustomMessages:
         await ctx.author.send(embed=bridge_info)
 
     @staticmethod
-    async def system_message(interaction, message: str, color_code, destination: int, sys_msg_title: str = None,
+    async def system_message(interaction, message: str, color_code, sys_msg_title: str = None,
                              embed_title: str = None):
         """
         Custom System Messages
