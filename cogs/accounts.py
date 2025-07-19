@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timezone
 from nextcord import Embed, Colour, File, Interaction, slash_command, SlashOption
 from nextcord.ext import commands, application_checks
 import cooldowns
@@ -9,6 +10,7 @@ from cogs.utils.systemMessaages import CustomMessages
 import os
 import time
 import pyqrcode
+import traceback
 
 custom_messages = CustomMessages()
 # Move this to class
@@ -52,58 +54,71 @@ class UserAccountCommands(commands.Cog):
     @slash_command(description="Basic details about your Crypto Link account", dm_permission=False)
     @application_checks.check(has_wallet_inter_check())
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.author)
-    async def me(self,
-                 interaction: Interaction):
-        utc_now = datetime.utcnow()
-        wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=interaction.user.id)
-
+    async def me(self, interaction: Interaction):
         try:
-            xlm_balance = float(wallet_data["xlm"]) / (10 ** 7)
-        except ZeroDivisionError:
-            xlm_balance = 0
+            utc_now = datetime.now(timezone.utc)
+            user_id = interaction.user.id
+            username = interaction.user.display_name
 
-        rates = get_rates(coin_name='stellar')
-        acc_details = Embed(title=f':office_worker: {interaction.user} :office_worker:',
-                            description=f' ***__Basic details about your Crypto Link account__*** ',
-                            colour=Colour.dark_orange(),
-                            timestamp=utc_now)
-        acc_details.add_field(name=":map: Wallet Address :map: ",
-                              value=f"```{self.backoffice.stellar_wallet.public_key}```")
-        acc_details.add_field(name=":compass: MEMO :compass: ",
-                              value=f"```{wallet_data['depositId']}```",
-                              inline=False)
-        acc_details.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag: ',
-                              value=f'`{xlm_balance:.7f}`',
-                              inline=False)
+            wallet_data = self.backoffice.wallet_manager.get_full_details(user_id=user_id)
 
-        if rates and float(wallet_data["xlm"]) > 0:
-            in_eur = rate_converter(xlm_balance, rates["stellar"]["eur"])
-            in_usd = rate_converter(xlm_balance, rates["stellar"]["usd"])
-            in_btc = rate_converter(xlm_balance, rates["stellar"]["btc"])
-            in_eth = rate_converter(xlm_balance, rates["stellar"]["eth"])
-            in_rub = rate_converter(xlm_balance, rates["stellar"]["rub"])
-            in_ltc = rate_converter(xlm_balance, rates["stellar"]["ltc"])
-            acc_details.add_field(name=f':flag_us: USA',
-                                  value=f'`$ {in_usd:.4f}`')
-            acc_details.add_field(name=f':flag_eu: EUR',
-                                  value=f'`€ {in_eur:.4f}`')
-            acc_details.add_field(name=f':flag_ru:  RUB',
-                                  value=f'`₽ {in_rub:.4f}`')
-            acc_details.add_field(name=f'BTC',
-                                  value=f'`₿ {in_btc:.8f}`')
-            acc_details.add_field(name=f'ETH',
-                                  value=f'`Ξ {in_eth:.8f}`')
-            acc_details.add_field(name=f'LTC',
-                                  value=f'`Ł {in_ltc:.8f}`')
+            if not isinstance(wallet_data, dict):
+                await interaction.response.send_message(
+                    "No wallet data found. Please set up your account first.",
+                    ephemeral=True
+                )
+                return
 
-        acc_details.add_field(name=f'More On Stellar Lumen (XLM)',
-                              value=f'[Stellar](https://www.stellar.org/)\n'
-                                    f'[Stellar Foundation](https://www.stellar.org/foundation)\n'
-                                    f'[Stellar Lumens](https://www.stellar.org/lumens)\n'
-                                    f'[CMC](https://coinmarketcap.com/currencies/stellar/)\n'
-                                    f'[Stellar Expert](https://stellar.expert/explorer/public)')
-        acc_details.set_footer(text='Conversion rates are provided by CoinGecko')
-        await interaction.response.send_message(embed=acc_details, delete_after=15, ephemeral=True)
+            # Safely extract wallet data with defaults
+            xlm_raw = float(wallet_data.get("xlm", 0))
+            xlm_balance = xlm_raw / 1e7 if xlm_raw else 0.0
+            deposit_id = wallet_data.get("depositId", "Unknown")
+
+            embed = Embed(
+                title=f':office_worker: {username} :office_worker:',
+                description='***__Basic details about your Crypto Link account__***',
+                colour=Colour.dark_orange(),
+                timestamp=utc_now
+            )
+
+            embed.add_field(name=":map: Wallet Address :map:", value=f"```{self.backoffice.stellar_wallet.public_key}```")
+            embed.add_field(name=":compass: MEMO :compass:", value=f"```{deposit_id}```", inline=False)
+            embed.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag:', value=f'`{xlm_balance:.7f}`', inline=False)
+
+            if xlm_raw > 0:
+                rates = get_rates(coin_name='stellar')
+                if rates:
+                    conversions = {
+                        'USD': ('$ ', 'usd'),
+                        'EUR': ('€ ', 'eur'),
+                        'RUB': ('₽ ', 'rub'),
+                        'BTC': ('₿ ', 'btc'),
+                        'ETH': ('Ξ ', 'eth'),
+                        'LTC': ('Ł ', 'ltc')
+                    }
+
+                    for label, (symbol, key) in conversions.items():
+                        value = rate_converter(xlm_balance, rates["stellar"].get(key, 0))
+                        embed.add_field(name=label, value=f'`{symbol}{value:.4f if label in ["USD", "EUR", "RUB"] else ".8f"}`')
+
+            embed.add_field(
+                name='More On Stellar Lumen (XLM)',
+                value=(
+                    '[Stellar](https://www.stellar.org/)\n'
+                    '[Stellar Foundation](https://www.stellar.org/foundation)\n'
+                    '[Stellar Lumens](https://www.stellar.org/lumens)\n'
+                    '[CMC](https://coinmarketcap.com/currencies/stellar/)\n'
+                    '[Stellar Expert](https://stellar.expert/explorer/public)'
+                )
+            )
+            embed.set_footer(text='Conversion rates are provided by CoinGecko')
+
+            await interaction.response.send_message(embed=embed, delete_after=15, ephemeral=True)
+
+        except Exception as e:
+            print("Exception occurred:", repr(e))
+            traceback.print_exc()
+            await interaction.response.send_message("An unexpected error occurred. Please try again later.", ephemeral=True)
 
     @slash_command(description="Register to Crypto Link", dm_permission=False)
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
