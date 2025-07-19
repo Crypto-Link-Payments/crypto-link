@@ -146,7 +146,7 @@ class UserAccountCommands(commands.Cog):
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
         else:
             message = f'You already have an account! Please use ' \
-                      f'***/wallet*** to access your wallet details.'
+                      f'/wallet to access your wallet details and other commands or /me for quick check.'
             await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
