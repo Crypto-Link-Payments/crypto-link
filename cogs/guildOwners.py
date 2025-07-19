@@ -397,42 +397,73 @@ class GuildOwnerCommands(commands.Cog):
         # )
         return
 
-    @merchant.subcommand(name="open", description="Community Wallet Registration")
-    async def open(self,
-                   interaction: Interaction
-                   ):
-        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=interaction.guild.id):
-            if not self.merchant.check_if_community_exist(community_id=interaction.guild.id):  # Check if not registered
-                if self.merchant.register_community_wallet(community_id=interaction.guild.id,
-                                                           community_owner_id=interaction.user.id,
-                                                           community_name=f'{interaction.guild}'):
-                    msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
-                    message = f'You have successfully merchant system on ***{interaction.guild}***. You can proceed ' \
-                              f' with `/merchant` in order to familiarize yourself with ' \
-                              f'all available commands or have a look at ***merchant system' \
-                              f' manual*** accessible through command ' \
-                              f' `/merchant manual` '
-                    await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
-                                                        message=message, color_code=0)
-                else:
-                    msg_title = ':warning:  __Merchant Registration Status___ :warning: '
-                    message = f'There has been an issue while registering wallet into the system. ' \
-                              f'Please try again later.' \
-                              f' or contact one of the support staff. '
-                    await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
-                                                        message=message, color_code=1)
-            else:
-                msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
-                message = f'You have already registered Merchant system on {interaction.guild} server. Proceed' \
-                          f'with command {self.command_string}merchant'
-                await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
-                                                    message=message, color_code=0)
+    @merchant.subcommand(name="open", description="Register a community wallet for merchant system")
+    @application_checks.check(is_guild_owner())  # ✅ Restrict to owner
+    async def open(self, interaction: Interaction):
+        guild_id = interaction.guild.id
+        guild_name = str(interaction.guild)
+        user_id = interaction.user.id
+
+        if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=guild_id):
+            msg_title = ':warning: __Community Registration Status__ :warning:'
+            message = (
+                f'The server ***{guild_name}*** is not registered in the Crypto Link system yet.\n\n'
+                f'Please register it first using `{self.guild_string}owner register`.'
+            )
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=msg_title,
+                message=message,
+                color_code=1
+            )
+            return
+
+        if self.merchant.check_if_community_exist(community_id=guild_id):
+            msg_title = ':warning: __Merchant Registration Status__ :warning:'
+            message = (
+                f'The merchant system is already active for ***{guild_name}***.\n\n'
+                f'Use `/merchant` to access merchant features on public channel of the server where Crypto Link has access to.'
+            )
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=msg_title,
+                message=message,
+                color_code=0
+            )
+            return
+
+        # Attempt to register the merchant wallet
+        success = self.merchant.register_community_wallet(
+            community_id=guild_id,
+            community_owner_id=user_id,
+            community_name=guild_name
+        )
+
+        if success:
+            msg_title = ':rocket: __Community Wallet Registration Status__ :rocket:'
+            message = (
+                f'You have successfully activated the merchant system for ***{guild_name}***.\n\n'
+                f'You can now use `{self.command_string}merchant` to view commands, or access the manual via '
+                f'`/merchant manual`.'
+            )
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=msg_title,
+                message=message,
+                color_code=0
+            )
         else:
-            msg_title = ':warning:  __Community Registration Status___ :warning: '
-            message = f'You have not yet registered {interaction.guild} server into Crypto Link system. Please ' \
-                      f'do that first through `{self.guild_string}owner register`.'
-            await customMessages.system_message(interaction=interaction, sys_msg_title=msg_title,
-                                                message=message, color_code=0)
+            msg_title = ':warning: __Merchant Registration Status__ :warning:'
+            message = (
+                f'An error occurred while registering the merchant wallet.\n\n'
+                f'Please try again later or contact support.'
+            )
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=msg_title,
+                message=message,
+                color_code=1
+            )
 
     @owner.error
     async def owner_error(self, interaction, error):
