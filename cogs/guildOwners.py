@@ -230,65 +230,144 @@ class GuildOwnerCommands(commands.Cog):
         await interaction.response.send_message(embed=service_info)
         
 
-    @owner.subcommand(name="uplink", description="Crypto Link Uplink Manual")
-    async def uplink(self,
-                     interaction: Interaction
-                     ):
-        title = ':satellite_orbital: __Crypto Link Uplink manual__ :satellite_orbital:'
-        description = "All available commands to operate with guild system"
-        list_of_values = [
-            {"name": "Apply Channel for CL feed",
-             "value": f"`/owner uplink apply <#discord.Channel>`"},
-            {"name": "Remove Channel for CL feed",
-             "value": f"`/owner uplink remove`"}
-        ]
+    # @owner.subcommand(name="uplink", description="Crypto Link Uplink Manual")
+    # @application_checks.check(is_guild_owner())  
+    # async def uplink(self, interaction: Interaction):
+    #     title = ':satellite_orbital: __Crypto Link Uplink Manual__ :satellite_orbital:'
+    #     description = "Use the following commands to manage Crypto Link network feed channels."
 
-        await customMessages.embed_builder(interaction=interaction, title=title, description=description,
-                                           data=list_of_values,
-                                           c=Colour.dark_gold())
+    #     list_of_values = [
+    #         {
+    #             "name": "Apply Channel for CL Feed",
+    #             "value": "`/owner uplink apply <#channel>`"
+    #         },
+    #         {
+    #             "name": "Remove Channel for CL Feed",
+    #             "value": "`/owner uplink remove`"
+    #         }
+    #     ]
 
-    @uplink.subcommand(name="apply", description="Crypto Link Activity Feed")
-    async def apply(self,
-                    interaction: Interaction,
-                    chn: TextChannel
-                    ):
-        data_to_update = {
-            "explorerSettings.channelId": int(chn.id)
-        }
+    #     await customMessages.embed_builder(
+    #         interaction=interaction,
+    #         title=title,
+    #         description=description,
+    #         data=list_of_values,
+    #         c=Colour.dark_gold()
+    #     )
 
-        # Check if owner registered
-        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=interaction.guild.id):
-            if await self.backoffice.guild_profiles.update_guild_profile(guild_id=interaction.guild.id,
-                                                                         data_to_update=data_to_update):
-                await customMessages.system_message(interaction=interaction, color_code=0,
-                                                    message=f'You have successfully set channel {chn} to receive Crypto'
-                                                            f' Link Network Activity feed', sys_msg_title=CONST_SYS_MSG)
-            else:
-                await customMessages.system_message(interaction=interaction, color_code=1,
-                                                    message='There has been an issue while trying'
-                                                            'to update data.', sys_msg_title=CONST_SYS_MSG)
-        else:
-            await customMessages.system_message(interaction=interaction, color_code=1,
-                                                message=f'Please register the {interaction.guild} to the system with '
-                                                        f'/owner register', sys_msg_title=CONST_SYS_MSG)
+    # #     interaction: Interaction,
+    # #     chn: GuildChannel = SlashOption(
+    # #         description="Select the channel to receive network feed",
+    # #         channel_types=[ChannelType.text]
+    # #     )
+    # # ):
+    # #     data_to_update = {
+    # #         "explorerSettings.channelId": int(chn.id)
+    # #     }
 
-    @uplink.subcommand(name="remove", description="Switch Off Uplink")
-    async def remove(self,
-                     interaction: Interaction):
-        data_to_update = {
-            "explorerSettings.channelId": int(0)
-        }
+    # #     # Check if owner registered
+    # #     if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=interaction.guild.id):
+    # #         if await self.backoffice.guild_profiles.update_guild_profile(
+    # #             guild_id=interaction.guild.id,
+    # #             data_to_update=data_to_update
+    # #         ):
+    # #             await customMessages.system_message(
+    # #                 interaction=interaction,
+    # #                 color_code=0,
+    # #                 message=f'✅ Channel {chn.mention} will now receive Crypto Link Network Activity feed.',
+    # #                 sys_msg_title=CONST_SYS_MSG
+    # #             )
+    # #         else:
+    # #             await customMessages.system_message(
+    # #                 interaction=interaction,
+    # #                 color_code=1,
+    # #                 message='❌ Failed to update your settings.',
+    # #                 sys_msg_title=CONST_SYS_MSG
+    # #             )
+    # #     else:
+    # #         await customMessages.system_message(
+    # #             interaction=interaction,
+    # #             color_code=1,
+    # #             message=f'Please register the server {interaction.guild.name} using `/owner register` first.',
+    # #             sys_msg_title=CONST_SYS_MSG
+    # #         )
+    
+    # @uplink.subcommand(name="apply", description="Set the channel for Crypto Link activity feed")
+    # @application_checks.check(is_guild_owner())  # ✅ Only server owner allowed
+    # async def apply(
+    #     self,
+    #     interaction: Interaction,
+    #     chn: GuildChannel = SlashOption(
+    #         description="Select the channel to receive network feed",
+    #         channel_types=[ChannelType.text]
+    #     )
+    # ):
+    #     guild_id = interaction.guild.id
 
-        if await self.backoffice.guild_profiles.update_guild_profile(guild_id=interaction.guild.id,
-                                                                     data_to_update=data_to_update):
-            await customMessages.system_message(interaction=interaction, color_code=0,
-                                                message=f'You have successfully turned OFF Crypto Link Network Feed',
-                                                sys_msg_title=CONST_SYS_MSG)
-        else:
-            await customMessages.system_message(interaction=interaction, color_code=1,
-                                                message='There has been an issue and Crypto Link Network Feed could '
-                                                        'not be turned OFF. Please try again later',
-                                                sys_msg_title=CONST_SYS_ERROR)
+    #     data_to_update = {
+    #         "explorerSettings.channelId": chn.id
+    #     }
+
+    #     if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=guild_id):
+    #         success = await self.backoffice.guild_profiles.update_guild_profile(
+    #             guild_id=guild_id,
+    #             data_to_update=data_to_update
+    #         )
+
+    #         if success:
+    #             await customMessages.system_message(
+    #                 interaction=interaction,
+    #                 color_code=0,
+    #                 message=f'✅ Channel {chn.mention} will now receive Crypto Link Network Activity feed.',
+    #                 sys_msg_title=CONST_SYS_MSG
+    #             )
+    #         else:
+    #             await customMessages.system_message(
+    #                 interaction=interaction,
+    #                 color_code=1,
+    #                 message='❌ Failed to update your settings.',
+    #                 sys_msg_title=CONST_SYS_MSG
+    #             )
+    #     else:
+    #         await customMessages.system_message(
+    #             interaction=interaction,
+    #             color_code=1,
+    #             message=f'Please register the server `{interaction.guild.name}` using `/owner register` first.',
+    #             sys_msg_title=CONST_SYS_MSG
+    #         )
+        
+    # @uplink.subcommand(name="remove", description="Switch off the Crypto Link Network Feed")
+    # @application_checks.check(is_guild_owner())  # ✅ Restrict to guild owner
+    # async def remove(self, interaction: Interaction):
+    #     guild_id = interaction.guild.id
+
+    #     data_to_update = {
+    #         "explorerSettings.channelId": 0
+    #     }
+
+    #     success = await self.backoffice.guild_profiles.update_guild_profile(
+    #         guild_id=guild_id,
+    #         data_to_update=data_to_update
+    #     )
+
+    #     if success:
+    #         await customMessages.system_message(
+    #             interaction=interaction,
+    #             color_code=0,
+    #             message="📡 You have successfully turned **OFF** the Crypto Link Network Feed.",
+    #             sys_msg_title=CONST_SYS_MSG
+    #         )
+    #     else:
+    #         await customMessages.system_message(
+    #             interaction=interaction,
+    #             color_code=1,
+    #             message=(
+    #                 "❌ There was an issue turning **OFF** the network feed. "
+    #                 "Please try again later or contact support."
+    #             ),
+    #             sys_msg_title=CONST_SYS_ERROR
+    #         )
+
 
     @owner.subcommand(name="merchant", description="Guild Merchant Service")
     @application_checks.check(has_wallet_inter_check())
