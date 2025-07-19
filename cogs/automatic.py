@@ -8,10 +8,6 @@ import sys
 from colorama import Fore
 from nextcord import Embed, Colour, Game, Status, Interaction
 from nextcord.ext import commands
-import datetime
-import time
-from discord import HTTPException
-import traceback
 from cooldowns import CallableOnCooldown
 from cogs.utils.systemMessaages import CustomMessages
 
@@ -38,16 +34,14 @@ class AutoFunctions(commands.Cog):
         if isinstance(error, CallableOnCooldown):
             await inter.send(f"You are being rate-limited! Retry in `{error.retry_after}` seconds.")
         else:
-            print(error)
             usr_details = f'User: {inter.user} {inter.user.id}\n' \
                           f'Server: {inter.guild}\n' \
                           f'Channel: {inter.channel}\n'
             try:
-                self.bot.hook_pager.error_discord(title="Unhandled Error",
-                                                  details=usr_details,
-                                                  error_description=error,
-                                                  command_content=inter.message.content,
-                                                  message='Animus')
+                from pprint import pprint
+                pprint(usr_details)
+                pprint(error)
+                pprint(inter.message.content)
             except Exception as e:
                 print(e)
 
