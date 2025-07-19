@@ -125,80 +125,72 @@ class MerchantCommunityOwner(commands.Cog):
         )
 
 
+    @merchant.subcommand(name="initiate", description="Initiate and register your community in the Merchant system")
+    @application_checks.check(is_guild_owner())
+    @application_checks.check(has_wallet_inter_check())
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    async def merchant_initiate(self, interaction: Interaction):
+        guild_id = interaction.guild.id
+        user_id = interaction.user.id
+        guild_name = interaction.guild.name
+
+        if not self.merchant.check_if_community_exist(community_id=guild_id):
+            success = self.merchant.register_community_wallet(
+                community_id=guild_id,
+                community_owner_id=user_id,
+                community_name=guild_name
+            )
+
+            if success:
+                msg_title = ':rocket: __Community Wallet Registration Status__ :rocket:'
+                message = (
+                    f'You have successfully registered the merchant system on {guild_name}.\n'
+                    f'Use `/merchant help` to explore available commands or `/merchant manual` for system documentation.'
+                )
+                await customMessages.system_message(
+                    interaction=interaction,
+                    sys_msg_title=msg_title,
+                    message=message,
+                    color_code=0,
+                    destination=1
+                )
+
+                merchant_notification_channel = self.bot.get_channel(int(self.merchant_channel_info))
+                if merchant_notification_channel:
+                    new_merch = Embed(
+                        title='New Community Registered for Merchant',
+                        description='A new community has registered for the merchant service.',
+                        colour=Colour.purple()
+                    )
+                    new_merch.add_field(name='Community', value=guild_name)
+                    await merchant_notification_channel.send(embed=new_merch)                   
             else:
-                msg_title = ':warning:  __Merchant Registration Status___ :warning: '
-                message = f'There has been an issue while registering wallet into the system. Please try again later.' \
-                          f' or contact one of the support staff. '
-                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
-                                                    destination=1)
+                msg_title = ':warning: __Merchant Registration Failed__ :warning:'
+                message = (
+                    'There was an issue registering the wallet in the system.\n'
+                    'Please try again later or contact support staff.'
+                )
+                await customMessages.system_message(
+                    interaction=interaction,
+                    sys_msg_title=msg_title,
+                    message=message,
+                    color_code=1,
+                    destination=1
+                )
         else:
-            msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
-            message = f'You have already registered {ctx.guild} for Merchant system on {self.bot.user.mention}. Proceed' \
-                      f' with command ```{self.command_string}merchant``` or ```{self.command_string}```'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-                                                destination=1)
-
-    @commands.group(aliases=['merchant'])
-    @commands.check(is_owner)  # Check if author is community owner
-    @commands.check(merchant_com_reg_stats)  # Check if community has been registered in the system
-    @commands.check(has_wallet)  # Check if owner has community wallet
-    @commands.guild_only()
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def merch(self, ctx):
-        if ctx.invoked_subcommand is None:
-            title = "💱 __Merchant System Message Setup__💱 "
-            description = 'All available commands under ***merchant*** category.'
-            list_of_commands = [
-                {"name": f':information_source: How to Monetize Roles :information_source: ',
-                 "value": f'```{self.command_string}merchant manual```'},
-                {"name": f':information_source: Access Role Management sub-commands :information_source: ',
-                 "value": f'```{self.command_string}merchant roles```'},
-                {"name": f':moneybag: Access Merchant Wallet sub-commands :moneybag:   ',
-                 "value": f'```{self.command_string}merchant wallet```'},
-                {"name": f':moneybag: List Active Roles on Community :moneybag:   ',
-                 "value": f'```{self.command_string}merchant active```'}
-
-            ]
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands,
-                                               c=Color.purple())
-
-    @merch.command()
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def manual(self, ctx):
-        manual = Embed(title=':convenience_store: __Merchant system manual__ :convenience_store: ',
-                       colour=Color.purple())
-        manual.add_field(name=':one: Create monetized roles :one:',
-                         value=f'```{self.command_string}merchant role create <role name> <role value in $> '
-                               f'<weeks> <days> <hours> <minutes>```\n'
-                               f'\n:warning: __Required parameters__ :warning: \n'
-                               f'\n'
-                               f'> :white_check_mark:  No spaces in role name and max length 20 characters\n'
-                               f'> :white_check_mark:  At least one of the time parameters needs to be greater than 0\n'
-                               f'> :white_check_mark:  Dollar value of the role required to be greater than 0.00 $',
-                         inline=False)
-        manual.add_field(name=':two: Additional setup :two:',
-                         value=f'> Allow role to be mentioned by everyone'
-                               f'> assign rights to created role ',
-                         inline=False)
-        manual.add_field(name=':three: Inform members :three:',
-                         value=f'Once role successfully created, it can be purchased by your members with command\n'
-                               f'```{self.command_string}membership subscribe @discord.Role```',
-                         inline=False)
-        await ctx.channel.send(embed=manual, delete_after=600)
-
-    @merch.group(aliases=['role', 'r'])
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def roles(self, ctx):
-        if ctx.invoked_subcommand is None:
-            title = ":man_juggling: __Merchant Role Management__ :man_juggling: "
-            description = 'All available commands to manage monetized roles'
-            list_of_commands = [
-                {"name": f':information_source: Create new monetized role :information_source: ',
-                 "value": f'```{self.command_string}merchant role create <role name> <role value in $> '
-                          f'<weeks> <days> <hours> <minutes>```'},
-                {"name": f':rocket: Activate already activated role',
-                 "value": f'```{self.command_string}merchant role reactivate <@discord.Role> <role value in $> '
-                          f'<weeks> <days> <hours> <minutes>```'},
+            print('Already registred')
+            msg_title = ':warning: __Community Wallet Already Registered__ :warning:'
+            message = (
+                f'{guild_name} is already registered in the merchant system.\n'
+                f'Use `/merchant help` or `/merchant manual` to proceed.'
+            )
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=msg_title,
+                message=message,
+                color_code=0,
+                destination=1
+            )
 
                 {"name": f':play_pause:  Stop Active Role :play_pause:  ',
                  "value": f'```{self.command_string}merchant role stop <@discord.Role>```'},
