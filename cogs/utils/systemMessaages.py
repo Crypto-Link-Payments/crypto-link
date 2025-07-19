@@ -140,15 +140,11 @@ class CustomMessages:
         """
         # Color filtering
         if isinstance(color_code, Colour):
-            emoji = ":robot:"
             c = color_code
+            emoji = ":robot:"
         else:
-            if color_code == 0:
-                c = 0x319f6b
-                emoji = ":robot: "
-            else:
-                c = Colour.red()
-                emoji = ":warning:"
+            c = 0x319f6b if color_code == 0 else Colour.red()
+            emoji = ":robot:" if color_code == 0 else ":warning:"
 
         if embed_title is None:
             embed_title = 'System Message'
@@ -160,9 +156,9 @@ class CustomMessages:
                             value=f'```{message}```')
         sys_embed.set_footer(text='Message will self-destruct in 15 seconds! ')
         if destination == 0:
-            await interaction.response.send_message(embed=sys_embed, ephermeral=True)
+            await interaction.response.send_message(embed=sys_embed, ephemeral=True)
         else:
-            await interaction.channel.send(embed=sys_embed, delete_after=15, ephermeral=True)
+            await interaction.channel.send(embed=sys_embed, delete_after=15)
 
     async def transaction_report_to_user(self, ctx, user, destination, transaction_data: dict, direction: int,
                                          tx_type: str,
