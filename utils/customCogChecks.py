@@ -4,6 +4,7 @@ File includes custom security checks for the Discord GUI part
 
 from nextcord import ChannelType, Interaction
 from nextcord.ext import application_checks
+from nextcord.errors import ApplicationCheckFailure  
 
 
 def is_animus(ctx):
@@ -56,15 +57,49 @@ def is_owner(ctx):
     return int(ctx.message.author.id) == int(ctx.message.guild.owner_id)
 
 
+
+def has_clmng_role():
+    """This security check if the user has CLMng role on the server"""
+    async def predicate(interaction: Interaction):
+        if interaction.guild is None:
+            raise ApplicationCheckFailure("This command can only be used in a server.")
+
+        if not hasattr(interaction.user, "roles"):
+            raise ApplicationCheckFailure("This command requires role-based permissions.")
+
+        has_role = any(role.name == "CLMng" for role in interaction.user.roles)
+        if not has_role:
+            raise ApplicationCheckFailure("You must have the 'CLMng' role to use this command.")
+
+        return True
+
+    return application_checks.check(predicate)
+
+
 def is_guild_owner():
-    """
-    Checks if its guild owner
-    :return:
-    """
+    async def predicate(interaction):
+        if interaction.guild is None:
+            raise ApplicationCheckFailure("This command can only be used in a guild.")
+        if interaction.user.id != interaction.guild.owner_id:
+            raise ApplicationCheckFailure("Only the server owner can use this command.")
+        return True
 
-    def predicate(interaction: Interaction):
-        return interaction.guild.owner_id == interaction.user.id
+    return application_checks.check(predicate)
 
+def is_guild_owner_or_has_clmng():
+    async def predicate(interaction: Interaction):
+        if interaction.guild is None:
+            raise ApplicationCheckFailure("This command can only be used in a server.")
+
+        user = interaction.user
+
+        if user.id == interaction.guild.owner_id:
+            return True
+
+        if hasattr(user, "roles") and any(role.name == "CLMng" for role in user.roles):
+            return True
+
+        raise ApplicationCheckFailure("You must be the server owner or have the 'CLMng' role.")
     return application_checks.check(predicate)
 
 
