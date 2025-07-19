@@ -195,27 +195,40 @@ class GuildOwnerCommands(commands.Cog):
 
 
     @owner.subcommand(name="services", description="Guild Service Status")
+    @application_checks.check(is_guild_owner()) 
     @application_checks.check(guild_has_stats())
-    async def services(self,
-                       interaction: Interaction
-                       ):
-        service_status = await self.backoffice.guild_profiles.get_service_statuses(guild_id=interaction.guild.id)
-        explorer_channel = self.bot.get_channel(int(service_status["explorerSettings"]["channelId"]))
+    async def services(self, interaction: Interaction):
+        service_status = await self.backoffice.guild_profiles.get_service_statuses(
+            guild_id=interaction.guild.id
+        )
 
-        service_info = Embed(title=":service_dog: __Guild Service Status__ :service_dog: ",
-                             timestamp=datetime.utcnow(),
-                             description=f'All activated services on Crypto Link system and their relays',
-                             colour=Colour.dark_gold())
+        explorer_channel_id = int(service_status["explorerSettings"].get("channelId", 0))
+        explorer_channel = self.bot.get_channel(explorer_channel_id)
+
+        service_info = Embed(
+            title=":service_dog: __Guild Service Status__ :service_dog:",
+            timestamp=datetime.utcnow(),
+            description='Currently active services and their assigned channels in Crypto Link.',
+            colour=Colour.dark_gold()
+        )
         service_info.set_thumbnail(url=self.bot.user.avatar.url)
 
         if explorer_channel:
-            service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
-                                   value=f'```{explorer_channel} ({explorer_channel.id})```')
+            service_info.add_field(
+                name=':satellite_orbital: Crypto Link Uplink :satellite_orbital:',
+                value=f'```{explorer_channel.name} ({explorer_channel.id})```',
+                inline=False
+            )
         else:
-            service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
-                                   value=f':red_circle:')
+            service_info.add_field(
+                name=':satellite_orbital: Crypto Link Uplink :satellite_orbital:',
+                value=':red_circle: Not assigned',
+                inline=False
+            )
 
-        await interaction.response.sent_message(embed=service_info)
+        # TODO add status for merchant
+        await interaction.response.send_message(embed=service_info)
+        
 
     @owner.subcommand(name="uplink", description="Crypto Link Uplink Manual")
     async def uplink(self,
