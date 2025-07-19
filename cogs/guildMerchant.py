@@ -95,15 +95,35 @@ class MerchantCommunityOwner(commands.Cog):
             ephemeral=True
         )
 
+    @merchant.subcommand(name="help", description="Show merchant system manual and available commands")
+    @application_checks.check(is_guild_owner())
+    @application_checks.check(merchant_com_reg_stats_check())
+    @application_checks.check(has_wallet_inter_check())
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    async def merchant_help(self, interaction: Interaction):
+        title = "💱 __Merchant System Message Setup__ 💱"
+        description = "All available commands under the ***merchant*** category."
+        list_of_commands = [
+            {"name": ":warning: Activate Merchant on the Guild :warning:",
+            "value": "```/merchant initiate```"},
+            {"name": ":information_source: How to Monetize Roles :information_source:",
+            "value": "```/merchant manual```"},
+            {"name": ":information_source: Access Role Management :information_source:",
+            "value": "```/merchant roles```"},
+            {"name": ":moneybag: Access Merchant Wallet sub-commands :moneybag:",
+            "value": "```/merchant wallet```"},
+            {"name": ":moneybag: List Active Roles on Community :moneybag:",
+            "value": "```/merchant active```"},
+        ]
 
-                merchant_notification = self.bot.get_channel(int(self.merchant_channel_info))
-                new_merch = Embed(title=f'New Community Has registered for merchant',
-                                  description=f'New community has registered for merchant service',
-                                  colour=Color.purple())
-                new_merch.add_field(name='Community',
-                                    value=f'{ctx.guild}')
+        await customMessages.embed_builder(
+            interaction=interaction,
+            title=title,
+            description=description,
+            data=list_of_commands,
+            c=Colour.purple()
+        )
 
-                await merchant_notification.send(embed=new_merch)
 
             else:
                 msg_title = ':warning:  __Merchant Registration Status___ :warning: '
