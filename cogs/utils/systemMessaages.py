@@ -127,7 +127,7 @@ class CustomMessages:
 
     @staticmethod
     async def system_message(interaction, message: str, color_code, sys_msg_title: str = None,
-                             embed_title: str = None):
+                             embed_title: str = None, destination: int = 0):
         """
         Custom System Messages
         """
@@ -149,9 +149,9 @@ class CustomMessages:
                             value=f'```{message}```')
         sys_embed.set_footer(text='Message will self-destruct in 15 seconds! ')
         if destination == 0:
-            await interaction.response.send_message(embed=sys_embed, ephemeral=True)
+            await interaction.response.send_message(embed=sys_embed,delete_after=15, ephemeral=True)
         else:
-            await interaction.channel.send(embed=sys_embed, delete_after=15)
+            await interaction.channel.send(embed=sys_embed, delete_after=15, ephemeral=True)
 
     async def transaction_report_to_user(self, ctx, user, destination, transaction_data: dict, direction: int,
                                          tx_type: str,
