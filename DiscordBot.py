@@ -10,7 +10,7 @@ CONST_SEPARATOR = '+++++++++++++++++++++++++++++++++++++++'
 init(autoreset=True)
 
 cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
-           'cogs.system', 'cogs.withdrawals',
+           'cogs.system',
            'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners','cogs.specialPayments',
            'cogs.ballotOwner', 'cogs.voters']
 
