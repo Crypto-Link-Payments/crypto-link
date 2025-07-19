@@ -50,50 +50,68 @@ class GuildOwnerCommands(commands.Cog):
                                         description=description, data=list_of_values,
                                         c=Colour.dark_gold())
 
+
     @owner.subcommand(name="register", description="Register Guild into the System")
-    @application_checks.check(has_wallet_inter_check())
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def register(self,
-                       interaction: Interaction
-                       ):
-        if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=interaction.guild.id):
-            new_guild = {
-                "guildId": interaction.guild.id,
-                "guildName": f'{interaction.guild}',
-                "explorerSettings": {"channelId": int(0)},
-                "txFees": {"xlmFeeValue": int(0)},
-                "registeredUsers": 0,
-                "xlm": {"volume": float(0.0),
-                        "txCount": int(0),
-                        "privateCount": int(0),
-                        "publicCount": int(0),
-                        "roleTxCount": int(0),
-                        "emojiTxCount": int(0),
-                        "multiTxCount": int(0)}
-            }
+    @application_checks.check(is_guild_owner())  
+    @application_checks.check(has_wallet_inter_check())  
+    @commands.cooldown(1, 20, commands.BucketType.user) 
+    async def register(self, interaction: Interaction):
+        guild_id = interaction.guild.id
 
-            all_integrated_tokens = self.bot.backoffice.token_manager.get_registered_tokens()
+        # Check if guild already exists
+        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=guild_id):
+            await customMessages.system_message(
+                interaction=interaction,
+                color_code=1,
+                message='Guild is already registered.',
+                sys_msg_title=CONST_SYS_ERROR
+            )
+            return
 
-            for asset_code in all_integrated_tokens:
-                new_guild[asset_code["assetCode"]] = {"volume": float(0.0),
-                                                      "txCount": int(0),
-                                                      "privateCount": int(0),
-                                                      "publicCount": int(0),
-                                                      "roleTxCount": int(0),
-                                                      "emojiTxCount": int(0),
-                                                      "multiTxCount": int(0)}
+        # Define the default structure per token
+        default_token_structure = {
+            "volume": 0.0,
+            "txCount": 0,
+            "privateCount": 0,
+            "publicCount": 0,
+            "roleTxCount": 0,
+            "emojiTxCount": 0,
+            "multiTxCount": 0
+        }
 
-            self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=int(interaction.guild.id), prefix="!")
+        # Initialize new guild profile
+        new_guild = {
+            "guildId": guild_id,
+            "guildName": str(interaction.guild),
+            "explorerSettings": {"channelId": 0},
+            "txFees": {"xlmFeeValue": 0},
+            "registeredUsers": 0,
+            "xlm": default_token_structure.copy()
+        }
 
-            await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
-            await customMessages.system_message(interaction=interaction, color_code=0,
-                                                message='You have successfully registered guild into the system.',
-                                                sys_msg_title=CONST_SYS_MSG)
-        else:
-            await customMessages.system_message(interaction=interaction, color_code=1,
-                                                message='Guild already registered',
-                                                sys_msg_title=CONST_SYS_ERROR)
+        # Add other integrated tokens
+        try:
+            all_tokens = self.bot.backoffice.token_manager.get_registered_tokens()
+            for token in all_tokens:
+                asset_code = token.get("assetCode")
+                if asset_code and asset_code.lower() != "xlm":
+                    new_guild[asset_code] = default_token_structure.copy()
+        except Exception as e:
+            print(f"[ERROR] Token fetch failed during guild registration: {e}")
+
+        # Set default guild prefix
+        self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=guild_id, prefix="!")
+
+        # Register the guild
+        await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
+
+        # Confirm success
+        await customMessages.system_message(
+            interaction=interaction,
+            color_code=0,
+            message='✅ You have successfully registered the guild into the system. now you are able to use other slash commands under the /owner',
+            sys_msg_title=CONST_SYS_MSG
+        )
 
     @owner.subcommand(name="stats", description="Check Guild Stats")
     @application_checks.check(guild_has_stats())
