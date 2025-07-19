@@ -28,31 +28,27 @@ class GuildOwnerCommands(commands.Cog):
     async def owner(self, interaction: Interaction):
         pass 
 
+    @owner.subcommand(name="help", description="Show the guild owner's manual")
+    @application_checks.check(is_guild_owner())
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
-    async def owner(self,
-                    interaction: Interaction
-                    ):
+    async def owner_help(self, interaction: Interaction):
         self.guild_string = self.bot.get_prefix_help(interaction.guild.id)
         title = ':joystick: __Guild Owner Manual__ :joystick: '
         description = "Available commands to operate the guild system."
         list_of_values = [
-            {"name": ":bellhop: Register Guild :bellhop: ",
-             "value": f"`/owner register`"},
             {"name": ":bar_chart: Guild Crypto Link Stats :bar_chart: ",
-             "value": f"`/owner stats`"},
+            "value": f"`/owner stats`"},
             {"name": ":service_dog: Guild Applied Services :service_dog: ",
-             "value": f"`/owner services`"},
-            {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
-             "value": f"`/owner uplink`"},
-            {"name": ":convenience_store: Operate with merchant :convenience_store:  ",
-             "value": f"`/owner merchant`"},
-            {"name": ":ballot_box: Operate with voting pools :ballot_box:",
-             "value": f"`/owner ballot`"}
+            "value": f"`/owner services`"},
+            # {"name": ":satellite_orbital: Crypto Uplink (transaciton feeds) :satellite_orbital: ",
+            # "value": f"`/owner uplink`"},
+            {"name": ":convenience_store: Activate Role Monetization :convenience_store:  ",
+            "value": f"`/owner merchant open`"}
         ]
 
         await customMessages.embed_builder(interaction=interaction, title=title,
-                                           description=description, data=list_of_values,
-                                           c=Colour.dark_gold())
+                                        description=description, data=list_of_values,
+                                        c=Colour.dark_gold())
 
     @owner.subcommand(name="register", description="Register Guild into the System")
     @application_checks.check(has_wallet_inter_check())
