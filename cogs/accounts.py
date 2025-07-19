@@ -1,6 +1,6 @@
 from datetime import datetime
 from datetime import timezone
-from nextcord import Embed, Colour, File, Interaction, slash_command, SlashOption
+from nextcord import Embed, Colour, File, Interaction, slash_command, SlashOption, Forbidden
 from nextcord.ext import commands, application_checks
 import cooldowns
 from utils.customCogChecks import has_wallet_inter_check, check
@@ -169,7 +169,7 @@ class UserAccountCommands(commands.Cog):
         list_of_values = [{"name": " :woman_technologist: Get AFull Account Balance Report :woman_technologist:  ",
                            "value": f"```/wallet balance```\n"},
                           {"name": ":bar_chart: Get Your Wallet Statistics :bar_chart:",
-                           "value": f"```/wallet stats <asset_code=optional for non XLM>```"},
+                           "value": f"```/wallet stats token=optional for non XLM```"},
                           {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
                            "value": f"```/wallet deposit```"},
                           {"name": ":outbox_tray: Withdraw from Crypto Link :outbox_tray: ",
@@ -180,78 +180,111 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.subcommand(name="stats", description="Fetch wallet stats")
     @application_checks.check(has_wallet_inter_check())
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def stats(self,
-                    interaction: Interaction,
-                    token: str = SlashOption(description="Balance for token", required=False, default='xlm')
-                    ):
-        token = token.lower()
-        # Pull all the registered coin codes from database for further check
-        supported_tokens = [sup["assetCode"].lower() for sup in
-                            self.bot.backoffice.token_manager.get_registered_tokens()]
+    @commands.cooldown(1, 20, commands.BucketType.user)  # Only ONE cooldown applies
+    async def stats(self, interaction: Interaction,
+                    token: str = SlashOption(description="Balance for token", required=False, default='xlm')):
 
-        utc_now = datetime.utcnow()
-        if token.lower() == 'xlm':
-            tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
-                      x['assetCode'] != 'xlm']
-            available_stats = ' '.join([str("***" + elem + "***" + ", ") for elem in tokens]).capitalize()
-            account_details = self.backoffice.account_mng.get_account_stats(
-                discord_id=interaction.message.author.id)
-            stats_info = Embed(title=f':bar_chart: Wallet level 1 statistics :bar_chart: ',
-                               description='Below you will find a summary of stats which are '
-                                           'automatically counted upon successful'
-                                           ' execution of the commands dedicated to wallet level :one: ',
-                               colour=Colour.lighter_grey())
-            stats_info.add_field(name=f":symbols: Symbols :symbols: ",
-                                 value=f':incoming_envelope: -> `SUM of total incoming transactions` \n'
-                                       f':money_with_wings: -> `SUM of total amount sent per currency` \n'
-                                       f':envelope_with_arrow:  -> `SUM of total outgoing transactions`\n'
-                                       f':money_mouth: -> `SUM of total amount received per currency` \n'
-                                       f':man_juggling: -> `SUM of total roles purchased through merchant system`\n'
-                                       f':money_with_wings: -> `SUM of total amount spent on the merchant system` \n')
-            stats_info.add_field(name=f':warning: Access token stats :warning: ',
-                                 value=f'Use the same command and add an asset code. All available currencies are: '
-                                       f'{available_stats}',
-                                 inline=False)
-            await interaction.response.send_message(embed=stats_info, delete_after=40, ephemeral=True)
-            await custom_messages.stellar_wallet_overall(interaction=interaction, coin_stats=account_details,
-                                                         utc_now=utc_now)
-        else:
-            if token in supported_tokens:
-                token_stats = self.backoffice.account_mng.get_token_stats(discord_id=interaction.message.author.id,
-                                                                          token=token.lower())
-                if token_stats:
-                    token_stats_info = Embed(title=f'Details for token {token.upper()}',
-                                             description=f'Below are statistical details on account activities '
-                                                         f'for the selected token, till {utc_now} (UTC)',
-                                             colour=Colour.gold())
+        try:
+            token = token.lower()
+            discord_id = interaction.user.id
+            utc_now = datetime.now(timezone.utc)
 
-                    for k, v in token_stats[token.lower()].items():
-                        itm = sub(r"([A-Z])", r" \1", k).split()
-                        item = ' '.join([str(elem) for elem in itm]).capitalize()
-                        if k in ["depositsCount", "publicTxSendCount", "privateTxSendCount", "withdrawalsCount"]:
-                            token_stats_info.add_field(name=f'{item}',
-                                                       value=f'{v}')
-                        else:
-                            token_stats_info.add_field(name=f'{item}',
-                                                       value=f'{v:,.7f} {token.upper()}')
+            supported_tokens = [
+                t["assetCode"].lower()
+                for t in self.bot.backoffice.token_manager.get_registered_tokens()
+            ]
+
+            if token == 'xlm':
+                tokens = [x for x in supported_tokens if x != 'xlm']
+                available_stats = ', '.join([f'***{t}***' for t in tokens])
+
+                account_details = self.backoffice.account_mng.get_account_stats(discord_id=discord_id)
+
+                stats_info = Embed(
+                    title=':bar_chart: Wallet Level 1 Statistics :bar_chart:',
+                    description='Here is a summary of your XLM wallet-level activity.',
+                    colour=Colour.lighter_grey()
+                )
+                stats_info.add_field(
+                    name=":symbols: Legend",
+                    value=(
+                        ':incoming_envelope: → Total incoming tx count\n'
+                        ':money_with_wings: → Total sent amount\n'
+                        ':envelope_with_arrow: → Total outgoing tx count\n'
+                        ':money_mouth: → Total received amount\n'
+                        ':man_juggling: → Total merchant purchases\n'
+                        ':money_with_wings: → Total merchant spend\n'
+                    )
+                )
+                stats_info.add_field(
+                    name=':warning: Access Token Stats',
+                    value=f'Use this command with a token argument to get token-specific stats. Available: {available_stats}',
+                    inline=False
+                )
+
+                # Send the embed to user's DM
+                try:
+                    await interaction.user.send(embed=stats_info)
+                except nextcord.Forbidden:
+                    await interaction.response.send_message("❌ Could not send DM. Please check your privacy settings.", ephemeral=True)
+                    return
+
+                # Acknowledge the interaction publicly but quietly
+                await interaction.response.send_message("📬 Wallet stats have been sent to your DM!", ephemeral=True)
+
+                await custom_messages.stellar_wallet_overall(
+                    interaction=interaction,
+                    coin_stats=account_details,
+                    utc_now=utc_now
+                )
+
+            elif token in supported_tokens:
+                token_stats = self.backoffice.account_mng.get_token_stats(discord_id=discord_id, token=token)
+
+                if token_stats and token in token_stats:
+                    data = token_stats[token]
+                    token_stats_info = Embed(
+                        title=f'Details for token {token.upper()}',
+                        description=f'Statistics for this token until {utc_now.strftime("%Y-%m-%d %H:%M UTC")}',
+                        colour=Colour.gold()
+                    )
+
+                    for k, v in data.items():
+                        name = ' '.join(sub(r'([A-Z])', r' \1', k).split()).capitalize()
+                        value = f'{v}' if isinstance(v, int) else f'{v:,.7f} {token.upper()}'
+                        token_stats_info.add_field(name=name, value=value)
 
                     await interaction.response.send_message(embed=token_stats_info, delete_after=15, ephemeral=True)
 
                 else:
-                    title = '__Token statistics__'
-                    message = f'You have no activity marked in the wallet for token {token.upper()}'
-                    await custom_messages.system_message(interaction=interaction, color_code=1, message=message,
-                                                         destination=1,
-                                                         sys_msg_title=title)
+                    await custom_messages.system_message(
+                        interaction=interaction,
+                        color_code=1,
+                        message=f'No recorded activity for token {token.upper()}',
+                        destination=1,
+                        sys_msg_title='__Token statistics__'
+                    )
+
             else:
-                title = '__Token not supported__'
-                message = f'Token {token.upper()} is not integrated in {self.bot.user.name}. Currently available' \
-                          f' tokens are:\n {", ".join([str(elem) for elem in supported_tokens]).capitalize()}'
-                await custom_messages.system_message(interaction=interaction, color_code=1, message=message,
-                                                     destination=1,
-                                                     sys_msg_title=title)
+                message = (
+                    f'Token {token.upper()} is not supported. '
+                    f'Supported tokens: {", ".join(t.upper() for t in supported_tokens)}'
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=message,
+                    destination=1,
+                    sys_msg_title='__Token not supported__'
+                )
+
+        except Exception as e:
+            print("Exception in stats command:", repr(e))
+            traceback.print_exc()
+            await interaction.response.send_message(
+                "An error occurred while fetching stats.",
+                ephemeral=True
+            )
 
     @wallet.subcommand(name="deposit", description="Deposit Funds to your Wallet")
     async def deposit(self,
@@ -359,7 +392,7 @@ class UserAccountCommands(commands.Cog):
         if bag:
             # initiate Discord embed
             balance_embed = Embed(title=f":office_worker: Details for {interaction.user} :office_worker:",
-                                  timestamp=datetime.utcnow(),
+                                  timestamp=datetime.now(timezone.utc),
                                   colour=Colour.dark_orange())
 
             for k, v in user_balances.items():
