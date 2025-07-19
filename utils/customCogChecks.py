@@ -112,6 +112,17 @@ def merchant_com_reg_stats(ctx):
     except AttributeError:
         return False
 
+def merchant_com_reg_stats_check():
+    def predicate(interaction: Interaction):
+        try:
+            return interaction.client.backoffice.merchant_manager.check_if_community_exist(
+                community_id=interaction.guild.id
+            )
+        except AttributeError:
+            return False
+    return application_checks.check(predicate)
+
+
 
 def community_missing(ctx):
     """
