@@ -87,34 +87,27 @@ class CustomMessages:
 
     @staticmethod
     async def embed_builder(interaction, title, description, data: list, destination=None, thumbnail=None, c: Colour = None):
-        """
-        Build embed from data provided
-        :param ctx: Discord Context
-        :param title: Title for embed
-        :param description: Description of embed
-        :param data: data as list of dict
-        :param destination: where embed is sent
-        :param thumbnail: where embed is sent
-        :return:
-        """
-
         if not c:
             c = Colour.gold()
 
-        embed = Embed(title=title,
-                      description=description,
-                      colour=c)
+        embed = Embed(title=title, description=description, colour=c)
         for d in data:
-            embed.add_field(name=d['name'],
-                            value=d['value'],
-                            inline=False)
+            embed.add_field(name=d['name'], value=d['value'], inline=False)
+
         try:
-            if destination:
-                await interaction.author.send(embed=embed)
+            # First, always acknowledge the interaction if not done yet
+            if not interaction.response.is_done():
+                await interaction.response.send_message(embed=embed,  delete_after=40, ephemeral=True)
             else:
-                await interaction.channel.send(embed=embed, delete_after=40)
-        except Exception:
-            await interaction.channel.send(embed=embed)
+                await interaction.followup.send(embed=embed, ephemeral=True)
+
+        except Exception as e:
+            print("Error while sending embed:", e)
+            try:
+                await interaction.user.send(embed=embed)
+            except:
+                pass
+
 
     @staticmethod
     async def bridge_notification(ctx, recipient):
