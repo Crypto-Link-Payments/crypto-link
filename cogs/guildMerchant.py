@@ -192,8 +192,49 @@ class MerchantCommunityOwner(commands.Cog):
                 destination=1
             )
 
-                {"name": f':play_pause:  Stop Active Role :play_pause:  ',
-                 "value": f'```{self.command_string}merchant role stop <@discord.Role>```'},
+
+    @merchant.subcommand(name="manual", description="Show how to create and use monetized roles")
+    @application_checks.check(is_guild_owner())
+    @application_checks.check(merchant_com_reg_stats_check())
+    @application_checks.check(has_wallet_inter_check())
+    @cooldowns.cooldown(1, 20, cooldowns.SlashBucket.guild)
+    async def merchant_manual(self, interaction: Interaction):
+
+        manual = Embed(
+            title=':convenience_store: __Merchant System Manual__ :convenience_store:',
+            colour=Colour.purple(),
+            description=":warning: if you have not open merchant yet through `/owner merchant open` you can also use /merchant initiate to create merchant wallet:warning:"
+        )
+
+        manual.add_field(
+            name=':one: Create Monetized Roles :one:',
+            value=(
+                f'```/merchant role create <role name> <role value in $> '
+                f'<weeks> <days> <hours> <minutes>```\n\n'
+                f':warning: __Required Parameters__ :warning:\n'
+                f'> ✅ No spaces in role name (max length: 20 characters)\n'
+                f'> ✅ At least one of the time parameters must be greater than 0\n'
+                f'> ✅ Role price must be greater than $0.00'
+            ),
+            inline=False
+        )
+
+        manual.add_field(
+            name=':two: Additional Setup :two:',
+            value='> Allow role to be mentioned by everyone\n> Assign permissions to created role',
+            inline=False
+        )
+
+        manual.add_field(
+            name=':three: Inform Members :three:',
+            value=(
+                'Once the role is successfully created, members can purchase it using:\n'
+                f'```/membership subscribe @discord.Role```'
+            ),
+            inline=False
+        )
+
+        await interaction.response.send_message(embed=manual, ephemeral=True)
 
                 {"name": f':arrow_forward: Re-start inactive role :arrow_forward:  ',
                  "value": f'```{self.command_string}merchant role start <@discord.Role>```'},
