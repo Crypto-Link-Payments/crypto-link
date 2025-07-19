@@ -370,23 +370,32 @@ class GuildOwnerCommands(commands.Cog):
 
 
     @owner.subcommand(name="merchant", description="Guild Merchant Service")
+    @application_checks.check(is_guild_owner())  # ✅ Restrict to guild owner only
     @application_checks.check(has_wallet_inter_check())
     @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def merchant(self,
-                       interaction: Interaction
-                       ):
-        title = ':convenience_store: __Crypto Link Uplink manual__ :convenience_store: '
-        description = "All available commands to activate and operate with merchant service."
-        list_of_values = [
-            {"name": ":pencil: Open/Register for Merchant system :pencil:  ",
-             "value": f"```/owner merchant open ```"},
-            {"name": ":joystick: Access commands for merchant :joystick: ",
-             "value": f"```/merchant```"}
-        ]
+    async def merchant(self, interaction: Interaction):
+        # title = ':convenience_store: __Crypto Link Merchant Manual__ :convenience_store:'
+        # description = "Here are the available commands to activate and manage the guild's merchant service."
 
-        await customMessages.embed_builder(interaction=interaction, title=title,
-                                           description=description, data=list_of_values,
-                                           c=Colour.dark_gold())
+        # list_of_values = [
+        #     {
+        #         "name": ":pencil: Open/Register for Merchant System",
+        #         "value": "```/owner merchant open```"
+        #     },
+        #     {
+        #         "name": ":joystick: Access Merchant Commands",
+        #         "value": "```/merchant```"
+        #     }
+        # ]
+
+        # await customMessages.embed_builder(
+        #     interaction=interaction,
+        #     title=title,
+        #     description=description,
+        #     data=list_of_values,
+        #     c=Colour.dark_gold()
+        # )
+        return
 
     @merchant.subcommand(name="open", description="Community Wallet Registration")
     async def open(self,
