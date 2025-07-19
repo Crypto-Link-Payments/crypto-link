@@ -152,7 +152,6 @@ class UserAccountCommands(commands.Cog):
 
     @slash_command(description="Wallet operations", dm_permission=False)
     @application_checks.check(has_wallet_inter_check())
-    @commands.cooldown(1, 20, commands.BucketType.guild)
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def wallet(self,
                      interaction: Interaction,
@@ -161,7 +160,6 @@ class UserAccountCommands(commands.Cog):
 
     @wallet.subcommand(name="help", description="Help commands for /wallet")
     @application_checks.check(has_wallet_inter_check())
-    @commands.cooldown(1, 20, commands.BucketType.guild)
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def help(self,
                    interaction: Interaction
