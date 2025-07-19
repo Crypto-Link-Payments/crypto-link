@@ -82,31 +82,19 @@ class MerchantCommunityOwner(commands.Cog):
                                                 color_code=1,
                                                 destination=1)
 
-    @commands.command()
-    @commands.guild_only()
-    @commands.check(is_owner)
-    @commands.check(has_wallet)
-    @commands.cooldown(1, 5, commands.BucketType.guild)
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def merchant_initiate(self, ctx):
 
-        """
-        Command to initiate merchant setup process and register community into the Merchant system
-        :param ctx:
-        :return:
-        """
+    @slash_command(name="merchant", description="Merchant system command hub", dm_permission=False)
+    @application_checks.check(is_guild_owner())
+    @application_checks.check(merchant_com_reg_stats_check())
+    @application_checks.check(has_wallet_inter_check())
+    @commands.cooldown(1, 20, commands.BucketType.guild)
+    async def merchant(self, interaction: Interaction):
+        # Optional: You can leave this blank if you only use subcommands
+        await interaction.response.send_message(
+            content="Use `/merchant help` to view available merchant commands.",
+            ephemeral=True
+        )
 
-        if not self.merchant.check_if_community_exist(community_id=ctx.message.guild.id):  # Check if not registered
-            if self.merchant.register_community_wallet(community_id=ctx.message.guild.id,
-                                                       community_owner_id=ctx.message.author.id,
-                                                       community_name=f'{ctx.message.guild}'):  # register community wallet
-                msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
-                message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed' \
-                          f' with `{self.command_string}merchant` in order to familiarize yourself with all available' \
-                          f' commands or have a look at ***merchant system manual on' \
-                          f' `{self.command_string}merchant manual` '
-                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-                                                    destination=1)
 
                 merchant_notification = self.bot.get_channel(int(self.merchant_channel_info))
                 new_merch = Embed(title=f'New Community Has registered for merchant',
