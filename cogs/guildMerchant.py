@@ -254,6 +254,16 @@ class MerchantCommunityOwner(commands.Cog):
             )
 
 
+    ################################# ROLE RELATED COMMANDS
+    @merchant.subcommand(name="role", description="Role monetization")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    async def role_group(self, interaction: Interaction):
+        await interaction.response.send_message(
+            content="Use `/merchant role comms` to view available role commands.",
+            ephemeral=True
+        )
+
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def reactivate(self, ctx, role: Role, dollar_value: float, weeks_count: int, days_count: int,
