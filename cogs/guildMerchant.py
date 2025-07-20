@@ -447,41 +447,65 @@ class MerchantCommunityOwner(commands.Cog):
                 color_code=1,
             )
 
+
+    @role_group.subcommand(name="stop", description="Deactivate a monetized role")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
     @commands.bot_has_permissions(manage_roles=True)
-    async def stop(self, ctx, role: Role):
-        """
-        Command used to change activity status of the role
-        """
+    async def stop_role_sub(
+        self,
+        interaction: Interaction,
+        role: Role = SlashOption(description="Select the monetized role to deactivate")
+    ):
+        # Fetch role details
+        role_details = self.bot.backoffice.merchant_manager.find_role_details(role_id=role.id)
 
-        role_details = self.merchant.find_role_details(role_id=role.id)
-        if role_details:
-            if role_details['status'] == 'active':
-                role_details['status'] = 'inactive'
-                if self.merchant.change_role_details(role_data=role_details):
-                    title = '__Role status change notification__'
-                    message = f'Role has been deactivated successfully. in order to re-activate it and make it ' \
-                              f'available to users again, use command' \
-                              f' `{self.command_string}monetize start_role <@discord.Role>`'
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
-                                                        destination=1)
-                else:
-                    message = 'Role could not be deactivated, please try again later. Please try again. If the issue ' \
-                              'persists, contact one staff. '
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE_ERROR,
-                                                        message=message, color_code=1,
-                                                        destination=1)
+        if not role_details:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=":warning: Role Not Found",
+                message=(
+                    f"The role {role.name} is not registered in the system.\n\n"
+                    f"Use `/merchant role list` to view all monetized roles."
+                ),
+                color_code=1,
+            )
+            return
 
-            else:
-                message = f'Role {role} has been already deactivate. '
-                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE_ERROR,
-                                                    message=message, color_code=1,
-                                                    destination=1)
+        if role_details.get("status") != "active":
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=":information_source: Already Inactive",
+                message=f"The role {role.name} is already inactive.",
+                color_code=0,
+            )
+            return
+
+        # Update role status
+        role_details["status"] = "inactive"
+        updated = self.bot.backoffice.merchant_manager.change_role_details(role_data=role_details)
+
+        if updated:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title="✅ Role Deactivated",
+                message=(
+                    f"The role {role.name} has been deactivated.\n\n"
+                    f"To reactivate it, use:\n`/merchant role reactivate @discord.Role`"
+                ),
+                color_code=0,
+            )
         else:
-            message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
-                      f'`{self.command_string} monetize community_roles` to obtain all roles on the community'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE_ERROR, message=message,
-                                                color_code=1,
-                                                destination=1)
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title="❌ Deactivation Failed",
+                message=(
+                    "Role could not be deactivated due to a system issue. "
+                    "Please try again later or contact an administrator if the problem persists."
+                ),
+                color_code=1,
+            )
+
 
     @roles.command()
     @commands.bot_has_permissions(manage_roles=True)
