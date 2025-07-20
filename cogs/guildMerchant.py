@@ -389,36 +389,64 @@ class MerchantCommunityOwner(commands.Cog):
                 message="Error in the backend. Please contact Crypto Link owner.",
                 color_code=1
             )
-    @commands.bot_has_permissions(manage_roles=True)
-    @commands.check(is_public)
-    async def delete(self, ctx, discord_role: Role):
-        """
-        Delete monetized role from the system and community
-        :param ctx:
-        :param discord_role:
-        :return:
-        """
-        if self.merchant.find_role_details(role_id=discord_role.id):
-            if self.merchant.remove_monetized_role_from_system(role_id=discord_role.id,
-                                                               community_id=ctx.message.guild.id):
-                await discord_role.delete()
-                title = ':convenience_store: Merchant System Notification__:convenience_store: '
-                message = f'Monetized role has been successfully removed from the Crypto Link Merchant System, ' \
-                          f'{ctx.guild} and from all the users who has obtained it.'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
-                                                    destination=1)
-            else:
-                message = 'Role could not be removed from the Merchant System. Please contact the team with details.'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_SYSTEM_ERROR, message=message,
-                                                    color_code=0,
-                                                    destination=1)
-        else:
-            message = 'This Role could not be removed as it is not registered in the merchant system'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_SYSTEM_ERROR, message=message,
-                                                color_code=0,
-                                                destination=1)
 
-    @roles.command()
+    @role_group.subcommand(name="reactivate", description="Reactivate an existing monetized role")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    @commands.bot_has_permissions(manage_roles=True)
+    async def reactivate_role_sub(
+        self,
+        interaction: Interaction,
+        role: Role = SlashOption(description="Select an existing monetized role to reactivate")
+    ):
+        # Fetch existing role data
+        role_data = self.merchant.find_role_details(role_id=role.id)
+        from pprint import pprint
+        pprint(role_data)
+        if not role_data:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=":warning: Role Not Found",
+                message=f"The role {role.name} is not registered in the Merchant system yet or is not part of the Merchant system on Crypto Link.",
+                color_code=1,
+            )
+            return
+
+        # Check if already active
+        if role_data.get("status") == "active":
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=":information_source: Already Active",
+                message=f"The role {role.name} is already active.",
+                color_code=0,
+            )
+            return
+
+        # Reactivate the role in the database
+        role_data["status"] = "active"
+        updated = self.bot.backoffice.merchant_manager.change_role_details(role_data=role_data)
+
+        if updated:
+            value_dollars = role_data.get("pennyValues", 0) / 100
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title="✅ Role Reactivated",
+                message=(
+                    f"Role {role.name} has been successfully reactivated.\n\n"
+                    f"💰 Value: ${value_dollars:.2f}\n"
+                    f"⏳ Duration: {role_data.get('weeks', 0)}w {role_data.get('days', 0)}d "
+                    f"{role_data.get('hours', 0)}h {role_data.get('minutes', 0)}m"
+                ),
+                color_code=0,
+            )
+        else:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title="❌ Reactivation Failed",
+                message="An error occurred while updating the role in the system. Please try again later.",
+                color_code=1,
+            )
+
     @commands.bot_has_permissions(manage_roles=True)
     async def stop(self, ctx, role: Role):
         """
