@@ -2,9 +2,12 @@
 File includes custom security checks for the Discord GUI part
 """
 
-from nextcord import ChannelType, Interaction
+from nextcord import ChannelType, Interaction, TextChannel, Thread
 from nextcord.ext import application_checks
 from nextcord.errors import ApplicationCheckFailure  
+from nextcord import Interaction
+from nextcord.ext import application_checks
+from nextcord.ext.commands.errors import CheckFailure
 
 
 def is_animus(ctx):
@@ -70,17 +73,13 @@ def has_wallet_inter_check():
 
     return application_checks.check(predicate)
 
-
 def is_owner(ctx):
     """
     Function checks if the user is owner of the community or not
     """
     return int(ctx.message.author.id) == int(ctx.message.guild.owner_id)
 
-
-
 def has_clmng_role():
-    """This security check if the user has CLMng role on the server"""
     async def predicate(interaction: Interaction):
         if interaction.guild is None:
             raise ApplicationCheckFailure("This command can only be used in a server.")
@@ -90,8 +89,7 @@ def has_clmng_role():
 
         has_role = any(role.name == "CLMng" for role in interaction.user.roles)
         if not has_role:
-            raise ApplicationCheckFailure("You must have the 'CLMng' role to use this command.")
-
+            raise ApplicationCheckFailure("❌ Access denied! You must have the 'CLMng' role to use this command.")
         return True
 
     return application_checks.check(predicate)
@@ -110,10 +108,11 @@ def is_guild_owner():
 
     return application_checks.check(predicate)
 
+
 def is_guild_owner_or_has_clmng():
     async def predicate(interaction: Interaction):
         if interaction.guild is None:
-            raise ApplicationCheckFailure("This command can only be used in a server.")
+            raise CheckFailure("❌ This command can only be used in a server.")
 
         user = interaction.user
 
@@ -123,7 +122,8 @@ def is_guild_owner_or_has_clmng():
         if hasattr(user, "roles") and any(role.name == "CLMng" for role in user.roles):
             return True
 
-        raise ApplicationCheckFailure("You must be the server owner or have the 'CLMng' role.")
+        raise CheckFailure("❌ You must be the server owner or have the 'CLMng' role.")
+    
     return application_checks.check(predicate)
 
 
@@ -136,17 +136,57 @@ def merchant_com_reg_stats(ctx):
     except AttributeError:
         return False
 
+# def merchant_com_reg_stats_check():
+#     def predicate(interaction: Interaction):
+#         try:
+#             return interaction.client.backoffice.merchant_manager.check_if_community_exist(
+#                 community_id=interaction.guild.id
+#             )
+#         except AttributeError:
+#             return False
+#     return application_checks.check(predicate)
+
 def merchant_com_reg_stats_check():
     def predicate(interaction: Interaction):
+        if interaction.guild is None:
+            raise ApplicationCheckFailure("This command can only be used in a server.")
+
+        if not hasattr(interaction.client, "backoffice") or not hasattr(interaction.client.backoffice, "merchant_manager"):
+            raise ApplicationCheckFailure("❌ Access denied! Merchant system is not available.")
+
         try:
-            return interaction.client.backoffice.merchant_manager.check_if_community_exist(
+            exists = interaction.client.backoffice.merchant_manager.check_if_community_exist(
                 community_id=interaction.guild.id
             )
-        except AttributeError:
-            return False
+            if not exists:
+                raise ApplicationCheckFailure("❌ This server is not registered as a merchant community. Please register it first")
+            return True
+        except Exception as e:
+            raise ApplicationCheckFailure(f"❌ Error checking community registration: {str(e)}")
+
     return application_checks.check(predicate)
 
+def guild_has_stats():
+    """
+    Check if the guild has registered stats in the system.
+    Used to gate commands that require existing stats data.
+    """
+    def predicate(interaction: Interaction):
+        if interaction.guild is None:
+            raise ApplicationCheckFailure("❌ This command can only be used in a server.")
 
+        try:
+            exists = interaction.client.backoffice.guild_profiles.check_guild_registration_stats(
+                guild_id=interaction.guild.id
+            )
+            if not exists:
+                raise ApplicationCheckFailure("❌ This guild is not registered for stats.")
+            return True
+
+        except AttributeError:
+            raise ApplicationCheckFailure("❌ Could not access guild profile system. Please try again later.")
+
+    return application_checks.check(predicate)
 
 def community_missing(ctx):
     """
@@ -168,18 +208,6 @@ def guild_has_merchant(ctx):
     """
     return ctx.bot.backoffice.merchant_manager.check_if_community_exist(int(ctx.message.guild.id))
 
-
-def guild_has_stats():
-    """
-    check if guild has stats
-    :return:
-    """
-
-    def predicate(interaction: Interaction):
-        return interaction.client.backoffice.guild_profiles.check_guild_registration_stats(
-            guild_id=interaction.guild_id)
-
-    return application_checks.check(predicate)
 
 
 def user_has_second_level(ctx):
@@ -210,17 +238,17 @@ def user_has_no_third_level(ctx):
     return not ctx.bot.backoffice.third_level_manager.third_level_user_reg_status(user_id=ctx.author.id)
 
 
-def check(author):
-    def inner_check(message):
-        """
-        Check for answering the verification message on withdrawal. Author origin
-        """
-        if message.author.id == author.id:
-            return True
-        else:
-            return False
+# def check(author):
+#     def inner_check(message):
+#         """
+#         Check for answering the verification message on withdrawal. Author origin
+#         """
+#         if message.author.id == author.id:
+#             return True
+#         else:
+#             return False
 
-    return inner_check
+#     return inner_check
 
 
 def has_ballot_access(ctx):
