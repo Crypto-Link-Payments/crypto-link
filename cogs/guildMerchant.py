@@ -507,45 +507,64 @@ class MerchantCommunityOwner(commands.Cog):
             )
 
 
-    @roles.command()
+    @role_group.subcommand(name="delete", description="Permanently delete a monetized role from the system and the server")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
     @commands.bot_has_permissions(manage_roles=True)
-    async def start(self, ctx, role: Role):
-        """
-        Change status of the role
-        :param ctx: Discord Context
-        :param role:
-        :return:
-        """
+    async def delete_role_sub(
+        self,
+        interaction: Interaction,
+        role: Role = SlashOption(description="Select the monetized role to delete")
+    ):
+        guild = interaction.guild
 
-        role_details = self.merchant.find_role_details(role_id=role.id)
-        if role_details:
-            if role_details['status'] == 'inactive':
-                role_details['status'] = 'active'
-                if self.merchant.change_role_details(role_data=role_details):
-                    title = '__Role status change notification__'
-                    message = f'Role {role} has been re-activate successfully.'
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=title, message=message, color_code=0,
-                                                        destination=1)
-                else:
-                    message = 'Role could not be re-activated, please try again later. Please try again. If the ' \
-                              'issue persists, contact one staff. '
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE,
-                                                        message=message, color_code=1,
-                                                        destination=1)
-            else:
-                message = f'Role {role} is already active. '
-                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE, message=message,
-                                                    color_code=1,
-                                                    destination=1)
-        else:
-            message = f'Role {role} does either not exist in the system or has not been created. Please use ' \
-                      f'`{self.command_string}` monetize community_roles to obtain all roles on the community'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_STATUS_CHANGE, message=message,
-                                                color_code=1,
-                                                destination=1)
+        # Check if the role is monetized
+        if not self.bot.backoffice.merchant_manager.find_role_details(role_id=role.id):
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=":warning: Role Not Found",
+                message="This role is not registered in the merchant system and cannot be deleted.",
+                color_code=1,
+            )
+            return
 
-    @merch.command()
-    @commands.check(is_owner)
+        # Attempt to remove role from merchant system
+        removed = self.bot.backoffice.merchant_manager.remove_monetized_role_from_system(
+            role_id=role.id,
+            community_id=guild.id
+        )
+
+        if not removed:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title="❌ Deletion Failed",
+                message="The role could not be removed from the merchant system. Please contact the support team.",
+                color_code=1,
+            )
+            return
+
+        try:
+            await role.delete(reason="Deleted via /merchant role delete command")
+        except Exception as e:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title="⚠️ Role Deletion Error",
+                message=f"Failed to delete the role from the server: `{str(e)}`",
+                color_code=1,
+            )
+            return
+
+        await customMessages.system_message(
+            interaction=interaction,
+            sys_msg_title="✅ Role Deleted",
+            message=(
+                f"The monetized role {role.name} has been successfully removed from:\n"
+                f"• the Crypto Link Merchant System\n"
+                f"• the server (**{guild.name}**)\n"
+            ),
+            color_code=0,
+        )
+
     @commands.check(is_public)
     async def active(self, ctx):
         """
