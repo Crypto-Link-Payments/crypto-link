@@ -1,9 +1,9 @@
 from datetime import datetime
 from datetime import timezone
 from nextcord import Embed, Colour, File, Interaction, slash_command, SlashOption, Forbidden
-from nextcord.ext import commands, application_checks
+from nextcord.ext import commands
 import cooldowns
-from utils.customCogChecks import has_wallet_inter_check, check
+from utils.customCogChecks import has_wallet_inter_check
 from cogs.utils.monetaryConversions import get_rates, rate_converter
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
@@ -11,6 +11,7 @@ import os
 import time
 import pyqrcode
 import traceback
+import nextcord
 
 custom_messages = CustomMessages()
 # Move this to class
@@ -52,7 +53,7 @@ class UserAccountCommands(commands.Cog):
             print(f'Exception: {e}')
 
     @slash_command(description="Basic details about your Crypto Link account", dm_permission=False)
-    @application_checks.check(has_wallet_inter_check())
+    @has_wallet_inter_check()
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.author)
     async def me(self, interaction: Interaction):
         try:
@@ -64,7 +65,7 @@ class UserAccountCommands(commands.Cog):
 
             if not isinstance(wallet_data, dict):
                 await interaction.response.send_message(
-                    "No wallet data found. Please set up your account first.",
+                    "No wallet data found. Please set up your account first. Use /register",
                     ephemeral=True
                 )
                 return
@@ -129,7 +130,7 @@ class UserAccountCommands(commands.Cog):
                                                          discord_username=f'{interaction.user}'):
                 message = f'Congratulations, your account has been successfully created.' \
                           f' You can access your wallet via the following command:\n' \
-                          f'/wallet'
+                          f'`/wallet`. For aditional commands available for wallet use /wallet help '
                 await custom_messages.system_message(interaction=interaction, color_code=0, message=message,
                                                      destination=0,
                                                      sys_msg_title=CONST_ACC_REG_STATUS)
@@ -151,7 +152,7 @@ class UserAccountCommands(commands.Cog):
                                                  sys_msg_title=CONST_ACC_REG_STATUS)
 
     @slash_command(description="Wallet operations", dm_permission=False)
-    @application_checks.check(has_wallet_inter_check())
+    @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def wallet(self,
                      interaction: Interaction,
@@ -159,7 +160,7 @@ class UserAccountCommands(commands.Cog):
         pass
 
     @wallet.subcommand(name="help", description="Help commands for /wallet")
-    @application_checks.check(has_wallet_inter_check())
+    @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def help(self,
                    interaction: Interaction
@@ -179,7 +180,7 @@ class UserAccountCommands(commands.Cog):
                                             destination=1, c=Colour.dark_orange())
 
     @wallet.subcommand(name="stats", description="Fetch wallet stats")
-    @application_checks.check(has_wallet_inter_check())
+    @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.user)  # Only ONE cooldown applies
     async def stats(self, interaction: Interaction,
                     token: str = SlashOption(description="Balance for token", required=False, default='xlm')):
@@ -287,6 +288,7 @@ class UserAccountCommands(commands.Cog):
             )
 
     @wallet.subcommand(name="deposit", description="Deposit Funds to your Wallet")
+    @has_wallet_inter_check()
     async def deposit(self, interaction: Interaction):
         """
         Returns deposit information to user
@@ -367,6 +369,7 @@ class UserAccountCommands(commands.Cog):
         self.clean_qr_image(author_id=user_id)
 
     @wallet.subcommand(name="qr", description="QR Code Generator")
+    @has_wallet_inter_check()
     async def qr(self,
                  interaction: Interaction
                  ):
@@ -405,6 +408,7 @@ class UserAccountCommands(commands.Cog):
                                                  sys_msg_title=title)
 
     @wallet.subcommand(name="balance", description="Fetch wallet Balance")
+    @has_wallet_inter_check()
     async def balance(self,
                       interaction: Interaction
                       ):
@@ -432,6 +436,7 @@ class UserAccountCommands(commands.Cog):
                                                  sys_msg_title=title)
 
     @wallet.subcommand(name='withdraw', description='Withdraw from wallet')
+    @has_wallet_inter_check()
     @cooldowns.cooldown(1, 20, bucket=cooldowns.SlashBucket.author)
     async def withdraw_command(self,
                                interaction: Interaction,
@@ -615,47 +620,6 @@ class UserAccountCommands(commands.Cog):
             await custom_messages.system_message(interaction=interaction, color_code=1,
                                                  message=msg,
                                                  destination=0, sys_msg_title='Withdrawal error')
-        # except Exception as e:
-        #     msg = (f'There has been an issue. Please contact support and provide them with the error {e}')
-        #     await custom_messages.system_message(ctx=ctx, color_code=1,
-        #                                          message=msg,
-        #                                          destination=ctx.message.author, sys_msg_title='Withdrawal error')
-
-    @me.error
-    async def quick_acc_check_error(self, interaction, error):
-        if isinstance(error, commands.CheckFailure):
-            title = f'__Balance check error__'
-            message = f'In order to check balance you need to be registered into the system'
-            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
-
-    @register.error
-    async def register_error(self, interaction, error):
-        if isinstance(error, commands.CheckFailure):
-            title = f'__/register error__'
-            message = f'You can not register over DM with the bot. Please head to one of the channels on Discord ' \
-                      f' server where Crypto Link is present and execute command: \n{self.command_string}register'
-            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
-
-    @wallet.error
-    async def wallet_error(self, interaction, error):
-        if isinstance(error, commands.CheckFailure):
-            title = f'__/wallet Error__'
-            message = f'In order to access your wallet you need to be first registered into payment system. You' \
-                      f' can do that with {self.command_string}register!'
-            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
-
-    @withdraw_command.error
-    async def withdrawal_error(self, interaction, error):
-        if isinstance(error, commands.CheckFailure):
-            message = f'First you need to register yourself wallet in Crypto Link system. You can do that ' \
-                      f'though {self.command_string}register'
-            title = f'**__Not registered__** :clipboard:'
-            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=title)
-
 
 def setup(bot):
     bot.add_cog(UserAccountCommands(bot))
