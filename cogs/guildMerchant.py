@@ -302,60 +302,93 @@ class MerchantCommunityOwner(commands.Cog):
             c=Color.purple()
         )
 
+
+    @role_group.subcommand(name="create", description="Create a new monetized role")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
     @commands.bot_has_permissions(manage_roles=True)
-    @commands.guild_only()
-    async def reactivate(self, ctx, role: Role, dollar_value: float, weeks_count: int, days_count: int,
-                         hours_count: int, minutes_count: int):
+    async def create_role_sub(
+        self,
+        interaction: Interaction,
+        role_name: str = SlashOption(description="Role name"),
+        dollar_value: float = SlashOption(description="Dollar value"),
+        weeks_count: int = SlashOption(description="Weeks", default=0),
+        days_count: int = SlashOption(description="Days", default=0),
+        hours_count: int = SlashOption(description="Hours", default=0),
+        minutes_count: int = SlashOption(description="Minutes", default=0)
+    ):
+        in_penny = int(dollar_value * 100)
+        total_duration = weeks_count + days_count + hours_count + minutes_count
 
-        if ctx.author.id == ctx.guild.owner.id:
-            in_penny = (int(dollar_value * (10 ** 2)))  # Convert to pennies
-            total = weeks_count + days_count + hours_count + minutes_count
-            if not (weeks_count < 0) and not (days_count < 0) and not (hours_count < 0) and not (
-                    minutes_count < 0) and (
-                    total > 0):
-                if not self.bot.backoffice.merchant_manager.find_role_details(role_id=role.id):
-                    if in_penny > 0:
-                        await self.create_monetized_role(ctx=ctx,
-                                                         role=role,
-                                                         in_penny=in_penny,
-                                                         weeks_count=weeks_count,
-                                                         days_count=days_count,
-                                                         hours_count=hours_count,
-                                                         minutes_count=minutes_count)
-                    else:
-                        message = f'Role value you are planning to monetize needs to be greater than $0.00'
-                        await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
-                                                            message=message,
-                                                            color_code=1,
-                                                            destination=1)
-                else:
-                    message = 'Role you have selected has been already monetized'
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
-                                                        message=message,
-                                                        color_code=1,
-                                                        destination=1)
+        if any(x < 0 for x in [weeks_count, days_count, hours_count, minutes_count]) or total_duration <= 0:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=":warning: Invalid Role Duration",
+                message=(
+                    "The role expiration time is invalid.\n"
+                    "At least one of the values for weeks, days, hours, or minutes must be greater than 0.\n"
+                    "Negative values or role without specific length are not allowed."
+                ),
+                color_code=1
+            )
+            return
 
-            else:
-                message = 'Role could not be create since the length of the role is either' \
-                          ' limitless or expiration time is' \
-                          ' not in future. In order to create a role data for week, days hours and minutes needs ' \
-                          'to be provide as followed:\n' \
-                          'week: whole number greater than 0\n' \
-                          'day: whole number greater than 0\n' \
-                          'hour: whole number greater than 0\n' \
-                          'minute: whole number greater than 0\n' \
-                          'Note: 0 is also acceptable however the sum of all variables needs to be greater than 0 at ' \
-                          'the end. '
-                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
-                                                    color_code=1,
-                                                    destination=1)
-        else:
-            message = f'You can not operate with this command as you are not the owner of the {ctx.guild}'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
-                                                color_code=1,
-                                                destination=1)
+        if re.search(r"[~!#$%^&*()_+{}:;\'\"]", role_name):
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=":warning: Invalid Role Name",
+                message=f'Role name {role_name} contains forbidden special characters.',
+                color_code=1
+            )
+            return
 
-    @roles.command()
+        if len(role_name) > 20:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=":warning: Role Name Too Long",
+                message=f'Role name {role_name} is too long. Max allowed length is 20 characters.',
+                color_code=1
+            )
+            return
+
+        existing_role = utils.get(interaction.guild.roles, name=role_name)
+        if existing_role:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                message=f'Role {role_name} already exists in the community.',
+                color_code=1
+            )
+            return
+
+        if in_penny <= 0:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=":warning: Invalid Dollar Value",
+                message="The dollar value must be greater than 0.00$",
+                color_code=1
+            )
+            return
+
+        try:
+            new_role = await interaction.guild.create_role(name=role_name)
+
+            await self.create_monetized_role(
+                interaction=interaction,
+                role=new_role,
+                in_penny=in_penny,
+                weeks_count=weeks_count,
+                days_count=days_count,
+                hours_count=hours_count,
+                minutes_count=minutes_count
+            )
+        except nextcord.Forbidden:
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=CONST_ROLE_CREATION_ERROR,
+                message="Error in the backend. Please contact Crypto Link owner.",
+                color_code=1
+            )
     @commands.bot_has_permissions(manage_roles=True)
     @commands.check(is_public)
     async def delete(self, ctx, discord_role: Role):
