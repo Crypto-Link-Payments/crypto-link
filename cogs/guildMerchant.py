@@ -116,20 +116,19 @@ class MerchantCommunityOwner(commands.Cog):
         )
 
     @merchant.subcommand(name="help", description="Show merchant system manual and available commands")
-    @application_checks.check(is_guild_owner())
-    @application_checks.check(merchant_com_reg_stats_check())
-    @application_checks.check(has_wallet_inter_check())
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    @merchant_com_reg_stats_check()
+    @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merchant_help(self, interaction: Interaction):
         title = "💱 __Merchant System Message Setup__ 💱"
         description = "All available commands under the ***merchant*** category."
         list_of_commands = [
-            {"name": ":warning: Activate Merchant on the Guild :warning:",
-            "value": "```/merchant initiate```"},
             {"name": ":information_source: How to Monetize Roles :information_source:",
             "value": "```/merchant manual```"},
             {"name": ":information_source: Access Role Management :information_source:",
-            "value": "```/merchant roles```"},
+            "value": "```/merchant role```"},
             {"name": ":moneybag: Access Merchant Wallet sub-commands :moneybag:",
             "value": "```/merchant wallet```"},
             {"name": ":moneybag: List Active Roles on Community :moneybag:",
@@ -143,75 +142,6 @@ class MerchantCommunityOwner(commands.Cog):
             data=list_of_commands,
             c=Colour.purple()
         )
-
-
-    @merchant.subcommand(name="initiate", description="Initiate and register your community in the Merchant system")
-    @application_checks.check(is_guild_owner())
-    @application_checks.check(has_wallet_inter_check())
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def merchant_initiate(self, interaction: Interaction):
-        guild_id = interaction.guild.id
-        user_id = interaction.user.id
-        guild_name = interaction.guild.name
-
-        if not self.merchant.check_if_community_exist(community_id=guild_id):
-            success = self.merchant.register_community_wallet(
-                community_id=guild_id,
-                community_owner_id=user_id,
-                community_name=guild_name
-            )
-
-            if success:
-                msg_title = ':rocket: __Community Wallet Registration Status__ :rocket:'
-                message = (
-                    f'You have successfully registered the merchant system on {guild_name}.\n'
-                    f'Use `/merchant help` to explore available commands or `/merchant manual` for system documentation.'
-                )
-                await customMessages.system_message(
-                    interaction=interaction,
-                    sys_msg_title=msg_title,
-                    message=message,
-                    color_code=0,
-                    destination=1
-                )
-
-                merchant_notification_channel = self.bot.get_channel(int(self.merchant_channel_info))
-                if merchant_notification_channel:
-                    new_merch = Embed(
-                        title='New Community Registered for Merchant',
-                        description='A new community has registered for the merchant service.',
-                        colour=Colour.purple()
-                    )
-                    new_merch.add_field(name='Community', value=guild_name)
-                    await merchant_notification_channel.send(embed=new_merch)                   
-            else:
-                msg_title = ':warning: __Merchant Registration Failed__ :warning:'
-                message = (
-                    'There was an issue registering the wallet in the system.\n'
-                    'Please try again later or contact support staff.'
-                )
-                await customMessages.system_message(
-                    interaction=interaction,
-                    sys_msg_title=msg_title,
-                    message=message,
-                    color_code=1,
-                    destination=1
-                )
-        else:
-            print('Already registred')
-            msg_title = ':warning: __Community Wallet Already Registered__ :warning:'
-            message = (
-                f'{guild_name} is already registered in the merchant system.\n'
-                f'Use `/merchant help` or `/merchant manual` to proceed.'
-            )
-            await customMessages.system_message(
-                interaction=interaction,
-                sys_msg_title=msg_title,
-                message=message,
-                color_code=0,
-                destination=1
-            )
-
 
     @merchant.subcommand(name="manual", description="Show how to create and use monetized roles")
     @application_checks.check(is_guild_owner())
