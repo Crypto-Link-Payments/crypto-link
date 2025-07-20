@@ -5,7 +5,7 @@ from nextcord.ext import commands, application_checks
 from nextcord import Embed, Colour, slash_command, SlashOption, Interaction, Role, TextChannel, ChannelType
 from nextcord.abc import GuildChannel
 import cooldowns
-from utils.customCogChecks import guild_has_stats, has_wallet_inter_check, is_guild_owner_or_has_clmng
+from utils.customCogChecks import guild_has_stats, has_wallet_inter_check, is_guild_owner_or_has_clmng, is_public_channel
 from cogs.utils.systemMessaages import CustomMessages
 
 customMessages = CustomMessages()
@@ -24,12 +24,14 @@ class GuildOwnerCommands(commands.Cog):
         self.guild_string = None
 
     @slash_command(name='owner', description="Guild Owner manual group", dm_permission=False)
+    @is_public_channel()
     @is_guild_owner_or_has_clmng()
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
     async def owner(self, interaction: Interaction):
         pass 
 
     @owner.subcommand(name="help", description="Show the guild owner's manual")
+    @is_public_channel()
     @is_guild_owner_or_has_clmng()
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
     async def owner_help(self, interaction: Interaction):
@@ -52,6 +54,7 @@ class GuildOwnerCommands(commands.Cog):
                                         c=Colour.dark_gold())
 
     @owner.subcommand(name="register", description="Register Guild into the System")
+    @is_public_channel()
     @is_guild_owner_or_has_clmng()
     @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.user) 
@@ -114,6 +117,7 @@ class GuildOwnerCommands(commands.Cog):
         )
 
     @owner.subcommand(name="stats", description="Check Guild Stats")
+    @is_public_channel()
     @is_guild_owner_or_has_clmng()
     @guild_has_stats()
     async def stats(self,
@@ -195,6 +199,7 @@ class GuildOwnerCommands(commands.Cog):
 
 
     @owner.subcommand(name="services", description="Guild Service Status")
+    @is_public_channel()
     @is_guild_owner_or_has_clmng()
     @guild_has_stats()
     async def services(self, interaction: Interaction):
@@ -370,6 +375,7 @@ class GuildOwnerCommands(commands.Cog):
 
 
     @owner.subcommand(name="merchant", description="Guild Merchant Service")
+    @is_public_channel()
     @is_guild_owner_or_has_clmng()
     @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.guild)
@@ -398,6 +404,7 @@ class GuildOwnerCommands(commands.Cog):
         return
 
     @merchant.subcommand(name="open", description="Register a community wallet for merchant system")
+    @is_public_channel()
     @is_guild_owner_or_has_clmng()
     async def open(self, interaction: Interaction):
         guild_id = interaction.guild.id
