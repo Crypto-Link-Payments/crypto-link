@@ -96,13 +96,16 @@ def has_clmng_role():
 
     return application_checks.check(predicate)
 
-
 def is_guild_owner():
-    async def predicate(interaction):
+    async def predicate(interaction: Interaction):
         if interaction.guild is None:
-            raise ApplicationCheckFailure("This command can only be used in a guild.")
+            raise ApplicationCheckFailure("This command can only be used in a server.")
+
+        if not hasattr(interaction.user, "id") or not hasattr(interaction.guild, "owner_id"):
+            raise ApplicationCheckFailure("Unable to verify ownership due to missing user or guild data.")
+
         if interaction.user.id != interaction.guild.owner_id:
-            raise ApplicationCheckFailure("Only the server owner can use this command.")
+            raise ApplicationCheckFailure("❌ Access denied! Only the server owner can use this command.")
         return True
 
     return application_checks.check(predicate)
