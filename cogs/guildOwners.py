@@ -5,7 +5,7 @@ from nextcord.ext import commands, application_checks
 from nextcord import Embed, Colour, slash_command, SlashOption, Interaction, Role, TextChannel, ChannelType
 from nextcord.abc import GuildChannel
 import cooldowns
-from utils.customCogChecks import guild_has_stats, has_wallet_inter_check, is_guild_owner, is_guild_owner_or_has_clmng
+from utils.customCogChecks import guild_has_stats, has_wallet_inter_check, is_guild_owner_or_has_clmng
 from cogs.utils.systemMessaages import CustomMessages
 
 customMessages = CustomMessages()
@@ -24,37 +24,36 @@ class GuildOwnerCommands(commands.Cog):
         self.guild_string = None
 
     @slash_command(name='owner', description="Guild Owner manual group", dm_permission=False)
-    @application_checks.check(is_guild_owner())
+    @is_guild_owner_or_has_clmng()
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
     async def owner(self, interaction: Interaction):
         pass 
 
     @owner.subcommand(name="help", description="Show the guild owner's manual")
-    @application_checks.check(is_guild_owner())
+    @is_guild_owner_or_has_clmng()
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
     async def owner_help(self, interaction: Interaction):
         self.guild_string = self.bot.get_prefix_help(interaction.guild.id)
         title = ':joystick: __Guild Owner Manual__ :joystick: '
         description = "Available commands to operate the guild system."
-        list_of_values = [
+        list_of_values = [{"name": ":office_worker: Register Server into Crypto Link :office_worker: ",
+            "value": f"`/owner register`"},
             {"name": ":bar_chart: Guild Crypto Link Stats :bar_chart: ",
             "value": f"`/owner stats`"},
             {"name": ":service_dog: Guild Applied Services :service_dog: ",
             "value": f"`/owner services`"},
-            # {"name": ":satellite_orbital: Crypto Uplink (transaciton feeds) :satellite_orbital: ",
-            # "value": f"`/owner uplink`"},
             {"name": ":convenience_store: Activate Role Monetization :convenience_store:  ",
-            "value": f"`/owner merchant open`"}
-        ]
+            "value": f"`/owner merchant open`"},
+            {"name": ":information_source:  Guild Applied Services :information_source:",
+            "value": f"`/owner help`"}]
 
         await customMessages.embed_builder(interaction=interaction, title=title,
                                         description=description, data=list_of_values,
                                         c=Colour.dark_gold())
 
-
     @owner.subcommand(name="register", description="Register Guild into the System")
-    @application_checks.check(is_guild_owner())  
-    @application_checks.check(has_wallet_inter_check())  
+    @is_guild_owner_or_has_clmng()
+    @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.user) 
     async def register(self, interaction: Interaction):
         guild_id = interaction.guild.id
@@ -115,8 +114,8 @@ class GuildOwnerCommands(commands.Cog):
         )
 
     @owner.subcommand(name="stats", description="Check Guild Stats")
-    @application_checks.check(is_guild_owner())
-    @application_checks.check(guild_has_stats())
+    @is_guild_owner_or_has_clmng()
+    @guild_has_stats()
     async def stats(self,
                     interaction: Interaction,
                     token: str = SlashOption(description="Token to display stats for", required=False, default='xlm')
@@ -196,8 +195,8 @@ class GuildOwnerCommands(commands.Cog):
 
 
     @owner.subcommand(name="services", description="Guild Service Status")
-    @application_checks.check(is_guild_owner()) 
-    @application_checks.check(guild_has_stats())
+    @is_guild_owner_or_has_clmng()
+    @guild_has_stats()
     async def services(self, interaction: Interaction):
         service_status = await self.backoffice.guild_profiles.get_service_statuses(
             guild_id=interaction.guild.id
@@ -371,8 +370,8 @@ class GuildOwnerCommands(commands.Cog):
 
 
     @owner.subcommand(name="merchant", description="Guild Merchant Service")
-    @application_checks.check(is_guild_owner())  # ✅ Restrict to guild owner only
-    @application_checks.check(has_wallet_inter_check())
+    @is_guild_owner_or_has_clmng()
+    @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merchant(self, interaction: Interaction):
         # title = ':convenience_store: __Crypto Link Merchant Manual__ :convenience_store:'
@@ -399,7 +398,7 @@ class GuildOwnerCommands(commands.Cog):
         return
 
     @merchant.subcommand(name="open", description="Register a community wallet for merchant system")
-    @application_checks.check(is_guild_owner())  # ✅ Restrict to owner
+    @is_guild_owner_or_has_clmng()
     async def open(self, interaction: Interaction):
         guild_id = interaction.guild.id
         guild_name = str(interaction.guild)
@@ -422,7 +421,7 @@ class GuildOwnerCommands(commands.Cog):
         if self.merchant.check_if_community_exist(community_id=guild_id):
             msg_title = ':warning: __Merchant Registration Status__ :warning:'
             message = (
-                f'The merchant system is already active for ***{guild_name}***.\n\n'
+                f'The merchant system is already active for {guild_name}.\n\n'
                 f'Use `/merchant` to access merchant features on public channel of the server where Crypto Link has access to.'
             )
             await customMessages.system_message(
@@ -445,7 +444,7 @@ class GuildOwnerCommands(commands.Cog):
             message = (
                 f'You have successfully activated the merchant system for ***{guild_name}***.\n\n'
                 f'You can now use `{self.command_string}merchant` to view commands, or access the manual via '
-                f'`/merchant manual`.'
+                f'`/merchant manual`. To fully activate merchant please proceed with command /merchan_initiate.'
             )
             await customMessages.system_message(
                 interaction=interaction,
