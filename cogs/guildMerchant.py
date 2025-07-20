@@ -212,73 +212,48 @@ class MerchantCommunityOwner(commands.Cog):
             c=Color.purple()
         )
 
-        if not (weeks_count < 0) and not (days_count < 0) and not (hours_count < 0) and not (minutes_count < 0) and (
-                total > 0):
-            if not re.search("[~!#$%^&*()_+{}:;\']", role_name):  # Check for special characters
-                if len(role_name) <= 20:  # Check for role length
-                    role = utils.get(ctx.guild.roles, name=role_name)  # Check if role present already
-                    if not role:
-                        if in_penny > 0:  # Checks if it is greater than 0
-                            try:
-                                new_role = await ctx.guild.create_role(
-                                    name=role_name)  # Create role and return its details
+    @wallet_group.subcommand(name="balance", description="Check merchant wallet balance")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    async def wallet_balance(self, interaction: Interaction):
+        """
+        Returns the current value of the community wallet in Stellar
+        """
+        community_id = interaction.guild.id
+        data = self.merchant.get_wallet_balance(community_id=community_id)
 
-                                await self.create_monetized_role(ctx=ctx,
-                                                                 role=new_role,
-                                                                 in_penny=in_penny,
-                                                                 weeks_count=weeks_count,
-                                                                 days_count=days_count,
-                                                                 hours_count=hours_count,
-                                                                 minutes_count=minutes_count)
-                            except nextcord.Forbidden:
-                                message = 'Error in the backend. Please contact Crypto Link owner'
-                                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
-                                                                    message=message,
-                                                                    color_code=1,
-                                                                    destination=1)
-                                return
-                        else:
-                            message = 'The amount user will have to pay for role needs to be greater than 0.00$'
-                            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
-                                                                message=message,
-                                                                color_code=1,
-                                                                destination=1)
-                    else:
-                        message = f'Role with name ***{role_name}*** already exist on the community ' \
-                                  f'or in the system and can not be created.'
-                        await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
-                                                            message=message,
-                                                            color_code=1,
-                                                            destination=1)
-                else:
-                    message = f'Role with name ***{role_name}*** is too long. Max allowed length is 10 characters'
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR,
-                                                        message=message,
-                                                        color_code=1,
-                                                        destination=1)
-            else:
-                message = f'Role with name ***{role_name}*** includes special characters which are' \
-                          f' not allowed. Please repeat the process'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
-                                                    color_code=1,
-                                                    destination=1)
+        if data:
+            wallet_details = Embed(
+                title=':bank: __Merchant Wallet Balance__ :bank:',
+                description=f"Current balance of the ***{interaction.guild.name}*** wallet",
+                colour=Color.gold()
+            )
+            wallet_details.add_field(
+                name=':moneybag:  Stellar Lumen :moneybag:',
+                value=f"```{(data['xlm']) / (10 ** 7)} XLM```",
+                inline=False
+            )
+            wallet_details.add_field(
+                name=':warning: Withdrawal from merchant wallet :warning:',
+                value=(
+                    f"Use command ```/merchant wallet sweep``` to withdraw all available funds "
+                    f"to your personal wallet.\n\nWithdrawing is allowed **only** for the owner of {interaction.guild.name}."
+                ),
+                inline=False
+            )
+
+            # Send privately (ephemeral)
+            await interaction.response.send_message(embed=wallet_details, ephemeral=True)
 
         else:
-            message = 'Role could not be create since the length of the role is either' \
-                      ' limitless or expiration time is' \
-                      ' not in future. In order to create a role data for week, days hours and minutes needs ' \
-                      'to be provide as followed:\n' \
-                      'week: whole number greater than 0\n' \
-                      'day: whole number greater than 0\n' \
-                      'hour: whole number greater than 0\n' \
-                      'minute: whole number greater than 0\n' \
-                      'Note: 0 is also acceptable however the sum of all variables needs to be greater than 0 at ' \
-                      'the end. '
-            await customMessages.system_message(ctx=ctx, sys_msg_title=CONST_ROLE_CREATION_ERROR, message=message,
-                                                color_code=1,
-                                                destination=1)
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title='__Balance Check Error__',
+                message='There was a problem fetching the community balance. Please try again later or contact support.',
+                color_code=1
+            )
 
-    @roles.command()
+
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def reactivate(self, ctx, role: Role, dollar_value: float, weeks_count: int, days_count: int,
