@@ -187,35 +187,30 @@ class MerchantCommunityOwner(commands.Cog):
 
         await interaction.response.send_message(embed=manual, ephemeral=True)
 
-                {"name": f':arrow_forward: Re-start inactive role :arrow_forward:  ',
-                 "value": f'```{self.command_string}merchant role start <@discord.Role>```'},
-
-                {"name": f':wastebasket: Remove role from the system :wastebasket:   ',
-                 "value": f'```{self.command_string}merchant role delete <@discord.Role>```'},
-
-            ]
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_commands,
-                                               c=Color.purple())
-
-    @roles.command(aliases=["new"])
-    @commands.bot_has_permissions(manage_roles=True)
-    @commands.check(is_public)
-    async def create(self, ctx, role_name: str, dollar_value: float, weeks_count: int, days_count: int,
-                     hours_count: int, minutes_count: int):
-        """
-        Procedure to create role in the system
-        :param ctx:
-        :param role_name: String representation of the role
-        :param dollar_value: Value in dollar
-        :param weeks_count: length in weeks
-        :param days_count: length in days
-        :param hours_count: length in hours
-        :param minutes_count: length in minutes
-        :return:
-        """
-
-        in_penny = (int(dollar_value * (10 ** 2)))  # Convert to pennies
-        total = weeks_count + days_count + hours_count + minutes_count
+    ################################# MERCHANT WLALLET RELATED COMMANDS
+    @merchant.subcommand(name="wallet", description="Merchant wallet operations")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    async def wallet_group(self, interaction: Interaction):
+        title = "💱 __Merchant Wallet Commands__ 💱"
+        description = "All available commands to operate the merchant wallet of the community."
+        list_of_commands = [
+            {
+                "name": ":moneybag: Get Balance Status :moneybag:",
+                "value": "```/merchant wallet balance```\nAliases: `bal`"
+            },
+            {
+                "name": ":broom: Withdraw funds to your personal account :broom:",
+                "value": "```/merchant wallet sweep```\nAliases: `withdraw`"
+            },
+        ]
+        await customMessages.embed_builder(
+            interaction=interaction,
+            title=title,
+            description=description,
+            data=list_of_commands,
+            c=Color.purple()
+        )
 
         if not (weeks_count < 0) and not (days_count < 0) and not (hours_count < 0) and not (minutes_count < 0) and (
                 total > 0):
