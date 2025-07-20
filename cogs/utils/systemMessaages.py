@@ -127,7 +127,7 @@ class CustomMessages:
 
     @staticmethod
     async def system_message(interaction, message: str, color_code, sys_msg_title: str = None,
-                             embed_title: str = None, destination: int = 0):
+                            embed_title: str = None, destination: int = 0):
         """
         Custom System Messages
         """
@@ -143,15 +143,18 @@ class CustomMessages:
             embed_title = 'System Message'
 
         sys_embed = Embed(title=f"{emoji}{embed_title}",
-                          description=sys_msg_title,
-                          colour=c)
-        sys_embed.add_field(name=':information_source:',
-                            value=f'```{message}```')
-        sys_embed.set_footer(text='Message will self-destruct in 15 seconds! ')
-        if destination == 0:
-            await interaction.response.send_message(embed=sys_embed,delete_after=15, ephemeral=True)
-        else:
-            await interaction.channel.send(embed=sys_embed, delete_after=15, ephemeral=True)
+                        description=sys_msg_title,
+                        colour=c)
+        sys_embed.add_field(name=':information_source:', value=f'```{message}```')
+        sys_embed.set_footer(text='Message will self-destruct in 15 seconds!')
+
+        try:
+            if destination == 0:
+                await interaction.response.send_message(embed=sys_embed, ephemeral=True)
+            else:
+                await interaction.channel.send(embed=sys_embed, delete_after=15) 
+        except Exception as e:
+            print(f"system_message error: {e}")
 
     async def transaction_report_to_user(self, ctx, user, destination, transaction_data: dict, direction: int,
                                          tx_type: str,
