@@ -40,6 +40,21 @@ def has_wallet(ctx):
     """
     return ctx.bot.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id)
 
+def is_public_channel():
+    async def predicate(interaction: Interaction):
+        if interaction.guild is None:
+            raise ApplicationCheckFailure("❌ This command cannot be used in Direct Messages.")
+
+        if isinstance(interaction.channel, Thread):
+            raise ApplicationCheckFailure("❌ This command cannot be used in thread channels.")
+
+        if not isinstance(interaction.channel, TextChannel):
+            raise ApplicationCheckFailure("❌ This command must be used in a public text channel.")
+
+        return True
+
+    return application_checks.check(predicate)
+
 
 def has_wallet_inter_check():
     def predicate(interaction: Interaction):
