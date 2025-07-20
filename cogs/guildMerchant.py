@@ -264,6 +264,44 @@ class MerchantCommunityOwner(commands.Cog):
             ephemeral=True
         )
 
+
+    @role_group.subcommand(name="comms_role", description="View commands to monetized roles")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    async def commands_example(self, interaction: Interaction):
+        title = ":man_juggling: __Merchant Role Management__ :man_juggling:"
+        description = "All available commands to manage monetized roles"
+        list_of_commands = [
+            {
+                "name": ":information_source: Create new monetized role",
+                "value": f"```/merchant role create <role name> <value in $> <weeks> <days> <hours> <minutes>```"
+            },
+                        {
+                "name": ":play_pause: Stop Active Role",
+                "value": f"```/merchant role stop <@Role>```"
+            },
+            {
+                "name": ":rocket: Activate already active role",
+                "value": f"```/merchant role reactivate <@Role>```"
+            },
+            {
+                "name": ":wastebasket: Remove role from the system and server",
+                "value": f"```/merchant role delete <@Role>```"
+            },
+            {
+                "name": ":play_pause: View Monetized Roles",
+                "value": f"```/merchant role active```"
+            }
+        ]
+
+        await customMessages.embed_builder(
+            interaction=interaction,
+            title=title,
+            description=description,
+            data=list_of_commands,
+            c=Color.purple()
+        )
+
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
     async def reactivate(self, ctx, role: Role, dollar_value: float, weeks_count: int, days_count: int,
