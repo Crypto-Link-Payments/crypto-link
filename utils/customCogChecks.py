@@ -58,9 +58,15 @@ def is_public_channel():
 
 def has_wallet_inter_check():
     def predicate(interaction: Interaction):
-        return (
-            interaction.client.backoffice.account_mng.check_user_existence(user_id=interaction.user.id)
-        )
+        print("✅ Wallet check running for user:", interaction.user.id)
+
+        user_id = interaction.user.id
+        exists = interaction.client.backoffice.account_mng.check_user_existence(user_id=user_id)
+        if not exists:
+            raise ApplicationCheckFailure(
+                "❌ You don’t have a wallet yet.\nUse `/register` to create one and get started."
+            )
+        return True
 
     return application_checks.check(predicate)
 
