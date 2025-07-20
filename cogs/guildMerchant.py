@@ -103,9 +103,10 @@ class MerchantCommunityOwner(commands.Cog):
             )
 
     @slash_command(name="merchant", description="Merchant system command hub", dm_permission=False)
-    @application_checks.check(is_guild_owner())
-    @application_checks.check(merchant_com_reg_stats_check())
-    @application_checks.check(has_wallet_inter_check())
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    @merchant_com_reg_stats_check()
+    @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merchant(self, interaction: Interaction):
         # Optional: You can leave this blank if you only use subcommands
