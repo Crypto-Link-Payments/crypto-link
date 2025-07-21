@@ -254,6 +254,96 @@ class MerchantCommunityOwner(commands.Cog):
             )
 
 
+    @wallet_group.subcommand(name="sweep", description="Withdraw all funds to owner's personal wallet")
+    @is_public_channel()
+    @has_wallet_inter_check()
+    @is_guild_owner_or_has_clmng()
+    async def wallet_sweep(self, interaction: Interaction):
+        await interaction.response.defer(ephemeral=True)
+
+        community_id = interaction.guild.id
+        user_id = interaction.user.id
+        guild_name = interaction.guild.name
+        ticker = "xlm"
+        current_time = datetime.utcnow()
+
+        # Fee check
+        withdrawal_min = self.backoffice.bot_manager.get_fees_by_category(key='merchant_min')
+        withdrawal_min_dollar = withdrawal_min['fee']
+        min_in_xlm = convert_to_currency(withdrawal_min_dollar, coin_name='stellar')
+
+
+        if min_in_xlm.get("error"):
+            return await interaction.followup.send(
+                "Could not fetch live XLM conversion rates. Please try again later.",
+                ephemeral=True
+            )
+
+        withdrawal_limit = min_in_xlm["total"]
+        com_balance_stroops = self.merchant.get_balance_based_on_ticker(community_id=community_id, ticker=ticker)
+
+        if com_balance_stroops < withdrawal_limit:
+            return await interaction.followup.send(
+                f"❌ Minimum withdrawal is `{withdrawal_limit / 1e7:.2f} XLM`, "
+                f"but current balance is `{com_balance_stroops / 1e7:.2f} XLM`.",
+                ephemeral=True
+            )
+
+        fee_perc = self.backoffice.bot_manager.get_fees_by_category(key='wallet_transfer')['fee']
+        fee_amount = int(com_balance_stroops * (fee_perc / 100))
+        net_amount = com_balance_stroops - fee_amount
+
+        if not self.merchant.modify_funds_in_community_merchant_wallet(direction=1, community_id=community_id, wallet_tick=ticker, amount=com_balance_stroops):
+            return await interaction.followup.send(
+                "An error occurred while attempting to withdraw the funds. Please try again later.",
+                ephemeral=True
+            )
+
+        # Transfer fee to corp account
+        if not self.backoffice.bot_manager.update_cl_wallet_balance(to_update={"balance": fee_amount}, ticker=ticker):
+            return await interaction.followup.send(
+                "Error applying merchant fee to corporate wallet. Withdrawal aborted.",
+                ephemeral=True
+            )
+
+        # Add net funds to owner's personal wallet
+        if not self.backoffice.account_mng.update_user_wallet_balance(discord_id=user_id, ticker=ticker, direction=0, amount=net_amount):
+            return await interaction.followup.send(
+                "Funds withdrawal failed. Please contact the staff.",
+                ephemeral=True
+            )
+
+        # Send embed summary to user
+        embed = Embed(
+            title=":money_with_wings: Withdrawal Successful",
+            description=f"Withdrawal from **{guild_name}** to your personal wallet completed.",
+            colour=Color.purple()
+        )
+        embed.add_field(name="🕒 Time", value=f"`{current_time} UTC`", inline=False)
+        embed.add_field(name="💰 Amounts", value=f"```Total: {com_balance_stroops / 1e7:.2f} XLM\n"
+                                                f"Fee: {fee_amount / 1e7:.2f} XLM\n"
+                                                f"Net: {net_amount / 1e7:.2f} XLM```", inline=False)
+        await interaction.user.send(embed=embed)
+
+        # Notify system channel
+        sys_embed = Embed(
+            title=":bank: Corp Wallet Updated",
+            description=f"Fee from `{guild_name}` merchant sweep added to corp.",
+            colour=Color.green()
+        )
+        sys_embed.add_field(name="Guild", value=f"`{guild_name}`", inline=False)
+        sys_embed.add_field(name="Guild Owner", value=f"`{interaction.user}`", inline=False)
+        sys_embed.add_field(name="Fee Collected", value=f"`{fee_amount / 1e7:.2f} XLM`", inline=False)
+        notification_channel = self.bot.get_channel(int(self.merchant_channel_info))
+        await notification_channel.send(embed=sys_embed)
+
+        await self.backoffice.stats_manager.update_cl_earnings(
+            amount=fee_amount, system="merchant", token="xlm", time=current_time,
+            user=str(interaction.user), user_id=user_id
+        )
+
+        await interaction.followup.send("✅ Funds withdrawn successfully!", ephemeral=True)
+
     ################################# ROLE RELATED COMMANDS
     @merchant.subcommand(name="role", description="Role monetization")
     @is_public_channel()
