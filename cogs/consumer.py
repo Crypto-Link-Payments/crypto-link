@@ -29,9 +29,30 @@ class ConsumerCommands(commands.Cog):
     async def membership(self, interaction: Interaction):
         pass  # required root slash group
 
-    @membership.command(aliases=["live"])
-    @commands.check(is_public)
-    async def current(self, ctx):
+    @membership.subcommand(name="help", description="Shows available membership commands")
+    @has_wallet_inter_check()
+    @guild_has_merchant()
+    @is_public_channel()
+    async def membership_help(self, interaction: Interaction):
+        title = ':joystick: __Membership available commands__ :joystick:'
+        description = 'Representation of all available commands under ***membership*** category'
+
+        list_of_commands = [
+            {"name": f':circus_tent: Available Roles on {interaction.guild.name} :circus_tent:',
+             "value": '`/membership roles`'},
+            {"name": f':person_juggling: Subscribe for role on community :person_juggling:',
+             "value": '`/membership subscribe`'},
+            {"name": f':man_mage: List active roles on community:man_mage:',
+             "value": '`/membership current`'}
+        ]
+
+        await custom_messages.embed_builder(
+            interaction=interaction,
+            title=title,
+            description=description,
+            data=list_of_commands,
+            c=Colour.magenta()
+        )
         """
         Returns information on current membership details user currently has active
         """
