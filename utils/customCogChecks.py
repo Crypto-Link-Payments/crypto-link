@@ -202,11 +202,6 @@ def user_has_wallet(ctx):
     return ctx.bot.backoffice.account_mng.check_user_existence(user_id=ctx.message.author.id)
 
 
-def guild_has_merchant(ctx):
-    """
-    Check if community has activate merchant system
-    """
-    return ctx.bot.backoffice.merchant_manager.check_if_community_exist(int(ctx.message.guild.id))
 
 def guild_has_merchant():
     """
