@@ -90,10 +90,9 @@ class HelpCommands(commands.Cog):
         await custom_messages.embed_builder(interaction=interaction, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
 
-    @commands.command(aliases=["start"])
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def get_started(self, ctx):
+
+    @help_cmd.subcommand(name="get_started", description='About Crypto Link')
+    async def help_get_started(self, interaction:Interaction):
         """
         How to get started with the payment system
         :param ctx: Discord Context
@@ -104,33 +103,29 @@ class HelpCommands(commands.Cog):
         start_embed.add_field(name=':one: Register yourself custodial wallet :one:',
                               value=f'In order for you to be able to make peer to peer transactions and use merchant'
                                     f' system, you must have registered at least custodial wallet.\n'
-                                    f'You can do that by executing command `{self.command_string}register` on any '
+                                    f'You can do that by executing command `/register` on any '
                                     f'public Discord channel where Crypto Link has access to.\n'
                                     f'Once successful, you will create personal wallet with details which you can use '
                                     f' to move or deposit funds. To further familiarize yourself with other'
-                                    f' commands use `{self.command_string}help`',
+                                    f' commands use `/help <category>`',
                               inline=False)
         start_embed.add_field(name=':two: Get Deposit Details :two:',
-                              value=f'Get deposit details of your Discord wallet with `{self.command_string}wallet'
-                                    f' deposit` and deposit XLM or any other supported Stellar native token. '
-                                    f'Please use `{self.command_string}help tokens` to check all available '
-                                    f'tokens on the system besides XLM',
+                              value=f'Get deposit details of your Discord wallet with `/wallet deposit'
+                                    f' and deposit XLM or any other supported Stellar native token. ',
                               inline=False)
         start_embed.add_field(name=':three: Make P-2-P Transaction :three:',
                               value=f'`{self.command_string}send <@discord.Member> <amount> <ticker>`\n'
                                     f'Example: `{self.command_string}send @animus 10 xlm`',
                               inline=False)
         start_embed.add_field(name=':four: Check your balances :four:',
-                              value=f'`{self.command_string}wallet balance`\n'
-                                    f'`{self.command_string}me`',
+                              value=f'`/wallet balance` or\n'
+                                    f'`/me`',
                               inline=False)
         start_embed.add_field(name=':five: Withdraw from Discord :five:',
-                              value=f'`{self.command_string}withdraw <amount> <asset_code> <address> <memo=optional>`\n'
-                                    f'Example: `{self.command_string}withdraw 10 xlm GBALRXCJ6NNRE4USDCUFLAOZCDSKDSEJZHTLGEDQXI7BM2T6M77CMMWG`',
+                              value=f'`/wallet withdraw <address> <amount> <asset_code>  <memo=optional>`\n'
+                                    f'Example: `/wallet withdraw GBALRXCJ6NNRE4USDCUFLAOZCDSKDSEJZHTLGEDQXI7BM2T6M77CMMWG 10 xlm`',
                               inline=False)
-        start_embed.add_field(name=':sos: Explore Crypto Link :sos: ',
-                              value=f'```{self.command_string}help```',
-                              inline=False)
+        await interaction.send(embed=start_embed)
 
         await ctx.author.send(embed=start_embed)
 
