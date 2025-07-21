@@ -40,6 +40,9 @@ class HelpCommands(commands.Cog):
             content="Use `/merchant help` to view available merchant commands.",
             ephemeral=True
         )
+
+    @help_cmd.subcommand(name="about", description='About Crypto Link')
+    async def help_about(self, interaction: Interaction):
         """
         Command which returns information on About the system
         :param ctx:
@@ -58,25 +61,19 @@ class HelpCommands(commands.Cog):
             {"name": ":moneybag: Wallet Types :moneybag:  ",
              "value": f'At this moment Crypto Link supports only custodial wallet which operated based on MEMO '
                       f'when depositing. '
-                      f'please use `{self.command_string}help wallets`. Each user is required to register for custodial '
+                      f'please use `/wallet help`. Each user is required to register for custodial '
                       f'wallet in order to be able to interact and use Crypto Link in full.'},
 
             {"name": ":money_with_wings: Instant Peer to Peer feels transactions :money_with_wings:  ",
              "value": f"Users are able to execute instant peer-2-peer transactions without fees either with the Stellar"
                       f" native currency XLM or integrated tokens. Currently system supports public and private types."
-                      f" For full list of supported currencies please use command {self.command_string}currencies"},
+                      f" For full list of supported currencies please use command /currencies"},
 
             {"name": ":convenience_store: Merchant system :convenience_store: ",
              "value": f"Discord Guild owners can monetize roles in various lengths and "
                       f"values and make them available for purchase. Once role is purchased, Crypto Link will handle"
                       f" micro management tasks (role management, transfer of funds, role monitoring and its removal "
                       f"uppon expiration) on its own, saving owners a lot of time."},
-
-            {"name": ":satellite_orbital: Crypto Link Up-Link system :satellite_orbital:  ",
-             "value": f"Owners can as well set-up Up-Link which provides opportunity to monitor Crypto Link System"
-                      f" activities. Serving as an 'Network Explorer' users are able to see activites happening"
-                      f" across other guilds who have integrated the system"},
-
             {"name": ":postal_horn: ICO's and Project promotions :postal_horn: ",
              "value": f'Integrated support for Stellar Native Crypto Currency and its tokens provides as well '
                       f'possibility for Crypto Link to be utilized as one of the channels for running '
@@ -84,19 +81,13 @@ class HelpCommands(commands.Cog):
                       f'or would like to get in touch with us, please write us on'
                       f' ***__cryptolinkpayments@gmail.com__***, open issue on Github or contact us directly over '
                       f'Discord Crypto Link Community.'},
-            {"name": ":sunrise: Queries to Horizon Network from Discord :sunrise: ",
-             "value": f'Crypto Link has integrated as well access to Stellar Horizon which is  client-facing API server for '
-                      f'the Stellar ecosystem. Discord Users can now execute queries to it straight from Discord'
-                      f' through execution of specific Discord Commands. To find and familiarize yourself with Horizon'
-                      f' initiate `{self.command_string}help horizon` with the bot or jump straight into it '
-                      f' with `{self.command_string}horizon`.'},
             {"name": ":placard: Further information and links:placard: ",
              "value": f'[Homepage](https://cryptolink.carrd.co/) \n'
                       f'[Github](https://github.com/launch-pad-investments/crypto-link) \n'
                       f'[Twitter](https://twitter.com/CryptoLink8)'},
         ]
 
-        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+        await custom_messages.embed_builder(interaction=interaction, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
 
     @commands.command(aliases=["start"])
