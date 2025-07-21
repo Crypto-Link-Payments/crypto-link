@@ -53,47 +53,47 @@ class ConsumerCommands(commands.Cog):
             data=list_of_commands,
             c=Colour.magenta()
         )
+
+    @membership.subcommand(name="current", description="Review your active memberships")
+    @is_public_channel()
+    async def current_cmd(self, interaction: Interaction):
         """
         Returns information on current membership details user currently has active
         """
-        author = ctx.message.author.id
-        community = ctx.message.guild.id
+        author = interaction.user.id
+        community = interaction.guild.id
 
-        roles = self.backoffice.merchant_manager.check_user_roles(user_id=author, discord_id=community)
+        try:
+            roles = self.backoffice.merchant_manager.check_user_roles(user_id=author, discord_id=community)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error fetching role data: {e}", ephemeral=True)
+            return
+
         if roles:
             for role in roles:
                 value_in_stellar = round(int(role['atomicValue']) / 10000000, 7)
-
-                starting_time = datetime.fromtimestamp(int(role['start']))
-                ending_time = datetime.fromtimestamp(int(role['end']))
-                count_left = ending_time - datetime.utcnow()
+                starting_time = datetime.fromtimestamp(role['start'], tz=timezone.utc)
+                ending_time = datetime.fromtimestamp(role['end'], tz=timezone.utc)
+                now = datetime.now(timezone.utc)
+                count_left = ending_time - now
                 dollar_worth = round(int(role['pennies']) / 100, 4)
 
-                role_name = role['roleName']
-                role_id = int(role['roleId'])
+                role_embed = Embed(
+                    title=":person_juggling: Active Role Information :person_juggling:",
+                    colour=Colour.magenta()
+                )
+                role_embed.add_field(name=":circus_tent: Active Role", value=f"***{role['roleName']}*** (id:{int(role['roleId'])})", inline=False)
+                role_embed.add_field(name=":calendar: Role Obtained", value=f"{starting_time.strftime('%Y-%m-%d %H:%M:%S')} UTC", inline=False)
+                role_embed.add_field(name=":money_with_wings: Role Value", value=f"{value_in_stellar} {CONST_STELLAR_EMOJI} (${dollar_worth})", inline=False)
+                role_embed.add_field(name=":stopwatch: Role Expires", value=f"{ending_time.strftime('%Y-%m-%d %H:%M:%S')} UTC", inline=False)
+                role_embed.add_field(name=":timer: Time Remaining", value=str(count_left), inline=False)
 
-                role_embed = Embed(title=f':person_juggling: Active role information :person_juggling:',
-                                           colour=Colour.magenta())
-                role_embed.add_field(name=":circus_tent: Active Role :circus_tent:",
-                                     value=f'***{role_name}*** (id:{role_id})',
-                                     inline=False)
-                role_embed.add_field(name=":calendar: Role Obtained :calendar: ",
-                                     value=f"{starting_time} UTC",
-                                     inline=False)
-                role_embed.add_field(name=":money_with_wings: Role Value :money_with_wings: ",
-                                     value=f"{value_in_stellar} {CONST_STELLAR_EMOJI} (${dollar_worth})",
-                                     inline=False)
-                role_embed.add_field(name=":stopwatch: Role Expires :stopwatch: ",
-                                     value=f'{ending_time} UTC',
-                                     inline=False)
-                role_embed.add_field(name=":timer: Time Remaining :timer: ",
-                                     value=f'{count_left}',
-                                     inline=False)
+                await interaction.user.send(embed=role_embed)
 
-                await ctx.author.send(embed=role_embed)
+            await interaction.response.send_message("📬 Role details sent to your DM!", ephemeral=True)
         else:
-            message = f"You have no active roles on {ctx.message.guild}, or all of them have expired."
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=0,
+            message = f"You have no active roles on {interaction.guild}, or all of them have expired."
+            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
     @membership.command(aliases=['rls'])
