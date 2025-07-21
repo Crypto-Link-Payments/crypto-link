@@ -221,40 +221,40 @@ class TransactionCommands(commands.Cog):
                                                                                        direction=1)
                                     message = f'{amount} {coin.upper()} could not be sent to the {recipient} ' \
                                               f'please try again later'
-                                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                    await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message,
                                                                          destination=1,
                                                                          sys_msg_title=CONST_TX_ERROR_TITLE)
 
                             else:
                                 message = f'There has been an error while making P2P transaction please try again later'
-                                await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                                await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message,
                                                                      destination=1,
                                                                      sys_msg_title=CONST_TX_ERROR_TITLE)
                         else:
                             message = f'You have insufficient balance! Your current wallet balance is' \
                                       f' {wallet_value / (10 ** 7)} XLM'
-                            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
                     else:
                         message = f'Your wallet balance of token ***{coin.upper()}*** is 0.0000000. Before you can ' \
                                   f'make payment you need to first deposit some.'
-                        await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                        await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message,
                                                              destination=1,
                                                              sys_msg_title=CONST_TX_ERROR_TITLE)
                 else:
 
                     message = f'Coin {coin} has not been integrated yet into {self.bot.user}.'
-                    await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                    await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message,
                                                          destination=1,
                                                          sys_msg_title=CONST_TX_ERROR_TITLE)
             else:
                 message = f'You are not allowed to send {amount} xlm to either yourself or the bot.'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message,
+                await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message,
                                                      destination=1,
                                                      sys_msg_title=CONST_TX_ERROR_TITLE)
         else:
             message = 'Amount needs to be greater than 0.0000000 XLM'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
 
     @commands.group()
@@ -268,11 +268,11 @@ class TransactionCommands(commands.Cog):
                 await self.send_impl(ctx, amount, asset_code.lower(), recipient, tx_type="public", message=message)
             else:
                 message = f'Amount needs to be greater than 0.0000000  {asset_code.upper()}'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                      sys_msg_title=CONST_TX_ERROR_TITLE)
         else:
             message = 'Special characters are not allowed in token code'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
 
     @commands.group()
@@ -286,11 +286,11 @@ class TransactionCommands(commands.Cog):
                 await self.send_impl(ctx, amount, asset_code.lower(), recipient, tx_type="private", message=message)
             else:
                 message = f'Amount needs to be greater than 0.0000000 {asset_code.upper()}'
-                await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+                await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                      sys_msg_title=CONST_TX_ERROR_TITLE)
         else:
             message = 'Special characters are not allowed in token code'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=CONST_TX_ERROR_TITLE)
 
     @send.error
@@ -300,28 +300,28 @@ class TransactionCommands(commands.Cog):
             message = f'In order to execute P2P transaction you need to be registered into the system, and ' \
                       f'transaction request needs to be executed on one of the text public text channels ' \
                       f'on {ctx.message.guild}'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
         elif isinstance(error, commands.BadArgument):
             title = f'__Bad Argument Provided __'
             message = f'You have provided wrong argument either for amount or than for the recipient'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
         elif isinstance(error, AssertionError):
             title = f'__Amount Check failed __'
             message = f'You have provided wrong amount for tx value.'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
         elif isinstance(error, commands.CommandOnCooldown):
             title = f'__Command on cool-down__!'
             message = f'{error}. Please try again after {error.retry_after}s'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
         elif isinstance(error, commands.MissingRequiredArgument):
             title = f'__Missing Required Argument Error __'
             message = f'{str(error)}'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=title)
 
 
