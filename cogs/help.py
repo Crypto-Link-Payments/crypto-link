@@ -125,6 +125,9 @@ class HelpCommands(commands.Cog):
                               value=f'`/wallet withdraw <address> <amount> <asset_code>  <memo=optional>`\n'
                                     f'Example: `/wallet withdraw GBALRXCJ6NNRE4USDCUFLAOZCDSKDSEJZHTLGEDQXI7BM2T6M77CMMWG 10 xlm`',
                               inline=False)
+        start_embed.add_field(name=':sos: Additional Help :sos:',
+                        value=f'Additional help information can be access through: `/wallet help`, `/membership help`, `/help currencies`, `/help payments`',
+                        inline=False)
         await interaction.send(embed=start_embed)
 
     
