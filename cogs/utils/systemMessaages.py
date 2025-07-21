@@ -156,6 +156,37 @@ class CustomMessages:
         except Exception as e:
             print(f"system_message error: {e}")
 
+    @staticmethod
+    async def system_message_pref(ctx, message: str, color_code, sys_msg_title: str = None,
+                                embed_title: str = None, destination: int = 0):
+        """
+        Custom System Messages for prefix-based commands (ctx).
+        """
+        # Color filtering
+        if isinstance(color_code, Colour):
+            c = color_code
+            emoji = ":robot:"
+        else:
+            c = 0x319f6b if color_code == 0 else Colour.red()
+            emoji = ":robot:" if color_code == 0 else ":warning:"
+
+        if embed_title is None:
+            embed_title = 'System Message'
+
+        sys_embed = Embed(title=f"{emoji}{embed_title}",
+                        description=sys_msg_title,
+                        colour=c)
+        sys_embed.add_field(name=':information_source:', value=f'```{message}```')
+        sys_embed.set_footer(text='Message will self-destruct in 15 seconds!')
+
+        try:
+            if destination == 0:
+                await ctx.author.send(embed=sys_embed, delete_after=15)
+            else:
+                await ctx.channel.send(embed=sys_embed, delete_after=15)
+        except Exception as e:
+            print(f"system_message_pref error: {e}")
+
     async def transaction_report_to_user(self, ctx, user, destination, transaction_data: dict, direction: int,
                                          tx_type: str,
                                          message: str = None):
