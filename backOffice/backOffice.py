@@ -16,7 +16,6 @@ from backOffice.corpHistory import CorporateHistoryManager
 from backOffice.secondLevelWalletManager import SecondLevelWalletManager
 from backOffice.thirdLevelWalletManager import ThirdLevelWalletManager
 from backOffice.tokenManager import TokenManager
-from backOffice.ballotPoolManager import VotingPoolManager
 
 
 class BackOffice:
@@ -40,8 +39,6 @@ class BackOffice:
         self.bot_manager = BotManager(self.connection)
         self.corporate_hist_mng = CorporateHistoryManager(self.connection)
         self.token_manager = TokenManager(self.connection)
-        self.voting_manager = VotingPoolManager(self.connection)
-
     def check_backend(self):
         self.backend_check.check_collections()
         self.backend_check.checking_stats_documents()
