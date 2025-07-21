@@ -96,38 +96,49 @@ class ConsumerCommands(commands.Cog):
             await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
                                                  sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
 
-    @membership.command(aliases=['rls'])
-    @commands.check(is_public)
-    async def roles(self, ctx):
+    @membership.subcommand(name="roles", description="List all available monetized roles on this community")
+    @is_public_channel()
+    async def roles(self, interaction: Interaction):
         """
         Gets all available monetized roles on the community
-        :return:
         """
-        roles = self.backoffice.merchant_manager.get_all_roles_community(community_id=ctx.message.guild.id)
-        title = f':circus_tent: __Available Roles on Community {ctx.message.guild}__ :circus_tent:'
+        roles = self.backoffice.merchant_manager.get_all_roles_community(community_id=interaction.guild.id)
+        title = f':circus_tent: __Available Roles on Community {interaction.guild.name}__ :circus_tent:'
         dollar_xlm = gecko.get_price(ids='stellar', vs_currencies='usd')
 
         if roles:
             for role in roles:
                 value = float(role["pennyValues"] / 100)
                 value_in_stellar = value / dollar_xlm['stellar']['usd']
-                values = [{"name": ':person_juggling: Role :person_juggling: ',
-                           "value": f'```{role["roleName"]} ID({role["roleId"]})```'},
-                          {"name": ':vertical_traffic_light: Status :vertical_traffic_light:',
-                           "value": f'```{role["status"]}```'},
-                          {"name": ':dollar: Fiat value :dollar: ', "value": f"```{value} $```"},
-                          {"name": ':currency_exchange: Conversion to crypto :currency_exchange: ',
-                           "value": f"```{value_in_stellar:.7} XLM```"},
-                          {"name": ':timer: Role Length:timer:  ',
-                           "value": f"```{role['weeks']} week/s \n{role['days']} day/s \n{role['hours']}"
-                                    f" hour/s \n{role['minutes']} minute/s```"}]
-                description = "Role details"
-                await custom_messages.embed_builder(ctx=ctx, title=title, description=description, destination=1,
-                                                    data=values, c=Colour.magenta())
+                values = [
+                    {"name": ':person_juggling: Role', "value": f'```{role["roleName"]} ID({role["roleId"]})```'},
+                    {"name": ':vertical_traffic_light: Status', "value": f'```{role["status"]}```'},
+                    {"name": ':dollar: Fiat value', "value": f"```{value:.2f} $```"},
+                    {"name": ':currency_exchange: Conversion to crypto', "value": f"```{value_in_stellar:.7f} XLM```"},
+                    {"name": ':timer: Role Length',
+                    "value": f"```{role['weeks']} week/s \n{role['days']} day/s \n{role['hours']} hour/s \n{role['minutes']} minute/s```"}
+                ]
+                await custom_messages.embed_builder(
+                    interaction=interaction,
+                    title=title,
+                    description="Role details",
+                    destination=1,
+                    data=values,
+                    c=Colour.magenta()
+                )
+            # Acknowledge response if not yet sent
+            if not interaction.response.is_done():
+                await interaction.response.send_message("✅ Role list sent above!", ephemeral=True)
         else:
-            message = f"{ctx.message.guild} does not have any available roles for purchase at this moment."
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=CONST_MERCHANT_ROLE_ERROR)
+            message = f"Server {interaction.guild.name} does not have any available roles for purchase at this moment."
+            await custom_messages.system_message(
+                interaction=interaction,
+                color_code=1,
+                message=message,
+                destination=1,
+                sys_msg_title=CONST_MERCHANT_ROLE_ERROR
+            )
+
 
     @membership.command(aliases=['purchase', 'buy', 'get'])
     @commands.bot_has_permissions(manage_roles=True)
