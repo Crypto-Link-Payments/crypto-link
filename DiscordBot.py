@@ -17,7 +17,7 @@ CONST_SEPARATOR = '+++++++++++++++++++++++++++++++++++++++'
 # init colorama :
 init(autoreset=True)
 
-cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts','cogs.system', 'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners','cogs.specialPayments', 'cogs.voters']
+cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts','cogs.system', 'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners']
 
 horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.accounts',
