@@ -45,6 +45,7 @@ def has_wallet(ctx):
 
 def is_public_channel():
     async def predicate(interaction: Interaction):
+        print("✅ Is public check running for guild:", interaction.guild_id)
         if interaction.guild is None:
             raise ApplicationCheckFailure("❌ This command cannot be used in Direct Messages.")
 
