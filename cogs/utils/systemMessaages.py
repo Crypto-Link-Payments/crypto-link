@@ -108,6 +108,32 @@ class CustomMessages:
             except:
                 pass
 
+    @staticmethod
+    async def ctx_embed_builder(ctx, title: str, description: str, data: list, destination=None, thumbnail=None, c: Colour = None):
+        if not c:
+            c = Colour.gold()
+
+        embed = Embed(title=title, description=description, colour=c)
+        for d in data:
+            embed.add_field(name=d['name'], value=d['value'], inline=False)
+
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
+
+        try:
+            # If a specific destination is provided (like a channel), send there
+            if destination and hasattr(destination, 'send'):
+                await destination.send(embed=embed, delete_after=40)
+            else:
+                await ctx.send(embed=embed, delete_after=40)
+        except Exception as e:
+            print("Error while sending embed:", e)
+            try:
+                await ctx.author.send(embed=embed)
+            except Exception:
+                pass
+
+
 
     @staticmethod
     async def bridge_notification(ctx, recipient):
