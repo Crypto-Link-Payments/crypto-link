@@ -384,33 +384,46 @@ class CustomMessages:
             print(Fore.RED + f'{e}')
 
     @staticmethod
-    async def guild_owner_role_purchase_msg(ctx, role: Role, role_details: dict):
-        incoming_funds = Embed(title=':convenience_store:__Incoming funds to corporate '
-                                     'wallet___:convenience_store:',
-                               description=f'Role has been purchased on your community '
-                                           f'at __{role_details["roleStart"]}__.',
-                               colour=Colour.green())
+    async def guild_owner_role_purchase_msg(interaction: Interaction, role: Role, role_details: dict):
+        incoming_funds = Embed(
+            title=':convenience_store: __Incoming funds to corporate wallet__ :convenience_store:',
+            description=f'Role has been purchased on your community at __{role_details["roleStart"]}__.',
+            colour=Colour.green()
+        )
 
-        incoming_funds.add_field(name=':japanese_ogre: Role Purchased :japanese_ogre: ',
-                                 value=f"```Name: {role.name}\n"
-                                       f"Id: {role.id}```",
-                                 inline=False)
+        incoming_funds.add_field(
+            name=':japanese_ogre: Role Purchased :japanese_ogre:',
+            value=f"```Name: {role.name}\nId: {role.id}```",
+            inline=False
+        )
 
-        incoming_funds.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
-                                 value=f'```Fiat: ${role_details["dollarValue"]}\n'
-                                       f'Crypto: {role_details["roleRounded"]} XLM\n'
-                                       f'Rate: {role_details["usdRate"]} / 1 XLM```',
-                                 inline=False)
-        incoming_funds.add_field(name=':cowboy: User Details :cowboy: ',
-                                 value=f"```User: {ctx.message.author}\n"
-                                       f"Id: {ctx.message.author.id}```",
-                                 inline=False)
+        incoming_funds.add_field(
+            name=':money_with_wings: Role Value :money_with_wings:',
+            value=(
+                f"```Fiat: ${role_details['dollarValue']}\n"
+                f"Crypto: {role_details['roleRounded']} XLM\n"
+                f"Rate: {role_details['usdRate']} / 1 XLM```"
+            ),
+            inline=False
+        )
 
-        incoming_funds.add_field(name=':clipboard: Role Duration Details :clipboard:  ',
-                                 value=f'```{role_details["roleDetails"]}```',
-                                 inline=False)
+        incoming_funds.add_field(
+            name=':cowboy: User Details :cowboy:',
+            value=f"```User: {interaction.user}\nId: {interaction.user.id}```",
+            inline=False
+        )
 
-        await ctx.message.guild.owner.send(embed=incoming_funds)
+        incoming_funds.add_field(
+            name=':clipboard: Role Duration Details :clipboard:',
+            value=f"```{role_details['roleDetails']}```",
+            inline=False
+        )
+
+        try:
+            await interaction.guild.owner.send(embed=incoming_funds)
+        except Exception as e:
+            print(f"Failed to DM guild owner: {e}")
+
 
     @staticmethod
     async def wallet_overall_stats(ctx, utc_now, transaction_stats: dict):
