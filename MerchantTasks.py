@@ -2,7 +2,7 @@ import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from colorama import Fore, init
-from datetime import datetime
+from datetime import datetime, timezone
 from nextcord import Color, Embed
 from utils.tools import Helpers
 
@@ -27,7 +27,7 @@ class MerchantTasks:
         current_time = time.strftime("%H:%M:%S", t)
         print(Fore.GREEN + f"{current_time} --> CHECKING FOR USERS WITH EXPIRED ROLES ")
 
-        now = datetime.utcnow().timestamp()  # Gets current time of the system in unix format
+        now = datetime.now(timezone.utc).timestamp()  # Gets current time of the system in unix format
         merchant_manager = self.backoffice.merchant_manager
         overdue_members = merchant_manager.get_over_due_users(
             timestamp=int(now))  # Gets all overdue members from database
