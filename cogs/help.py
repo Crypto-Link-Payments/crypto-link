@@ -139,7 +139,7 @@ class HelpCommands(commands.Cog):
                           colour=Colour.blue())
         await interaction.send(embed=available)
 
-    @help.command(aliases=['w'])
+    @help_cmd.subcommand(name='wallets', description='Information of wallet system')
     async def wallets(self, ctx):
         title = ':office_worker: __Multi Level Wallet system__:office_worker: '
         description = "Explanation of wallet system"
@@ -154,7 +154,7 @@ class HelpCommands(commands.Cog):
                       f"account. "}
         ]
 
-        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+        await custom_messages.ctx_embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
 
     @help.command(aliases=['tx', 'pay'])
