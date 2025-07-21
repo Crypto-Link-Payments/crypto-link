@@ -380,27 +380,6 @@ class GuildOwnerCommands(commands.Cog):
     @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.guild)
     async def merchant(self, interaction: Interaction):
-        # title = ':convenience_store: __Crypto Link Merchant Manual__ :convenience_store:'
-        # description = "Here are the available commands to activate and manage the guild's merchant service."
-
-        # list_of_values = [
-        #     {
-        #         "name": ":pencil: Open/Register for Merchant System",
-        #         "value": "```/owner merchant open```"
-        #     },
-        #     {
-        #         "name": ":joystick: Access Merchant Commands",
-        #         "value": "```/merchant```"
-        #     }
-        # ]
-
-        # await customMessages.embed_builder(
-        #     interaction=interaction,
-        #     title=title,
-        #     description=description,
-        #     data=list_of_values,
-        #     c=Colour.dark_gold()
-        # )
         return
 
     @merchant.subcommand(name="open", description="Register a community wallet for merchant system")
@@ -414,7 +393,7 @@ class GuildOwnerCommands(commands.Cog):
         if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=guild_id):
             msg_title = ':warning: __Community Registration Status__ :warning:'
             message = (
-                f'The server ***{guild_name}*** is not registered in the Crypto Link system yet.\n\n'
+                f'The server {guild_name} is not registered in the Crypto Link system yet.\n\n'
                 f'Please register it first using `{self.guild_string}owner register`.'
             )
             await customMessages.system_message(
@@ -450,8 +429,8 @@ class GuildOwnerCommands(commands.Cog):
             msg_title = ':rocket: __Community Wallet Registration Status__ :rocket:'
             message = (
                 f'You have successfully activated the merchant system for ***{guild_name}***.\n\n'
-                f'You can now use `{self.command_string}merchant` to view commands, or access the manual via '
-                f'`/merchant manual`. To fully activate merchant please proceed with command /merchan_initiate.'
+                f'You can now use `/merchant` to view commands, or access the manual via '
+                f'`/merchant manual`.'
             )
             await customMessages.system_message(
                 interaction=interaction,
