@@ -336,43 +336,52 @@ class CustomMessages:
         await sys_channel.send(embed=notify)
 
     @staticmethod
-    async def user_role_purchase_msg(ctx, role: Role, role_details: dict):
-        # # Send notification to user
-        # role_embed = Embed(title=':man_juggling: Congratulations on '
-        #                          'obtaining the role',
-        #                    description='You have received this notification because you have successfully '
-        #                                'purchased role on the community. Please see details below.',
-        #                    colour=Colour.blue())
-        # role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
-        # role_embed.add_field(name=':convenience_store: Community :convenience_store:',
-        #                      value=f'```{ctx.message.guild}  \n'
-        #                            f'ID:{ctx.message.guild.id}```',
-        #                      inline=False)
-        # role_embed.add_field(name=':japanese_ogre: Role: :japanese_ogre: ',
-        #                      value=f'```Name:{role.name}  \nID:{role.id}```',
-        #                      inline=False)
-        # role_embed.add_field(name=f':calendar: Role Purchase Date :calendar: ',
-        #                      value=f'```{role_details["roleStart"]}```')
-        # role_embed.add_field(name=':timer: Role Expiration :timer: ',
-        #                      value=f'```{role_details["roleEnd"]} (in: {role_details["roleLeft"]})```',
-        #                      inline=False)
-        # role_embed.add_field(name=':money_with_wings: Payment Slip :money_with_wings: ',
-        #                      value=f'```Fiat:{role_details["dollarValue"]} $ \n'
-        #                            f'Crypto: {role_details["roleRounded"]} XLM\n'
-        #                            f'Rate: {role_details["usdRate"]} / 1 XLM```',
-        #                      inline=False)
+    async def user_role_purchase_msg(interaction: Interaction, role: Role, role_details: dict):
         try:
-            await ctx.channel.send(content=f'{ctx.message.guild.owner.mention} {ctx.author.mention}'
-                                          f' you have successfully purchased membership {role} in value of '
-                                           f'{role_details["roleRounded"]} XLM (${role_details["dollarValue"]}). '
-                                          f'It will expire on {role_details["roleEnd"]} (in: {role_details["roleLeft"]})')
+            # Format the expiration datetime
+            end_time: datetime = role_details["roleEnd"]
+            if isinstance(end_time, str):
+                end_time = datetime.fromisoformat(end_time)
+            formatted_end_time = end_time.strftime("%A, %B %d, %Y at %H:%M UTC")
+
+            embed = Embed(
+                title=":tada: Membership Purchased Successfully!",
+                description=(
+                    f"{interaction.user.mention}, you've successfully subscribed to the **{role.name}** membership!"
+                ),
+                colour=Colour.green()
+            )
+
+            embed.add_field(
+                name=":moneybag: Payment Summary",
+                value=(
+                    f"• **Amount Paid:** {role_details['roleRounded']} XLM\n"
+                    f"• **Approx. Value:** ${role_details['dollarValue']}\n"
+                    f"• **Rate Used:** 1 XLM = ${role_details['usdRate']}"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name=":hourglass_flowing_sand: Membership Duration",
+                value=(
+                    f"• **Expires On:** {formatted_end_time}\n"
+                    f"• **Time Remaining:** {role_details['roleLeft']}"
+                ),
+                inline=False
+            )
+
+            embed.set_footer(
+                text=f"Role ID: {role.id} • Purchased in {interaction.guild.name}"
+            )
+
+            await interaction.channel.send(
+                content=f"{interaction.guild.owner.mention}, {interaction.user.mention}",
+                embed=embed
+            )
+
         except nextcord.Forbidden as e:
             print(Fore.RED + f'{e}')
-        # try:
-        #     await ctx.author.send(embed=role_embed)
-        # except Exception as e:
-        #     print(e)
-        #     await ctx.channel.send(embed=role_embed, delete_after=10)
 
     @staticmethod
     async def guild_owner_role_purchase_msg(ctx, role: Role, role_details: dict):
