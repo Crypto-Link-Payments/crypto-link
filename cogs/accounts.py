@@ -97,10 +97,11 @@ class UserAccountCommands(commands.Cog):
                         'ETH': ('Ξ ', 'eth'),
                         'LTC': ('Ł ', 'ltc')
                     }
-
                     for label, (symbol, key) in conversions.items():
                         value = rate_converter(xlm_balance, rates["stellar"].get(key, 0))
-                        embed.add_field(name=label, value=f'`{symbol}{value:.4f if label in ["USD", "EUR", "RUB"] else ".8f"}`')
+                        format_str = f"{value:.4f}" if label in ["USD", "EUR", "RUB"] else f"{value:.8f}"
+                        embed.add_field(name=label, value=f'`{symbol}{format_str}`')
+
 
             embed.add_field(
                 name='More On Stellar Lumen (XLM)',
