@@ -142,26 +142,9 @@ class HelpCommands(commands.Cog):
                           colour=Colour.blue())
         await interaction.send(embed=available)
 
-    @help_cmd.subcommand(name='wallets', description='Information of wallet system')
-    async def wallets(self, ctx):
-        title = ':office_worker: __Multi Level Wallet system__:office_worker: '
-        description = "Explanation of wallet system"
-        list_of_values = [
-            {"name": ":one: Custodial Wallet :one: ",
-             "value": f"Registration for `custodial wallet level` is mandatory for all users who would like to "
-                      f"use all the functions Crypto Link has to offer. Wallet operates based on MEMO when depositing. "
-                      f"This allows anyone to receive transaction from sender "
-                      f"instantly, even if recipient has not registered yet into the system. Custodial wallet "
-                      f"is automatically created and all actions connected with it do not require private key "
-                      f"to be used for signing. In order to fully protect your wallet, please activate 2FA for Discord "
-                      f"account. "}
-        ]
 
-        await custom_messages.ctx_embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                            destination=1, c=Colour.blue())
-
-    @help.command(aliases=['tx', 'pay'])
-    async def payments(self, ctx):
+    @help_cmd.subcommand(name='payments', description='Availabale P-2-P payments on channel')
+    async def payments(self, interaction:Interaction):
         title = ':money_with_wings: __How to make P-2-P payments__ :money_with_wings: '
         description = f"Available payment types on {self.bot.user.name} System"
         list_of_values = [
@@ -171,18 +154,18 @@ class HelpCommands(commands.Cog):
             {"name": f":detective: Private payment :detective:  ",
              "value": f"`{self.command_string}private <@Discord User> <amount> <asset_code> <message=optional>`\n"
                       f"__Example__: `{self.command_string}private  @animus 10 xlm Dont tell anyone`"},
-            {"name": f":gift: Gift to other members :gift:  ",
-             "value": f"`{self.command_string}give <Up to 5 taged users> <amount> <asset_code> <message=optional>`\n"
-                      f"__Example__: `{self.command_string}give @Animus @Plippy @ManuManu 1 xlm`"},
-            {"name": f":military_medal: Loyalty :military_medal:",
-             "value": f"`{self.command_string}loyalty <Last N active users on channe> <amount> <asset_code>`\n"
-                      f"__Example__: `{self.command_string}loyalty 2 1 xlm`\n"
-                      f"__Description__: Sends 1 xlm to two users who have last posted to the channel where payment "
-                      f"was executed  in history of 100 messages. "},
-            {"name": f":mortar_board: Role Payment :mortar_board:",
-             "value": f"`{self.command_string}to_role <@discord.Role> <amount> <asset_code>`\n"
-                      f"__Example__: `{self.command_string}to_role @vip 1 xlm`\n"
-                      f"__Description__: Send 1 xlm to each members who has been assigned role ***vip***"}
+            # {"name": f":gift: Gift to other members :gift:  ",
+            #  "value": f"`{self.command_string}give <Up to 5 taged users> <amount> <asset_code> <message=optional>`\n"
+            #           f"__Example__: `{self.command_string}give @Animus @Plippy @ManuManu 1 xlm`"},
+            # {"name": f":military_medal: Loyalty :military_medal:",
+            #  "value": f"`{self.command_string}loyalty <Last N active users on channe> <amount> <asset_code>`\n"
+            #           f"__Example__: `{self.command_string}loyalty 2 1 xlm`\n"
+            #           f"__Description__: Sends 1 xlm to two users who have last posted to the channel where payment "
+            #           f"was executed  in history of 100 messages. "},
+            # {"name": f":mortar_board: Role Payment :mortar_board:",
+            #  "value": f"`{self.command_string}to_role <@discord.Role> <amount> <asset_code>`\n"
+            #           f"__Example__: `{self.command_string}to_role @vip 1 xlm`\n"
+            #           f"__Description__: Send 1 xlm to each members who has been assigned role ***vip***"}
         ]
 
         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
