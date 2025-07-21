@@ -34,47 +34,12 @@ class HelpCommands(commands.Cog):
         self.helper = Helpers()
         self.command_string = bot.get_command_str()
 
-    @commands.group()
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def help(self, ctx):
-        if ctx.invoked_subcommand is None:
-            title = ':sos: __Available Help Commands__ :sos: '
-            description = f"Available sub commands for `{self.command_string}help`"
-            list_of_values = [
-                {"name": " :mega: About the Crypto Link :mega:",
-                 "value": f"```{self.command_string}about```"},
-                {"name": ":rocket: How to get started :rocket:",
-                 "value": f"```{self.command_string}get_started```\n"
-                          f"`Aliases: start`"},
-                {"name": ":coin: Available Currencies :coin:",
-                 "value": f"```{self.command_string}help currencies```\n"
-                          f"`Aliases: tokens, coins`"},
-                {"name": ":purse: About wallet system :purse: ",
-                 "value": f"```{self.command_string}help wallets```\n"
-                          f"`Aliases: tokens, coins`"},
-                {"name": ":office_worker: Accessing personal account :office_worker:",
-                 "value": f"```{self.command_string}help account```\n"
-                          f"`Aliases: acc, user, profile, wallet`"},
-                {"name": ":money_with_wings: Making P2P payments :money_with_wings:",
-                 "value": f"```{self.command_string}help payments```\n"
-                          f"`Aliases: tx, pay`"},
-                {"name": ":convenience_store: Crypto Link Merchant :convenience_store:  ",
-                 "value": f"```{self.command_string}help membership```\n"
-                          f"`Aliases: tokens, coins`"},
-                {"name": ":crown: Commands for owner system :crown: ",
-                 "value": f"```{self.command_string}help owner```\n"
-                          f"`Aliases: acc, user, profile, wallet`"},
-                # {"name": ":sunrise:  Query Stellar Horizon :sunrise: ",
-                #  "value": f"```{self.command_string}help horizon```\n"
-                #           f"`Aliases: hor, network, explorer`"},
-
-            ]
-            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                destination=1, c=Colour.blue())
-
-    @commands.command()
-    async def about(self, ctx):
+    @slash_command(name='help', description='Get assistance with navigating the Crypot Link system')
+    async def help_cmd(self, interaction: Interaction):
+        await interaction.response.send_message(
+            content="Use `/merchant help` to view available merchant commands.",
+            ephemeral=True
+        )
         """
         Command which returns information on About the system
         :param ctx:
