@@ -208,7 +208,29 @@ def guild_has_merchant(ctx):
     """
     return ctx.bot.backoffice.merchant_manager.check_if_community_exist(int(ctx.message.guild.id))
 
+def guild_has_merchant():
+    """
+    Slash command check to ensure the community has the merchant system enabled.
+    """
+    async def predicate(interaction: Interaction):
+        print("✅ Guild has merchant check running for guild:", interaction.guild_id)
+        if interaction.guild is None:
+            raise ApplicationCheckFailure("❌ This command can only be used in a server.")
 
+        if not hasattr(interaction.client, "backoffice") or not hasattr(interaction.client.backoffice, "merchant_manager"):
+            raise ApplicationCheckFailure("❌ Access denied! Merchant system is not available.")
+
+        try:
+            exists = interaction.client.backoffice.merchant_manager.check_if_community_exist(
+                community_id=interaction.guild.id
+            )
+            if not exists:
+                raise ApplicationCheckFailure("❌ This server is not registered as a merchant community. Please register it first.")
+            return True
+        except Exception as e:
+            raise ApplicationCheckFailure(f"❌ Error checking merchant registration: {str(e)}")
+
+    return application_checks.check(predicate)
 
 def user_has_second_level(ctx):
     """
