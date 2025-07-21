@@ -127,10 +127,9 @@ class HelpCommands(commands.Cog):
                               inline=False)
         await interaction.send(embed=start_embed)
 
-        await ctx.author.send(embed=start_embed)
-
-    @help.command(aliases=['tokens', 'coins'])
-    async def currencies(self, ctx):
+    
+    @help_cmd.subcommand(name='currencies', description='Check supported currencies on Crypto Link')
+    async def currencies(self, interaction: Interaction):
         """
         Returns representation of all available currencies available to be utilized int transactions
         :return: Discord Embed
@@ -138,7 +137,7 @@ class HelpCommands(commands.Cog):
         available = Embed(title=':coin: Integrated coins and tokens :coin: ',
                           description='[Token List](https://cryptolink.carrd.co/)',
                           colour=Colour.blue())
-        await ctx.author.send(embed=available)
+        await interaction.send(embed=available)
 
     @help.command(aliases=['w'])
     async def wallets(self, ctx):
