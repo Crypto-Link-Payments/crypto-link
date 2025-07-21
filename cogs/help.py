@@ -168,58 +168,66 @@ class HelpCommands(commands.Cog):
             #           f"__Description__: Send 1 xlm to each members who has been assigned role ***vip***"}
         ]
 
-        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+        await custom_messages.embed_builder(interaction=interaction, title=title, description=description, data=list_of_values,
                                             destination=1, c=Colour.blue())
 
-    @help.command(aliases=['acc', 'user', 'profile', 'wallet'])
-    async def account(self, ctx):
-        title = ':office_worker: __Obtain information on personal account of level 1__:office_worker: '
-        description = "Below are presented all currencies available for P2P transactions"
-        list_of_values = [
-            {"name": ":credit_card: Get balance information :credit_card: ",
-             "value": f"```{self.command_string}me```"},
-            {"name": ":moneybag: Access wallet commands :moneybag: ",
-             "value": f"```{self.command_string}wallet```"},
-            {"name": " :woman_technologist: Get full account balance report :woman_technologist:  ",
-             "value": f"```{self.command_string}wallet balance```"},
-            {"name": ":bar_chart: Wallet Statistics :bar_chart:",
-             "value": f"```{self.command_string}wallet stats```"},
-            {"name": ":inbox_tray: Get instructions on how to deposit :inbox_tray:",
-             "value": f"```{self.command_string}wallet deposit```"},
-            {"name": ":outbox_tray: Withdrawal instructions :outbox_tray: ",
-             "value": f"```{self.command_string}withdraw```"}]
 
-        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                            destination=1, c=Colour.blue())
+    # @help.group()
+    # @commands.check(is_public)
+    # @commands.check(is_owner)
+    # @commands.cooldown(1, 20, commands.BucketType.guild)
+    # @commands.cooldown(1, 20, commands.BucketType.user)
+    # async def owner(self, ctx):
+    #     if ctx.invoked_subcommand is None:
+    #         title = ':crown: __Available Commands for guild owners__ :crown: '
+    #         description = f"This section of command is dedicated only for the owners of the server. "
 
-    @help.group()
-    @commands.check(is_public)
-    @commands.check(is_owner)
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def owner(self, ctx):
-        if ctx.invoked_subcommand is None:
-            title = ':crown: __Available Commands for guild owners__ :crown: '
-            description = f"This section of command is dedicated only for the owners of the server. "
+    #         list_of_values = [
+    #             {"name": f":crown: Owner panel access :crown:",
+    #              "value": f"```{self.command_string}owner```"},
+    #             {"name": f":scales:  Register Guild into System :scales: ",
+    #              "value": f"```{self.command_string}owner register```"},
+    #             # {"name": f":bank: Guild wallet commands :bank:",
+    #             #  "value": f"```{self.command_string}help owner corporate```"},
+    #             # {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
+    #             #  "value": f"```{self.command_string}help owner merchant```"},
+    #             {"name": f":satellite_orbital: About Uplink system and Setup :satellite_orbital:  ",
+    #              "value": f"```{self.command_string}help owner uplink```"},
+    #             {"name": f":convenience_store:  About merchant system over Discord :convenience_store: ",
+    #              "value": f"```{self.command_string}help owner merchant```"}
+    #         ]
 
-            list_of_values = [
-                {"name": f":crown: Owner panel access :crown:",
-                 "value": f"```{self.command_string}owner```"},
-                {"name": f":scales:  Register Guild into System :scales: ",
-                 "value": f"```{self.command_string}owner register```"},
-                # {"name": f":bank: Guild wallet commands :bank:",
-                #  "value": f"```{self.command_string}help owner corporate```"},
-                # {"name": f":convenience_store: About Merchant and Setup :convenience_store:",
-                #  "value": f"```{self.command_string}help owner merchant```"},
-                {"name": f":satellite_orbital: About Uplink system and Setup :satellite_orbital:  ",
-                 "value": f"```{self.command_string}help owner uplink```"},
-                {"name": f":convenience_store:  About merchant system over Discord :convenience_store: ",
-                 "value": f"```{self.command_string}help owner merchant```"}
-            ]
+    #         await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+    #                                             c=Colour.blue())
 
-            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                c=Colour.blue())
-
+    # @owner.command(aliases=['store', 'monetize', 'merch'])
+    # async def merchant(self, ctx):
+    #     """
+    #     Entry point for merchant system
+    #     """
+    #     merchant_nfo = Embed(title=':convenience_store: __Merchant System Commands__ :convenience_store: ',
+    #                          description='Basic explanation on what is merchant system.',
+    #                          colour=Colour.blue())
+    #     merchant_nfo.add_field(name=':mega: About Merchant System:mega:',
+    #                            value='Merchant is part of the Crypto Link eco system and provides owners of the '
+    #                                  'community an opportunity to monetize perks/roles. Once role, of custom duration'
+    #                                  ' and value successfully registered and activated, it can be offered to '
+    #                                  'Discord members for purchase. System handles role management automatically,'
+    #                                  'transfer of funds to server owners account, and role removal upon expiration'
+    #                                  ' date (subjected to role length and date of purchase)',
+    #                            inline=False)
+    #     merchant_nfo.add_field(name=':scroll: Fees',
+    #                            value='Activation and integration of merchant system is free of charge, however once '
+    #                                  'owner wants to withdraw funds from merchant account'
+    #                                  'to his own, a dynamic fee is applied.',
+    #                            inline=False)
+    #     merchant_nfo.add_field(name=':rocket: Get Started with Merchant :rocket: ',
+    #                            value=f":one: Register yourself {self.bot.user.name} account with "
+    #                                  f"`{self.command_string}register`\n"
+    #                                  f":two: Register your guild into the {self.bot.user.name} system "
+    #                                  f"with`{self.command_string}owner register`\n"
+    #                                  f":three: Initiate the merchant with `{self.command_string}merchant_initiate`\n"
+    #                                  f":four: Familiarize yourself with merchant system through command `{self.command_string}merchant`",
     #                            inline=False)
     #     merchant_nfo.set_thumbnail(url=self.bot.user.avatar.url)
     #     await ctx.author.send(embed=merchant_nfo, delete_after=500)
