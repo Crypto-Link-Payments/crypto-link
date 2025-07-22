@@ -14,10 +14,12 @@ def is_animus(ctx):
     """
     Check if creator
     """
+    print(f'{ctx.message.author} tried to check the gods command on {ctx.message.guild}')   
     return ctx.bot.is_animus(ctx.message.author.id)
 
 
 def is_one_of_gods(ctx):
+    print(f'{ctx.message.author} tried to check the gods command on {ctx.message.guild}')
     return ctx.bot.is_one_of_gods(ctx.message.author.id)
 
 
@@ -255,20 +257,3 @@ def user_has_no_third_level(ctx):
     """
     return not ctx.bot.backoffice.third_level_manager.third_level_user_reg_status(user_id=ctx.author.id)
 
-
-# def check(author):
-#     def inner_check(message):
-#         """
-#         Check for answering the verification message on withdrawal. Author origin
-#         """
-#         if message.author.id == author.id:
-#             return True
-#         else:
-#             return False
-
-#     return inner_check
-
-
-def has_ballot_access(ctx):
-    voting_role_id = ctx.bot.backoffice.voting_manager.get_ballot_rights_role(guild_id=ctx.guild.id)
-    return voting_role_id in [role.id for role in ctx.author.roles]
