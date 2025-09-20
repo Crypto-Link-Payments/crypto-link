@@ -103,7 +103,7 @@ class BotManagementCommands(commands.Cog):
     #############################  Crypto Link Commands #############################
 
     @commands.command()
-    @commands.check(is_one_of_gods)
+    @commands.check(is_animus)
     async def gods(self, ctx):
         title = ':man_mage:  __Crypto Link commands__ :man_mage:  '
         description = "All commands and their subcommands to operate with the Crypto Link System as administrator" \
@@ -117,11 +117,11 @@ class BotManagementCommands(commands.Cog):
 
         ]
 
-        await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+        await custom_messages.ctx_embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                             destination=ctx.message.author, thumbnail=self.bot.user.avatar.url)
 
     @commands.group()
-    @commands.check(is_one_of_gods)
+    @commands.check(is_animus)
     async def cl(self, ctx):
         """
         Entry point for cl sub commands
@@ -143,10 +143,11 @@ class BotManagementCommands(commands.Cog):
                           f"{self.command_string}hot"}
             ]
 
-            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+            await custom_messages.ctx_embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 destination=ctx.message.author, thumbnail=self.bot.user.avatar.url)
 
     @cl.command(aliases=['balance'])
+    @commands.check(is_animus)
     async def bal(self, ctx):
         """
         Check the off-chain balance status of Crypto Link system
@@ -164,35 +165,36 @@ class BotManagementCommands(commands.Cog):
                              inline=False)
         await ctx.channel.send(embed=values)
 
+    # @cl.command()
+    # async def stats(self, ctx, token: str = None):
+    #     """
+    #     Statistical information on Crypto Link system
+    #     """
+    #     if not token:
+    #         data = self.backoffice.stats_manager.get_all_stats()
+    #         cl_off_chain = data["xlm"]["offChain"]
+    #         cl_on_chain = data['xlm']['onChain']
+
+    #         guilds = await self.bot.fetch_guilds(limit=150).flatten()
+    #         reach = len(self.bot.users)
+    #         world = Embed(title='__Crypto Link__',
+    #                       colour=Colour.magenta(),
+    #                       timestamp=datetime.utcnow())
+    #         world.add_field(name='Guild reach',
+    #                         value=f'{len(guilds)}',
+    #                         inline=False)
+    #         world.add_field(name='Member reach',
+    #                         value=f'{reach}',
+    #                         inline=False)
+    #         await ctx.author.send(embed=world)
+
+    #         await self.send_token_stats(ctx=ctx, cl_on_chain=cl_on_chain, cl_off_chain=cl_off_chain)
+    #     else:
+    #         off_chain_stats, on_chain_stats = self.bot.stats_manager.get_token_stats_global(token=token)
+    #         await self.send_token_stats(ctx=ctx, cl_on_chain=on_chain_stats, cl_off_chain=off_chain_stats)
+
     @cl.command()
-    async def stats(self, ctx, token: str = None):
-        """
-        Statistical information on Crypto Link system
-        """
-        if not token:
-            data = self.backoffice.stats_manager.get_all_stats()
-            cl_off_chain = data["xlm"]["offChain"]
-            cl_on_chain = data['xlm']['onChain']
-
-            guilds = await self.bot.fetch_guilds(limit=150).flatten()
-            reach = len(self.bot.users)
-            world = Embed(title='__Crypto Link__',
-                          colour=Colour.magenta(),
-                          timestamp=datetime.utcnow())
-            world.add_field(name='Guild reach',
-                            value=f'{len(guilds)}',
-                            inline=False)
-            world.add_field(name='Member reach',
-                            value=f'{reach}',
-                            inline=False)
-            await ctx.author.send(embed=world)
-
-            await self.send_token_stats(ctx=ctx, cl_on_chain=cl_on_chain, cl_off_chain=cl_off_chain)
-        else:
-            off_chain_stats, on_chain_stats = self.bot.stats_manager.get_token_stats_global(token=token)
-            await self.send_token_stats(ctx=ctx, cl_on_chain=on_chain_stats, cl_off_chain=off_chain_stats)
-
-    @cl.command()
+    @commands.check(is_animus)
     async def bridges(self, ctx):
         stats = self.backoffice.stats_manager.get_top_builders(limit=10)
 
@@ -214,105 +216,92 @@ class BotManagementCommands(commands.Cog):
                                 value=f"{bridges} Bridge Builders Hall of Fame {bridges}\n" + f'{string}')
         await ctx.author.send(embed=bridges_embed)
 
-    @cl.command()
-    @commands.check(is_one_of_gods)
-    async def sweep(self, ctx, ticker: str):
-        """
-        Transfer funds from Crypto Link to develop wallet
-        """
+    # TODO fix this for sweeping
+    # @cl.command()
+    # @commands.check(is_one_of_gods)
+    # async def sweep(self, ctx, ticker: str):
+    #     """
+    #     Transfer funds from Crypto Link to develop wallet
+    #     """
 
-        balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
-        if balance > 0:  # Check if balance greater than -
-            if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
-                    discord_id=ctx.message.author.id,
-                    stroops=int(balance), direction=1):
-                # Deduct from bot wallet balance
-                if self.backoffice.bot_manager.reset_bot_wallet_balance(ticker=ticker):
-                    print("Bot wallet balance has been reset")
-                else:
-                    print(f"Could not reset bot wallet balance for {ticker}")
-            else:
-                print("Balance could not be appended to you")
-        else:
-            print(f"Bot wallet balance is 0 for ticker {ticker}")
+    #     balance = int(self.backoffice.bot_manager.get_bot_wallet_balance_by_ticker(ticker=ticker))
+    #     if balance > 0:  # Check if balance greater than -
+    #         if self.backoffice.stellar_manager.update_stellar_balance_by_discord_id(
+    #                 discord_id=ctx.message.author.id,
+    #                 stroops=int(balance), direction=1):
+    #             # Deduct from bot wallet balance
+    #             if self.backoffice.bot_manager.reset_bot_wallet_balance(ticker=ticker):
+    #                 print("Bot wallet balance has been reset")
+    #             else:
+    #                 print(f"Could not reset bot wallet balance for {ticker}")
+    #         else:
+    #             print("Balance could not be appended to you")
+    #     else:
+    #         print(f"Bot wallet balance is 0 for ticker {ticker}")
 
     #############################  Crypto Link System #############################
 
     @commands.group(aliases=["sys"])
-    @commands.check(is_one_of_gods)
+    @commands.check(is_animus)
     async def system(self, ctx):
         if ctx.invoked_subcommand is None:
             value = [{'name': '__Turning bot off__',
                       'value': f"***{self.command_string}system off*** "},
-                     {'name': '__Pulling update from Github__',
-                      'value': f"***{self.command_string}system update*** "},
                      ]
 
-            await custom_messages.embed_builder(ctx, title='Available sub commands for system',
+            await custom_messages.ctx_embed_builder(ctx, title='Available sub commands for system',
                                                 description='Available commands under category ***system***',
                                                 data=value)
 
     @system.command(aliases=["stop"])
+    @commands.check(is_animus)
     async def off(self, ctx):
         guild = await self.bot.fetch_guild(756132394289070102)
         role = guild.get_role(773212890269745222)
         channel = self.bot.get_channel(int(773157463628709898))
-        message = f':robot: {role.mention} I am going Offline for Maintenance'
+        message = f':robot: {role} I am going Offline for Maintenance'
         await channel.send(content=message)
         await self.bot.close()
         sys.exit(0)
 
-    #############################  Token management #############################
-    @commands.group()
-    @commands.check(is_one_of_gods)
-    async def tokens(self, ctx):
-        if ctx.invoked_subcommand is None:
-            value = [{'name': '__Add new support__',
-                      'value': f"***{self.command_string}tokens new <issuer> <tick>*** "},
-                     {'name': '__Add new with trust DONE!__',
-                      'value': f"***{self.command_string}tokens trusted <issuer> <amount>*** "},
-                     {'name': '__Update token profiles__',
-                      'value': f"***{self.command_string}tokens profile*** "},
-                     ]
+    # #############################  Token management #############################
+    # @commands.group()
+    # @commands.check(is_one_of_gods)
+    # async def tokens(self, ctx):
+    #     if ctx.invoked_subcommand is None:
+    #         value = [{'name': '__Add new support__',
+    #                   'value': f"***{self.command_string}tokens new <issuer> <tick>*** "},
+    #                  {'name': '__Add new with trust DONE!__',
+    #                   'value': f"***{self.command_string}tokens trusted <issuer> <amount>*** "},
+    #                  {'name': '__Update token profiles__',
+    #                   'value': f"***{self.command_string}tokens profile*** "},
+    #                  ]
 
-            await custom_messages.embed_builder(ctx, title='Available sub commands for system',
-                                                description='Available commands under category ***system***',
-                                                data=value)
+    #         await custom_messages.ctx_embed_builder(ctx, title='Available sub commands for system',
+    #                                             description='Available commands under category ***system***',
+    #                                             data=value)
 
-    @tokens.group()
-    async def profile(self, ctx):
-        if ctx.invoked_subcommand is None:
-            value = [{'name': '__Set homepage __',
-                      'value': f"***{self.command_string}tokens profile home <issuer> <tick> <homepage address>*** "},
-                     {'name': '__Set Expert__',
-                      'value': f"***{self.command_string}tokens profile expert <issuer> <tick> <expert address>***"},
-                     {'name': '__Set Token Withdrawal Limit__',
-                      'value': f"***{self.command_string}tokens profile withdrawal <issuer> <tick> <amount limit float>***"},
-                     {'name': '__Set Token TOML link__',
-                      'value': f"***{self.command_string}tokens profile toml <issuer> <tick> <toml https>***"}
-                     ]
+    # @tokens.group()
+    # async def profile(self, ctx):
+    #     if ctx.invoked_subcommand is None:
+    #         value = [{'name': '__Set homepage __',
+    #                   'value': f"***{self.command_string}tokens profile home <issuer> <tick> <homepage address>*** "},
+    #                  {'name': '__Set Expert__',
+    #                   'value': f"***{self.command_string}tokens profile expert <issuer> <tick> <expert address>***"},
+    #                  {'name': '__Set Token Withdrawal Limit__',
+    #                   'value': f"***{self.command_string}tokens profile withdrawal <issuer> <tick> <amount limit float>***"},
+    #                  {'name': '__Set Token TOML link__',
+    #                   'value': f"***{self.command_string}tokens profile toml <issuer> <tick> <toml https>***"}
+    #                  ]
 
-            await custom_messages.embed_builder(ctx, title='Available sub commands for system',
-                                                description='Available commands under category ***system***',
-                                                data=value)
-        pass
+    #         await custom_messages.ctx_embed_builder(ctx, title='Available sub commands for system',
+    #                                             description='Available commands under category ***system***',
+    #                                             data=value)
+    #     pass
 
-    @profile.command()
-    async def toml(self, ctx, issuer: str, asset_code: str, address: str):
-        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
-            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
-                                                                      asset_code=asset_code.lower(),
-                                                                      to_update={"toml": address}):
 
-                await ctx.channel.send(
-                    content=f'You have successfully updated the TOML link for token {asset_code.upper()} {issuer}')
-            else:
-                await ctx.channel.send(
-                    content="There has been issue in the backend while trying to update token details")
-        else:
-            await ctx.channel.send(content='This token is not registered in DB')
-
-    @profile.command()
+    @system.command()
+    @commands.check(is_animus)
     async def withdrawal(self, ctx, issuer: str, asset_code: str, amount: float):
         if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
             amount_micro = int(amount * (10 ** 7))
@@ -328,37 +317,11 @@ class BotManagementCommands(commands.Cog):
         else:
             await ctx.channel.send(content='This token is not registered in DB')
 
-    @profile.command()
-    async def expert(self, ctx, issuer: str, asset_code: str, address: str):
-        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
-            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
-                                                                      asset_code=asset_code.lower(),
-                                                                      to_update={"expert": address}):
 
-                await ctx.channel.send(
-                    content=f'You have successfully updated the expert link for token {asset_code.upper()} {issuer}')
-            else:
-                await ctx.channel.send(
-                    content="There has been issue in the backend while trying to update token details")
-        else:
-            await ctx.channel.send(content='This token is not registered in DB')
 
-    @profile.command()
-    async def homepage(self, ctx, issuer: str, asset_code: str, address: str):
-        if self.bot.backoffice.token_manager.check_token_existence(issuer=issuer.upper(), code=asset_code.lower()):
-            if self.bot.backoffice.token_manager.update_token_profile(issuer=issuer.upper(),
-                                                                      asset_code=asset_code.lower(),
-                                                                      to_update={"homepage": address}):
 
-                await ctx.channel.send(
-                    content=f'You have successfully updated the hoemapage link for token {asset_code.upper()} {issuer}')
-            else:
-                await ctx.channel.send(
-                    content="There has been issue in the backend while trying to update token details")
-        else:
-            await ctx.channel.send(content='This token is not registered in DB')
-
-    @tokens.command()
+    @system.command()
+    @commands.check(is_animus)
     async def new(self, ctx, asset_issuer: str, asset_code: str):
         """Ads support for ne token"""
         try:
@@ -488,7 +451,8 @@ class BotManagementCommands(commands.Cog):
             await ctx.send(content=f'It seems like there hass been an issue\n'
                                    f'```{e}```')
 
-    @tokens.command()
+    @system.command()
+    @commands.check(is_animus)
     async def trusted(self, ctx, asset_issuer: str, asset_code: str):
         data = self.backoffice.stellar_wallet.get_account_assets()
         assets = data["balances"]
@@ -605,97 +569,8 @@ class BotManagementCommands(commands.Cog):
                     else:
                         await ctx.author.send(content="Data for new token could not be set in DB ")
 
-    # @commands.check(is_one_of_gods)
-    # async def cogs(self, ctx):
-    #     if ctx.invoked_subcommand is None:
-    #         value = [{'name': '__List all cogs__',
-    #                   'value': f"***{self.command_string}cogs list*** "},
-    #                  {'name': '__Loading specific cog__',
-    #                   'value': f"***{self.command_string}cogs load <cog name>*** "},
-    #                  {'name': '__Unloading specific cog__',
-    #                   'value': f"***{self.command_string}cogs unload <cog name>*** "},
-    #                  {'name': '__Reload all cogs__',
-    #                   'value': f"***{self.command_string}cogs reload*** "}
-    #                  ]
-    #
-    #         await custom_messages.embed_builder(ctx, title='Available sub commands for system',
-    #                                             description='Available commands under category ***system***',
-    #                                             data=value)
 
-    # @cogs.command()
-    # async def load(self, ctx, extension: str):
-    #     """
-    #     Load specific COG == Turn ON
-    #     :param ctx: Context
-    #     :param extension: Extension Name as str
-    #     :return:
-    #     """
-    #     try:
-    #         self.bot.load_extension(f'cogs.{extension}')
-    #         embed_unload = Embed(name='Boom',
-    #                              title='Cogs management',
-    #                              colour=Colour.green())
-    #         embed_unload.add_field(name='Extension',
-    #                                value=f'You have loaded ***{extension}*** COGS')
-    #
-    #         await ctx.channel.send(embed=embed_unload)
-    #     except Exception as error:
-    #         await ctx.channel.send(content=error)
 
-    # @cogs.command()
-    # async def unload(self, ctx, extension: str):
-    #     """
-    #     Unloads COG == Turns OFF commands under certain COG
-    #     :param ctx: Context
-    #     :param extension: COG Name
-    #     :return:
-    #     """
-    #     try:
-    #         self.bot.unload_extension(f'cogs.{extension}')
-    #         embed_unload = Embed(name='Boom',
-    #                              title='Cogs management',
-    #                              colour=Colour.red())
-    #         embed_unload.add_field(name='Extension',
-    #                                value=f'You have unloaded ***{extension}*** COGS')
-    #
-    #         await ctx.channel.send(embed=embed_unload)
-    #     except Exception as error:
-    #         await ctx.channel.send(content=error)
-    #
-    # @cogs.command()
-    # async def list(self, ctx):
-    #     """
-    #     List all cogs implemented in the system
-    #     """
-    #     cog_list_embed = Embed(title='All available COGS',
-    #                            description='All available cogs and their description',
-    #                            colour=Colour.green())
-    #     for cg in extensions:
-    #         cog_list_embed.add_field(name=cg,
-    #                                  value='==============',
-    #                                  inline=False)
-    #     await ctx.channel.send(embed=cog_list_embed)
-    #
-    # @cogs.command()
-    # async def reload(self, ctx):
-    #     """
-    #      Reload all cogs
-    #     """
-    #     notification_str = ''
-    #     ext_load_embed = Embed(title='System message',
-    #                            description='Status of the cogs after reload',
-    #                            colour=Colour.blue())
-    #     for extension in extensions:
-    #         try:
-    #             self.bot.unload_extension(f'{extension}')
-    #             self.bot.load_extension(f'{extension}')
-    #             notification_str += f'{extension} :smile: \n'
-    #         except Exception as e:
-    #             notification_str += f'{extension} :angry: {e}\n'
-    #
-    #     ext_load_embed.add_field(name='Status',
-    #                              value=notification_str)
-    #     await ctx.channel.send(embed=ext_load_embed)
 
     #############################  Crypto Link Hot Wallet #############################
 
@@ -709,7 +584,7 @@ class BotManagementCommands(commands.Cog):
             value = [{'name': f'***{self.command_string}hot balance*** ',
                       'value': "Returns information from wallet RPC on stellar balance"}
                      ]
-            await custom_messages.embed_builder(ctx, title='Querying hot wallet details',
+            await custom_messages.ctx_embed_builder(ctx, title='Querying hot wallet details',
                                                 description="All available commands to operate with hot wallets",
                                                 data=value, destination=1)
 
@@ -740,12 +615,13 @@ class BotManagementCommands(commands.Cog):
         else:
             sys_msg_title = 'Stellar Wallet Query Server error'
             message = 'Status of the wallet could not be obtained at this moment'
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
                                                  sys_msg_title=sys_msg_title)
 
     #############################  Crypto Link Fee management #############################
 
     @commands.command()
+    @commands.check(is_animus)
     async def fees(self, ctx):
         fees = self.backoffice.bot_manager.get_all_fees()
         fee_info = Embed(title='Applied fees for system',
@@ -780,7 +656,7 @@ class BotManagementCommands(commands.Cog):
         await ctx.channel.send(embed=fee_info)
 
     @commands.group()
-    @commands.check(is_one_of_gods)
+    @commands.check(is_animus)
     async def fee(self, ctx):
         """
         Command category/ entry for the system
@@ -795,10 +671,11 @@ class BotManagementCommands(commands.Cog):
                  "value": f"Entry to sub category of commands to set fees for various parts of {self.bot.user} system"}
             ]
 
-            await custom_messages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
+            await custom_messages.ctx_embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
                                                 thumbnail=self.bot.user.avatar.url, destination=ctx.message.author)
 
     @fee.group()
+    @commands.check(is_animus)
     async def change(self, ctx):
         """
         Commands entry for sub categories to manipulate fees
@@ -824,6 +701,7 @@ class BotManagementCommands(commands.Cog):
                                                 thumbnail=self.bot.user.avatar.url, destination=ctx.message.author)
 
     @change.command()
+    @commands.check(is_animus)
     async def coin_fee(self, ctx, value: float, ticker: str):
         """
         Set the coin withdrawal fee
@@ -850,6 +728,7 @@ class BotManagementCommands(commands.Cog):
                                                  sys_msg_title=CONST_FEE_INFO)
 
     @change.command()
+    @commands.check(is_animus)
     async def min_merchant_transfer(self, ctx, value: float):
         """
         Set minimum amount in merchant wallet for withdrawal from it
@@ -875,6 +754,7 @@ class BotManagementCommands(commands.Cog):
                                                  sys_msg_title=CONST_MERCHANT_LICENSE_CHANGE)
 
     @change.command()
+    @commands.check(is_animus)
     async def merchant_wallet_transfer_fee(self, ctx, value: float):
         """
         Change fee for merchant wallet transfer in $
@@ -906,25 +786,19 @@ class BotManagementCommands(commands.Cog):
     @cl.error
     async def cl_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
 
     @system.error
     async def sys_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
-
-    # @cogs.error
-    # async def mng_error(self, ctx, error):
-    #     if isinstance(error, commands.CheckFailure):
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
-    #                                              sys_msg_title=CONST_WARNING_MESSAGE)
 
     @hot.error
     async def h_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await custom_messages.system_message(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
 
 

@@ -4,7 +4,7 @@ import nextcord
 from colorama import Fore
 
 from nextcord import errors
-from nextcord import Role, Embed, Colour, TextChannel, User
+from nextcord import Role, Embed, Colour, TextChannel, User, Interaction
 
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_HASH_STR = ':hash: Transaction Hash :hash: '
@@ -87,34 +87,53 @@ class CustomMessages:
 
     @staticmethod
     async def embed_builder(interaction, title, description, data: list, destination=None, thumbnail=None, c: Colour = None):
-        """
-        Build embed from data provided
-        :param ctx: Discord Context
-        :param title: Title for embed
-        :param description: Description of embed
-        :param data: data as list of dict
-        :param destination: where embed is sent
-        :param thumbnail: where embed is sent
-        :return:
-        """
-
         if not c:
             c = Colour.gold()
 
-        embed = Embed(title=title,
-                      description=description,
-                      colour=c)
+        embed = Embed(title=title, description=description, colour=c)
         for d in data:
-            embed.add_field(name=d['name'],
-                            value=d['value'],
-                            inline=False)
+            embed.add_field(name=d['name'], value=d['value'], inline=False)
+
         try:
-            if destination:
-                await interaction.author.send(embed=embed)
+            # First, always acknowledge the interaction if not done yet
+            if not interaction.response.is_done():
+                await interaction.response.send_message(embed=embed,  delete_after=40, ephemeral=True)
             else:
-                await interaction.channel.send(embed=embed, delete_after=40)
-        except Exception:
-            await interaction.channel.send(embed=embed)
+                await interaction.followup.send(embed=embed, ephemeral=True)
+
+        except Exception as e:
+            print("Error while sending embed:", e)
+            try:
+                await interaction.user.send(embed=embed)
+            except:
+                pass
+
+    @staticmethod
+    async def ctx_embed_builder(ctx, title: str, description: str, data: list, destination=None, thumbnail=None, c: Colour = None):
+        if not c:
+            c = Colour.gold()
+
+        embed = Embed(title=title, description=description, colour=c)
+        for d in data:
+            embed.add_field(name=d['name'], value=d['value'], inline=False)
+
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
+
+        try:
+            # If a specific destination is provided (like a channel), send there
+            if destination and hasattr(destination, 'send'):
+                await destination.send(embed=embed, delete_after=40)
+            else:
+                await ctx.send(embed=embed, delete_after=40)
+        except Exception as e:
+            print("Error while sending embed:", e)
+            try:
+                await ctx.author.send(embed=embed)
+            except Exception:
+                pass
+
+
 
     @staticmethod
     async def bridge_notification(ctx, recipient):
@@ -133,36 +152,66 @@ class CustomMessages:
         await ctx.author.send(embed=bridge_info)
 
     @staticmethod
-    async def system_message(interaction, message: str, color_code, destination: int, sys_msg_title: str = None,
-                             embed_title: str = None):
+    async def system_message(interaction, message: str, color_code, sys_msg_title: str = None,
+                            embed_title: str = None, destination: int = 0):
         """
         Custom System Messages
         """
         # Color filtering
         if isinstance(color_code, Colour):
-            emoji = ":robot:"
             c = color_code
+            emoji = ":robot:"
         else:
-            if color_code == 0:
-                c = 0x319f6b
-                emoji = ":robot: "
-            else:
-                c = Colour.red()
-                emoji = ":warning:"
+            c = 0x319f6b if color_code == 0 else Colour.red()
+            emoji = ":robot:" if color_code == 0 else ":warning:"
 
         if embed_title is None:
             embed_title = 'System Message'
 
         sys_embed = Embed(title=f"{emoji}{embed_title}",
-                          description=sys_msg_title,
-                          colour=c)
-        sys_embed.add_field(name=':information_source:',
-                            value=f'```{message}```')
-        sys_embed.set_footer(text='Message will self-destruct in 15 seconds! ')
-        if destination == 0:
-            await interaction.response.send_message(embed=sys_embed, ephermeral=True)
+                        description=sys_msg_title,
+                        colour=c)
+        sys_embed.add_field(name=':information_source:', value=f'```{message}```')
+        sys_embed.set_footer(text='Message will self-destruct in 15 seconds!')
+
+        try:
+            if destination == 0:
+                await interaction.response.send_message(embed=sys_embed, ephemeral=True)
+            else:
+                await interaction.channel.send(embed=sys_embed, delete_after=15) 
+        except Exception as e:
+            print(f"system_message error: {e}")
+
+    @staticmethod
+    async def system_message_pref(ctx, message: str, color_code, sys_msg_title: str = None,
+                                embed_title: str = None, destination: int = 0):
+        """
+        Custom System Messages for prefix-based commands (ctx).
+        """
+        # Color filtering
+        if isinstance(color_code, Colour):
+            c = color_code
+            emoji = ":robot:"
         else:
-            await interaction.channel.send(embed=sys_embed, delete_after=15, ephermeral=True)
+            c = 0x319f6b if color_code == 0 else Colour.red()
+            emoji = ":robot:" if color_code == 0 else ":warning:"
+
+        if embed_title is None:
+            embed_title = 'System Message'
+
+        sys_embed = Embed(title=f"{emoji}{embed_title}",
+                        description=sys_msg_title,
+                        colour=c)
+        sys_embed.add_field(name=':information_source:', value=f'```{message}```')
+        sys_embed.set_footer(text='Message will self-destruct in 15 seconds!')
+
+        try:
+            if destination == 0:
+                await ctx.author.send(embed=sys_embed, delete_after=15)
+            else:
+                await ctx.channel.send(embed=sys_embed, delete_after=15)
+        except Exception as e:
+            print(f"system_message_pref error: {e}")
 
     async def transaction_report_to_user(self, ctx, user, destination, transaction_data: dict, direction: int,
                                          tx_type: str,
@@ -313,72 +362,94 @@ class CustomMessages:
         await sys_channel.send(embed=notify)
 
     @staticmethod
-    async def user_role_purchase_msg(ctx, role: Role, role_details: dict):
-        # # Send notification to user
-        # role_embed = Embed(title=':man_juggling: Congratulations on '
-        #                          'obtaining the role',
-        #                    description='You have received this notification because you have successfully '
-        #                                'purchased role on the community. Please see details below.',
-        #                    colour=Colour.blue())
-        # role_embed.set_thumbnail(url=ctx.message.guild.icon_url)
-        # role_embed.add_field(name=':convenience_store: Community :convenience_store:',
-        #                      value=f'```{ctx.message.guild}  \n'
-        #                            f'ID:{ctx.message.guild.id}```',
-        #                      inline=False)
-        # role_embed.add_field(name=':japanese_ogre: Role: :japanese_ogre: ',
-        #                      value=f'```Name:{role.name}  \nID:{role.id}```',
-        #                      inline=False)
-        # role_embed.add_field(name=f':calendar: Role Purchase Date :calendar: ',
-        #                      value=f'```{role_details["roleStart"]}```')
-        # role_embed.add_field(name=':timer: Role Expiration :timer: ',
-        #                      value=f'```{role_details["roleEnd"]} (in: {role_details["roleLeft"]})```',
-        #                      inline=False)
-        # role_embed.add_field(name=':money_with_wings: Payment Slip :money_with_wings: ',
-        #                      value=f'```Fiat:{role_details["dollarValue"]} $ \n'
-        #                            f'Crypto: {role_details["roleRounded"]} XLM\n'
-        #                            f'Rate: {role_details["usdRate"]} / 1 XLM```',
-        #                      inline=False)
+    async def user_role_purchase_msg(interaction: Interaction, role: Role, role_details: dict):
         try:
-            await ctx.channel.send(content=f'{ctx.message.guild.owner.mention} {ctx.author.mention}'
-                                          f' you have successfully purchased membership {role} in value of '
-                                           f'{role_details["roleRounded"]} XLM (${role_details["dollarValue"]}). '
-                                          f'It will expire on {role_details["roleEnd"]} (in: {role_details["roleLeft"]})')
+            # Format the expiration datetime
+            end_time: datetime = role_details["roleEnd"]
+            if isinstance(end_time, str):
+                end_time = datetime.fromisoformat(end_time)
+            formatted_end_time = end_time.strftime("%A, %B %d, %Y at %H:%M UTC")
+
+            embed = Embed(
+                title=":tada: Membership Purchased Successfully!",
+                description=(
+                    f"{interaction.user.mention}, you've successfully subscribed to the **{role.name}** membership!"
+                ),
+                colour=Colour.green()
+            )
+
+            embed.add_field(
+                name=":moneybag: Payment Summary",
+                value=(
+                    f"• **Amount Paid:** {role_details['roleRounded']} XLM\n"
+                    f"• **Approx. Value:** ${role_details['dollarValue']}\n"
+                    f"• **Rate Used:** 1 XLM = ${role_details['usdRate']}"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name=":hourglass_flowing_sand: Membership Duration",
+                value=(
+                    f"• **Expires On:** {formatted_end_time}\n"
+                    f"• **Time Remaining:** {role_details['roleLeft']}"
+                ),
+                inline=False
+            )
+
+            embed.set_footer(
+                text=f"Role ID: {role.id} • Purchased in {interaction.guild.name}"
+            )
+
+            await interaction.channel.send(
+                content=f"{interaction.guild.owner.mention}, {interaction.user.mention}",
+                embed=embed
+            )
+
         except nextcord.Forbidden as e:
             print(Fore.RED + f'{e}')
-        # try:
-        #     await ctx.author.send(embed=role_embed)
-        # except Exception as e:
-        #     print(e)
-        #     await ctx.channel.send(embed=role_embed, delete_after=10)
 
     @staticmethod
-    async def guild_owner_role_purchase_msg(ctx, role: Role, role_details: dict):
-        incoming_funds = Embed(title=':convenience_store:__Incoming funds to corporate '
-                                     'wallet___:convenience_store:',
-                               description=f'Role has been purchased on your community '
-                                           f'at __{role_details["roleStart"]}__.',
-                               colour=Colour.green())
+    async def guild_owner_role_purchase_msg(interaction: Interaction, role: Role, role_details: dict):
+        incoming_funds = Embed(
+            title=':convenience_store: __Incoming funds to corporate wallet__ :convenience_store:',
+            description=f'Role has been purchased on your community at __{role_details["roleStart"]}__.',
+            colour=Colour.green()
+        )
 
-        incoming_funds.add_field(name=':japanese_ogre: Role Purchased :japanese_ogre: ',
-                                 value=f"```Name: {role.name}\n"
-                                       f"Id: {role.id}```",
-                                 inline=False)
+        incoming_funds.add_field(
+            name=':japanese_ogre: Role Purchased :japanese_ogre:',
+            value=f"```Name: {role.name}\nId: {role.id}```",
+            inline=False
+        )
 
-        incoming_funds.add_field(name=':money_with_wings: Role Value :money_with_wings: ',
-                                 value=f'```Fiat: ${role_details["dollarValue"]}\n'
-                                       f'Crypto: {role_details["roleRounded"]} XLM\n'
-                                       f'Rate: {role_details["usdRate"]} / 1 XLM```',
-                                 inline=False)
-        incoming_funds.add_field(name=':cowboy: User Details :cowboy: ',
-                                 value=f"```User: {ctx.message.author}\n"
-                                       f"Id: {ctx.message.author.id}```",
-                                 inline=False)
+        incoming_funds.add_field(
+            name=':money_with_wings: Role Value :money_with_wings:',
+            value=(
+                f"```Fiat: ${role_details['dollarValue']}\n"
+                f"Crypto: {role_details['roleRounded']} XLM\n"
+                f"Rate: {role_details['usdRate']} / 1 XLM```"
+            ),
+            inline=False
+        )
 
-        incoming_funds.add_field(name=':clipboard: Role Duration Details :clipboard:  ',
-                                 value=f'```{role_details["roleDetails"]}```',
-                                 inline=False)
+        incoming_funds.add_field(
+            name=':cowboy: User Details :cowboy:',
+            value=f"```User: {interaction.user}\nId: {interaction.user.id}```",
+            inline=False
+        )
 
-        await ctx.message.guild.owner.send(embed=incoming_funds)
+        incoming_funds.add_field(
+            name=':clipboard: Role Duration Details :clipboard:',
+            value=f"```{role_details['roleDetails']}```",
+            inline=False
+        )
+
+        try:
+            await interaction.guild.owner.send(embed=incoming_funds)
+        except Exception as e:
+            print(f"Failed to DM guild owner: {e}")
+
 
     @staticmethod
     async def wallet_overall_stats(ctx, utc_now, transaction_stats: dict):

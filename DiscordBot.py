@@ -1,18 +1,23 @@
 from nextcord.ext import commands
-from nextcord import Intents
 
 from colorama import Fore, init
 import json
 from utils.tools import Helpers
+from nextcord.ext import commands
+from nextcord import Intents, Interaction
+from nextcord.errors import ApplicationCheckFailure
+
+from nextcord.ext import commands
+from nextcord import Intents, Interaction, slash_command
+from nextcord.errors import ApplicationCheckFailure
+from colorama import Fore, init
+
 
 CONST_SEPARATOR = '+++++++++++++++++++++++++++++++++++++++'
 # init colorama :
 init(autoreset=True)
 
-cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
-           'cogs.system', 'cogs.withdrawals',
-           'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners','cogs.specialPayments',
-           'cogs.ballotOwner', 'cogs.voters']
+cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts','cogs.system', 'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners']
 
 horizon_cogs = ['horizonCommands.horizonMain',
                 'horizonCommands.accounts',
@@ -33,20 +38,45 @@ horizon_cogs = ['horizonCommands.horizonMain',
 #
 # custodial_layer = ['secondLevel.secondLevelAccounts']
 
+async def global_app_command_error_handler(interaction: Interaction, error):
+    error = getattr(error, "original", error)
+
+    if isinstance(error, ApplicationCheckFailure):
+        try:
+            await interaction.response.send_message(str(error), ephemeral=True)
+        except Exception:
+            await interaction.followup.send(str(error), ephemeral=True)
+
+        # print(f"[CHECK BLOCKED] {interaction.user} (ID: {interaction.user.id}) tried '{interaction.data.get('name', 'unknown')}' – {str(error)}")
+        return
+
+    print(f"[UNHANDLED SLASH ERROR] {repr(error)}")
 
 class DiscordBot(commands.Bot):
     def __init__(self, backoffice, bot_settings: dict):
         self.bot_settings = bot_settings
         self.hot_wallets = backoffice.stellar_wallet.public_key
+        self.backoffice = backoffice
 
         super().__init__(
             command_prefix=commands.when_mentioned_or(self.get_prefix),
-            intents=Intents.all())
-        self.remove_command('help')  # removing the old help command
-        self.backoffice = backoffice
+            intents=Intents.all()
+        )
+
+        self.remove_command('help')
+
+        @self.event
+        async def on_ready():
+            print(Fore.MAGENTA + f"{self.user} is online and ready!")
+
+        @self.event
+        async def on_application_command_error(interaction, error):
+            await global_app_command_error_handler(interaction, error)
+
         self.load_cogs()
 
         print(Fore.CYAN + f'{self.hot_wallets}')
+    
 
     def get_prefix_help(self, guild_id):
         try:
@@ -66,6 +96,7 @@ class DiscordBot(commands.Bot):
         for extension in cl_cogs:
             try:
                 self.load_extension(extension)
+                
             except Exception as error:
                 notification_str += f'| {extension} --> {error}\n'
                 raise
@@ -87,12 +118,12 @@ class DiscordBot(commands.Bot):
         #
         # notification_str = Fore.CYAN + '+++++++++++++++++++++++++++++++++++++++\n' \
         #                                '           LOADING Horizon commands....        \n'
-        for hor in horizon_cogs:
-            try:
-                self.load_extension(hor)
-            except Exception as error:
-                notification_str += f'| {hor} --> {error}\n'
-                raise
+        # for hor in horizon_cogs:
+        #     try:
+        #         self.load_extension(hor)
+        #     except Exception as error:
+        #         notification_str += f'| {hor} --> {error}\n'
+        #         raise
         notification_str += CONST_SEPARATOR
         print(notification_str)
 
@@ -100,9 +131,6 @@ class DiscordBot(commands.Bot):
         super().run(self.bot_settings['token'], reconnect=True)
 
     def is_animus(self, user_id):
-        """
-        Check if creator
-        """
         return user_id == self.bot_settings['creator']
 
     def is_one_of_gods(self, user_id):

@@ -1,21 +1,12 @@
 
 # :joystick: Command map for Crypto Link System :joystick: 
 
-## Commands Count
-System has currently 65 various commands of various categories dedicate to:
-- Discord User accounts and P2P transactions
-- Discord Guild Owner and merchant
-- Crypto Link System Management for bot owner
+
+/register -> register personal wallet into the Crypto Link system
+
 
 ## Prefix
-Bot listens to prefix 
-```text
-!
-
-or 
-
-@CryptoLink tag
-```
+Slash Commands
 
 ## About the system and fees 
 ```text
@@ -27,63 +18,41 @@ To check the fees implemented and their values use command:
 ```text
 !fees
 ```
-
-## Help Commands
-```text
-!help --> Main command entry
-!help get_started --> Discord User Entry Point with explanation on how to get started
-!help currencies --> Information on available cryptocurrencies
-!help transactions --> Instruction on how to make peer to peer transaction
-!help account --> Information on available commands to operate with personal account
-!help owner --> Available commands and sub commands for owners of the community
-!help owner merchant --> get information about merchant system
-```
-
 ## User account commands and operations
+To be able to access own wallet or operate with the the Crypto Link system you are required to 
+register yourself into the system with `/register`
 
 ### Wallet queries and management
 
 ```text
-!register --> Registers user into Crypto Link System
-!acc --> Returns general report about personal account
-!balance --> Fast personal account balance check 
-!wallet --> Information on available sub commands for personal wallet
-!wallet stats --> Statistical details for off-chain and on-chain activities 
-!wallet deposit --> Instructions on how to deposit available cryptocurrencies
-!wallet withdraw --> Instructions on how to withdraw available cryptocurrencies
-!wallet balance --> Additional expansion of the wallets balance
-!wallet trust --> Used to create a trust line between personal account and token issuer for token withdrawal
+/wallet help --> List of available commands
+/me --> Quick check of the balance 
+/wallet balance --> in depth balance overview
+/wallet stats --> In depth statistics on the wallet operations
+/wallet deposit --> Details on where and how to deposit to Discord wallet
+/wallet qr --> Qr code to be scanned for automatic deposit details 
+```
+
+#### Making on-chain withdrawals
+```text
+/wallet withdraw <Stellar valid destination address> <amount:float> <asset_code:str> --> asset code 'xlm' to withdraw "Stellar Lumen"
 ```
 
 ### Making off-chain peer to peer transactions
 
 ```text
 !send <amount:float> <ticker> <@discord.User> <message optional> --> Creates a public P2P transaction
-!private <amount:float> <ticker> <@discord.User> <message optional> --> Initiates a private P2P transaction
+!private <amount:float> <ticker> <@discord.User> <message optional> --> Initiates a private P2P transaction meaning that the value will not bee seen on private channel
 ```
 
-### Making on-chain withdrawals
-```text
-!withdraw --> Representation of available withdrawal sub-commands
-!withdraw token <ticker> <amount:float> <destination address: Valid Stellar Lumen Address> --> Stellar chain token withdrawals
-!withdraw xlm <amount:float> <destination address: Valid Stellar Lumen Address>  --> Withdrawal of Stellar Lumen (XLM)
-```
 
-### Participating in merchant system
+### Participating in merchant system on the server to purchase monetized roles
 ```text
-!membership --> Returns description on all available sub-commands
-!membership current --> Returns on-going purchased memberships for the community user has obtained
-!membership roles --> Get all available roles/memberships listed for purchase on community
-!membership subscribe --> Subscribe to role which is available on community to be purchased 
+/membership help --> information on all available commands 
+/membership
 ```
 
 ## Community Owners 
-
-### Up-Link activation deactivation
-```text
-!owner services explorer apply <#discord.TextChannel> 
-!owner services explorer remove 
-```
 ### Merchant system setup
 
 #### Merchant setup and general commands
@@ -106,14 +75,6 @@ To check the fees implemented and their values use command:
 ```
 #### Merchant Licensing details
 
-```text
-!license --> Representation of available sub-commands
-!license about --> Information about the license 
-!license price --> Information about current license price 
-!license status --> Check the license status of the community for merchant system
-!license buy --> Representation of available sub commands
-!license buy with_xlm --> Use Stellar Lumen to purchase license
-```
 
 ## System management commands
 Locked for bot owner/creators

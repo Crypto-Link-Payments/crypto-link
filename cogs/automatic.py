@@ -8,12 +8,10 @@ import sys
 from colorama import Fore
 from nextcord import Embed, Colour, Game, Status, Interaction
 from nextcord.ext import commands
-import datetime
-import time
-from discord import HTTPException
-import traceback
 from cooldowns import CallableOnCooldown
 from cogs.utils.systemMessaages import CustomMessages
+from nextcord.ext.commands import CheckFailure
+from nextcord.errors import ApplicationCheckFailure, HTTPException
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
@@ -36,95 +34,138 @@ class AutoFunctions(commands.Cog):
         error = getattr(error, "original", error)
 
         if isinstance(error, CallableOnCooldown):
-            await inter.send(f"You are being rate-limited! Retry in `{error.retry_after}` seconds.")
-        else:
-            print(error)
-            usr_details = f'User: {inter.user} {inter.user.id}\n' \
-                          f'Server: {inter.guild}\n' \
-                          f'Channel: {inter.channel}\n'
+            await inter.send(f"⏳ You are being rate-limited! Retry in `{error.retry_after:.1f}` seconds.", ephemeral=True)
+            return
+
+        elif isinstance(error, (CheckFailure, ApplicationCheckFailure)):
             try:
-                self.bot.hook_pager.error_discord(title="Unhandled Error",
-                                                  details=usr_details,
-                                                  error_description=error,
-                                                  command_content=inter.message.content,
-                                                  message='Animus')
-            except Exception as e:
-                print(e)
+                await inter.response.send_message(str(error), ephemeral=True)
+            except Exception:
+                try:
+                    await inter.followup.send(str(error), ephemeral=True)
+                except:
+                    pass  # Silent fail fallback
+
+            command_name = inter.data.get('name', 'unknown')
+
+            # Handle nested subcommands safely
+            def extract_command_path(options):
+                parts = []
+                while options:
+                    current = options[0]
+                    parts.append(current.get("name", ""))
+                    options = current.get("options", [])
+                return " ".join(parts)
+
+            sub_path = extract_command_path(inter.data.get('options', []))
+
+            guild_name = inter.guild.name if inter.guild else "DM"
+            channel_name = getattr(inter.channel, "name", "Unknown")
+
+            print(
+                f"[CHECK BLOCKED] {inter.user} (ID: {inter.user.id}) "
+                f"tried command '/{command_name} {sub_path}' in guild '{guild_name}', channel '{channel_name}' – {str(error)}"
+            )
+
+            return
 
 
-    # @commands.Cog.listener()
-    # async def on_command_error(self, ctx, exception):
-    #     """
-    #     Global error for on command error
-    #     """
-    #     print(Fore.RED + f"{ctx.message.author} @ {ctx.message.guild}: {ctx.message.content}")
-    #     try:
-    #         await ctx.message.delete()
-    #     except Exception:
-    #         pass
-    #
-    #     if isinstance(exception, commands.CommandNotFound):
-    #         title = '__Command Error__'
-    #         message = f'Command `{ctx.message.content}` is not implemented/active yet or it does not exist! Please' \
-    #                   f'type `{self.command_string}help` to check available commands.'
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-    #                                              sys_msg_title=title)
-    #     elif isinstance(exception, commands.CommandOnCooldown):
-    #         message = f'{exception}. In order to prevent abuse and unwanted delays, we have implemented cool down' \
-    #                   f' into various commands. Thank you for your understanding.'
-    #         await custom_messages.system_message(ctx=ctx, color_code=Colour.blue(), message=message, destination=0,
-    #                                              sys_msg_title=':sweat_drops: Cool-Down :sweat_drops: ')
-    #
-    #     elif isinstance(exception, commands.MissingRequiredArgument):
-    #         await custom_messages.system_message(ctx=ctx, color_code=Colour.orange(), message=f'{exception}',
-    #                                              destination=0,
-    #                                              sys_msg_title=':sweat_drops: Missing Required Argument :sweat_drops: ')
-    #     elif isinstance(exception, HTTPException):
-    #         title = 'Discord API Error'
-    #         message = f'We could not process your command due to the connection error with Discord API server. ' \
-    #                   f'Please try again later'
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-    #                                              sys_msg_title=title)
-    #     elif isinstance(exception, commands.NoPrivateMessage):
-    #         title = 'Limit access'
-    #         message = f'This command `{ctx.message.content}` can be used only through public channel of the server' \
-    #                   f' where Crypto Link is present.'
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-    #                                              sys_msg_title=title)
-    #     elif isinstance(exception, commands.PrivateMessageOnly):
-    #         title = 'Limit access'
-    #         message = f'This command `{ctx.message.content}` can be used only through DM with the Crypto Link'
-    #         await custom_messages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-    #                                              sys_msg_title=title)
-    #
-    #     else:
-    #         if isinstance(exception, commands.CheckFailure):
-    #             print("Check has failed")
-    #         else:
-    #             bug_channel = self.bot.get_channel(int(self.bot_channels["bug"]))
-    #
-    #             animus = await self.bot.fetch_user(int(self.animus_id))
-    #
-    #             bug_info = Embed(title=f':new: :bug: :warning: ',
-    #                              description='New command error found',
-    #                              colour=Colour.red())
-    #             bug_info.add_field(name=f'Command Author',
-    #                                value=f'{ctx.author}')
-    #             bug_info.add_field(name=f'Channel',
-    #                                value=ctx.message.channel)
-    #             bug_info.add_field(name=f':joystick: Command Executed :joystick:',
-    #                                value=f'```{ctx.message.content}```',
-    #                                inline=False)
-    #             bug_info.add_field(name=f':interrobang: Error Details :interrobang: ',
-    #                                value=f'```{exception}```',
-    #                                inline=False)
-    #
-    #             await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
-    #
-    #     # stack_trace = ''.join(
-    #     #     traceback.format_exception(etype=type(exception), value=exception, tb=exception.__traceback__))
-    #     # pprint(stack_trace)
-    #     # await bug_channel.send(content=stack_trace)
+        # Other errors
+        print(f"[UNHANDLED COMMAND ERROR] {str(error)}")
+
+    @commands.Cog.listener()
+    async def on_application_command_error_handled(self, inter: Interaction, error):
+        #Prevent traceback from being printed by Nextcord
+        pass
+
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, exception):
+        """
+        Global error for on command error
+        """
+        print(Fore.RED + f"{ctx.message.author} @ {ctx.message.guild}: {ctx.message.content}")
+        try:
+            await ctx.message.delete()
+        except Exception:
+            pass
+    
+        if isinstance(exception, commands.CommandNotFound):
+            title = '__Command Error__'
+            message = f'Command `{ctx.message.content}` is not implemented/active yet or it does not exist! Please' \
+                      f'type `{self.command_string}help` to check available commands.'
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+        elif isinstance(exception, commands.CommandOnCooldown):
+            message = f'{exception}. In order to prevent abuse and unwanted delays, we have implemented cool down' \
+                      f' into various commands. Thank you for your understanding.'
+            await custom_messages.system_message_pref(ctx=ctx, color_code=Colour.blue(), message=message, destination=0,
+                                                 sys_msg_title=':sweat_drops: Cool-Down :sweat_drops: ')
+    
+        elif isinstance(exception, commands.MissingRequiredArgument):
+            await custom_messages.system_message_pref(ctx=ctx, color_code=Colour.orange(), message=f'{exception}',
+                                                 destination=0,
+                                                 sys_msg_title=':sweat_drops: Missing Required Argument :sweat_drops: ')
+        elif isinstance(exception, HTTPException):
+            title = 'Discord API Error'
+            message = f'We could not process your command due to the connection error with Discord API server. ' \
+                      f'Please try again later'
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+        elif isinstance(exception, commands.NoPrivateMessage):
+            title = 'Limit access'
+            message = f'This command `{ctx.message.content}` can be used only through public channel of the server' \
+                      f' where Crypto Link is present.'
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+        elif isinstance(exception, commands.PrivateMessageOnly):
+            title = 'Limit access'
+            message = f'This command `{ctx.message.content}` can be used only through DM with the Crypto Link'
+            await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=message, destination=1,
+                                                 sys_msg_title=title)
+    
+        else:
+            if isinstance(exception, commands.CheckFailure):
+                print("Check has failed")
+            else:
+                bug_channel = self.bot.get_channel(int(self.bot_channels["bug"]))
+    
+                animus = await self.bot.fetch_user(int(self.animus_id))
+    
+                bug_info = Embed(title=f':new: :bug: :warning: ',
+                                 description='New command error found',
+                                 colour=Colour.red())
+                bug_info.add_field(name=f'Command Author',
+                                   value=f'{ctx.author}')
+                bug_info.add_field(name=f'Channel',
+                                   value=ctx.message.channel)
+                bug_info.add_field(name=f':joystick: Command Executed :joystick:',
+                                   value=f'```{ctx.message.content}```',
+                                   inline=False)
+                bug_info.add_field(name=f':interrobang: Error Details :interrobang: ',
+                                   value=f'```{exception}```',
+                                   inline=False)
+    
+                await bug_channel.send(embed=bug_info, content=f"{animus.mention}")
+    
+    @commands.Cog.listener()
+    async def on_app_command_error(self, inter: Interaction, error):
+        # Unwrap original error if needed
+        error = getattr(error, "original", error)
+
+        if isinstance(error, ApplicationCheckFailure):
+            try:
+                await inter.response.send_message(str(error), ephemeral=True)
+            except Exception:
+                await inter.followup.send(str(error), ephemeral=True)
+
+            print(f"[CHECK BLOCKED] {inter.user} (ID: {inter.user.id}) tried '{inter.data.get('name', 'unknown')}' – {str(error)}")
+            return
+
+    @commands.Cog.listener()
+    async def on_error(self, event_method, *args, **kwargs):
+        if "application_command" in event_method:
+            return  # Silently suppress
 
     # @commands.Cog.listener()
     # async def on_command(self, ctx):

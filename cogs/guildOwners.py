@@ -1,10 +1,11 @@
 from datetime import datetime
-import decimal
 from bson.decimal128 import Decimal128
 from re import sub
-from nextcord.ext import commands
-from nextcord import Embed, Colour, Role
-from utils.customCogChecks import is_owner, is_public, guild_has_stats, has_wallet
+from nextcord.ext import commands, application_checks
+from nextcord import Embed, Colour, slash_command, SlashOption, Interaction, Role, TextChannel, ChannelType
+from nextcord.abc import GuildChannel
+import cooldowns
+from utils.customCogChecks import guild_has_stats, has_wallet_inter_check, is_guild_owner_or_has_clmng, is_public_channel
 from cogs.utils.systemMessaages import CustomMessages
 
 customMessages = CustomMessages()
@@ -22,396 +23,450 @@ class GuildOwnerCommands(commands.Cog):
         self.merchant = self.backoffice.merchant_manager
         self.guild_string = None
 
-    @commands.group()
-    @commands.check(is_owner)
-    @commands.check(is_public)
-    @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def owner(self, ctx):
-        if ctx.invoked_subcommand is None:
-            self.guild_string = self.bot.get_prefix_help(ctx.guild.id)
-            title = ':joystick: __Guild Owner Manual__ :joystick: '
-            description = "All available commands to operate with guild system."
-            list_of_values = [
-                {"name": ":bellhop: Register Guild :bellhop: ", "value": f"`{self.guild_string}owner register`"},
-                {"name": ":bar_chart: Guild Crypto Link Stats :bar_chart: ",
-                 "value": f"`{self.guild_string}owner stats`"},
-                {"name": ":service_dog: Guild Applied Services :service_dog: ",
-                 "value": f"`{self.guild_string}owner services`"},
-                {"name": ":satellite_orbital: Crypto Link Commands :satellite_orbital: ",
-                 "value": f"`{self.guild_string}owner uplink`"},
-                {"name": ":convenience_store:  Operate with merchant :convenience_store:  ",
-                 "value": f"`{self.guild_string}owner merchant`"},
-                {"name": ":ballot_box: Operate with voting pools :ballot_box:",
-                 "value": f"`{self.guild_string}owner ballot`"},
-                {"name": f":tools: Change {self.bot.user} prefix ",
-                 "value": f"`{self.guild_string}owner changeprefix <char>`"}
-            ]
+    @slash_command(name='owner', description="Guild Owner manual group", dm_permission=False)
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
+    async def owner(self, interaction: Interaction):
+        pass 
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               c=Colour.dark_gold())
+    @owner.subcommand(name="help", description="Show the guild owner's manual")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
+    async def owner_help(self, interaction: Interaction):
+        self.guild_string = self.bot.get_prefix_help(interaction.guild.id)
+        title = ':joystick: __Guild Owner Manual__ :joystick: '
+        description = "Available commands to operate the guild system."
+        list_of_values = [{"name": ":office_worker: Register Server into Crypto Link :office_worker: ",
+            "value": f"`/owner register`"},
+            {"name": ":bar_chart: Guild Crypto Link Stats :bar_chart: ",
+            "value": f"`/owner stats`"},
+            {"name": ":service_dog: Guild Applied Services :service_dog: ",
+            "value": f"`/owner services`"},
+            {"name": ":convenience_store: Activate Role Monetization :convenience_store:  ",
+            "value": f"`/owner merchant open`"},
+            {"name": ":information_source:  Guild Applied Services :information_source:",
+            "value": f"`/owner help`"}]
 
-    @owner.command()
-    async def changeprefix(self, ctx, prefix):
-        prefix = prefix.strip()
-        if not len(prefix) > 1 and self.bot.backoffice.helper.check_for_special_char(string=prefix):
-            if not self.bot.backoffice.check_guild_prefix(guild_id=ctx.message.guild.id):
-                self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=int(ctx.guild.id), prefix=prefix)
-                await customMessages.system_message(ctx=ctx, color_code=0,
-                                                    message=f'You have successfully set prefix for server {ctx.guild} '
-                                                            f'to {prefix}. In case if you forget the prefix, '
-                                                            f'tag the bot '
-                                                            f'and it will respond as well. Be aware that '
-                                                            f'the prefix does '
-                                                            f'not work over DM therefore a default or bot tag needs'
-                                                            f' to be used.',
-                                                    destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
-            else:
-                if self.bot.backoffice.guild_profiles.update_guild_prefix(guild_id=ctx.message.guild.id, prefix=prefix):
-                    await customMessages.system_message(ctx=ctx, color_code=0,
-                                                        message=f'You have successfully set prefix '
-                                                                f'for server {ctx.guild} '
-                                                                f'to {prefix}. In case if you forget the prefix, '
-                                                                f'tag the bot '
-                                                                f'and it will respond as well. Be aware that the '
-                                                                f'prefix does '
-                                                                f'not work over DM therefore a default or bot tag needs'
-                                                                f' to be used.',
-                                                        destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
-                else:
+        await customMessages.embed_builder(interaction=interaction, title=title,
+                                        description=description, data=list_of_values,
+                                        c=Colour.dark_gold())
 
-                    await customMessages.system_message(ctx=ctx, color_code=1,
-                                                        message=f'There has been an issue. please try again later.',
-                                                        destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
-        else:
-            await customMessages.system_message(ctx=ctx, color_code=1,
-                                                message=f'Prefix can be only 1 character in length and a special'
-                                                        f' character',
-                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+    @owner.subcommand(name="register", description="Register Guild into the System")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    @has_wallet_inter_check()
+    @commands.cooldown(1, 20, commands.BucketType.user) 
+    async def register(self, interaction: Interaction):
+        guild_id = interaction.guild.id
 
-    @owner.command()
-    @commands.check(has_wallet)
-    async def register(self, ctx):
-        if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
-            new_guild = {
-                "guildId": ctx.message.guild.id,
-                "guildName": f'{ctx.guild}',
-                "explorerSettings": {"channelId": int(0)},
-                "txFees": {"xlmFeeValue": int(0)},
-                "registeredUsers": 0,
-                "xlm": {"volume": float(0.0),
-                        "txCount": int(0),
-                        "privateCount": int(0),
-                        "publicCount": int(0),
-                        "roleTxCount": int(0),
-                        "emojiTxCount": int(0),
-                        "multiTxCount": int(0)}
-            }
+        # Check if guild already exists
+        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=guild_id):
+            await customMessages.system_message(
+                interaction=interaction,
+                color_code=1,
+                message='Guild is already registered.',
+                sys_msg_title=CONST_SYS_ERROR
+            )
+            return
 
-            all_integrated_tokens = self.bot.backoffice.token_manager.get_registered_tokens()
+        # Define the default structure per token
+        default_token_structure = {
+            "volume": 0.0,
+            "txCount": 0,
+            "privateCount": 0,
+            "publicCount": 0,
+            "roleTxCount": 0,
+            "emojiTxCount": 0,
+            "multiTxCount": 0
+        }
 
-            for asset_code in all_integrated_tokens:
-                new_guild[asset_code["assetCode"]] = {"volume": float(0.0),
-                                                      "txCount": int(0),
-                                                      "privateCount": int(0),
-                                                      "publicCount": int(0),
-                                                      "roleTxCount": int(0),
-                                                      "emojiTxCount": int(0),
-                                                      "multiTxCount": int(0)}
+        # Initialize new guild profile
+        new_guild = {
+            "guildId": guild_id,
+            "guildName": str(interaction.guild),
+            "explorerSettings": {"channelId": 0},
+            "txFees": {"xlmFeeValue": 0},
+            "registeredUsers": 0,
+            "xlm": default_token_structure.copy()
+        }
 
-            self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=int(ctx.guild.id), prefix="!")
+        # Add other integrated tokens
+        try:
+            all_tokens = self.bot.backoffice.token_manager.get_registered_tokens()
+            for token in all_tokens:
+                asset_code = token.get("assetCode")
+                if asset_code and asset_code.lower() != "xlm":
+                    new_guild[asset_code] = default_token_structure.copy()
+        except Exception as e:
+            print(f"[ERROR] Token fetch failed during guild registration: {e}")
 
-            await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
-            await customMessages.system_message(ctx=ctx, color_code=0,
-                                                message='You have successfully registered guild into the system. '
-                                                        'Default bot prefix is:\n'
-                                                        '!',
-                                                destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
-        else:
-            await customMessages.system_message(ctx=ctx, color_code=1, message='Guild already registered',
-                                                destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
+        # Set default guild prefix
+        self.bot.backoffice.guild_profiles.set_guild_prefix(guild_id=guild_id, prefix="!")
 
-    @owner.command()
-    @commands.check(guild_has_stats)
-    async def stats(self, ctx, token=None):
-        stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=ctx.guild.id)
-        # available tokens
-        tokens = [x['assetCode'] for x in self.bot.backoffice.token_manager.get_registered_tokens() if
-                  x['assetCode'] != 'xlm']
-        available_stats = ' '.join([str(elem) for elem in tokens]).capitalize()
+        # Register the guild
+        await self.backoffice.guild_profiles.register_guild(guild_data=new_guild)
 
-        if not token or token == 'xlm':
+        # Confirm success
+        await customMessages.system_message(
+            interaction=interaction,
+            color_code=0,
+            message='✅ You have successfully registered the guild into the system. now you are able to use other slash commands under the /owner',
+            sys_msg_title=CONST_SYS_MSG
+        )
 
-            stats_info = Embed(title=":bank: __Guild Statistics__ :bank: ",
-                               timestamp=datetime.utcnow(),
-                               colour=Colour.dark_gold())
-            stats_info.add_field(name='Wallets registered',
-                                 value=f'`{stats["registeredUsers"]}`',
-                                 inline=False)
+    @owner.subcommand(name="stats", description="Check Guild Stats")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    @guild_has_stats()
+    async def stats(self,
+                    interaction: Interaction,
+                    token: str = SlashOption(description="Token to display stats for", required=False, default='xlm')
+                    ):
 
-            volume = stats["xlm"]["volume"]
+        token = token.lower()
+        guild_id = interaction.guild.id
+
+        stats = await self.backoffice.guild_profiles.get_guild_stats(guild_id=guild_id)
+        registered_tokens = [
+            x["assetCode"] for x in self.bot.backoffice.token_manager.get_registered_tokens()
+        ]
+
+        available_stats = ', '.join(t for t in registered_tokens if t.lower() != "xlm").upper()
+
+        if token == 'xlm':
+            xlm_stats = stats["xlm"]
+            volume = xlm_stats["volume"]
             if isinstance(volume, Decimal128):
                 volume = volume.to_decimal()
 
-            xlm_stats = stats["xlm"]
+            embed = Embed(
+                title=":bank: __Guild Statistics__ :bank:",
+                timestamp=datetime.utcnow(),
+                colour=Colour.dark_gold()
+            )
+            embed.set_thumbnail(url=interaction.guild.icon.url)
+            embed.add_field(name="Wallets registered", value=f'`{stats["registeredUsers"]}`', inline=False)
+            embed.add_field(name=":incoming_envelope: XLM Payments executed", value=f'`{xlm_stats["txCount"]}`')
+            embed.add_field(name=":money_with_wings: Total Volume", value=f'`{round(volume, 7)} XLM`')
+            embed.add_field(name=":cowboy: Public Transactions", value=f'`{xlm_stats["publicCount"]}`')
+            embed.add_field(name=":detective: Private Transactions", value=f'`{xlm_stats["privateCount"]}`')
+            embed.add_field(name=":person_juggling: Perks Sold", value=f'`{xlm_stats["roleTxCount"]}`')
 
-            stats_info.set_thumbnail(url=ctx.guild.icon.url)
-            stats_info.add_field(name=":incoming_envelope: XLM Payments executed ",
-                                 value=f'`{xlm_stats["txCount"]}`')
-            stats_info.add_field(name=":money_with_wings: Total Volume ",
-                                 value=f'`{round(volume, 7)} XLM`')
-            stats_info.add_field(name=":cowboy: XLM Public Transactions  ",
-                                 value=f'`{xlm_stats["publicCount"]}`')
-            stats_info.add_field(name=":detective: XLM Private Transactions ",
-                                 value=f'`{xlm_stats["privateCount"]}`')
-            stats_info.add_field(name=":person_juggling: Perks Sold  ",
-                                 value=f'`{xlm_stats["roleTxCount"]}`')
-            # stats_info.add_field(name=":japanese_ogre: Emoji Transactions :japanese_ogre: ",
-            #                      value=f'`{xlm_stats["emojiTxCount"]}`')
-            # stats_info.add_field(name=":family_man_woman_boy: Multi tx :family_man_woman_boy: ",
-            #                      value=f'`{xlm_stats["multiTxCount"]}`')
-            stats_info.add_field(name=':warning: Other token statistics',
-                                 value=f'In order to get statistics of other tokens for you server please use '
-                                       f'same command structure and add one asset code from available:'
-                                       f' {available_stats.upper()}',
-                                 inline=False)
-            await ctx.channel.send(embed=stats_info)
+            embed.add_field(
+                name=':warning: Other token statistics',
+                value=(
+                    f'To view token-specific stats, use this command with one of the following tokens: '
+                    f'`{available_stats}`'
+                ),
+                inline=False
+            )
+
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        elif token in [t.lower() for t in registered_tokens if t.lower() != 'xlm']:
+            token_stats = stats.get(token)
+            if not token_stats:
+                await interaction.response.send_message(
+                    f"No stats available for token `{token.upper()}`.",
+                    ephemeral=True
+                )
+                return
+
+            embed = Embed(
+                title=f":coin: Token Statistics: {token.upper()}",
+                timestamp=datetime.utcnow(),
+                colour=Colour.teal()
+            )
+            embed.set_thumbnail(url=interaction.guild.icon.url)
+
+            for k, v in token_stats.items():
+                display_key = ' '.join(sub(r"([A-Z])", r" \1", k).split()).capitalize()
+                value_str = f'{v:,.7f} {token.upper()}' if k == 'volume' else str(v)
+                embed.add_field(name=display_key, value=f'```{value_str}```')
+
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+
         else:
-            tokens = [x["assetCode"] for x in self.backoffice.token_manager.get_registered_tokens() if
-                      x["assetCode"] != 'xlm']
+            await interaction.response.send_message(
+                content=(
+                    f"❌ Unsupported token `{token.upper()}`.\n"
+                    f"Available tokens: `{available_stats}`"
+                ),
+                ephemeral=True
+            )
 
-            if tokens:
-                token_stats_info = Embed(title=f'Token statistics for server')
 
-                for token in tokens:
-                    token_stats = stats[f'{token.lower()}']
-                    for k, v in token_stats.items():
-                        itm = sub(r"([A-Z])", r" \1", k).split()
-                        item = ' '.join([str(elem) for elem in itm]).capitalize()
-                        if k != 'volume':
-                            token_stats_info.add_field(name=f'{item}',
-                                                       value=f'```{v}```')
-                        else:
-                            token_stats_info.add_field(name=f'{item}',
-                                                       value=f'```{v:,.7f} {token.upper()}```')
-                    await ctx.channel.send(embed=token_stats_info)
-            else:
-                await ctx.channel.send(content="No tokens registered")
+    @owner.subcommand(name="services", description="Guild Service Status")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    @guild_has_stats()
+    async def services(self, interaction: Interaction):
+        service_status = await self.backoffice.guild_profiles.get_service_statuses(
+            guild_id=interaction.guild.id
+        )
 
-    @owner.command()
-    @commands.check(guild_has_stats)
-    async def services(self, ctx):
-        service_status = await self.backoffice.guild_profiles.get_service_statuses(guild_id=ctx.guild.id)
-        explorer_channel = self.bot.get_channel(int(service_status["explorerSettings"]["channelId"]))
+        explorer_channel_id = int(service_status["explorerSettings"].get("channelId", 0))
+        explorer_channel = self.bot.get_channel(explorer_channel_id)
 
-        service_info = Embed(title=":service_dog: __Guild Service Status__ :service_dog: ",
-                             timestamp=datetime.utcnow(),
-                             description=f'All activated services on Crypto Link system and their relays',
-                             colour=Colour.dark_gold())
+        service_info = Embed(
+            title=":service_dog: __Guild Service Status__ :service_dog:",
+            timestamp=datetime.utcnow(),
+            description='Currently active services and their assigned channels in Crypto Link.',
+            colour=Colour.dark_gold()
+        )
         service_info.set_thumbnail(url=self.bot.user.avatar.url)
 
         if explorer_channel:
-            service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
-                                   value=f'```{explorer_channel} ({explorer_channel.id})```')
+            service_info.add_field(
+                name=':satellite_orbital: Crypto Link Uplink :satellite_orbital:',
+                value=f'```{explorer_channel.name} ({explorer_channel.id})```',
+                inline=False
+            )
         else:
-            service_info.add_field(name=':satellite_orbital: Crypto Link Uplink :satellite_orbital: ',
-                                   value=f':red_circle:')
+            service_info.add_field(
+                name=':satellite_orbital: Crypto Link Uplink :satellite_orbital:',
+                value=':red_circle: Not assigned',
+                inline=False
+            )
 
-        await ctx.channel.send(embed=service_info)
+        # TODO add status for merchant
+        await interaction.response.send_message(embed=service_info)
+        
 
-    # @owner.group()
-    # async def uplink(self, ctx):
-    #     if ctx.invoked_subcommand is None:
-    #         title = ':satellite_orbital: __Crypto Link Uplink manual__ :satellite_orbital:'
-    #         description = "All available commands to operate with guild system"
-    #         list_of_values = [
-    #             {"name": "Apply Channel for CL feed",
-    #              "value": f"`{self.command_string}owner uplink apply <#discord.Channel>`"},
-    #             {"name": "Remove Channel for CL feed",
-    #              "value": f"`{self.command_string}owner uplink remove`"}
-    #         ]
-    #
-    #         await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-    #                                            c=Colour.dark_gold())
+    # @owner.subcommand(name="uplink", description="Crypto Link Uplink Manual")
+    # @application_checks.check(is_guild_owner())  
+    # async def uplink(self, interaction: Interaction):
+    #     title = ':satellite_orbital: __Crypto Link Uplink Manual__ :satellite_orbital:'
+    #     description = "Use the following commands to manage Crypto Link network feed channels."
 
-    # @uplink.command()
-    # async def apply(self, ctx, chn: TextChannel):
+    #     list_of_values = [
+    #         {
+    #             "name": "Apply Channel for CL Feed",
+    #             "value": "`/owner uplink apply <#channel>`"
+    #         },
+    #         {
+    #             "name": "Remove Channel for CL Feed",
+    #             "value": "`/owner uplink remove`"
+    #         }
+    #     ]
+
+    #     await customMessages.embed_builder(
+    #         interaction=interaction,
+    #         title=title,
+    #         description=description,
+    #         data=list_of_values,
+    #         c=Colour.dark_gold()
+    #     )
+
+    # #     interaction: Interaction,
+    # #     chn: GuildChannel = SlashOption(
+    # #         description="Select the channel to receive network feed",
+    # #         channel_types=[ChannelType.text]
+    # #     )
+    # # ):
+    # #     data_to_update = {
+    # #         "explorerSettings.channelId": int(chn.id)
+    # #     }
+
+    # #     # Check if owner registered
+    # #     if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=interaction.guild.id):
+    # #         if await self.backoffice.guild_profiles.update_guild_profile(
+    # #             guild_id=interaction.guild.id,
+    # #             data_to_update=data_to_update
+    # #         ):
+    # #             await customMessages.system_message(
+    # #                 interaction=interaction,
+    # #                 color_code=0,
+    # #                 message=f'✅ Channel {chn.mention} will now receive Crypto Link Network Activity feed.',
+    # #                 sys_msg_title=CONST_SYS_MSG
+    # #             )
+    # #         else:
+    # #             await customMessages.system_message(
+    # #                 interaction=interaction,
+    # #                 color_code=1,
+    # #                 message='❌ Failed to update your settings.',
+    # #                 sys_msg_title=CONST_SYS_MSG
+    # #             )
+    # #     else:
+    # #         await customMessages.system_message(
+    # #             interaction=interaction,
+    # #             color_code=1,
+    # #             message=f'Please register the server {interaction.guild.name} using `/owner register` first.',
+    # #             sys_msg_title=CONST_SYS_MSG
+    # #         )
+    
+    # @uplink.subcommand(name="apply", description="Set the channel for Crypto Link activity feed")
+    # @application_checks.check(is_guild_owner())  # ✅ Only server owner allowed
+    # async def apply(
+    #     self,
+    #     interaction: Interaction,
+    #     chn: GuildChannel = SlashOption(
+    #         description="Select the channel to receive network feed",
+    #         channel_types=[ChannelType.text]
+    #     )
+    # ):
+    #     guild_id = interaction.guild.id
+
     #     data_to_update = {
-    #         "explorerSettings.channelId": int(chn.id)
+    #         "explorerSettings.channelId": chn.id
     #     }
-    #
-    #     # Check if owner registered
-    #     if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
-    #         if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id,
-    #                                                                      data_to_update=data_to_update):
-    #             await customMessages.system_message(ctx=ctx, color_code=0,
-    #                                                 message=f'You have successfully set channel {chn} to receive Crypto'
-    #                                                         f' Link Network Activity feed',
-    #                                                 destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+
+    #     if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=guild_id):
+    #         success = await self.backoffice.guild_profiles.update_guild_profile(
+    #             guild_id=guild_id,
+    #             data_to_update=data_to_update
+    #         )
+
+    #         if success:
+    #             await customMessages.system_message(
+    #                 interaction=interaction,
+    #                 color_code=0,
+    #                 message=f'✅ Channel {chn.mention} will now receive Crypto Link Network Activity feed.',
+    #                 sys_msg_title=CONST_SYS_MSG
+    #             )
     #         else:
-    #             await customMessages.system_message(ctx=ctx, color_code=1,
-    #                                                 message='There has been an issue while trying'
-    #                                                         'to update data.',
-    #                                                 destination=ctx.message.channel, sys_msg_title=CONST_SYS_MSG)
+    #             await customMessages.system_message(
+    #                 interaction=interaction,
+    #                 color_code=1,
+    #                 message='❌ Failed to update your settings.',
+    #                 sys_msg_title=CONST_SYS_MSG
+    #             )
     #     else:
-    #         await customMessages.system_message(ctx=ctx, color_code=1, message=f'Please register the {ctx.guild}'
-    #                                                                            f' to the system with '
-    #                                                                            f'`{self.guild_string}owner register',
-    #                                             destination=ctx.message.channel, sys_msg_title=CONST_SYS_MSG)
+    #         await customMessages.system_message(
+    #             interaction=interaction,
+    #             color_code=1,
+    #             message=f'Please register the server `{interaction.guild.name}` using `/owner register` first.',
+    #             sys_msg_title=CONST_SYS_MSG
+    #         )
+        
+    # @uplink.subcommand(name="remove", description="Switch off the Crypto Link Network Feed")
+    # @application_checks.check(is_guild_owner())  # ✅ Restrict to guild owner
+    # async def remove(self, interaction: Interaction):
+    #     guild_id = interaction.guild.id
 
-    # @uplink.command()
-    # async def remove(self, ctx):
     #     data_to_update = {
-    #         "explorerSettings.channelId": int(0)
+    #         "explorerSettings.channelId": 0
     #     }
-    #
-    #     if await self.backoffice.guild_profiles.update_guild_profile(guild_id=ctx.guild.id,
-    #                                                                  data_to_update=data_to_update):
-    #         await customMessages.system_message(ctx=ctx, color_code=0,
-    #                                             message=f'You have successfully turned OFF Crypto Link Network Feed',
-    #                                             destination=ctx.message.author, sys_msg_title=CONST_SYS_MSG)
+
+    #     success = await self.backoffice.guild_profiles.update_guild_profile(
+    #         guild_id=guild_id,
+    #         data_to_update=data_to_update
+    #     )
+
+    #     if success:
+    #         await customMessages.system_message(
+    #             interaction=interaction,
+    #             color_code=0,
+    #             message="📡 You have successfully turned **OFF** the Crypto Link Network Feed.",
+    #             sys_msg_title=CONST_SYS_MSG
+    #         )
     #     else:
-    #         await customMessages.system_message(ctx=ctx, color_code=1, message='There has been an issue and Crypto Link'
-    #                                                                            ' Network Feed could not be turned OFF.'
-    #                                                                            'Please try again later',
-    #                                             destination=ctx.message.channel, sys_msg_title=CONST_SYS_ERROR)
+    #         await customMessages.system_message(
+    #             interaction=interaction,
+    #             color_code=1,
+    #             message=(
+    #                 "❌ There was an issue turning **OFF** the network feed. "
+    #                 "Please try again later or contact support."
+    #             ),
+    #             sys_msg_title=CONST_SYS_ERROR
+    #         )
 
-    @owner.group(aliases=['merchant'])
-    @commands.check(is_owner)
-    @commands.check(has_wallet)
-    @commands.check(is_public)
+
+    @owner.subcommand(name="merchant", description="Guild Merchant Service")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.guild)
-    async def merch(self, ctx):
-        if ctx.invoked_subcommand is None:
-            title = ':convenience_store: __Crypto Link Uplink manual__ :convenience_store: '
-            description = "All available commands to activate and operate with merchant service."
-            list_of_values = [
-                {"name": ":pencil:  Open/Register for Merchant system :pencil:  ",
-                 "value": f"```{self.command_string}owner merchant open ```"},
-                {"name": ":joystick: Access commands for merchant :joystick: ",
-                 "value": f"```{self.command_string}merchant```"}
-            ]
+    async def merchant(self, interaction: Interaction):
+        return
 
-            await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                               c=Colour.dark_gold())
+    @merchant.subcommand(name="open", description="Register a community wallet for merchant system")
+    @is_public_channel()
+    @is_guild_owner_or_has_clmng()
+    async def open(self, interaction: Interaction):
+        guild_id = interaction.guild.id
+        guild_name = str(interaction.guild)
+        user_id = interaction.user.id
 
-    @merch.command()
-    async def open(self, ctx):
-        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
-            if not self.merchant.check_if_community_exist(community_id=ctx.message.guild.id):  # Check if not registered
-                if self.merchant.register_community_wallet(community_id=ctx.message.guild.id,
-                                                           community_owner_id=ctx.message.author.id,
-                                                           community_name=f'{ctx.message.guild}'):  # register community wallet
-                    msg_title = ':rocket: __Community Wallet Registration Status___ :rocket:'
-                    message = f'You have successfully merchant system on ***{ctx.message.guild}***. You can proceed ' \
-                              f' with `{self.command_string}merchant` in order to familiarize yourself with ' \
-                              f'all available commands or have a look at ***merchant system' \
-                              f' manual*** accessible through command ' \
-                              f' `{self.command_string}merchant manual` '
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-                                                        destination=1)
-                else:
-                    msg_title = ':warning:  __Merchant Registration Status___ :warning: '
-                    message = f'There has been an issue while registering wallet into the system. Please try again later.' \
-                              f' or contact one of the support staff. '
-                    await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=1,
-                                                        destination=1)
-            else:
-                msg_title = ':warning:  __Community Wallet Registration Status___ :warning: '
-                message = f'You have already registered Merchant system on {ctx.guild} server. Proceed' \
-                          f'with command {self.command_string}merchant'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-                                                    destination=1)
+        if not self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=guild_id):
+            msg_title = ':warning: __Community Registration Status__ :warning:'
+            message = (
+                f'The server {guild_name} is not registered in the Crypto Link system yet.\n\n'
+                f'Please register it first using `{self.guild_string}owner register`.'
+            )
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=msg_title,
+                message=message,
+                color_code=1
+            )
+            return
+
+        if self.merchant.check_if_community_exist(community_id=guild_id):
+            msg_title = ':warning: __Merchant Registration Status__ :warning:'
+            message = (
+                f'The merchant system is already active for {guild_name}.\n\n'
+                f'Use `/merchant` to access merchant features on public channel of the server where Crypto Link has access to.'
+            )
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=msg_title,
+                message=message,
+                color_code=0
+            )
+            return
+
+        # Attempt to register the merchant wallet
+        success = self.merchant.register_community_wallet(
+            community_id=guild_id,
+            community_owner_id=user_id,
+            community_name=guild_name
+        )
+
+        if success:
+            msg_title = ':rocket: __Community Wallet Registration Status__ :rocket:'
+            message = (
+                f'You have successfully activated the merchant system for ***{guild_name}***.\n\n'
+                f'You can now use `/merchant` to view commands, or access the manual via '
+                f'`/merchant manual`.'
+            )
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=msg_title,
+                message=message,
+                color_code=0
+            )
         else:
-            msg_title = ':warning:  __Community Registration Status___ :warning: '
-            message = f'You have not yet registered {ctx.guild} server into Crypto Link system. Please ' \
-                      f'do that first through `{self.guild_string}owner register`.'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-                                                destination=1)
+            msg_title = ':warning: __Merchant Registration Status__ :warning:'
+            message = (
+                f'An error occurred while registering the merchant wallet.\n\n'
+                f'Please try again later or contact support.'
+            )
+            await customMessages.system_message(
+                interaction=interaction,
+                sys_msg_title=msg_title,
+                message=message,
+                color_code=1
+            )
 
     @owner.error
-    async def owner_error(self, ctx, error):
+    async def owner_error(self, interaction, error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to be able to access this category of commands you are required to be ' \
-                      f' owner of the community {ctx.guild} and execute command on one of the ' \
+                      f' owner of the community {interaction.guild} and execute command on one of the ' \
                       f' public channels.'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message)
 
     @register.error
-    async def register_error(self, ctx, error):
+    async def register_error(self, interaction, error):
         if isinstance(error, commands.CheckFailure):
             message = f'In order to be able to register community into Crypto Link system you re required to ' \
                       f' have personal wallet registered in the system. You can do so through:\n' \
-                      f' {self.command_string}register'
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=0)
+                      f' /register'
+            await customMessages.system_message(interaction=interaction, color_code=1, message=message)
 
-    # ----------------Voting pools registration-------------#
-    @owner.group()
-    @commands.check(is_owner)
-    @commands.check(has_wallet)
-    @commands.check(is_public)
-    async def ballot(self, ctx):
-        if self.backoffice.guild_profiles.check_guild_registration_stats(guild_id=ctx.guild.id):
-            if ctx.invoked_subcommand is None:
-                title = ':ballot_box: __Crypto Link Ballot System__ :ballot_box: '
-                description = "Commands to activate voting feature over Crypto Link and Discord"
-                list_of_values = [
-                    {"name": ":pencil: Activate ballot vote pools functionality :pencil:  ",
-                     "value": f"```{self.command_string}owner ballot activate```"},
-                    {"name": ":joystick: Access commands to operate with ballot vote pools :joystick: ",
-                     "value": f"```{self.command_string}pool```"}
-                ]
-                await customMessages.embed_builder(ctx=ctx, title=title, description=description, data=list_of_values,
-                                                   c=Colour.dark_gold())
-        else:
-            msg_title = ':warning:  __Community Registration Status___ :warning: '
-            message = f'You have not yet registered {ctx.guild} server into Crypto Link system. Please ' \
-                      f'do that first through `{self.guild_string}owner register`.'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-                                                destination=1)
-
-    @ballot.command()
-    async def activate(self, ctx, r: Role):
-        """
-        Activation of voting pools
-        """
-        if not self.bot.backoffice.voting_manager.check_server_voting_reg_status(guild_id=ctx.guild.id):
-            data = {
-                "guildId": ctx.guild.id,
-                "ownerId": ctx.author.id,
-                "mngRoleId": int(r.id),
-                "mngRoleName": f'{r}'
-            }
-
-            if self.backoffice.voting_manager.register_server_for_voting_service(data=data):
-                await customMessages.system_message(ctx=ctx, color_code=0,
-                                                    message=f'You have successfully activated ballot voting '
-                                                            f'pools functionality for your'
-                                                            f' server. Proceed with `{self.command_string}ballot` over '
-                                                            f'public channel where Crypto Link has access to.',
-                                                    destination=1, sys_msg_title=CONST_SYS_MSG)
-            else:
-                msg_title = ':ballot_box: __Ballot Voting System Error__ :ballot_box: '
-                message = f'System could not activate Ballot Voting pools due to backend issue. Please contact' \
-                          f' crypto link team.'
-                await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-                                                    destination=1)
-        else:
-            msg_title = ':ballot_box: __Ballot Voting System Already Active__ :ballot_box: '
-            message = f'You have already activated {ctx.guild} server for voting functionality.'
-            await customMessages.system_message(ctx=ctx, sys_msg_title=msg_title, message=message, color_code=0,
-                                                destination=1)
-
-    @activate.error
-    async def activate_error(self, ctx, error):
-        if isinstance(error, commands.CheckFailure):
-            message = f"You are required to specify active role on the server which will have access to the " \
-                      f"Ballot voting system management. `{self.command_string}owner ballot activate @discord.Role'"
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title="Ballot voting access error!")
-        elif isinstance(error, commands.MissingRequiredArgument):
-            message = f"You forgot to provide @discord.Role which will have access to ballot functions."
-            await customMessages.system_message(ctx=ctx, color_code=1, message=message, destination=1,
-                                                sys_msg_title="Ballot voting access error!")
 
 
 def setup(bot):
