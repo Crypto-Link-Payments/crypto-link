@@ -292,8 +292,10 @@ class UserAccountCommands(commands.Cog):
     @has_wallet_inter_check()
     async def deposit(self, interaction: Interaction):
         """
-        Returns deposit information to user
+        Returns deposit information to user (mobile-friendly with copy buttons + QR).
         """
+        await interaction.response.defer(ephemeral=True)
+
         user_id = interaction.user.id
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=user_id)
 
@@ -303,71 +305,107 @@ class UserAccountCommands(commands.Cog):
                 color_code=1,
                 message="Deposit details could not be retrieved. Please try again later.",
                 destination=1,
-                sys_msg_title='__Deposit information error__'
+                sys_msg_title="__Deposit information error__",
             )
             return
 
-        # Make coin list
-        coins_string = ', '.join([
-            x["assetCode"].upper()
-            for x in self.bot.backoffice.token_manager.get_registered_tokens()
-        ])
-
-        # Create and load QR code file
-        self.make_qr_image(user_id=user_id, user_profile=user_profile)
-        qr_filename = f"{user_id}.png"
-        qr_file = File(qr_filename)
-
-        # Build deposit embed
-        description = (
-            ':warning: To deposit funds to your Discord wallet, you must send from your wallet (GUI/CLI) '
-            'to the public address and deposit ID below. If done incorrectly, funds may be lost. '
-            'Crypto Link staff are not responsible for errors. :warning:'
-        )
-
-        deposit_embed = Embed(
-            title='How to deposit',
-            description=description,
-            colour=Colour.dark_orange()
-        )
-        deposit_embed.add_field(
-            name=':gem: Supported Cryptocurrencies/Tokens :gem:',
-            value=f'```{coins_string}```',
-            inline=False
-        )
-        deposit_embed.add_field(
-            name='Deposit Details',
-            value=(
-                f':map: Public Address :map:\n```{self.backoffice.stellar_wallet.public_key}```\n'
-                f':compass: MEMO :compass:\n```{user_profile["stellarDepositId"]}```'
-            ),
-            inline=False
-        )
-        deposit_embed.add_field(
-            name=':warning: **__Warning__** :warning:',
-            value='Include both **MEMO** and address correctly, or funds may be lost!',
-            inline=False
-        )
-        deposit_embed.add_field(
-            name=':printer: QR Code :printer:',
-            value='Your personal QR code (address + MEMO). Scan it with a QR-supported wallet app. Always verify details.',
-            inline=False
-        )
-        deposit_embed.set_footer(text='/wallet deposit qr → Only QR')
-        deposit_embed.set_image(url=f"attachment://{qr_filename}")
-
-        # Try sending the DM
         try:
-            await interaction.user.send(file=qr_file, embed=deposit_embed)
-            await interaction.response.send_message("📬 Deposit instructions sent to your DMs!", ephemeral=True)
-        except nextcord.Forbidden:
-            await interaction.response.send_message(
-                "❌ Could not send DM. Please enable 'Allow DMs from server members' in your privacy settings.",
-                ephemeral=True
+            # Make coin list
+            coins_string = ", ".join(
+                x["assetCode"].upper()
+                for x in self.bot.backoffice.token_manager.get_registered_tokens()
             )
 
-        # Clean up QR file
-        self.clean_qr_image(author_id=user_id)
+            # Create QR image
+            self.make_qr_image(user_id=user_id, user_profile=user_profile)
+            qr_filename = f"{user_id}.png"
+            qr_file = File(qr_filename)
+
+            deposit_address = self.backoffice.stellar_wallet.public_key
+            memo_text = str(user_profile["stellarDepositId"])
+
+            # Optional HTTPS trampoline for SEP-7 deep link
+            # (Discord link buttons only allow http/https/discord schemes.)
+            sep7_uri = build_sep7_uri(
+                destination=deposit_address,
+                memo_text=memo_text,
+                amount=None,  # set to string amount if you want to prefill
+            )
+            trampoline = (
+                wrap_trampoline(PAY_TRAMPOLINE_BASE, sep7_uri)
+                if PAY_TRAMPOLINE_BASE
+                else None
+            )
+
+            # Build deposit embed
+            description = (
+                ":warning: To deposit funds to your Discord wallet, you must send from your wallet (GUI/CLI) "
+                "to the public address and deposit ID (MEMO) below. If done incorrectly, funds may be lost. "
+                "Crypto Link staff are not responsible for errors. :warning:"
+            )
+
+            deposit_embed = Embed(
+                title="How to deposit", description=description, colour=Colour.dark_orange()
+            )
+            deposit_embed.add_field(
+                name=":gem: Supported Cryptocurrencies/Tokens :gem:",
+                value=f"```{coins_string}```",
+                inline=False,
+            )
+            deposit_embed.add_field(
+                name="Deposit Details",
+                value=(
+                    f":map: Public Address :map:\n`{deposit_address}`\n"
+                    f":compass: MEMO :compass:\n`{memo_text}`"
+                ),
+                inline=False,
+            )
+            deposit_embed.add_field(
+                name=":warning: **__Warning__** :warning:",
+                value="Include both **MEMO** and address correctly, or funds may be lost!",
+                inline=False,
+            )
+            deposit_embed.add_field(
+                name=":printer: QR Code :printer:",
+                value="Your personal QR code (address + MEMO). Scan it with a QR-supported wallet app. Always verify details.",
+                inline=False,
+            )
+
+            # Best-effort mobile hint
+            member = interaction.guild.get_member(user_id) if interaction.guild else None
+            if member and hasattr(member, "is_on_mobile") and callable(member.is_on_mobile) and member.is_on_mobile():
+                deposit_embed.add_field(
+                    name="📱 Mobile Tip",
+                    value="Tap the buttons to copy Address/MEMO. If supported, use **Open in Wallet**.",
+                    inline=False,
+                )
+
+            deposit_embed.set_footer(text="/wallet deposit qr → Only QR")
+            deposit_embed.set_image(url=f"attachment://{qr_filename}")
+
+            view = DepositCopyView(
+                address=deposit_address,
+                memo_text=memo_text,
+                trampoline_https_url=trampoline,
+            )
+
+            # DM preferred; fall back to ephemeral
+            try:
+                await interaction.user.send(file=qr_file, embed=deposit_embed, view=view)
+                await interaction.followup.send(
+                    "📬 Deposit instructions sent to your DMs!", ephemeral=True
+                )
+            except Forbidden:
+                await interaction.followup.send(
+                    content="❗ Could not send DM. Here are your deposit details:",
+                    embed=deposit_embed,
+                    view=view,
+                    ephemeral=True,
+                )
+
+        finally:
+            # Clean up QR file regardless of outcome
+            self.clean_qr_image(author_id=user_id)
 
     @wallet.subcommand(name="qr", description="QR Code Generator")
     @has_wallet_inter_check()
