@@ -1,17 +1,31 @@
-from datetime import datetime
-from datetime import timezone
-from nextcord import Embed, Colour, File, Interaction, slash_command, SlashOption, Forbidden
+from datetime import datetime, timezone
+from typing import Optional
+from urllib.parse import urlencode, quote_plus
+
+import os
+import time
+import traceback
+
+import pyqrcode
+import nextcord
+from nextcord import (
+    Embed,
+    Colour,
+    File,
+    Interaction,
+    slash_command,
+    SlashOption,
+)
+from nextcord.errors import Forbidden
 from nextcord.ext import commands
+from nextcord.ui import View, button, Button
+
 import cooldowns
+
 from utils.customCogChecks import has_wallet_inter_check
 from cogs.utils.monetaryConversions import get_rates, rate_converter
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
-import os
-import time
-import pyqrcode
-import traceback
-import nextcord
 
 custom_messages = CustomMessages()
 # Move this to class
