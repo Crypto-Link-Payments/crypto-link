@@ -1,23 +1,104 @@
-from datetime import datetime
-from datetime import timezone
-from nextcord import Embed, Colour, File, Interaction, slash_command, SlashOption, Forbidden
+from datetime import datetime, timezone
+from typing import Optional
+from urllib.parse import urlencode, quote_plus
+
+import os
+import time
+import traceback
+
+import pyqrcode
+import nextcord
+from nextcord import (
+    Embed,
+    Colour,
+    File,
+    Interaction,
+    slash_command,
+    SlashOption,
+)
+from nextcord.errors import Forbidden
 from nextcord.ext import commands
+from nextcord.ui import View, button, Button
+
 import cooldowns
+
 from utils.customCogChecks import has_wallet_inter_check
 from cogs.utils.monetaryConversions import get_rates, rate_converter
 from re import sub
 from cogs.utils.systemMessaages import CustomMessages
-import os
-import time
-import pyqrcode
-import traceback
-import nextcord
 
 custom_messages = CustomMessages()
-# Move this to class
+
+PAY_TRAMPOLINE_BASE: Optional[str] = None 
+
+# Move this to class if you prefer instance-level constants
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_ACC_REG_STATUS = '__Account registration status__'
 CONST_TRUST_ERROR = ':warning: __Trustline error__ :warning:'
+
+
+def build_sep7_uri(
+    destination: str,
+    memo_text: Optional[str] = None,
+    amount: Optional[str] = None,
+    asset_code: str = "XLM",
+    network_passphrase: str = "Public Global Stellar Network ; September 2015",
+) -> str:
+    """Build a SEP-7 payment URI; many wallets understand `web+stellar:pay?...`."""
+    params = {
+        "destination": destination,
+        "asset_code": asset_code,
+        "network_passphrase": network_passphrase,
+    }
+    if memo_text:
+        params["memo"] = memo_text
+        params["memo_type"] = "TEXT"
+    if amount:
+        params["amount"] = amount
+    return "web+stellar:pay?" + urlencode(params, quote_via=quote_plus)
+
+
+def wrap_trampoline(trampoline_base: str, sep7_uri: str) -> str:
+    """Wrap SEP-7 in an HTTPS trampoline (Discord URL buttons allow http/https/discord only)."""
+    return f"{trampoline_base}?u={quote_plus(sep7_uri)}"
+
+
+class DepositCopyView(View):
+    """Mobile-friendly buttons: quick copy for Address/MEMO and (optionally) an HTTPS deep-link."""
+
+    def __init__(
+        self,
+        address: str,
+        memo_text: str,
+        trampoline_https_url: Optional[str],
+        timeout: Optional[float] = 180,
+    ):
+        super().__init__(timeout=timeout)
+        self.address = address
+        self.memo_text = memo_text
+
+        if trampoline_https_url:
+            self.add_item(
+                Button(
+                    label="Open in Wallet",
+                    style=nextcord.ButtonStyle.link,
+                    url=trampoline_https_url,
+                    row=0,
+                )
+            )
+
+    @button(label="Copy Address", style=nextcord.ButtonStyle.primary, emoji="📋", row=1)
+    async def copy_address(self, _, interaction: Interaction):
+        # Ephemeral one-liner that's easy to long-press → Copy on mobile
+        await interaction.response.send_message(
+            content=f"**Public Address**\n`{self.address}`", ephemeral=True
+        )
+
+    @button(label="Copy MEMO", style=nextcord.ButtonStyle.secondary, emoji="🧭", row=1)
+    async def copy_memo(self, _, interaction: Interaction):
+        await interaction.response.send_message(
+            content=f"**MEMO**\n`{self.memo_text}`", ephemeral=True
+        )
 
 
 class UserAccountCommands(commands.Cog):
@@ -30,32 +111,34 @@ class UserAccountCommands(commands.Cog):
 
     def make_qr_image(self, user_id, user_profile):
         """
-        Function to produce the qr image from database data
-        :param user_id: Discord user id
-        :param user_profile: discord user profile to get deposit id
-        :return:
+        Produce the QR image from database data (address + memo in your wallet URI).
         """
         memo = user_profile["stellarDepositId"]
-        uri = self.backoffice.stellar_wallet.generate_uri(address=self.backoffice.stellar_wallet.public_key,
-                                                          memo=memo)
+        uri = self.backoffice.stellar_wallet.generate_uri(
+            address=self.backoffice.stellar_wallet.public_key, memo=memo
+        )
 
         # make the qr with picture
-        image = pyqrcode.create(content=uri, error='L')
-        image.png(file=f'{user_id}.png', scale=6, module_color=[0, 255, 255, 128],
-                  background=[17, 17, 17],
-                  quiet_zone=4)
+        image = pyqrcode.create(content=uri, error="L")
+        image.png(
+            file=f"{user_id}.png",
+            scale=6,
+            module_color=[0, 255, 255, 128],
+            background=[17, 17, 17],
+            quiet_zone=4,
+        )
 
     @staticmethod
     def clean_qr_image(author_id):
         try:
-            os.remove(f'{author_id}.png')
+            os.remove(f"{author_id}.png")
         except Exception as e:
-            print(f'Exception: {e}')
+            print(f"Exception during QR cleanup: {e}")
 
     @slash_command(description="Basic details about your Crypto Link account", dm_permission=False)
     @has_wallet_inter_check()
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.author)
-    async def me(self, interaction: Interaction):
+    async def my(self, interaction: Interaction):
         try:
             utc_now = datetime.now(timezone.utc)
             user_id = interaction.user.id
@@ -66,7 +149,7 @@ class UserAccountCommands(commands.Cog):
             if not isinstance(wallet_data, dict):
                 await interaction.response.send_message(
                     "No wallet data found. Please set up your account first. Use /register",
-                    ephemeral=True
+                    ephemeral=True,
                 )
                 return
 
@@ -76,116 +159,166 @@ class UserAccountCommands(commands.Cog):
             deposit_id = wallet_data.get("depositId", "Unknown")
 
             embed = Embed(
-                title=f':office_worker: {username} :office_worker:',
-                description='***__Basic details about your Crypto Link account__***',
+                title=f":office_worker: {username} :office_worker:",
+                description="***__Basic details about your Crypto Link account__***",
                 colour=Colour.dark_orange(),
-                timestamp=utc_now
+                timestamp=utc_now,
             )
-
-            embed.add_field(name=":map: Wallet Address :map:", value=f"```{self.backoffice.stellar_wallet.public_key}```")
-            embed.add_field(name=":compass: MEMO :compass:", value=f"```{deposit_id}```", inline=False)
-            embed.add_field(name=':moneybag: Stellar Lumen (XLM) Balance :moneybag:', value=f'`{xlm_balance:.7f}`', inline=False)
-
-            if xlm_raw > 0:
-                rates = get_rates(coin_name='stellar')
-                if rates:
-                    conversions = {
-                        'USD': ('$ ', 'usd'),
-                        'EUR': ('€ ', 'eur'),
-                        'RUB': ('₽ ', 'rub'),
-                        'BTC': ('₿ ', 'btc'),
-                        'ETH': ('Ξ ', 'eth'),
-                        'LTC': ('Ł ', 'ltc')
-                    }
-                    for label, (symbol, key) in conversions.items():
-                        value = rate_converter(xlm_balance, rates["stellar"].get(key, 0))
-                        format_str = f"{value:.4f}" if label in ["USD", "EUR", "RUB"] else f"{value:.8f}"
-                        embed.add_field(name=label, value=f'`{symbol}{format_str}`')
-
 
             embed.add_field(
-                name='More On Stellar Lumen (XLM)',
-                value=(
-                    '[Stellar](https://www.stellar.org/)\n'
-                    '[Stellar Foundation](https://www.stellar.org/foundation)\n'
-                    '[Stellar Lumens](https://www.stellar.org/lumens)\n'
-                    '[CMC](https://coinmarketcap.com/currencies/stellar/)\n'
-                    '[Stellar Expert](https://stellar.expert/explorer/public)'
-                )
+                name=":map: Wallet Address :map:",
+                value=f"`{self.backoffice.stellar_wallet.public_key}`",
             )
-            embed.set_footer(text='Conversion rates are provided by CoinGecko')
+            embed.add_field(
+                name=":compass: MEMO :compass:", value=f"`{deposit_id}`", inline=False
+            )
+            embed.add_field(
+                name=":moneybag: Stellar Lumen (XLM) Balance :moneybag:",
+                value=f"`{xlm_balance:.7f}`",
+                inline=False,
+            )
 
-            await interaction.response.send_message(embed=embed, delete_after=15, ephemeral=True)
+            if xlm_raw > 0:
+                rates = get_rates(coin_name="stellar")
+                if rates and "stellar" in rates:
+                    conversions = {
+                        "USD": ("$ ", "usd"),
+                        "EUR": ("€ ", "eur"),
+                        "RUB": ("₽ ", "rub"),
+                        "BTC": ("₿ ", "btc"),
+                        "ETH": ("Ξ ", "eth"),
+                        "LTC": ("Ł ", "ltc"),
+                    }
+                    for label, (symbol, key) in conversions.items():
+                        rate_val = rates["stellar"].get(key)
+                        if rate_val:
+                            value = rate_converter(xlm_balance, rate_val)
+                            format_str = (
+                                f"{value:.4f}"
+                                if label in ["USD", "EUR", "RUB"]
+                                else f"{value:.8f}"
+                            )
+                            embed.add_field(name=label, value=f"`{symbol}{format_str}`")
+
+            embed.add_field(
+                name="More On Stellar Lumen (XLM)",
+                value=(
+                    "[Stellar](https://www.stellar.org/)\n"
+                    "[Stellar Foundation](https://www.stellar.org/foundation)\n"
+                    "[Stellar Lumens](https://www.stellar.org/lumens)\n"
+                    "[CMC](https://coinmarketcap.com/currencies/stellar/)\n"
+                    "[Stellar Expert](https://stellar.expert/explorer/public)"
+                ),
+            )
+            embed.set_footer(text="Conversion rates are provided by CoinGecko")
+
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
         except Exception as e:
             print("Exception occurred:", repr(e))
             traceback.print_exc()
-            await interaction.response.send_message("An unexpected error occurred. Please try again later.", ephemeral=True)
+            await interaction.response.send_message(
+                "An unexpected error occurred. Please try again later.", ephemeral=True
+            )
 
     @slash_command(description="Register to Crypto Link", dm_permission=False)
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
-    async def register(self,
-                       interaction: Interaction):
+    async def register(self, interaction: Interaction):
         if not self.backoffice.account_mng.check_user_existence(user_id=interaction.user.id):
-            if self.backoffice.account_mng.register_user(discord_id=interaction.user.id,
-                                                         discord_username=f'{interaction.user}'):
-                message = f'Congratulations, your account has been successfully created.' \
-                          f' You can access your wallet via the following command:\n' \
-                          f'`/wallet`. For aditional commands available for wallet use /wallet help '
-                await custom_messages.system_message(interaction=interaction, color_code=0, message=message,
-                                                     destination=0,
-                                                     sys_msg_title=CONST_ACC_REG_STATUS)
+            if self.backoffice.account_mng.register_user(
+                discord_id=interaction.user.id, discord_username=f"{interaction.user}"
+            ):
+                message = (
+                    "Congratulations, your account has been successfully created."
+                    " You can access your wallet via the following command:\n"
+                    "`/wallet`. For additional commands available for wallet use /wallet help "
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=0,
+                    message=message,
+                    destination=0,
+                    sys_msg_title=CONST_ACC_REG_STATUS,
+                )
 
                 # Update guild stats on registered users
-                await self.backoffice.stats_manager.update_registered_users(guild_id=interaction.guild.id)
+                await self.backoffice.stats_manager.update_registered_users(
+                    guild_id=interaction.guild.id
+                )
 
             else:
-                message = f'Oh no! Something went wrong.\n' \
-                          f'Registration failed, please try again later.\n' \
-                          f'If the issue persists please contact one of the developers'
-                await custom_messages.system_message(interaction=interaction, color_code=1, message=message,
-                                                     destination=0,
-                                                     sys_msg_title=CONST_ACC_REG_STATUS)
+                message = (
+                    "Oh no! Something went wrong.\n"
+                    "Registration failed, please try again later.\n"
+                    "If the issue persists please contact one of the developers"
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=message,
+                    destination=0,
+                    sys_msg_title=CONST_ACC_REG_STATUS,
+                )
         else:
-            message = f'You already have an account! Please use ' \
-                      f'/wallet to access your wallet details and other commands or /me for quick check.'
-            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=0,
-                                                 sys_msg_title=CONST_ACC_REG_STATUS)
+            message = (
+                "You already have an account! Please use "
+                "/wallet to access your wallet details and other commands or /me for quick check."
+            )
+            await custom_messages.system_message(
+                interaction=interaction,
+                color_code=1,
+                message=message,
+                destination=0,
+                sys_msg_title=CONST_ACC_REG_STATUS,
+            )
 
     @slash_command(description="Wallet operations", dm_permission=False)
     @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def wallet(self,
-                     interaction: Interaction,
-                     ):
+    async def wallet(self, interaction: Interaction):
         pass
 
     @wallet.subcommand(name="help", description="Help commands for /wallet")
     @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def help(self,
-                   interaction: Interaction
-                   ):
-        title = ':joystick: __Available Wallet Commands__ :joystick: '
+    async def help(self, interaction: Interaction):
+        title = ":joystick: __Available Wallet Commands__ :joystick: "
         description = "Here is a summary of wallet related commands.\n"
-        list_of_values = [{"name": " :woman_technologist: Get AFull Account Balance Report :woman_technologist:  ",
-                           "value": f"```/wallet balance```\n"},
-                          {"name": ":bar_chart: Get Your Wallet Statistics :bar_chart:",
-                           "value": f"```/wallet stats token=optional for non XLM```"},
-                          {"name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
-                           "value": f"```/wallet deposit```"},
-                          {"name": ":outbox_tray: Withdraw from Crypto Link :outbox_tray: ",
-                           "value": f"```/wallet withdraw <amount> <asset code> <address> <memo=Optional>```"}]
-        await custom_messages.embed_builder(interaction=interaction, title=title,
-                                            description=description, data=list_of_values,
-                                            destination=1, c=Colour.dark_orange())
+        list_of_values = [
+            {
+                "name": " :woman_technologist: Get AFull Account Balance Report :woman_technologist:  ",
+                "value": "```/wallet balance```\n",
+            },
+            {
+                "name": ":bar_chart: Get Your Wallet Statistics :bar_chart:",
+                "value": "```/wallet stats token=optional for non XLM```",
+            },
+            {
+                "name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
+                "value": "```/wallet deposit```",
+            },
+            {
+                "name": ":outbox_tray: Withdraw from Crypto Link :outbox_tray: ",
+                "value": "```/wallet withdraw <amount> <asset code> <address> <memo=Optional>```",
+            },
+        ]
+        await custom_messages.embed_builder(
+            interaction=interaction,
+            title=title,
+            description=description,
+            data=list_of_values,
+            destination=1,
+            c=Colour.dark_orange(),
+        )
 
     @wallet.subcommand(name="stats", description="Fetch wallet stats")
     @has_wallet_inter_check()
     @commands.cooldown(1, 20, commands.BucketType.user)  # Only ONE cooldown applies
-    async def stats(self, interaction: Interaction,
-                    token: str = SlashOption(description="Balance for token", required=False, default='xlm')):
-
+    async def stats(
+        self,
+        interaction: Interaction,
+        token: str = SlashOption(description="Balance for token", required=False, default="xlm"),
+    ):
         try:
             token = token.lower()
             discord_id = interaction.user.id
@@ -196,80 +329,91 @@ class UserAccountCommands(commands.Cog):
                 for t in self.bot.backoffice.token_manager.get_registered_tokens()
             ]
 
-            if token == 'xlm':
-                tokens = [x for x in supported_tokens if x != 'xlm']
-                available_stats = ', '.join([f'***{t}***' for t in tokens])
+            if token == "xlm":
+                tokens = [x for x in supported_tokens if x != "xlm"]
+                available_stats = ", ".join([f"***{t}***" for t in tokens])
 
-                account_details = self.backoffice.account_mng.get_account_stats(discord_id=discord_id)
+                account_details = self.backoffice.account_mng.get_account_stats(
+                    discord_id=discord_id
+                )
 
                 stats_info = Embed(
-                    title=':bar_chart: Wallet Level 1 Statistics :bar_chart:',
-                    description='Here is a summary of your XLM wallet-level activity.',
-                    colour=Colour.lighter_grey()
+                    title=":bar_chart: Wallet Level 1 Statistics :bar_chart:",
+                    description="Here is a summary of your XLM wallet-level activity.",
+                    colour=Colour.lighter_grey(),
                 )
                 stats_info.add_field(
                     name=":symbols: Legend",
                     value=(
-                        ':incoming_envelope: → Total incoming tx count\n'
-                        ':money_with_wings: → Total sent amount\n'
-                        ':envelope_with_arrow: → Total outgoing tx count\n'
-                        ':money_mouth: → Total received amount\n'
-                        ':man_juggling: → Total merchant purchases\n'
-                        ':money_with_wings: → Total merchant spend\n'
-                    )
+                        ":incoming_envelope: → Total incoming tx count\n"
+                        ":money_with_wings: → Total sent amount\n"
+                        ":envelope_with_arrow: → Total outgoing tx count\n"
+                        ":money_mouth: → Total received amount\n"
+                        ":man_juggling: → Total merchant purchases\n"
+                        ":money_with_wings: → Total merchant spend\n"
+                    ),
                 )
                 stats_info.add_field(
-                    name=':warning: Access Token Stats',
-                    value=f'Use this command with a token argument to get token-specific stats. Available: {available_stats}',
-                    inline=False
+                    name=":warning: Access Token Stats",
+                    value=(
+                        "Use this command with a token argument to get token-specific stats. "
+                        f"Available: {available_stats}"
+                    ),
+                    inline=False,
                 )
 
                 # Send the embed to user's DM
                 try:
                     await interaction.user.send(embed=stats_info)
-                except nextcord.Forbidden:
-                    await interaction.response.send_message("❌ Could not send DM. Please check your privacy settings.", ephemeral=True)
+                except Forbidden:
+                    await interaction.response.send_message(
+                        "❌ Could not send DM. Please check your privacy settings.", ephemeral=True
+                    )
                     return
 
-                # Acknowledge the interaction publicly but quietly
-                await interaction.response.send_message("📬 Wallet stats have been sent to your DM!", ephemeral=True)
+                # Acknowledge the interaction quietly
+                await interaction.response.send_message(
+                    "📬 Wallet stats have been sent to your DM!", ephemeral=True
+                )
 
                 await custom_messages.stellar_wallet_overall(
-                    interaction=interaction,
-                    coin_stats=account_details,
-                    utc_now=utc_now
+                    interaction=interaction, coin_stats=account_details, utc_now=utc_now
                 )
 
             elif token in supported_tokens:
-                token_stats = self.backoffice.account_mng.get_token_stats(discord_id=discord_id, token=token)
+                token_stats = self.backoffice.account_mng.get_token_stats(
+                    discord_id=discord_id, token=token
+                )
 
                 if token_stats and token in token_stats:
                     data = token_stats[token]
                     token_stats_info = Embed(
-                        title=f'Details for token {token.upper()}',
+                        title=f"Details for token {token.upper()}",
                         description=f'Statistics for this token until {utc_now.strftime("%Y-%m-%d %H:%M UTC")}',
-                        colour=Colour.gold()
+                        colour=Colour.gold(),
                     )
 
                     for k, v in data.items():
-                        name = ' '.join(sub(r'([A-Z])', r' \1', k).split()).capitalize()
-                        value = f'{v}' if isinstance(v, int) else f'{v:,.7f} {token.upper()}'
+                        name = " ".join(sub(r"([A-Z])", r" \1", k).split()).capitalize()
+                        value = f"{v}" if isinstance(v, int) else f"{v:,.7f} {token.upper()}"
                         token_stats_info.add_field(name=name, value=value)
 
-                    await interaction.response.send_message(embed=token_stats_info, delete_after=15, ephemeral=True)
+                    await interaction.response.send_message(
+                        embed=token_stats_info, ephemeral=True
+                    )
 
                 else:
                     await custom_messages.system_message(
                         interaction=interaction,
                         color_code=1,
-                        message=f'No recorded activity for token {token.upper()}',
+                        message=f"No recorded activity for token {token.upper()}",
                         destination=1,
-                        sys_msg_title='__Token statistics__'
+                        sys_msg_title="__Token statistics__",
                     )
 
             else:
                 message = (
-                    f'Token {token.upper()} is not supported. '
+                    f"Token {token.upper()} is not supported. "
                     f'Supported tokens: {", ".join(t.upper() for t in supported_tokens)}'
                 )
                 await custom_messages.system_message(
@@ -277,23 +421,24 @@ class UserAccountCommands(commands.Cog):
                     color_code=1,
                     message=message,
                     destination=1,
-                    sys_msg_title='__Token not supported__'
+                    sys_msg_title="__Token not supported__",
                 )
 
         except Exception as e:
             print("Exception in stats command:", repr(e))
             traceback.print_exc()
             await interaction.response.send_message(
-                "An error occurred while fetching stats.",
-                ephemeral=True
+                "An error occurred while fetching stats.", ephemeral=True
             )
 
     @wallet.subcommand(name="deposit", description="Deposit Funds to your Wallet")
     @has_wallet_inter_check()
     async def deposit(self, interaction: Interaction):
         """
-        Returns deposit information to user
+        Returns deposit information to user (mobile-friendly with copy buttons + QR).
         """
+        await interaction.response.defer(ephemeral=True)
+
         user_id = interaction.user.id
         user_profile = self.backoffice.account_mng.get_user_memo(user_id=user_id)
 
@@ -303,138 +448,195 @@ class UserAccountCommands(commands.Cog):
                 color_code=1,
                 message="Deposit details could not be retrieved. Please try again later.",
                 destination=1,
-                sys_msg_title='__Deposit information error__'
+                sys_msg_title="__Deposit information error__",
             )
             return
 
-        # Make coin list
-        coins_string = ', '.join([
-            x["assetCode"].upper()
-            for x in self.bot.backoffice.token_manager.get_registered_tokens()
-        ])
-
-        # Create and load QR code file
-        self.make_qr_image(user_id=user_id, user_profile=user_profile)
-        qr_filename = f"{user_id}.png"
-        qr_file = File(qr_filename)
-
-        # Build deposit embed
-        description = (
-            ':warning: To deposit funds to your Discord wallet, you must send from your wallet (GUI/CLI) '
-            'to the public address and deposit ID below. If done incorrectly, funds may be lost. '
-            'Crypto Link staff are not responsible for errors. :warning:'
-        )
-
-        deposit_embed = Embed(
-            title='How to deposit',
-            description=description,
-            colour=Colour.dark_orange()
-        )
-        deposit_embed.add_field(
-            name=':gem: Supported Cryptocurrencies/Tokens :gem:',
-            value=f'```{coins_string}```',
-            inline=False
-        )
-        deposit_embed.add_field(
-            name='Deposit Details',
-            value=(
-                f':map: Public Address :map:\n```{self.backoffice.stellar_wallet.public_key}```\n'
-                f':compass: MEMO :compass:\n```{user_profile["stellarDepositId"]}```'
-            ),
-            inline=False
-        )
-        deposit_embed.add_field(
-            name=':warning: **__Warning__** :warning:',
-            value='Include both **MEMO** and address correctly, or funds may be lost!',
-            inline=False
-        )
-        deposit_embed.add_field(
-            name=':printer: QR Code :printer:',
-            value='Your personal QR code (address + MEMO). Scan it with a QR-supported wallet app. Always verify details.',
-            inline=False
-        )
-        deposit_embed.set_footer(text='/wallet deposit qr → Only QR')
-        deposit_embed.set_image(url=f"attachment://{qr_filename}")
-
-        # Try sending the DM
         try:
-            await interaction.user.send(file=qr_file, embed=deposit_embed)
-            await interaction.response.send_message("📬 Deposit instructions sent to your DMs!", ephemeral=True)
-        except nextcord.Forbidden:
-            await interaction.response.send_message(
-                "❌ Could not send DM. Please enable 'Allow DMs from server members' in your privacy settings.",
-                ephemeral=True
+            # Make coin list
+            coins_string = ", ".join(
+                x["assetCode"].upper()
+                for x in self.bot.backoffice.token_manager.get_registered_tokens()
             )
 
-        # Clean up QR file
-        self.clean_qr_image(author_id=user_id)
+            # Create QR image
+            self.make_qr_image(user_id=user_id, user_profile=user_profile)
+            qr_filename = f"{user_id}.png"
+            qr_file = File(qr_filename)
+
+            deposit_address = self.backoffice.stellar_wallet.public_key
+            memo_text = str(user_profile["stellarDepositId"])
+
+            # Optional HTTPS trampoline for SEP-7 deep link
+            # (Discord link buttons only allow http/https/discord schemes.)
+            sep7_uri = build_sep7_uri(
+                destination=deposit_address,
+                memo_text=memo_text,
+                amount=None,  # set to string amount if you want to prefill
+            )
+            trampoline = (
+                wrap_trampoline(PAY_TRAMPOLINE_BASE, sep7_uri)
+                if PAY_TRAMPOLINE_BASE
+                else None
+            )
+
+            # Build deposit embed
+            description = (
+                ":warning: To deposit funds to your Discord wallet, you must send from your wallet (GUI/CLI) "
+                "to the public address and deposit ID (MEMO) below. If done incorrectly, funds may be lost. "
+                "Crypto Link staff are not responsible for errors. :warning:"
+            )
+
+            deposit_embed = Embed(
+                title="How to deposit", description=description, colour=Colour.dark_orange()
+            )
+            deposit_embed.add_field(
+                name=":gem: Supported Cryptocurrencies/Tokens :gem:",
+                value=f"```{coins_string}```",
+                inline=False,
+            )
+            deposit_embed.add_field(
+                name="Deposit Details",
+                value=(
+                    f":map: Public Address :map:\n`{deposit_address}`\n"
+                    f":compass: MEMO :compass:\n`{memo_text}`"
+                ),
+                inline=False,
+            )
+            deposit_embed.add_field(
+                name=":warning: **__Warning__** :warning:",
+                value="Include both **MEMO** and address correctly, or funds may be lost!",
+                inline=False,
+            )
+            deposit_embed.add_field(
+                name=":printer: QR Code :printer:",
+                value="Your personal QR code (address + MEMO). Scan it with a QR-supported wallet app. Always verify details.",
+                inline=False,
+            )
+
+            # Best-effort mobile hint
+            member = interaction.guild.get_member(user_id) if interaction.guild else None
+            if member and hasattr(member, "is_on_mobile") and callable(member.is_on_mobile) and member.is_on_mobile():
+                deposit_embed.add_field(
+                    name="📱 Mobile Tip",
+                    value="Tap the buttons to copy Address/MEMO. If supported, use **Open in Wallet**.",
+                    inline=False,
+                )
+
+            deposit_embed.set_footer(text="/wallet deposit qr → Only QR")
+            deposit_embed.set_image(url=f"attachment://{qr_filename}")
+
+            view = DepositCopyView(
+                address=deposit_address,
+                memo_text=memo_text,
+                trampoline_https_url=trampoline,
+            )
+
+            # DM preferred; fall back to ephemeral
+            try:
+                await interaction.user.send(file=qr_file, embed=deposit_embed, view=view)
+                await interaction.followup.send(
+                    "📬 Deposit instructions sent to your DMs!", ephemeral=True
+                )
+            except Forbidden:
+                await interaction.followup.send(
+                    content="❗ Could not send DM. Here are your deposit details:",
+                    embed=deposit_embed,
+                    view=view,
+                    ephemeral=True,
+                )
+
+        finally:
+            # Clean up QR file regardless of outcome
+            self.clean_qr_image(author_id=user_id)
 
     @wallet.subcommand(name="qr", description="QR Code Generator")
     @has_wallet_inter_check()
-    async def qr(self,
-                 interaction: Interaction
-                 ):
+    async def qr(self, interaction: Interaction):
         """
         Send the QR only to user
         """
-        user_profile = self.backoffice.account_mng.get_user_memo(user_id=interaction.user.id)
+        await interaction.response.defer(ephemeral=True)
+
+        user_profile = self.backoffice.account_mng.get_user_memo(
+            user_id=interaction.user.id
+        )
         if user_profile:
-            # Get all registered tokens
-            coins_string = ', '.join(
-                [x["assetCode"].upper() for x in self.bot.backoffice.token_manager.get_registered_tokens()])
+            try:
+                # Get all registered tokens
+                coins_string = ", ".join(
+                    x["assetCode"].upper()
+                    for x in self.bot.backoffice.token_manager.get_registered_tokens()
+                )
 
-            # Get qr image as a file
-            self.make_qr_image(user_id=interaction.user.id, user_profile=user_profile)
-            qr_file = File(f"{interaction.user.id}.png")
+                # Get qr image as a file
+                self.make_qr_image(
+                    user_id=interaction.user.id, user_profile=user_profile
+                )
+                qr_file = File(f"{interaction.user.id}.png")
 
-            deposit_embed = Embed(title='Deposit QR code',
-                                  colour=Colour.dark_orange())
-            deposit_embed.add_field(name=':gem: Supported Cryptocurrencies and tokens to be deposited :gem: ',
-                                    value=f'```{coins_string}```',
-                                    inline=False)
-            deposit_embed.set_footer(text=f'/wallet deposit qr -> Only QR')
+                deposit_embed = Embed(
+                    title="Deposit QR code", colour=Colour.dark_orange()
+                )
+                deposit_embed.add_field(
+                    name=":gem: Supported Cryptocurrencies and tokens to be deposited :gem: ",
+                    value=f"```{coins_string}```",
+                    inline=False,
+                )
+                deposit_embed.set_footer(text="/wallet deposit qr -> Only QR")
+                deposit_embed.set_image(url=f"attachment://{interaction.user.id}.png")
 
-            deposit_embed.set_image(url=f"attachment://{interaction.user.id}.png")
-
-            await interaction.response.send_message(file=qr_file, embed=deposit_embed,
-                                                    delete_after=40, ephemeral=True)
-
-            # # Clean the image after process
-            self.clean_qr_image(author_id=interaction.user.id)
+                await interaction.followup.send(file=qr_file, embed=deposit_embed, ephemeral=True)
+            finally:
+                # Clean the image after process
+                self.clean_qr_image(author_id=interaction.user.id)
         else:
-            title = '__Deposit information error__'
-            message = f'Deposit details for your account could not be obtained at this moment from the system. ' \
-                      f'Please try again later, or contact one of the staff members. '
-            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=title)
+            title = "__Deposit information error__"
+            message = (
+                "Deposit details for your account could not be obtained at this moment from the system. "
+                "Please try again later, or contact one of the staff members. "
+            )
+            await custom_messages.system_message(
+                interaction=interaction,
+                color_code=1,
+                message=message,
+                destination=1,
+                sys_msg_title=title,
+            )
 
     @wallet.subcommand(name="balance", description="Fetch wallet Balance")
     @has_wallet_inter_check()
-    async def balance(self,
-                      interaction: Interaction
-                      ):
-        user_balances = self.backoffice.wallet_manager.get_balances(user_id=interaction.user.id)
+    async def balance(self, interaction: Interaction):
+        user_balances = self.backoffice.wallet_manager.get_balances(
+            user_id=interaction.user.id
+        )
         bag = [k for k, v in user_balances.items() if v > 0]
         if bag:
             # initiate Discord embed
-            balance_embed = Embed(title=f":office_worker: Details for {interaction.user} :office_worker:",
-                                  timestamp=datetime.now(timezone.utc),
-                                  colour=Colour.dark_orange())
+            balance_embed = Embed(
+                title=f":office_worker: Details for {interaction.user} :office_worker:",
+                timestamp=datetime.now(timezone.utc),
+                colour=Colour.dark_orange(),
+            )
 
             for k, v in user_balances.items():
                 if v > 0:
                     balance_embed.add_field(
                         name=f"{k.upper()}",
-                        value=f'```{v / (10 ** 7):,.7f} {k.upper()}```',
-                        inline=False)
-                else:
-                    pass
-            await interaction.response.send_message(embed=balance_embed, delete_after=40, ephemeral=True)
+                        value=f"```{v / (10 ** 7):,.7f} {k.upper()}```",
+                        inline=False,
+                    )
+            await interaction.response.send_message(embed=balance_embed, ephemeral=True)
         else:
-            title = 'Crypto Link Wallet is empty__'
-            message = f'Your wallet is empty'
-            await custom_messages.system_message(interaction=interaction, color_code=1, message=message, destination=1,
-                                                 sys_msg_title=title)
+            title = "Crypto Link Wallet is empty__"
+            message = "Your wallet is empty"
+            await custom_messages.system_message(
+                interaction=interaction,
+                color_code=1,
+                message=message,
+                destination=1,
+                sys_msg_title=title,
+            )
 
     @wallet.subcommand(name='withdraw', description='Withdraw from wallet')
     @has_wallet_inter_check()

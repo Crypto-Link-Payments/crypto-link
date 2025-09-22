@@ -55,7 +55,7 @@ class MerchantTasks:
                                 if merchant_manager.remove_overdue_user_role(community_id=mem_role_community_id,
                                                                              role_id=mem_role_id, user_id=mem_id):
                                     print(Fore.YELLOW + "active membership removed")
-                                    expired = Embed(title=':timer::octagonal_sign:  __Role Expiration Notification__ :octagonal_sign: :timer:',
+                                    expired = Embed(title=':octagonal_sign:  __Role Expired__ :octagonal_sign:',
                                                     description='Your active membership has expired.',
                                                     color=Color.dark_red())
                                     expired.add_field(name=':bank: Origin of role expiration:bank: ',
@@ -67,6 +67,7 @@ class MerchantTasks:
                                                       value=" In order to obtain back all privileges please re-purchase"
                                                             " the role directly from the community.",
                                                       inline=False)
+                                    expired.set_footer(text="This message was sent to you privately.")
                                     try:
                                         await member.send(embed=expired)
                                     except discord.Forbidden:
