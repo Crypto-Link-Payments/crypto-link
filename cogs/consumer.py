@@ -1,17 +1,37 @@
-import datetime
-import time
-from datetime import datetime
-from datetime import timedelta, timezone
+from datetime import datetime, timezone, timedelta
+from typing import Optional, Tuple
+import io
+
 from nextcord import Colour, Role, Embed
 import nextcord
 from datetime import datetime, timezone 
 from nextcord.ext import commands
 from pycoingecko import CoinGeckoAPI
 from nextcord import Embed, Colour, slash_command, Interaction, Role
-from utils.customCogChecks import has_wallet_inter_check, is_public_channel, guild_has_merchant
 
+from typing import Optional, Tuple
 from utils.customCogChecks import guild_has_merchant
 from cogs.utils.systemMessaages import CustomMessages
+import nextcord
+from nextcord import (
+    AllowedMentions,
+    ButtonStyle,
+    Colour,
+    Embed,
+    Interaction,
+    Role,
+    ui,
+)
+
+from urllib.parse import urlencode
+from nextcord.ui import View, button, Button
+from utils.customCogChecks import has_wallet_inter_check, is_public_channel
+
+try:
+    import pyqrcode  # pip install qrcode[pil]
+    HAS_QR = True
+except Exception:
+    HAS_QR = False
 
 custom_messages = CustomMessages()
 gecko = CoinGeckoAPI()
