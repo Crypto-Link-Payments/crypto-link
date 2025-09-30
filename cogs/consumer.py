@@ -71,6 +71,74 @@ def _build_https_trampoline(base_url: Optional[str], dest: str, amount_xlm: floa
     })
     return f"{base_url}?{qs}"
 
+
+class OrderCopyView(View):
+    def __init__(
+        self,
+        *,
+        address: str,
+        memo_text: str,
+        amount_xlm: float,
+        trampoline_https_url: Optional[str] = None,
+        invoker_id: Optional[int] = None,
+        timeout: Optional[float] = 600,
+    ):
+        super().__init__(timeout=timeout)
+        self.address = address
+        self.memo_text = memo_text
+        self.amount_xlm = amount_xlm
+        self.invoker_id = invoker_id
+
+        if trampoline_https_url and trampoline_https_url.startswith(("http://", "https://", "discord://")):
+            self.add_item(
+                Button(
+                    label="Open Payment Page",
+                    style=ButtonStyle.link,
+                    url=trampoline_https_url,
+                    row=0,
+                )
+            )
+
+    async def interaction_check(self, interaction: Interaction) -> bool:
+        return True if self.invoker_id is None else (interaction.user.id == self.invoker_id)
+
+    @button(label="Copy Address", style=ButtonStyle.primary, emoji="📋", row=1)
+    async def copy_address(self, _, interaction: Interaction):
+        await interaction.response.send_message(
+            content=f"**Public Address**\n`{_safe(self.address)}`\n\n_long-press to copy_",
+            ephemeral=True,
+            allowed_mentions=AllowedMentions.none(),
+        )
+
+    @button(label="Copy MEMO", style=ButtonStyle.primary, emoji="🧭", row=1)
+    async def copy_memo(self, _, interaction: Interaction):
+        await interaction.response.send_message(
+            content=f"**MEMO**\n`{_safe(self.memo_text)}`\n\n_long-press to copy_",
+            ephemeral=True,
+            allowed_mentions=AllowedMentions.none(),
+        )
+
+    @button(label="Copy Amount", style=ButtonStyle.secondary, emoji="💵", row=1)
+    async def copy_amount(self, _, interaction: Interaction):
+        await interaction.response.send_message(
+            content=f"**Amount (XLM)**\n`{_fmt_xlm(self.amount_xlm)}`\n\n_long-press to copy_",
+            ephemeral=True,
+            allowed_mentions=AllowedMentions.none(),
+        )
+
+    @button(label="Copy Both", style=ButtonStyle.secondary, emoji="📋", row=2)
+    async def copy_both(self, _, interaction: Interaction):
+        await interaction.response.send_message(
+            content=(
+                f"**Address + MEMO**\n"
+                f"Address:\n`{_safe(self.address)}`\n\n"
+                f"MEMO:\n`{_safe(self.memo_text)}`\n\n"
+                "_long-press to copy_"
+            ),
+            ephemeral=True,
+            allowed_mentions=AllowedMentions.none(),
+        )
+
 class ConsumerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
