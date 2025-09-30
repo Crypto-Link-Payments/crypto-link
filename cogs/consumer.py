@@ -249,7 +249,7 @@ class ConsumerCommands(commands.Cog):
 
     @slash_command(name="membership", description="Membership system entry point", dm_permission=False)
     async def membership(self, interaction: Interaction):
-        pass  # required root slash group
+        pass  
 
     @membership.subcommand(name="help", description="Shows available membership commands")
     @has_wallet_inter_check()
@@ -265,7 +265,9 @@ class ConsumerCommands(commands.Cog):
             {"name": f':person_juggling: Subscribe for role on community :person_juggling:',
              "value": '`/membership subscribe`'},
             {"name": f':man_mage: List active roles on community:man_mage:',
-             "value": '`/membership current`'}
+             "value": '`/membership current`'},
+            {"name": f':receipt: List active roles on community :receipt:',
+             "value": '`/membership order`'}
         ]
 
         await custom_messages.embed_builder(
