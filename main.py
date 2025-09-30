@@ -11,7 +11,7 @@ from MerchantTasks import MerchantTasks, start_merchant_scheduler
 from utils.tools import Helpers
 
 init(autoreset=True)
-#
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

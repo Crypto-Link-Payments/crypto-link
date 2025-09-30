@@ -154,14 +154,15 @@ class GuildOwnerCommands(commands.Cog):
             embed.add_field(name=":detective: Private Transactions", value=f'`{xlm_stats["privateCount"]}`')
             embed.add_field(name=":person_juggling: Perks Sold", value=f'`{xlm_stats["roleTxCount"]}`')
 
-            embed.add_field(
-                name=':warning: Other token statistics',
-                value=(
-                    f'To view token-specific stats, use this command with one of the following tokens: '
-                    f'`{available_stats}`'
-                ),
-                inline=False
-            )
+            if registered_tokens:
+                embed.add_field(
+                    name=':warning: Other token statistics',
+                    value=(
+                        f'To view token-specific stats, use this command with one of the following tokens: '
+                        f'`{available_stats}`'
+                    ),
+                    inline=False
+                )
 
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
