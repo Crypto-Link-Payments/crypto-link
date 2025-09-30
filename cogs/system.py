@@ -4,6 +4,7 @@ COGS: Management of the whole payment system
 import os
 import sys
 import time
+import zipfile
 from datetime import datetime
 
 from nextcord import Embed, Colour
@@ -12,7 +13,11 @@ from cogs.utils.monetaryConversions import get_normal, get_rates
 from utils.customCogChecks import is_animus, is_one_of_gods
 from cogs.utils.systemMessaages import CustomMessages
 from utils.tools import Helpers
-
+from bson import json_util
+from bson import ObjectId
+import json
+from nextcord import File
+import io
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
 
@@ -31,6 +36,14 @@ CONST_FEE_INFO = '__Stellar Lumen withdrawal fee information__'
 extensions = ['cogs.help', 'cogs.transactions', 'cogs.accounts',
               'cogs.system', 'cogs.withdrawals',
               'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners']
+
+class MongoJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, ObjectId):
+            return str(obj)
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
 
 
 class BotManagementCommands(commands.Cog):
@@ -165,33 +178,6 @@ class BotManagementCommands(commands.Cog):
                              inline=False)
         await ctx.channel.send(embed=values)
 
-    # @cl.command()
-    # async def stats(self, ctx, token: str = None):
-    #     """
-    #     Statistical information on Crypto Link system
-    #     """
-    #     if not token:
-    #         data = self.backoffice.stats_manager.get_all_stats()
-    #         cl_off_chain = data["xlm"]["offChain"]
-    #         cl_on_chain = data['xlm']['onChain']
-
-    #         guilds = await self.bot.fetch_guilds(limit=150).flatten()
-    #         reach = len(self.bot.users)
-    #         world = Embed(title='__Crypto Link__',
-    #                       colour=Colour.magenta(),
-    #                       timestamp=datetime.utcnow())
-    #         world.add_field(name='Guild reach',
-    #                         value=f'{len(guilds)}',
-    #                         inline=False)
-    #         world.add_field(name='Member reach',
-    #                         value=f'{reach}',
-    #                         inline=False)
-    #         await ctx.author.send(embed=world)
-
-    #         await self.send_token_stats(ctx=ctx, cl_on_chain=cl_on_chain, cl_off_chain=cl_off_chain)
-    #     else:
-    #         off_chain_stats, on_chain_stats = self.bot.stats_manager.get_token_stats_global(token=token)
-    #         await self.send_token_stats(ctx=ctx, cl_on_chain=on_chain_stats, cl_off_chain=off_chain_stats)
 
     @cl.command()
     @commands.check(is_animus)
@@ -800,6 +786,49 @@ class BotManagementCommands(commands.Cog):
         if isinstance(error, commands.CheckFailure):
             await custom_messages.system_message_pref(ctx=ctx, color_code=1, message=CONST_WARNING_TITLE, destination=1,
                                                  sys_msg_title=CONST_WARNING_MESSAGE)
+
+
+    #DATABASE OPERATIOSN 
+
+    @commands.command(name="exportDb")
+    @commands.check(is_animus)
+    async def export_db(self, ctx: commands.Context):
+        """Export all MongoDB collections into a single ZIP file (locked to owner ID)."""
+
+        if ctx.author.id != 360367188432912385:  # your Discord ID
+            await ctx.send("⛔ You are not authorized to use this command.")
+            return
+
+        try:
+            db = self.backoffice.connection["CryptoLink"]
+            collection_names = db.list_collection_names()
+            if not collection_names:
+                await ctx.send("❌ No collections found in the database.")
+                return
+
+            await ctx.send(f"📂 Exporting {len(collection_names)} collections into one ZIP...")
+
+            # Create an in-memory ZIP
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+                for coll_name in collection_names:
+                    docs = list(db[coll_name].find({}))
+                    if not docs:
+                        continue  # skip empty collections
+
+                    data_json = json_util.dumps(docs, indent=2)
+                    zipf.writestr(f"{coll_name}.json", data_json)
+
+            zip_buffer.seek(0)
+
+            # Send the ZIP as one file
+            file = File(zip_buffer, filename="mongodb_export.zip")
+            await ctx.send(file=file)
+
+            await ctx.send("✅ Export complete!")
+
+        except Exception as e:
+            await ctx.send(f"❌ Error exporting DB: {e}")
 
 
 def setup(bot):
