@@ -35,9 +35,12 @@ except Exception:
 
 custom_messages = CustomMessages()
 gecko = CoinGeckoAPI()
+PAY_TRAMPOLINE_BASE: Optional[str] = None 
+PAY_LINK_BASE: Optional[str] = None  
 CONST_STELLAR_EMOJI = '<:stelaremoji:684676687425961994>'
 CONST_MERCHANT_ROLE_ERROR = "__Merchant System Role Error__"
 CONST_MERCHANT_PURCHASE_ERROR = ":warning: __Merchant System Purchase Error__:warning: "
+ORDER_TTL_MINUTES = 60  
 
 
 class ConsumerCommands(commands.Cog):
