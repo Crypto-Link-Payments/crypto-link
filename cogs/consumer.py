@@ -237,7 +237,7 @@ class ConsumerCommands(commands.Cog):
                                 }
 
                                 # Send user payment slip info on purchased role
-                                await custom_messages.user_role_purchase_msg(interaction=interaction, role=role,
+                                emb = custom_messages.user_role_purchase_msg(interaction=interaction, role=role,
                                                                              role_details=purchase_role_data)
 
                                 # Send report to guild oowner that he recieved funds
@@ -288,14 +288,21 @@ class ConsumerCommands(commands.Cog):
                                 await self.backoffice.guild_profiles.update_stellar_community_wallet_stats(
                                     guild_id=guild_id, data=data)
 
-                                # # Send notifcications
-                                # load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                #                  self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                                # explorer_msg = f':man_juggling: purchased in value {role_value_rounded} {CONST_STELLAR_EMOJI} ' \
-                                #                f'(${convert_to_dollar}) on ' \
-                                #                f'{ctx.message.guild}'
-                                # await custom_messages.explorer_messages(applied_channels=load_channels,
-                                #                                         message=explorer_msg)
+                                # Send notifcications
+                                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
+                                                 self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
+                                explorer_msg = f':man_juggling: purchased in value {role_value_rounded} {CONST_STELLAR_EMOJI} ' \
+                                               f'(${convert_to_dollar}) on ' \
+                                               f'{interaction.message.guild}'
+                                await custom_messages.explorer_messages(applied_channels=load_channels,
+                                                                        message=explorer_msg)
+                                # inside user_role_purchase_msg
+                                await interaction.response.send_message(
+                                    content=f"{interaction.guild.owner.mention}, {interaction.user.mention}",
+                                    embed=emb
+                                )
+
+
                         else:
                             await custom_messages.system_message(
                                 interaction=interaction,
