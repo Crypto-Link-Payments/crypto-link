@@ -289,13 +289,15 @@ class ConsumerCommands(commands.Cog):
                                     guild_id=guild_id, data=data)
 
                                 # Send notifcications
-                                load_channels = [self.bot.get_channel(id=int(chn)) for chn in
-                                                 self.backoffice.guild_profiles.get_all_explorer_applied_channels()]
-                                explorer_msg = f':man_juggling: purchased in value {role_value_rounded} {CONST_STELLAR_EMOJI} ' \
-                                               f'(${convert_to_dollar}) on ' \
-                                               f'{interaction.message.guild}'
-                                await custom_messages.explorer_messages(applied_channels=load_channels,
-                                                                        message=explorer_msg)
+                                load_channels = [
+                                    self.bot.get_channel(int(chn))
+                                    for chn in self.backoffice.guild_profiles.get_all_explorer_applied_channels()
+                                ]
+                                explorer_msg = (
+                                    f":man_juggling: purchased in value {role_value_rounded} {CONST_STELLAR_EMOJI} "
+                                    f"(${convert_to_dollar}) on {interaction.guild.name}"
+                                )
+                                await custom_messages.explorer_messages(applied_channels=load_channels, message=explorer_msg)
                                 # inside user_role_purchase_msg
                                 await interaction.response.send_message(
                                     content=f"{interaction.guild.owner.mention}, {interaction.user.mention}",
