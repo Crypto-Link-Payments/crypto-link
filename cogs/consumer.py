@@ -139,6 +139,92 @@ class OrderCopyView(View):
             allowed_mentions=AllowedMentions.none(),
         )
 
+def _make_payment_embed(
+    interaction: Interaction,
+    role: Role,
+    order: dict,
+    amount_xlm: float,
+    amount_usd: float,
+    dest_address: str,
+    *,
+    trampoline_base_https: Optional[str] = None,
+) -> Tuple[Embed, Optional[nextcord.File], OrderCopyView]:
+    ts_ms = int(order["purchaseRequest"])  
+    ts = ts_ms // 1000
+    created_dt = datetime.fromtimestamp(ts, tz=timezone.utc)
+
+    status_map = {0: "Awaiting your payment", 1: "Processed"}
+    status = status_map.get(order.get("status", 0), "Unknown")
+
+    expires_at = created_dt + timedelta(minutes=ORDER_TTL_MINUTES)
+    expires_unix = int(expires_at.timestamp())
+
+    e = Embed(
+        title="🧾 Order Created",
+        description="Here are your order details. Please complete the payment on the Stellar (XLM) network.",
+        colour=Colour.blurple(),
+    )
+    e.add_field(name="🎪 Role", value=f"**{role.name}** (id:{order['roleId']})", inline=False)
+    e.add_field(name="💵 Amount", value=f"{_fmt_xlm(amount_xlm)} XLM  (${amount_usd:.2f})", inline=False)
+    e.add_field(name="📦 Status", value=status, inline=True)
+    e.add_field(name="🕒 Created", value=f"{created_dt.strftime('%Y-%m-%d %H:%M:%S')} UTC • <t:{ts}:R>", inline=True)
+
+    memo_val = order.get("roleReference") or ""
+    if memo_val:
+        e.add_field(name="🧾 Payment Memo", value=f"`{memo_val}`", inline=False)
+
+    e.add_field(
+        name="💳 Payment Instructions",
+        value=(
+            f"• **Network:** Stellar (XLM)\n"
+            f"• **Destination Address:** `{dest_address}`\n"
+            f"• **Amount:** {_fmt_xlm(amount_xlm)} XLM  (${amount_usd:.2f})\n"
+            f"• **Memo (required):** `{memo_val}`\n"
+            f"• **Order valid until:** <t:{expires_unix}:R> (then it may be recalculated)\n\n"
+            "⚠️ **Important**\n"
+            "• Use the **Stellar (XLM) network**, not another chain.\n"
+            "• Include the **memo exactly** as shown, or your payment may not be linked.\n"
+            "• Send the **exact amount** to avoid delays."
+        ),
+        inline=False,
+    )
+    e.set_footer(text=f"Community: {interaction.guild.name} • User: {interaction.user}")
+
+    # QR using the SEP-7 deep link (wallets can parse it when scanning)
+    qr_file: Optional[nextcord.File] = None
+    if HAS_QR:
+        try:
+            sep7_uri = _stellar_pay_uri(dest_address, amount_xlm, memo_val)
+            qr = pyqrcode.create(sep7_uri, error='M')
+            buf = io.BytesIO()
+            qr.png(buf, scale=5)  
+            buf.seek(0)
+            qr_file = nextcord.File(buf, filename="stellar_payment_qr.png")
+            e.set_image(url="attachment://stellar_payment_qr.png")
+        except Exception as ex:
+            print(f"QR generation failed: {ex}")
+            qr_file = None
+
+
+    https_url = _build_https_trampoline(trampoline_base_https, dest_address, amount_xlm, memo_val)
+
+    view = OrderCopyView(
+        address=dest_address,
+        memo_text=memo_val,
+        amount_xlm=amount_xlm,
+        trampoline_https_url=https_url,
+        invoker_id=interaction.user.id,  
+    )
+
+    return e, qr_file, view
+
+class PayView(ui.View):
+    def __init__(self, url: Optional[str], timeout: Optional[float] = 1800):
+        super().__init__(timeout=timeout)
+        if url and url.startswith(("http://", "https://", "discord://")):
+            self.add_item(ui.Button(label="Open Payment Page", style=ButtonStyle.link, url=url))
+
+
 class ConsumerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
