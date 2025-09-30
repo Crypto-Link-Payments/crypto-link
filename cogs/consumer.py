@@ -582,6 +582,88 @@ class ConsumerCommands(commands.Cog):
                 destination=1)
 
 
+    @membership.subcommand(name="order", description="Create order and pay directly")
+    @is_public_channel()
+    async def order(self, interaction: Interaction, role: Role, ticker: str = "xlm"):
+
+        await interaction.response.send_message("\u200b", ephemeral=True)
+
+        user = interaction.user
+        guild = interaction.guild
+        guild_id = interaction.guild_id
+        ticker = (ticker or "xlm").lower()
+
+
+        role_details = self.backoffice.merchant_manager.find_role_details(role_id=role.id)
+        if not (role_details and role_details.get("status") == "active"):
+            await custom_messages.system_message(
+                interaction=interaction,
+                message=f"Role {role} is not active or not monetized on {guild}. Contact {guild.owner}.",
+                sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                color_code=1,
+                destination=1,
+            )
+            return
+
+
+        if role.id in [r.id for r in user.roles]:
+            await custom_messages.system_message(
+                interaction=interaction,
+                message=f'You already own the role ***{role}***. Wait for it to expire before re-purchasing.',
+                sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                color_code=1,
+                destination=0,
+            )
+            return
+
+
+        convert_to_dollar = float(role_details["pennyValues"]) / 100.0  # USD price
+        gecko_data = gecko.get_price(ids="stellar", vs_currencies="usd") or {}
+        coin_usd_price = (gecko_data.get("stellar") or {}).get("usd")
+        if not coin_usd_price:
+            await custom_messages.system_message(
+                interaction=interaction,
+                message="Couldn’t fetch conversion rates. Try again later.",
+                sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                color_code=1,
+                destination=0,
+            )
+            return
+        amount_usd = convert_to_dollar
+        amount_xlm = amount_usd / float(coin_usd_price)
+
+        order = self.backoffice.merchant_manager.create_merchant_order(
+            community_id=guild_id, role_id=role.id, user_id=user.id
+        )
+        if not order:
+            await interaction.followup.send("❌ Failed to create order.", ephemeral=True)
+            return
+
+
+        dest_address = self.backoffice.stellar_wallet.public_key  
+        embed, qr_file, view = _make_payment_embed(
+            interaction, role, order, amount_xlm, amount_usd, dest_address,
+            trampoline_base_https=PAY_TRAMPOLINE_BASE  
+        )
+
+
+        try:
+            await interaction.user.send(
+                embed=embed,
+                file=qr_file,
+                view=view,
+                allowed_mentions=AllowedMentions.none(),
+            )
+            await interaction.followup.send("📬 I’ve sent your order details to your DMs.", ephemeral=True)
+        except nextcord.Forbidden:
+            await interaction.followup.send(
+                "⚠️ I couldn’t DM you. Here are your order details:",
+                embed=embed,
+                file=qr_file,
+                view=view,
+                ephemeral=True,
+                allowed_mentions=AllowedMentions.none(),
+            )
 
 def setup(bot):
     bot.add_cog(ConsumerCommands(bot))
