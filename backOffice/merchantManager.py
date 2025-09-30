@@ -7,9 +7,18 @@ import sys
 
 from bson.objectid import ObjectId
 from pymongo import errors
+import uuid
+import time
+import time
+import uuid
+import string
+import random
+from dataclasses import dataclass
 
 project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_path)
+
+from pymongo.errors import DuplicateKeyError, AutoReconnect, NetworkTimeout, PyMongoError
 
 
 class MerchantManager:
@@ -32,6 +41,78 @@ class MerchantManager:
 
         # Collection of applied users in the system
         self.applied_users = self.communities.MerchantAppliedUsers
+
+        # Merchant noncustodial access = 
+        self.merchant_orders = self.communities.MerchantOrders
+
+    def _random_memo_text(self, length: int = 28) -> str:
+        # ASCII-only to stay within MEMO_TEXT byte limits (≤28 bytes)
+        ASCII_ALNUM = string.ascii_letters + string.digits
+        return ''.join(random.SystemRandom().choice(ASCII_ALNUM) for _ in range(length))
+
+
+    def create_merchant_order(self, community_id, role_id, user_id):
+        """
+        Creating order for custodial deposits
+
+        status = 0 -> active and listening for the payments to be connected
+        status = 1 -> processed
+        """
+        unitx_ts = int(time.time() * 1000)
+
+        try:
+            role_id = int(role_id)
+            user_id = int(user_id)
+            if role_id <= 0 or user_id <= 0:
+                raise ValueError("role_id and user_id must be positive integers")
+            if not community_id:
+                raise ValueError("community_id is required")
+
+        except Exception as e:
+            print("could not verify all details to create order")
+            return 
+
+        memo_text = uuid.uuid4().hex[:28]  # safe 28-char random memo
+        base_order = {
+            "communityId": community_id,
+            "roleId": role_id,
+            "userId": user_id,
+            "status": 0,
+            "purchaseRequest": unitx_ts,
+            "processedTime": None,
+        }
+
+        max_attempts = 5
+        backoff_ms = 50
+
+        for attempt in range(1, max_attempts + 1):
+            try:
+                memo_text = self._random_memo_text(28)
+                order_details = {**base_order, "roleReference": memo_text}
+
+
+                self.merchant_orders.insert_one(order_details)
+                ins = self.merchant_orders.insert_one(order_details)  # acknowledged by default
+                order_details["_id"] = ins.inserted_id
+                return order_details
+            except DuplicateKeyError:
+                if attempt == max_attempts:
+                    return "There was a problem with creation of the order"
+
+                time.sleep(backoff_ms / 1000.0)
+                backoff_ms *= 2  # exponential backoff
+
+            except PyMongoError as e:
+                return "There was a DB error"
+        return "Entry could not be made"
+
+    def find_merchant_order (self, role_reference:str):
+        data = self.merchant_orders.find_one({"roleReference":role_reference})
+        if data:
+            return data
+        else:
+            return None
+
 
     def check_if_community_exist(self, community_id: int):
         """
