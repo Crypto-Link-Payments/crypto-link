@@ -362,7 +362,7 @@ class CustomMessages:
         await sys_channel.send(embed=notify)
 
     @staticmethod
-    async def user_role_purchase_msg(interaction: Interaction, role: Role, role_details: dict):
+    def user_role_purchase_msg(interaction: Interaction, role: Role, role_details: dict):
         try:
             # Format the expiration datetime
             end_time: datetime = role_details["roleEnd"]
@@ -401,10 +401,7 @@ class CustomMessages:
                 text=f"Role ID: {role.id} • Purchased in {interaction.guild.name}"
             )
 
-            await interaction.channel.send(
-                content=f"{interaction.guild.owner.mention}, {interaction.user.mention}",
-                embed=embed
-            )
+            return embed
 
         except nextcord.Forbidden as e:
             print(Fore.RED + f'{e}')
