@@ -42,6 +42,34 @@ CONST_MERCHANT_ROLE_ERROR = "__Merchant System Role Error__"
 CONST_MERCHANT_PURCHASE_ERROR = ":warning: __Merchant System Purchase Error__:warning: "
 ORDER_TTL_MINUTES = 60  
 
+def _safe(s: str) -> str:
+    """Avoid accidental mentions; keep backticks intact."""
+    return s.replace("@", "@\u200b").replace("#", "#\u200b")
+
+def _fmt_xlm(x: float) -> str:
+    """Always 7 decimals for XLM (Stellar base precision)."""
+    return f"{x:.7f}"
+
+def _stellar_pay_uri(dest: str, amount_xlm: float, memo_text: str) -> str:
+    """SEP-7 deep link (used in QR only; Discord buttons can't use web+stellar)."""
+    return (
+        f"web+stellar:pay?destination={dest}"
+        f"&amount={_fmt_xlm(amount_xlm)}"
+        f"&memo={memo_text}"
+        f"&memo_type=MEMO_TEXT"
+    )
+
+def _build_https_trampoline(base_url: Optional[str], dest: str, amount_xlm: float, memo_text: str) -> Optional[str]:
+    """If you have an HTTPS landing page, build a safe link for a Discord button."""
+    if not base_url:
+        return None
+    qs = urlencode({
+        "destination": dest,
+        "amount": _fmt_xlm(amount_xlm),
+        "memo": memo_text,
+        "memo_type": "MEMO_TEXT",
+    })
+    return f"{base_url}?{qs}"
 
 class ConsumerCommands(commands.Cog):
     def __init__(self, bot):
