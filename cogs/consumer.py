@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 from datetime import timedelta, timezone
 from nextcord import Colour, Role, Embed
+import nextcord
 from datetime import datetime, timezone 
 from nextcord.ext import commands
 from pycoingecko import CoinGeckoAPI
@@ -24,6 +25,22 @@ class ConsumerCommands(commands.Cog):
         self.bot = bot
         self.backoffice = bot.backoffice
         self.command_string = bot.get_command_str()
+
+
+    def human_td(self, td: timedelta) -> str:
+        """Nicely format a positive timedelta (no microseconds)."""
+        total = int(td.total_seconds())
+        if total <= 0:
+            return "Expired"
+        days, rem = divmod(total, 86400)
+        hours, rem = divmod(rem, 3600)
+        minutes, seconds = divmod(rem, 60)
+        parts = []
+        if days: parts.append(f"{days} day{'s' if days != 1 else ''}")
+        if hours: parts.append(f"{hours} h")
+        if minutes: parts.append(f"{minutes} min")
+        if not parts: parts.append(f"{seconds} s")
+        return ", ".join(parts)
 
     @slash_command(name="membership", description="Membership system entry point", dm_permission=False)
     async def membership(self, interaction: Interaction):
@@ -69,13 +86,16 @@ class ConsumerCommands(commands.Cog):
             await interaction.response.send_message(f"❌ Error fetching role data: {e}", ephemeral=True)
             return
 
+        await interaction.response.send_message("📬 I’ll DM you your role details.", ephemeral=True)
+
         if roles:
             for role in roles:
                 value_in_stellar = round(int(role['atomicValue']) / 10000000, 7)
                 starting_time = datetime.fromtimestamp(role['start'], tz=timezone.utc)
                 ending_time = datetime.fromtimestamp(role['end'], tz=timezone.utc)
                 now = datetime.now(timezone.utc)
-                count_left = ending_time - now
+                remaining = ending_time - now
+                remaining_str = self.human_td(remaining)
                 dollar_worth = round(int(role['pennies']) / 100, 4)
 
                 role_embed = Embed(
@@ -86,9 +106,13 @@ class ConsumerCommands(commands.Cog):
                 role_embed.add_field(name=":calendar: Role Obtained", value=f"{starting_time.strftime('%Y-%m-%d %H:%M:%S')} UTC", inline=False)
                 role_embed.add_field(name=":money_with_wings: Role Value", value=f"{value_in_stellar} {CONST_STELLAR_EMOJI} (${dollar_worth})", inline=False)
                 role_embed.add_field(name=":stopwatch: Role Expires", value=f"{ending_time.strftime('%Y-%m-%d %H:%M:%S')} UTC", inline=False)
-                role_embed.add_field(name=":timer: Time Remaining", value=str(count_left), inline=False)
+                role_embed.add_field(name=":timer: Time Remaining", value=remaining_str if remaining.total_seconds() > 0 else "Expired, you will loose membership if not re-purchased", inline=False)
 
-                await interaction.user.send(embed=role_embed)
+                try:
+                    await interaction.user.send(embed=role_embed)
+                except nextcord.Forbidden:
+                    await interaction.followup.send("⚠️ I couldn’t DM you (privacy settings). Here it is:", ephemeral=True)
+                    await interaction.followup.send(embed=role_embed, ephemeral=True)
 
             await interaction.response.send_message("📬 Role details sent to your DM!", ephemeral=True)
         else:
