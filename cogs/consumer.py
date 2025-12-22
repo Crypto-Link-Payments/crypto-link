@@ -42,6 +42,140 @@ CONST_MERCHANT_ROLE_ERROR = "__Merchant System Role Error__"
 CONST_MERCHANT_PURCHASE_ERROR = ":warning: __Merchant System Purchase Error__:warning: "
 ORDER_TTL_MINUTES = 60  
 
+
+from datetime import datetime, timezone, timedelta
+from typing import Any, Dict, List, Optional
+
+import nextcord
+from nextcord import Interaction, Embed, Colour
+
+
+ORDER_TTL_MINUTES = 30  # keep consistent with your order flow
+
+
+def _as_discord_ts(dt: datetime) -> int:
+    return int(dt.timestamp())
+
+
+def _fmt_xlm_from_stroops(stroops: int) -> str:
+    # 1 XLM = 10,000,000 stroops
+    return f"{stroops / 10_000_000:.7f}".rstrip("0").rstrip(".")
+
+
+def _infer_created_dt(order: dict) -> datetime:
+    """
+    Your Mongo doc has:
+      - createdAt (datetime) OR
+      - purchaseRequest (unix ms)
+    We'll use createdAt if present; else fall back to purchaseRequest.
+    """
+    created_at = order.get("createdAt")
+    if isinstance(created_at, datetime):
+        # ensure tz-aware
+        return created_at if created_at.tzinfo else created_at.replace(tzinfo=timezone.utc)
+
+    ts_ms = order.get("purchaseRequest")
+    if isinstance(ts_ms, int):
+        return datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)
+
+    return datetime.now(timezone.utc)
+
+
+def _status_text(order: dict, *, created_dt: datetime) -> tuple[str, str]:
+    """
+    Returns (label, emoji) based on your `status` and TTL.
+    status mapping you used:
+      0 = Awaiting your payment
+      1 = Processed
+    """
+    status = order.get("status", 0)
+    expires_at = created_dt + timedelta(minutes=ORDER_TTL_MINUTES)
+
+    if status == 1:
+        return ("Processed", "✅")
+
+    # status == 0 (or unknown): check TTL
+    if datetime.now(timezone.utc) > expires_at:
+        return ("Expired (create a new order)", "⌛")
+
+    return ("Awaiting payment", "⏳")
+
+
+def _build_order_embed(
+    interaction: Interaction,
+    order: dict,
+    role_name: str,
+    dest_address: str,
+) -> Embed:
+    created_dt = _infer_created_dt(order)
+    expires_at = created_dt + timedelta(minutes=ORDER_TTL_MINUTES)
+
+    status_label, status_emoji = _status_text(order, created_dt=created_dt)
+
+    # Amount (you store `value` in stroops)
+    stroops = int(order.get("value", 0) or 0)
+    amount_xlm_str = _fmt_xlm_from_stroops(stroops)
+
+    currency = (order.get("currency") or "xlm").upper()
+
+    memo = (
+        order.get("paymentReference")
+        or order.get("roleReference")
+        or ""
+    )
+
+    # Colour by status
+    if status_label.startswith("Processed"):
+        colour = Colour.green()
+    elif status_label.startswith("Expired"):
+        colour = Colour.orange()
+    else:
+        colour = Colour.blurple()
+
+    e = Embed(
+        title=f"{status_emoji} {role_name}",
+        description=(
+            "Membership order details.\n"
+            "If this order is **Awaiting payment**, complete the payment using the details below."
+        ),
+        colour=colour,
+    )
+
+    e.add_field(name="📦 Status", value=status_label, inline=True)
+    e.add_field(name="🕒 Created", value=f"<t:{_as_discord_ts(created_dt)}:R>", inline=True)
+    e.add_field(name="⏰ Valid until", value=f"<t:{_as_discord_ts(expires_at)}:R>", inline=True)
+
+    e.add_field(name="💵 Amount", value=f"**{amount_xlm_str} {currency}**", inline=False)
+    e.add_field(name="🏦 Destination", value=f"`{dest_address}`", inline=False)
+
+    if memo:
+        e.add_field(name="🧾 Memo (required)", value=f"`{memo}`", inline=False)
+    else:
+        e.add_field(
+            name="🧾 Memo (required)",
+            value="⚠️ *Missing memo in this order.* Create a new order and pay using the new memo.",
+            inline=False,
+        )
+
+    # Helpful hints for awaiting payment
+    if status_label == "Awaiting payment":
+        e.add_field(
+            name="✅ What to do next",
+            value=(
+                "1) Send the **exact amount** to the destination address\n"
+                "2) Include the **memo exactly** as shown\n"
+                "3) Wait for processing (it may take a moment)"
+            ),
+            inline=False,
+        )
+
+    # Show IDs (useful for support)
+    e.set_footer(
+        text=f"RoleId: {order.get('roleId')} • OrderRef: {memo or 'n/a'}"
+    )
+    return e
+
+
 def _safe(s: str) -> str:
     """Avoid accidental mentions; keep backticks intact."""
     return s.replace("@", "@\u200b").replace("#", "#\u200b")
@@ -169,7 +303,8 @@ def _make_payment_embed(
     e.add_field(name="📦 Status", value=status, inline=True)
     e.add_field(name="🕒 Created", value=f"{created_dt.strftime('%Y-%m-%d %H:%M:%S')} UTC • <t:{ts}:R>", inline=True)
 
-    memo_val = order.get("roleReference") or ""
+    memo_val = order.get("paymentReference") or ""
+    
     if memo_val:
         e.add_field(name="🧾 Payment Memo", value=f"`{memo_val}`", inline=False)
 
@@ -690,6 +825,81 @@ class ConsumerCommands(commands.Cog):
                 allowed_mentions=AllowedMentions.none(),
             )
 
+    @membership.subcommand(name="orders", description="List your recent membership orders")
+    @is_public_channel()
+    async def orders(self, interaction: Interaction):
+        if interaction.guild is None:
+            await custom_messages.system_message(
+                interaction=interaction,
+                message="This command can only be used in a server.",
+                sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                color_code=1,
+                destination=0,
+            )
+            return
+
+        if interaction.user is None:
+            return
+
+        user_id = interaction.user.id
+        guild_id = interaction.guild.id
+
+        orders = self.backoffice.merchant_manager.view_user_merchant_orders(
+            community_id=guild_id,
+            user_id=user_id
+        )
+
+        if not orders:
+            await custom_messages.system_message(
+                interaction=interaction,
+                message="You have no recent membership orders.",
+                sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                color_code=1,
+                destination=0,
+            )
+            return
+
+        dest_address = self.backoffice.stellar_wallet.public_key
+
+        embeds: list[nextcord.Embed] = []
+
+        awaiting = 0
+        processed = 0
+        expired = 0
+        for o in orders:
+            created_dt = _infer_created_dt(o)
+            status_label, _ = _status_text(o, created_dt=created_dt)
+            if status_label.startswith("Processed"):
+                processed += 1
+            elif status_label.startswith("Expired"):
+                expired += 1
+            else:
+                awaiting += 1
+
+        header = nextcord.Embed(
+            title="🧾 Your Membership Orders",
+            description=(
+                f"**Awaiting payment:** {awaiting}\n"
+                f"**Processed:** {processed}\n"
+                f"**Expired:** {expired}\n\n"
+                "Tip: If an order is awaiting payment, make sure to include the **memo** exactly."
+            ),
+            colour=nextcord.Colour.blurple(),
+        )
+        embeds.append(header)
+
+        # Newest first (if createdAt or purchaseRequest exists)
+        def sort_key(o: dict) -> float:
+            dt = _infer_created_dt(o)
+            return dt.timestamp()
+
+        for order in sorted(orders, key=sort_key, reverse=True)[:10]:
+            role = interaction.guild.get_role(order.get("roleId", 0))
+            role_name = role.name if role else f"Unknown Role (id:{order.get('roleId')})"
+
+            embeds.append(_build_order_embed(interaction, order, role_name, dest_address))
+
+        await interaction.response.send_message(embeds=embeds[:10], ephemeral=True)
 
 def setup(bot):
     bot.add_cog(ConsumerCommands(bot))
