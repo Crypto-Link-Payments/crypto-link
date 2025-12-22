@@ -242,7 +242,104 @@ class PeriodicTasks:
 
     async def process_tx_with_special_chart(self, channel):
         pass
+    
+    async def process_merchant_order_memo(self, channel, new_transactions: list[dict]):
+        for tx in new_transactions:
+            tx_hash = tx.get("hash")
+            memo = tx.get("memo")
 
+            if not tx_hash or not memo:
+                continue
+            
+            if not isinstance(memo, str) or not memo.startswith("MER"):
+                continue
+            
+            # Check if it is not  already in the history
+            if self.bot.backoffice.stellar_manager.check_if_deposit_hash_processed_merchant_payments(tx_hash):
+                continue
+            
+            # get the order detail of the user
+            order_details = self.bot.backoffice.merchant_manager.get_merchant_order_by_memo(payment_reference=memo)
+            
+            # what to do if the order can not be found
+            if not order_details:
+                # TODO resove this function before libe Optional: store as unidentified or just log
+                await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
+                continue
+        
+        
+             # If already processed order, mark tx as processed and skip
+            if int(order_details.get("status", 0)) == 1:
+                self.bot.backoffice.stellar_manager.store_processed_merchant_tx_hash(tx_hash)
+                continue
+
+            user_id = order_details["userId"]
+            community_id = order_details["communityId"]
+            role_id = order_details["roleId"]
+            
+            expected_stroops = int(order_details.get("value", 0))  # if no value its 0 to avoid crash
+            expected_currency = str(order_details.get("currency", "xlm")).lower()
+                
+            # validating the transaction
+            try:
+                tx_code = str(tx["asset_type"]["code"]).lower()
+                tx_amount_stroops = int(tx["asset_type"]["amount"])
+            except Exception:
+                await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
+                continue
+
+            if tx_code != expected_currency:
+                await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
+                continue
+            
+            if tx_amount_stroops != expected_stroops:
+                # You may want a tolerance or manual review bucket, but don't grant role
+                await custom_messages.send_unidentified_deposit_msg(channel=channel, tx_details=tx)
+                continue
+            
+            guild = self.bot.get_guild(community_id)
+            if not guild:
+                print(f"Guild {community_id} not found in cache")
+                continue
+            
+            assigned = await self._assign_role(guild=guild, user_id=user_id, role_id=role_id)
+            if not assigned:
+                # don’t mark processed if role assignment failed
+                continue
+            
+            # ---- Mark tx + order processed ----
+            now = datetime.now(timezone.utc)
+
+            #TODO this function need to be updated. Where tx to store 
+            self.bot.backoffice.stellar_manager.store_processed_merchant_tx_hash(tx_hash)
+
+
+            self.bot.backoffice.merchant_manager.mark_order_processed(
+                payment_reference=memo,
+                processed_time=now,
+                tx_hash=tx_hash,
+            )
+        
+            # Optional: send confirmation
+            try:
+                user = await self.bot.fetch_user(user_id)  # The role was granted
+                
+                #TODO send user a message that he/she has been granted a role with details
+                await custom_messages.deposit_notification_message(recipient=user, tx_details=tx)
+                
+            except Exception:
+                pass
+           
+            try:
+                # TODO send the guild owner that someone has purchased the role 
+                pass
+            except Exception:
+                
+                
+            # TODO send to explorer that someon ehas purchased a role
+            pass
+
+        
     async def check_stellar_hot_wallet(self):
         """
         Functions initiates the check for stellar incoming deposits and processes them
