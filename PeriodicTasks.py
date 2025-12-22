@@ -5,6 +5,7 @@ from datetime import datetime
 import tweepy
 from re import search
 from stellar_sdk import Server
+from datetime import datetime, timezone
 
 import nextcord
 from nextcord import Embed, Color
@@ -20,6 +21,7 @@ custom_messages = CustomMessages()
 helper = Helpers()
 channels = helper.read_json_file(file_name='autoMessagingChannels.json')
 
+MERCHANT_PREFIX = "MER"
 
 def get_time():
     """
@@ -41,6 +43,74 @@ class PeriodicTasks:
         auth = tweepy.OAuthHandler(self.twitter_cred["apiKey"], self.twitter_cred["apiSecret"])
         auth.set_access_token(self.twitter_cred["accessToken"], self.twitter_cred["accessSecret"])
         self.twitter_messages = tweepy.API(auth)
+
+    async def _assign_role(self, guild: nextcord.Guild, user_id: int, role_id:int):
+        """
+        Function to give user the role automatically"""
+        role = guild.get_role(role_id)
+        if role is None:
+            try:
+                roles = await guild.fetch_roles()
+                role = next((r for r in roles if r.id == role_id), None)
+            except Exception:
+                role = None
+
+        if role is None:
+            print(f'Role with {role_id} not found in {guild.name}')
+            return
+        
+        if role.managed:
+            print("❌ Target role is managed (integration) and cannot be assigned.")
+            return
+
+        me = guild.me
+
+        if me is None:
+            print("❌ Could not resolve bot member in guild.")
+            return
+
+        if not me.guild_permissions.manage_roles:
+            print( "❌ Missing 'Manage Roles' permission.")
+            return
+
+        if me.top_role <= role:
+            print("❌ Bot's top role is not above the target role.")
+            return
+
+        # member 
+        member = guild.get_member(user_id)
+        if member is None:
+            try:
+                member = await guild.fetch_member(user_id)
+            except nextcord.NotFound:
+                print("❌ User is not in this server.")
+            except Exception as e:
+                print(f"❌ Could not fetch member: {e}")
+        
+        if me.top_role <= member.top_role:
+            print("❌ Bot's top role is not above the member's top role.")
+            return 
+
+        if role in member.roles:
+            print("ℹ️ Member already has the role.")
+            return
+
+        try:
+            await member.add_roles(role, reason="Automated assignment after verified deposit")
+            print(f"✅ Assigned '{role.name}' to {member.display_name}.")
+            return
+        
+        except nextcord.Forbidden:
+            print("❌ Forbidden by Discord (permission/hierarchy).")
+            return
+        
+        except nextcord.HTTPException as e:
+            print(f"❌ Discord API error: {e}")
+            return
+        except Exception as e:
+            print(f"❌ Unexpected error: {e}")
+            return 
+
 
     async def global_bot_stats_update(self, tx):
         bot_stats = {
