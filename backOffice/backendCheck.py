@@ -40,7 +40,9 @@ class BotStructureCheck(object):
                                      "thirdLevelWallets",
                                      "votingGuildProfiles",
                                      "votingPools",
-                                     "votingPoolsHistory"]
+                                     "votingPoolsHistory",
+                                     "StellarOnChainMerchantPayments",
+                                     "MerchantOrders"]
 
     def check_collections(self):
         """
