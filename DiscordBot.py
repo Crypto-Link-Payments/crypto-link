@@ -19,24 +19,9 @@ init(autoreset=True)
 
 cl_cogs = ['cogs.help', 'cogs.transactions', 'cogs.accounts','cogs.system', 'cogs.guildMerchant', 'cogs.consumer', 'cogs.automatic', 'cogs.guildOwners']
 
-horizon_cogs = ['horizonCommands.horizonMain',
-                'horizonCommands.accounts',
-                'horizonCommands.payments',
-                'horizonCommands.ledger',
-                'horizonCommands.transactions',
-                'horizonCommands.assets',
-                'horizonCommands.effects',
-                'horizonCommands.operations',
-                'horizonCommands.offers',
-                'horizonCommands.trades',
-                'horizonCommands.orderBook',
-                'horizonCommands.paths',
-                'horizonCommands.tradeAggregations']
+horizon_cogs = ['horizonCommands.accounts',
+                'horizonCommands.transactions']
 
-
-# non_custodial_layer_cmds = ['thirdLevel.thirdLevelAccounts']
-#
-# custodial_layer = ['secondLevel.secondLevelAccounts']
 
 async def global_app_command_error_handler(interaction: Interaction, error):
     error = getattr(error, "original", error)
