@@ -63,31 +63,39 @@ class MerchantManager:
         ASCII_ALNUM = string.ascii_letters + string.digits
         return ''.join(random.SystemRandom().choice(ASCII_ALNUM) for _ in range(length))
 
-    def create_merchant_order_direct(self, community_id: int, role_id:int, user_id:int, value:float, currency:str = "xlm"):
-        """
-        Creates a merchant order for the user representing nocustodial purchases. 
-        
-
-        """
+    def create_merchant_order_direct(
+        self,
+        community_id: int,
+        role_id: int,
+        user_id: int,
+        value: float,
+        currency: str = "xlm",
+    ):
         try:
             community_id = int(community_id)
             role_id = int(role_id)
             user_id = int(user_id)
             if community_id <= 0 or role_id <= 0 or user_id <= 0:
                 raise ValueError("IDs must be positive integers")
-                        
-        except Exception:
+        except (TypeError, ValueError):
             print("could not verify all details to create order")
             return None
-               
-        stroop_value = int(value * 10000000)  # convert XLM to stroops
-        
+
+        stroop_value = int(value * 10_000_000)
         unix_ms = int(time.time() * 1000)
-        memo_text = self._random_memo_text(28)
-        
+
+        try:
+            raw_memo = self._random_memo_text(28)
+            memo_text = "MER" + raw_memo[:-3]
+            if len(memo_text.encode("ascii")) > 28:
+                raise ValueError("Generated Stellar memo exceeds 28 bytes")
+        except (UnicodeEncodeError, ValueError) as e:
+            print(f"Memo generation failed: {e}")
+            return None
+
         order_details = {
-            "value": stroop_value, # amount
-            "currency": currency, # XLM
+            "value": stroop_value,
+            "currency": currency,
             "communityId": community_id,
             "roleId": role_id,
             "userId": user_id,
@@ -95,29 +103,30 @@ class MerchantManager:
             "purchaseRequest": unix_ms,
             "processedTime": None,
             "createdAt": datetime.now(timezone.utc),
-            "paymentReference": memo_text
+            "paymentReference": memo_text,
+            "txHash": None
         }
 
-        
         try:
             result = self.merchant_orders.insert_one(order_details)
-
-            from pprint import pprint
-            pprint(order_details)
-        
-            return {
-                        **order_details,
-                        "_id": result.inserted_id,
-                    }
-
+            return {**order_details, "_id": result.inserted_id}
         except DuplicateKeyError:
-            # roleReference collided with an existing doc; try a new memo
             return None
         except PyMongoError as e:
             print(f"DB error creating order: {e}")
             return None
 
 
+    def mark_order_processed(self, payment_reference: str, processed_time, tx_hash: str):
+        """
+        Function used to mark the created order that it has been processed
+        """
+        self.merchant_orders.update_one(
+            {"paymentReference": payment_reference},
+            {"$set": {"status": 1, "processedTime": processed_time, "txHash": tx_hash}},
+        )
+    
+    
     def view_user_merchant_orders(self, user_id: int, community_id: int):
         """
         View all merchant orders for a specific user in a community
@@ -125,6 +134,17 @@ class MerchantManager:
         orders = list(self.merchant_orders.find({"userId": user_id, "communityId": community_id},
                                                 {"_id": 0}))
         return orders
+    
+    def get_merchant_order_by_memo(self, memo: str):
+        """
+        Get merchant order details by stellar memo
+        """
+        result = self.merchant_orders.find_one({"paymentReference": memo},
+                                              {"_id": 0})
+        if result:
+            return result
+        else:
+            return {}
         
                                         
     def check_if_community_exist(self, community_id: int):
