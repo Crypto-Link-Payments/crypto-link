@@ -132,7 +132,24 @@ class PeriodicTasks:
                                        tx_memo=tx['memo'])]  # GET tx with registered memo
         tx_with_not_registered_memo = [tx for tx in tx_with_memo if
                                        tx not in tx_with_registered_memo]  # GET tx with not registered memo
-        return tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special
+        
+        tx_with_merchant_memo = [
+            tx for tx in tx_with_not_registered_memo
+            if isinstance(tx.get("memo"), str) and tx["memo"].startswith(MERCHANT_PREFIX)
+        ]
+
+        tx_with_not_registered_non_merchant = [
+            tx for tx in tx_with_not_registered_memo
+            if tx not in tx_with_merchant_memo
+        ]
+
+        return (
+            tx_with_registered_memo,
+            tx_with_not_registered_non_merchant,
+            tx_with_no_memo,
+            tx_with_memo_special,
+            tx_with_merchant_memo,
+        )
 
     async def process_tx_with_no_memo(self, channel, no_memo_transaction):
 
