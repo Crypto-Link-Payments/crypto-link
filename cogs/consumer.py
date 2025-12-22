@@ -588,25 +588,44 @@ class ConsumerCommands(commands.Cog):
 
         await interaction.response.send_message("\u200b", ephemeral=True)
 
-        user = interaction.user
         guild = interaction.guild
-        guild_id = interaction.guild_id
-        ticker = (ticker or "xlm").lower()
-
-
-        role_details = self.backoffice.merchant_manager.find_role_details(role_id=role.id)
-        if not (role_details and role_details.get("status") == "active"):
+        if guild is None:
             await custom_messages.system_message(
                 interaction=interaction,
-                message=f"Role {role} is not active or not monetized on {guild}. Contact {guild.owner}.",
+                message="This command can only be used in a server.",
+                sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
+                color_code=1,
+                destination=0,
+            )
+            return
+
+        if interaction.user is None:
+            return  # type-safety; practically unreachable
+
+        user_id = interaction.user.id
+
+        # Always work with a Member for roles
+        member = guild.get_member(user_id)
+        if member is None:
+            member = await guild.fetch_member(user_id)
+
+        ticker = (ticker or "xlm").lower()
+
+        role_details = self.backoffice.merchant_manager.find_role_details(role_id=role.id)
+
+        if role_details is None or role_details.get("status") != "active":
+            owner_text = guild.owner.mention if guild.owner else "the server owner"
+            await custom_messages.system_message(
+                interaction=interaction,
+                message=f"Role {role} is not active or not monetized on {guild}. Contact {owner_text}.",
                 sys_msg_title=CONST_MERCHANT_PURCHASE_ERROR,
                 color_code=1,
                 destination=1,
             )
             return
 
-
-        if role.id in [r.id for r in user.roles]:
+        # Use member.roles, not interaction.user.roles
+        if role.id in {r.id for r in member.roles}:
             await custom_messages.system_message(
                 interaction=interaction,
                 message=f'You already own the role ***{role}***. Wait for it to expire before re-purchasing.',
@@ -616,8 +635,8 @@ class ConsumerCommands(commands.Cog):
             )
             return
 
-
         convert_to_dollar = float(role_details["pennyValues"]) / 100.0  # USD price
+
         gecko_data = gecko.get_price(ids="stellar", vs_currencies="usd") or {}
         coin_usd_price = (gecko_data.get("stellar") or {}).get("usd")
         if not coin_usd_price:
@@ -629,26 +648,32 @@ class ConsumerCommands(commands.Cog):
                 destination=0,
             )
             return
+
         amount_usd = convert_to_dollar
         amount_xlm = amount_usd / float(coin_usd_price)
 
-        order = self.backoffice.merchant_manager.create_merchant_order(
-            community_id=guild_id, role_id=role.id, user_id=user.id
+        # Create order in Mongo
+        order = self.backoffice.merchant_manager.create_merchant_order_direct(
+            community_id=guild.id,
+            role_id=role.id,
+            user_id=user_id,          # <-- fixed
+            value=amount_xlm,
+            currency=ticker,
         )
+
         if not order:
             await interaction.followup.send("❌ Failed to create order.", ephemeral=True)
             return
 
-
-        dest_address = self.backoffice.stellar_wallet.public_key  
+        dest_address = self.backoffice.stellar_wallet.public_key
         embed, qr_file, view = _make_payment_embed(
             interaction, role, order, amount_xlm, amount_usd, dest_address,
-            trampoline_base_https=PAY_TRAMPOLINE_BASE  
+            trampoline_base_https=PAY_TRAMPOLINE_BASE,
         )
 
 
         try:
-            await interaction.user.send(
+            await member.send(  # or interaction.user.send is fine, but member is guaranteed non-None
                 embed=embed,
                 file=qr_file,
                 view=view,
@@ -664,6 +689,7 @@ class ConsumerCommands(commands.Cog):
                 ephemeral=True,
                 allowed_mentions=AllowedMentions.none(),
             )
+
 
 def setup(bot):
     bot.add_cog(ConsumerCommands(bot))
