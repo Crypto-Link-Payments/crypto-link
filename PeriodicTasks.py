@@ -259,15 +259,22 @@ class PeriodicTasks:
         new_transactions = self.backoffice.stellar_wallet.get_incoming_transactions(pag=int(pag['pag']))
 
         if new_transactions and isinstance(new_transactions, list):
-            tx_with_registered_memo, tx_with_not_registered_memo, tx_with_no_memo, tx_with_memo_special = self.filter_transaction(
-                new_transactions)
+            
+            tx_with_registered_memo, tx_with_not_registered_non_merchant, tx_with_no_memo, tx_with_memo_special, tx_with_merchant_memo = \
+                self.filter_transaction(new_transactions)
+
             if tx_with_registered_memo:
                 channel = self.bot.get_channel(int(self.notification_channels['memoRegistered']))
                 await self.process_tx_with_memo(channel=channel, memo_transactions=tx_with_registered_memo)
-            if tx_with_not_registered_memo:
+
+            if tx_with_merchant_memo:
                 channel = self.bot.get_channel(int(self.notification_channels['memoNotRegistered']))
-                await self.process_tx_with_not_registered_memo(channel=channel,
-                                                               no_registered_memo=tx_with_not_registered_memo)
+                await self.process_merchant_order_memo(channel=channel, new_transactions=tx_with_merchant_memo)
+
+            if tx_with_not_registered_non_merchant:
+                channel = self.bot.get_channel(int(self.notification_channels['memoNotRegistered']))
+                await self.process_tx_with_not_registered_memo(channel=channel, no_registered_memo=tx_with_not_registered_non_merchant)
+
             if tx_with_no_memo:
                 channel = self.bot.get_channel(int(self.notification_channels['memoNone']))
                 await self.process_tx_with_no_memo(channel=channel, no_memo_transaction=tx_with_no_memo)
@@ -275,6 +282,7 @@ class PeriodicTasks:
             if tx_with_memo_special:
                 channel = self.bot.get_channel(int(self.notification_channels['memoSpecialChar']))
                 await self.process_tx_with_special_chart(channel=channel)
+
 
             last_checked_pag = new_transactions[-1]["paging_token"]
 
