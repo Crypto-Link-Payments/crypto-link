@@ -295,37 +295,54 @@ class CustomMessages:
 
     @staticmethod
     async def withdrawal_notify(interaction, withdrawal_data: dict, fee, memo=None):
-        notify = Embed(title=":outbox_tray: Withdrawal Notification :outbox_tray:",
-                       description=f'Withdrawal Successfully processed',
-                       timestamp=datetime.utcnow(),
-                       colour=Colour.green())
+        notify = Embed(
+            title=":outbox_tray: Withdrawal Notification :outbox_tray:",
+            description="Withdrawal successfully processed",
+            timestamp=datetime.utcnow(),
+            colour=Colour.green()
+        )
 
-        notify.add_field(name=":calendar: Time of withdrawal :calendar: ",
-                         value=str(datetime.utcnow()),
-                         inline=False)
-        notify.add_field(name=':map: Destination :map: ',
-                         value=f'```{withdrawal_data["destination"]}```',
-                         inline=False)
-        notify.add_field(name=':pencil: MEMO :pencil:',
-                         value=f'```{memo}```',
-                         inline=False)
-        notify.add_field(name=CONST_HASH_STR,
-                         value=f'`{withdrawal_data["hash"]}`',
-                         inline=False)
-        notify.add_field(name=':receipt: Withdrawal asset details :receipt: ',
-                         value=f'`{round(withdrawal_data["amount"] / 10000000, 7):.7f} {withdrawal_data["asset"]}`',
-                         inline=False)
-        notify.add_field(name=':money_mouth: Crypto Link Fee charged :money_mouth: ',
-                         value=f'`{fee}`',
-                         inline=False)
-        notify.add_field(name=':sunrise: Horizon Access Link :sunrise: ',
-                         value=f"[Complete Details]({withdrawal_data['explorer']})",
-                         inline=False)
+        notify.add_field(
+            name=":calendar: Time of withdrawal :calendar:",
+            value=str(datetime.utcnow()),
+            inline=False
+        )
+        notify.add_field(
+            name=":map: Destination :map:",
+            value=f'```{withdrawal_data["destination"]}```',
+            inline=False
+        )
+        notify.add_field(
+            name=":pencil: MEMO :pencil:",
+            value=f'```{memo if memo else "No memo provided"}```',
+            inline=False
+        )
+        notify.add_field(
+            name=CONST_HASH_STR,
+            value=f'`{withdrawal_data["hash"]}`',
+            inline=False
+        )
+        notify.add_field(
+            name=":receipt: Withdrawal asset details :receipt:",
+            value=f'`{round(withdrawal_data["amount"] / 10000000, 7):.7f} {withdrawal_data["asset"]}`',
+            inline=False
+        )
+        notify.add_field(
+            name=":money_mouth: Crypto Link Fee charged :money_mouth:",
+            value=f"`{fee}`",
+            inline=False
+        )
+        notify.add_field(
+            name=":sunrise: Horizon Access Link :sunrise:",
+            value=f"[Complete Details]({withdrawal_data['explorer']})",
+            inline=False
+        )
+
         try:
-            await interaction.user.send_message(embed=notify)
-
-        except Exception:
-            print(Fore.RED + f'Can not send deposit notidfication to user')
+            await interaction.user.send(embed=notify)
+            print(f"DM notification sent to user {interaction.user.id}")
+        except Exception as e:
+            print(Fore.RED + f"Cannot send withdrawal notification to user: {e}")
 
     @staticmethod
     async def withdrawal_notification_channel(interaction, channel, withdrawal_data):
