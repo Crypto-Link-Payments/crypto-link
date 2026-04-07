@@ -299,7 +299,7 @@ class UserAccountCommands(commands.Cog):
             },
             {
                 "name": ":outbox_tray: Withdraw from Crypto Link :outbox_tray: ",
-                "value": "```/wallet withdraw <amount> <asset code> <address> <memo=Optional>```",
+                "value": "```/wallet withdraw <address> <amount> <asset code> <memo=Optional>```",
             },
         ]
         await custom_messages.embed_builder(
