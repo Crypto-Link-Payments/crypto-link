@@ -638,191 +638,383 @@ class UserAccountCommands(commands.Cog):
                 sys_msg_title=title,
             )
 
-    @wallet.subcommand(name='withdraw', description='Withdraw from wallet')
+    @wallet.subcommand(name="withdraw", description="Withdraw from wallet")
     @has_wallet_inter_check()
     @cooldowns.cooldown(1, 20, bucket=cooldowns.SlashBucket.author)
-    async def withdraw_command(self,
-                               interaction: Interaction,
-                               address: str = SlashOption(required=True,
-                                                          description='Destination withdrawal address (XCA)'),
-                               amount: float = SlashOption(required=True, description='Amount of XCASH to withdraw'),
-                               asset_code: str = SlashOption(required=True,
-                                                             description='Asset code to withdraw'),
-                               memo: str = SlashOption(required=False,
-                                                       description='Text Memo for withdrawal')
-                               ):
-        token = asset_code.lower()
-        address = address.strip()
-        if address != self.bot.backoffice.stellar_wallet.public_key:
-            if self.bot.backoffice.helper.check_public_key(
-                    address=address) and not self.bot.backoffice.helper.check_for_special_char(string=address):
+    async def withdraw_command(
+        self,
+        interaction: Interaction,
+        address: str = SlashOption(
+            required=True,
+            description="Destination withdrawal address (XCA)"
+        ),
+        amount: float = SlashOption(
+            required=True,
+            description="Amount of XCASH to withdraw"
+        ),
+        asset_code: str = SlashOption(
+            required=True,
+            description="Asset code to withdraw"
+        ),
+        memo: str = SlashOption(
+            required=False,
+            description="Text Memo for withdrawal"
+        )
+    ):
+        try:
+            await interaction.response.defer(ephemeral=True)
 
-                # Checks if asset is registered
-                if [sup["assetCode"] for sup in self.bot.backoffice.token_manager.get_registered_tokens() if
-                    sup["assetCode"] == token]:
+            token = asset_code.lower().strip()
+            address = address.strip()
+            backoffice = self.bot.backoffice
 
-                    asset_details = self.backoffice.token_manager.get_token_details_by_code(code=token)
+            def msg_check(msg):
+                return (
+                    msg.author.id == interaction.user.id
+                    and msg.channel.id == interaction.channel.id
+                )
 
-                    minimum_withdrawal = asset_details["minimumWithdrawal"]  # Reactivate
-                    micro_units = int(amount * (10 ** 7))
-                    macro_units = micro_units / (10 ** 7)
+            if address == backoffice.stellar_wallet.public_key:
+                msg = (
+                    "Withdrawing back to your account does not make any sense. "
+                    "Please choose different destination address."
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=0,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                    if minimum_withdrawal < micro_units:
-                        withdrawal_fee = \
-                            self.backoffice.bot_manager.get_fees_by_category(key='withdrawals')["fee_list"][token]
-                        fee_micro = int(withdrawal_fee * (10 ** 7))
+            if not backoffice.helper.check_public_key(address=address) or \
+                    backoffice.helper.check_for_special_char(string=address):
+                msg = (
+                    "Address you have specified either is not a valid public key address "
+                    "or it includes special characters. Please try again"
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                        # Fee deduction
-                        for_owner_micro = micro_units - fee_micro  # Calculating NET withdrawal in micro
-                        for_owner_macro = for_owner_micro / (10 ** 7)  # Converting NET withdrawal in normal
+            registered_tokens = [
+                sup["assetCode"]
+                for sup in backoffice.token_manager.get_registered_tokens()
+                if sup["assetCode"] == token
+            ]
 
-                        wallet_details = self.backoffice.wallet_manager.get_ticker_balance(asset_code=token,
-                                                                                           user_id=interaction.user.id)
-                        if wallet_details:
-                            if wallet_details >= micro_units:
-                                message_content = f"{interaction.message.author.mention} You have requested to withdraw " \
-                                                  f"***{macro_units:,.7f} {token.upper()}***. Current system withdrawal fee" \
-                                                  f" is set to ***{withdrawal_fee:,.7f} {token.upper()}***. Final withdrawal " \
-                                                  f"amount is  ***{for_owner_macro:,.7f} {token.upper()}***." \
-                                                  f" Would you still like to withdraw? \n" \
-                                                  f"Please answer either with ***yes*** or ***no***."
+            if not registered_tokens:
+                msg = (
+                    f"{asset_code.upper()} is not supported yet on the Crypto Link system. "
+                    f"Please try different asset."
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                                verification = await interaction.channel.send(content=message_content)
-                                msg_usr = await self.bot.wait_for('message', check=check(interaction.user))
-                                if str(msg_usr.content.lower()) == 'yes':
-                                    processing_msg = ':robot: Processing withdrawal request, please wait few moments....'
-                                    processing_msg = await interaction.channel.send(content=processing_msg)
+            asset_details = backoffice.token_manager.get_token_details_by_code(code=token)
+            if not asset_details:
+                msg = f"Could not retrieve asset details for {token.upper()}."
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                                    asset_issuer = None
+            minimum_withdrawal = asset_details["minimumWithdrawal"]
+            micro_units = int(amount * (10 ** 7))
+            macro_units = micro_units / (10 ** 7)
 
-                                    # Get issuer if not xlm
-                                    if token != 'xlm':
-                                        asset_issuer = asset_details["assetIssuer"]
-                                        print(f'Issuer for asset {asset_code}? {asset_issuer}')
+            if micro_units <= 0:
+                msg = "Withdrawal amount must be greater than 0."
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                                    result = self.backoffice.stellar_wallet.token_withdrawal(address=address,
-                                                                                             token=token,
-                                                                                             amount=str(
-                                                                                                 for_owner_macro),
-                                                                                             asset_issuer=asset_issuer,
-                                                                                             memo=memo)
-                                    if result.get("hash"):
-                                        to_deduct = {f'{token}': int(micro_units) * (-1)}
-                                        if self.backoffice.wallet_manager.update_user_balance_off_chain(
-                                                user_id=int(interaction.user.id),
-                                                coin_details=to_deduct):
-                                            # Store withdrawal details to database
-                                            result['userId'] = int(interaction.user.id)
-                                            result["time"] = int(time.time())
-                                            result["memo"] = memo
-                                            result['offChainData'] = {f"{token}Fee": withdrawal_fee}
+            if micro_units <= minimum_withdrawal:
+                msg = (
+                    f"Minimum withdrawal amount has not been met. In order to be able to withdraw "
+                    f"{asset_code.upper()} amount needs to be greater than "
+                    f"{minimum_withdrawal / (10 ** 7)}"
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                                            # Insert in the history of withdrawals
-                                            await self.backoffice.stellar_manager.insert_to_withdrawal_hist(
-                                                tx_type=1,
-                                                tx_data=result)
+            fee_list = backoffice.bot_manager.get_fees_by_category(key="withdrawals")["fee_list"]
+            if token not in fee_list:
+                msg = f"No withdrawal fee configuration found for {token.upper()}."
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                                            # Update user withdrawal stats
-                                            withdrawal_data = {
-                                                f"{token}.withdrawalsCount": 1,
-                                                f"{token}.totalWithdrawn": for_owner_macro,
-                                            }
-                                            await self.backoffice.stats_manager.update_usr_tx_stats(
-                                                user_id=interaction.user.id,
-                                                tx_stats_data=withdrawal_data)
+            withdrawal_fee = fee_list[token]
+            fee_micro = int(withdrawal_fee * (10 ** 7))
 
-                                            # Update bot stats
-                                            bot_stats_data = {
-                                                "withdrawalCount": 1,
-                                                "withdrawnAmount": for_owner_macro
-                                            }
-                                            await self.backoffice.stats_manager.update_cl_on_chain_stats(
-                                                ticker=token,
-                                                stat_details=bot_stats_data)
+            for_owner_micro = micro_units - fee_micro
+            for_owner_macro = for_owner_micro / (10 ** 7)
 
-                                            # Stores in earnings for tax office
-                                            await self.backoffice.stats_manager.update_cl_earnings(
-                                                time=int(time.time()),
-                                                amount=fee_micro,
-                                                system='withdrawal',
-                                                token=token,
-                                                user=f'{interaction.user}',
-                                                user_id=interaction.user.id)
+            if for_owner_micro <= 0:
+                msg = (
+                    f"Withdrawal fee is too high for this amount. "
+                    f"Please enter a larger withdrawal amount."
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                                            self.backoffice.bot_manager.update_cl_wallet_balance(ticker=token,
-                                                                                                 to_update={
-                                                                                                     'balance': int(
-                                                                                                         fee_micro)})
+            wallet_details = backoffice.wallet_manager.get_ticker_balance(
+                asset_code=token,
+                user_id=interaction.user.id
+            )
 
-                                            # Send message to user on withdrawal
-                                            await custom_messages.withdrawal_notify(interaction=interaction,
-                                                                                    withdrawal_data=result,
-                                                                                    fee=f'{withdrawal_fee:,.7f} {token.upper()}',
-                                                                                    memo=memo)
+            if wallet_details is None:
+                msg = (
+                    f"You have not registered your wallet yet into the system or you have not "
+                    f"deposited {token.upper()}. Withdrawal request has been canceled"
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                                            # # System channel notification on withdrawal processed
-                                            channel_sys = self.bot.get_channel(int(self.with_channel))
-                                            await custom_messages.withdrawal_notification_channel(
-                                                interaction=interaction,
-                                                channel=channel_sys,
-                                                withdrawal_data=result)
+            if wallet_details < micro_units:
+                msg = (
+                    f"You do not have enough {token.upper()} to complete this withdrawal. "
+                    f"Requested: {macro_units:,.7f} {token.upper()}."
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
 
-                                            # Notify staff on incoming funds
-                                            incoming_funds = self.bot.get_channel(
-                                                int(self.earnings))
-                                            await custom_messages.cl_staff_incoming_funds_notification(
-                                                sys_channel=incoming_funds,
-                                                incoming_fees=f'{withdrawal_fee:,.7f} {token.upper()}')
+            message_content = (
+                f"{interaction.user.mention} You have requested to withdraw "
+                f"***{macro_units:,.7f} {token.upper()}***. Current system withdrawal fee "
+                f"is set to ***{withdrawal_fee:,.7f} {token.upper()}***. Final withdrawal "
+                f"amount is ***{for_owner_macro:,.7f} {token.upper()}***.\n"
+                f"Would you still like to withdraw?\n"
+                f"Please answer either with ***yes*** or ***no***."
+            )
 
-                                    else:
-                                        msg = f"It seems that there has been error while trying to withdraw. " \
-                                              f"Error: {result['error']}"
-                                        await custom_messages.system_message(interaction=interaction, color_code=1,
-                                                                             message=msg,
-                                                                             destination=1,
-                                                                             sys_msg_title='Withdrawal error')
-                                else:
-                                    msg = f"You have cancelled withdrawal request"
-                                    await custom_messages.system_message(interaction=interaction, color_code=1,
-                                                                         message=msg,
-                                                                         destination=1,
-                                                                         sys_msg_title='Withdrawal error')
-                        else:
-                            msg = f"You have not registered your wallet yet into the system or you have not" \
-                                  f" deposit {token.upper()}. Withdrawal request has been canceled"
-                            await custom_messages.system_message(interaction=interaction, color_code=1,
-                                                                 message=msg,
-                                                                 destination=1,
-                                                                 sys_msg_title='Withdrawal error')
-                    else:
-                        msg = f"Minimum withdrawal amount has not been met. In order to be able to withdraw " \
-                              f"{asset_code.upper()}" \
-                              f" amount needs to be greater than {minimum_withdrawal / (10 ** 7)}"
-                        await custom_messages.system_message(interaction=interaction, color_code=1,
-                                                             message=msg,
-                                                             destination=1,
-                                                             sys_msg_title='Withdrawal error')
-                else:
-                    msg = f'{asset_code.upper()} is not supported yet on the Crypto Link system. Please ' \
-                          f'try different asset. '
-                    await custom_messages.system_message(interaction=interaction, color_code=1,
-                                                         message=msg,
-                                                         destination=1,
-                                                         sys_msg_title='Withdrawal error')
-            else:
-                msg = "Address you have specified either is not a valid public key address or it includes " \
-                      "special characters. Please try again"
-                await custom_messages.system_message(interaction=interaction, color_code=1,
-                                                     message=msg,
-                                                     destination=1,
-                                                     sys_msg_title='Withdrawal error')
-        else:
-            msg = "Withdrawing back to your account does not make any sense. Please choose different " \
-                  "destination address."
+            await interaction.followup.send(content=message_content, ephemeral=True)
 
-            await custom_messages.system_message(interaction=interaction, color_code=1,
-                                                 message=msg,
-                                                 destination=0, sys_msg_title='Withdrawal error')
+            print("Waiting for user confirmation...")
+            try:
+                msg_usr = await self.bot.wait_for(
+                    "message",
+                    check=msg_check,
+                    timeout=60
+                )
+            except asyncio.TimeoutError:
+                msg = "Withdrawal confirmation timed out."
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
+
+            # 🔴 DELETE USER MESSAGE HERE
+            try:
+                await msg_usr.delete()
+            except Exception as e:
+                print(f"Could not delete user confirmation message: {e}")
+
+            print("Waiting for user confirmation... Received:", msg_usr.content)
+
+            if str(msg_usr.content.lower()).strip() != "yes":
+                print("User canceled the withdrawal.")
+                msg = "You have cancelled withdrawal request"
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
+
+            # await interaction.followup.send(
+            #     content=":robot: Processing withdrawal request, please wait few moments....",
+            #     ephemeral=True
+            # )
+            await interaction.edit_original_message(content=":robot: Processing withdrawal request, please wait few moments....")
+
+            asset_issuer = None
+            if token != "xlm":
+                asset_issuer = asset_details["assetIssuer"]
+                print(f"Issuer for asset {asset_code}? {asset_issuer}")
+
+            result = backoffice.stellar_wallet.token_withdrawal(
+                address=address,
+                token=token,
+                amount=str(for_owner_macro),
+                asset_issuer=asset_issuer,
+                memo=memo
+            )
+
+            if not result.get("hash"):
+                msg = (
+                    f"It seems that there has been error while trying to withdraw. "
+                    f"Error: {result.get('error', 'Unknown error')}"
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+                return
+            await interaction.edit_original_message(content=f"✅ Withdrawal completed successfully.\n📩 Additional details have been sent to your DMs.")
+            to_deduct = {token: -int(micro_units)}
+            balance_updated = backoffice.wallet_manager.update_user_balance_off_chain(
+                user_id=int(interaction.user.id),
+                coin_details=to_deduct
+            )
+            print(f"Balance update for user {interaction.user.id} successful? {balance_updated}")
+            
+            if not balance_updated:
+                msg = (
+                    "Withdrawal was sent on-chain, but there was an issue updating your "
+                    "off-chain wallet balance. Please contact staff immediately."
+                )
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal warning"
+                )
+                return
+
+            result["userId"] = int(interaction.user.id)
+            result["time"] = int(time.time())
+            result["memo"] = memo
+            result["offChainData"] = {f"{token}Fee": withdrawal_fee}
+
+            await backoffice.stellar_manager.insert_to_withdrawal_hist(
+                tx_type=1,
+                tx_data=result
+            )
+
+            withdrawal_data = {
+                f"{token}.withdrawalsCount": 1,
+                f"{token}.totalWithdrawn": for_owner_macro,
+            }
+            await backoffice.stats_manager.update_usr_tx_stats(
+                user_id=interaction.user.id,
+                tx_stats_data=withdrawal_data
+            )
+
+            bot_stats_data = {
+                "withdrawalCount": 1,
+                "withdrawnAmount": for_owner_macro
+            }
+            await backoffice.stats_manager.update_cl_on_chain_stats(
+                ticker=token,
+                stat_details=bot_stats_data
+            )
+
+            await backoffice.stats_manager.update_cl_earnings(
+                time=int(time.time()),
+                amount=fee_micro,
+                system="withdrawal",
+                token=token,
+                user=f"{interaction.user}",
+                user_id=interaction.user.id
+            )
+
+            backoffice.bot_manager.update_cl_wallet_balance(
+                ticker=token,
+                to_update={"balance": int(fee_micro)}
+            )
+
+            print(f"Withdrawal successful for user {interaction.user.id}. Tx hash: {result.get('hash')}")
+            print(f'Sending withdrawal notificaiton')
+            await custom_messages.withdrawal_notify(
+                interaction=interaction,
+                withdrawal_data=result,
+                fee=f"{withdrawal_fee:,.7f} {token.upper()}",
+                memo=memo
+            )
+
+            channel_sys = self.bot.get_channel(int(self.with_channel))
+            if channel_sys is not None:
+                await custom_messages.withdrawal_notification_channel(
+                    interaction=interaction,
+                    channel=channel_sys,
+                    withdrawal_data=result
+                )
+
+            incoming_funds = self.bot.get_channel(int(self.earnings))
+            if incoming_funds is not None:
+                await custom_messages.cl_staff_incoming_funds_notification(
+                    sys_channel=incoming_funds,
+                    incoming_fees=f"{withdrawal_fee:,.7f} {token.upper()}"
+                )
+
+        except Exception as e:
+            traceback.print_exc()
+
+            try:
+                msg = f"Unexpected error while processing withdrawal: {str(e)}"
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message=msg,
+                    destination=1,
+                    sys_msg_title="Withdrawal error"
+                )
+            except Exception:
+                pass
+            
+
 
 def setup(bot):
     bot.add_cog(UserAccountCommands(bot))
