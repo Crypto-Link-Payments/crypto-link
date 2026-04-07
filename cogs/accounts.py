@@ -286,7 +286,7 @@ class UserAccountCommands(commands.Cog):
         description = "Here is a summary of wallet related commands.\n"
         list_of_values = [
             {
-                "name": " :woman_technologist: Get AFull Account Balance Report :woman_technologist:  ",
+                "name": " :woman_technologist: Get A Full Account Balance Report :woman_technologist:  ",
                 "value": "```/wallet balance```\n",
             },
             {
@@ -296,6 +296,10 @@ class UserAccountCommands(commands.Cog):
             {
                 "name": ":inbox_tray: Get Deposit Instructions :inbox_tray:",
                 "value": "```/wallet deposit```",
+            },
+            {
+                "name": ":inbox_tray: Get Deposit QR :inbox_tray:",
+                "value": "```/wallet qr```",
             },
             {
                 "name": ":outbox_tray: Withdraw from Crypto Link :outbox_tray: ",
