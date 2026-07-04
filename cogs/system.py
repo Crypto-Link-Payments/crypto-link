@@ -264,41 +264,6 @@ class BotManagementCommands(commands.Cog):
         await self.bot.close()
         sys.exit(0)
 
-    # #############################  Token management #############################
-    # @commands.group()
-    # @commands.check(is_one_of_gods)
-    # async def tokens(self, ctx):
-    #     if ctx.invoked_subcommand is None:
-    #         value = [{'name': '__Add new support__',
-    #                   'value': f"***{self.command_string}tokens new <issuer> <tick>*** "},
-    #                  {'name': '__Add new with trust DONE!__',
-    #                   'value': f"***{self.command_string}tokens trusted <issuer> <amount>*** "},
-    #                  {'name': '__Update token profiles__',
-    #                   'value': f"***{self.command_string}tokens profile*** "},
-    #                  ]
-
-    #         await custom_messages.ctx_embed_builder(ctx, title='Available sub commands for system',
-    #                                             description='Available commands under category ***system***',
-    #                                             data=value)
-
-    # @tokens.group()
-    # async def profile(self, ctx):
-    #     if ctx.invoked_subcommand is None:
-    #         value = [{'name': '__Set homepage __',
-    #                   'value': f"***{self.command_string}tokens profile home <issuer> <tick> <homepage address>*** "},
-    #                  {'name': '__Set Expert__',
-    #                   'value': f"***{self.command_string}tokens profile expert <issuer> <tick> <expert address>***"},
-    #                  {'name': '__Set Token Withdrawal Limit__',
-    #                   'value': f"***{self.command_string}tokens profile withdrawal <issuer> <tick> <amount limit float>***"},
-    #                  {'name': '__Set Token TOML link__',
-    #                   'value': f"***{self.command_string}tokens profile toml <issuer> <tick> <toml https>***"}
-    #                  ]
-
-    #         await custom_messages.ctx_embed_builder(ctx, title='Available sub commands for system',
-    #                                             description='Available commands under category ***system***',
-    #                                             data=value)
-    #     pass
-
 
     @system.command()
     @commands.check(is_animus)
@@ -316,8 +281,6 @@ class BotManagementCommands(commands.Cog):
                     content="There has been issue in the backend while trying to update token details")
         else:
             await ctx.channel.send(content='This token is not registered in DB')
-
-
 
 
     @system.command()
@@ -568,9 +531,6 @@ class BotManagementCommands(commands.Cog):
                             await ctx.author.send(content="Wallet could not be created")
                     else:
                         await ctx.author.send(content="Data for new token could not be set in DB ")
-
-
-
 
     #############################  Crypto Link Hot Wallet #############################
 

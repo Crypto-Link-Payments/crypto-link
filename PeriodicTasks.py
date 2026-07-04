@@ -313,7 +313,7 @@ def start_scheduler(timed_updater):
     #                   misfire_grace_time=10,
     #                   max_instances=20)
     scheduler.add_job(timed_updater.check_stellar_hot_wallet,
-                      CronTrigger(minute='02,07, 12, 17,22,27,32,37,42,47,52,57'),
+                      CronTrigger(minute='02,07,12,17,22,27,32,37,42,47,52,57'),
                       misfire_grace_time=10,
                       max_instances=20)
     scheduler.add_job(timed_updater.send_marketing_messages, CronTrigger(
@@ -327,6 +327,5 @@ def start_scheduler(timed_updater):
                       CronTrigger(day='30'),
                       misfire_grace_time=7, max_instances=20)
 
-    scheduler.start()
-    print(Fore.LIGHTBLUE_EX + 'Started Chron Monitors : DONE')
+    print(Fore.LIGHTBLUE_EX + 'Chron Monitors prepared')
     return scheduler
