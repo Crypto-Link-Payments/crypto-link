@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 from typing import Optional
 from urllib.parse import urlencode, quote_plus
-
 import os
 import time
+import asyncio
 import traceback
 
 import pyqrcode
@@ -108,6 +108,48 @@ class UserAccountCommands(commands.Cog):
         self.command_string = bot.get_command_str()
         self.with_channel = bot.backoffice.auto_messaging_channels["withdrawals"]
         self.earnings = bot.backoffice.auto_messaging_channels["earnings"]
+        
+    async def _notify_new_registration(self, interaction: Interaction) -> None:
+        """
+        Send owner/admin ntfy notification when a new user registers.
+        This must never break the registration flow.
+        """
+
+        notifier = getattr(self.bot, "notifier", None)
+
+        if notifier is None:
+            print("ntfy notifier not attached to bot")
+            return
+
+        guild_name = interaction.guild.name if interaction.guild else "DM/Unknown"
+        guild_id = interaction.guild.id if interaction.guild else "Unknown"
+        member_count = interaction.guild.member_count if interaction.guild else "Unknown"
+
+        user_created_at = getattr(interaction.user, "created_at", None)
+        user_created_text = (
+            user_created_at.strftime("%Y-%m-%d %H:%M UTC")
+            if user_created_at
+            else "Unknown"
+        )
+
+        message = (
+            "New CryptoLink user registered.\n\n"
+            f"User: {interaction.user}\n"
+            f"User ID: {interaction.user.id}\n"
+            f"Display name: {interaction.user.display_name}\n"
+            f"Guild: {guild_name}\n"
+            f"Guild ID: {guild_id}\n"
+            f"Guild member count: {member_count}\n"
+            f"Discord account created: {user_created_text}"
+        )
+
+        await notifier.safe_send_async(
+            title="New CryptoLink registration",
+            message=message,
+            priority="high",
+            tags=["bust_in_silhouette", "white_check_mark"],
+            sequence_id=f"registration-{interaction.user.id}",
+        )
 
     def make_qr_image(self, user_id, user_profile):
         """
@@ -224,29 +266,31 @@ class UserAccountCommands(commands.Cog):
     @slash_command(description="Register to Crypto Link", dm_permission=False)
     @cooldowns.cooldown(1, 5, cooldowns.SlashBucket.guild)
     async def register(self, interaction: Interaction):
-        if not self.backoffice.account_mng.check_user_existence(user_id=interaction.user.id):
-            if self.backoffice.account_mng.register_user(
-                discord_id=interaction.user.id, discord_username=f"{interaction.user}"
-            ):
+        try:
+            user_exists = self.backoffice.account_mng.check_user_existence(
+                user_id=interaction.user.id
+            )
+
+            if user_exists:
                 message = (
-                    "Congratulations, your account has been successfully created."
-                    " You can access your wallet via the following command:\n"
-                    "`/wallet`. For additional commands available for wallet use /wallet help "
+                    "You already have an account! Please use "
+                    "/wallet to access your wallet details and other commands or /me for quick check."
                 )
                 await custom_messages.system_message(
                     interaction=interaction,
-                    color_code=0,
+                    color_code=1,
                     message=message,
                     destination=0,
                     sys_msg_title=CONST_ACC_REG_STATUS,
                 )
+                return
 
-                # Update guild stats on registered users
-                await self.backoffice.stats_manager.update_registered_users(
-                    guild_id=interaction.guild.id
-                )
+            registered = self.backoffice.account_mng.register_user(
+                discord_id=interaction.user.id,
+                discord_username=f"{interaction.user}",
+            )
 
-            else:
+            if not registered:
                 message = (
                     "Oh no! Something went wrong.\n"
                     "Registration failed, please try again later.\n"
@@ -259,18 +303,52 @@ class UserAccountCommands(commands.Cog):
                     destination=0,
                     sys_msg_title=CONST_ACC_REG_STATUS,
                 )
-        else:
+                return
+
             message = (
-                "You already have an account! Please use "
-                "/wallet to access your wallet details and other commands or /me for quick check."
+                "Congratulations, your account has been successfully created."
+                " You can access your wallet via the following command:\n"
+                "`/wallet`. For additional commands available for wallet use /wallet help "
             )
             await custom_messages.system_message(
                 interaction=interaction,
-                color_code=1,
+                color_code=0,
                 message=message,
                 destination=0,
                 sys_msg_title=CONST_ACC_REG_STATUS,
             )
+
+            await self._notify_new_registration(interaction)
+
+            if interaction.guild:
+                await self.backoffice.stats_manager.update_registered_users(
+                    guild_id=interaction.guild.id
+                )
+
+        except Exception as e:
+            traceback.print_exc()
+
+            notifier = getattr(self.bot, "notifier", None)
+            if notifier is not None:
+                await notifier.send_exception_async(
+                    e,
+                    context=(
+                        "Unexpected registration exception\n"
+                        f"User: {interaction.user} ({interaction.user.id})"
+                    ),
+                )
+
+            try:
+                await custom_messages.system_message(
+                    interaction=interaction,
+                    color_code=1,
+                    message="An unexpected error occurred during registration. Please try again later.",
+                    destination=0,
+                    sys_msg_title=CONST_ACC_REG_STATUS,
+                )
+            except Exception:
+                pass
+
 
     @slash_command(description="Wallet operations", dm_permission=False)
     @has_wallet_inter_check()
